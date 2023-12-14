@@ -1,7 +1,0 @@
-@prefix cim: <http://iec.ch/TC57/CIM100#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-
-cim:SinglePhaseKind a rdfs:Class ;
-  rdfs:subClassOf cim:PhaseCode ;
-  rdfs:label "SinglePhaseKind"@en ;
-  rdfs:comment "Single phase of a two phase or a three phase system."@en .

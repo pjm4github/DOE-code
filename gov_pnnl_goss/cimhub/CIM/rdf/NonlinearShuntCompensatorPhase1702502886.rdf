@@ -1,8 +1,0 @@
-@prefix cim: <http://iec.ch/TC57/CIM100#> .
-
-cim:NonlinearShuntCompensatorPhase rdf:type cim:NonlinearShuntCompensatorPhase ;
-  cim:IdentifiedObject.mRID "nsph1" ;
-  cim:IdentifiedObject.name "NonlinearShuntCompensatorPhase1" ;
-  cim:ShuntCompensatorPhase.bPerSection "0.1"^^xsd:double ;
-  cim:ShuntCompensatorPhase.gPerSection "0.1"^^xsd:double ;
-  cim:ShuntCompensatorPhase.phase "PhaseCode.A" .

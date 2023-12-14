@@ -1,6 +1,0 @@
-@prefix cim:      <http://iec.ch/TC57/2013/CIM-schema-cim16#> .
-
-<cim:SynchronousMachineOperatingMode rdf:about="http://iec.ch/TC57/Example#mode1">
-  cim:SynchronousMachine.operatingMode "Normal Operation" ;
-  cim:SynchronousMachine.mode "mode1" .
-</cim:SynchronousMachineOperatingMode>

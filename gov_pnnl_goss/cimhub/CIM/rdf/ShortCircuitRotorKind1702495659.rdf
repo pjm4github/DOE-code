@@ -1,8 +1,0 @@
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix cim: <http://iec.ch/TC57/2010/CIM-schema-cim15#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-
-cim:ShortCircuitRotorKind rdf:type rdfs:Class ;
-    rdfs:subClassOf cim:RotatingMachineKind ;
-    rdfs:label "ShortCircuitRotorKind"@en ;
-    rdfs:comment "Kind of short circuit for rotor."@en .

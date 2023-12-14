@@ -1,9 +1,0 @@
-@prefix cim: <http://iec.ch/TC57/CIM100#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-
-cim:NonlinearShuntCompensatorPhasePo rdf:type cim:NonlinearShuntCompensatorPhasePo ;
-  cim:ConductingEquipment.nomU <http://iec.ch/TC57/CIM100#Voltage> ;
-  cim:Equipment.aggregate <http://iec.ch/TC57/CIM100#Boolean> ;
-  cim:Equipment.normallyInService <http://iec.ch/TC57/CIM100#Boolean> ;
-  cim:RegulatingCondEq.controlEnabled <http://iec.ch/TC57/CIM100#Boolean> .

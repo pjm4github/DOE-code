@@ -1,8 +1,0 @@
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-cim16#> .
-
-cim:CompositeSwitch rdf:type cim:Switch ;
-    cim:IdentifiedObject.mRID "1" ;
-    cim:IdentifiedObject.name "CompositeSwitch1" ;
-    cim:Switch.normalOpen false ;
-    cim:Switch.normalOpen_d "0" .
