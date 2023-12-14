@@ -1,0 +1,62 @@
+@startjson
+{
+  "Region1": {
+    "type": "SubGeographicalRegion",
+    "Region": {
+      "RegionName": "ExampleRegion"
+    },
+    "SubGeographicalRegion": {
+      "RegionName": "ExampleRegion"
+    }
+  },
+  "Substation1": {
+    "Substation": {
+      "Region": "Region1"
+    },
+    "type": "Substation"
+  },
+  "Disconnector_12345": {
+    "IdentifiedObject": {
+      "name": "ExampleDisconnector",
+      "description": "A complex disconnector"
+    },
+    "Switch": {
+      "SwitchSchedule": "SwitchSchedule_56789",
+      "ratedCurrent": "800.0",
+      "RetainedVoltage": "false",
+      "ratedVoltage": "220.0",
+      "normalOpen": "true"
+    },
+    "type": "Disconnector"
+  },
+  "SwitchAction_54321": {
+    "SwitchAction": {
+      "associatedSwitch": "Disconnector_12345",
+      "actionType": "Open"
+    },
+    "type": "SwitchAction",
+    "IdentifiedObject": {
+      "name": "OpenSwitchAction"
+    }
+  },
+  "SwitchingStep_98765": {
+    "IdentifiedObject": {
+      "name": "SwitchingStep1"
+    },
+    "type": "SwitchingStep",
+    "SwitchingStep": {
+      "sequenceNumber": "1",
+      "SwitchAction": "SwitchAction_54321"
+    }
+  },
+  "SwitchSchedule_56789": {
+    "IdentifiedObject": {
+      "name": "ExampleSwitchSchedule"
+    },
+    "type": "SwitchingSchedule",
+    "SwitchingSchedule": {
+      "SwitchingSteps": "SwitchingStep_98765"
+    }
+  }
+}
+@endjson

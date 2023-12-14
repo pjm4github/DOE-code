@@ -1,0 +1,68 @@
+@startjson
+{
+  "Line_54321": {
+    "ACLineSegment": {
+      "length": "500.0",
+      "EquipmentContainer": "Substation1"
+    },
+    "IdentifiedObject": {
+      "name": "ExampleLine"
+    },
+    "type": "ACLineSegment",
+    "Conductor": {
+      "material": "Copper"
+    }
+  },
+  "Connector_12345": {
+    "type": "Connector",
+    "IdentifiedObject": {
+      "description": "A complex connector",
+      "name": "ExampleConnector"
+    },
+    "Connector": {
+      "pins": "3",
+      "ratedVoltage": "220.0",
+      "FacilityConnection": "FacilityConnection_56789",
+      "ratedCurrent": "2000.0",
+      "phases": "ABC"
+    }
+  },
+  "PowerTransformer_98765": {
+    "type": "PowerTransformer",
+    "PowerTransformer": {
+      "vectorGroup": "Dyn11",
+      "EquipmentContainer": "Substation1"
+    },
+    "IdentifiedObject": {
+      "name": "ExamplePowerTransformer"
+    }
+  },
+  "FacilityConnection_56789": {
+    "IdentifiedObject": {
+      "name": "ExampleFacilityConnection"
+    },
+    "FacilityConnection": {
+      "connectingElements": [
+        "Line_54321",
+        "PowerTransformer_98765"
+      ]
+    },
+    "type": "FacilityConnection"
+  },
+  "Substation1": {
+    "type": "Substation",
+    "Substation": {
+      "Region": "Region1"
+    }
+  },
+  "Region1": {
+    "Region": {
+      "RegionName": "ExampleRegion"
+    },
+    "SubGeographicalRegion": {
+      "RegionName": "ExampleRegion"
+    },
+    "type": "SubGeographicalRegion"
+  }
+}
+@endjson

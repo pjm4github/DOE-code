@@ -1,0 +1,65 @@
+@startjson
+{
+  "SwitchingStep_98765": {
+    "SwitchingStep": {
+      "sequenceNumber": "1",
+      "SwitchAction": "SwitchAction_54321"
+    },
+    "IdentifiedObject": {
+      "name": "SwitchingStep1"
+    },
+    "type": "SwitchingStep"
+  },
+  "CompositeSwitch_12345": {
+    "Switch": {
+      "ratedCurrent": "1000.0",
+      "SwitchSchedule": "SwitchSchedule_56789",
+      "ratedVoltage": "138.0",
+      "normalOpen": "false",
+      "RetainedVoltage": "true"
+    },
+    "Equipment": {
+      "EquipmentContainer": "Substation1"
+    },
+    "IdentifiedObject": {
+      "description": "A complex composite switch",
+      "name": "ExampleCompositeSwitch"
+    },
+    "type": "CompositeSwitch"
+  },
+  "Region1": {
+    "Region": {
+      "RegionName": "ExampleRegion"
+    },
+    "SubGeographicalRegion": {
+      "RegionName": "ExampleRegion"
+    },
+    "type": "SubGeographicalRegion"
+  },
+  "SwitchSchedule_56789": {
+    "SwitchingSchedule": {
+      "SwitchingSteps": "SwitchingStep_98765"
+    },
+    "IdentifiedObject": {
+      "name": "ExampleSwitchSchedule"
+    },
+    "type": "SwitchingSchedule"
+  },
+  "SwitchAction_54321": {
+    "type": "SwitchAction",
+    "SwitchAction": {
+      "actionType": "Open",
+      "associatedSwitch": "CompositeSwitch_12345"
+    },
+    "IdentifiedObject": {
+      "name": "OpenSwitchAction"
+    }
+  },
+  "Substation1": {
+    "type": "Substation",
+    "Substation": {
+      "Region": "Region1"
+    }
+  }
+}
+@endjson

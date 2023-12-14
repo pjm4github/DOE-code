@@ -1,10 +1,11 @@
 import json
+import os
 import time
 
 from openai import OpenAI
 from rdf_converter import build_init_struct
 # Replace 'YOUR_API_KEY' (as an ENV variable) with your actual GPT-3 API key
-
+from pathlib import Path
 class GptCodeConverter():
 
     MODEL_CHOICE_1 = "gpt-3.5-turbo-1106"
@@ -56,12 +57,15 @@ class GptCodeConverter():
 
 
 if __name__ == "__main__":
-    directory_path = "{os.path.expanduser('~')}/Documents/Git/GitHub/GOSS-GridAPPS-D-PYTHON/gov_pnnl_goss/cimhub/CIM/"
+    directory_path = f"{os.path.expanduser('~')}/Documents/Git/GitHub/GOSS-GridAPPS-D-PYTHON/gov_pnnl_goss/cimhub/CIM/"
     current_time = int(time.time())
     cim_types = "CIMtypes.txt"
     converter = GptCodeConverter("RDF")
     rdf_failcount = 0
+    rdf_fail_files = []
     json_failcount = 0
+    json_fail_files = []
+    Path(directory_path).mkdir(parents=True, exist_ok=True)
     with open(directory_path + cim_types, 'r') as f:
         lines = f.readlines()
     for line in lines:
@@ -83,7 +87,9 @@ if __name__ == "__main__":
             if not enclosure and r.find("```") == 0:
                 enclosure = True
         clean_results = '\n'.join(clean_lines)
-        output_filename = f"{directory_path}rdf/{cim_type}{current_time}.rdf"
+        rdf_directory_path = f"{directory_path}rdf/"
+        Path(rdf_directory_path).mkdir(parents=True, exist_ok=True)
+        output_filename = f"{rdf_directory_path}{cim_type}{current_time}.rdf"
         try:
             with open(output_filename, 'w') as f2:
                 f2.write(clean_results)
@@ -92,7 +98,9 @@ if __name__ == "__main__":
             print(e)
 
         try:
-            output_filename = f"{directory_path}json/{cim_type}{current_time}.json"
+            json_directory_path = f"{directory_path}json/"
+            Path(json_directory_path).mkdir(parents=True, exist_ok=True)
+            output_filename = f"{json_directory_path}{cim_type}{current_time}.json"
             struct_dict = build_init_struct(cim_type, clean_results)
             json_text = json.dumps(struct_dict, indent=2)
             with open(output_filename, 'w') as f2:
@@ -102,7 +110,9 @@ if __name__ == "__main__":
             with open(output_filename, 'w') as f2:
                 f2.write(pjson)
         except Exception as e:
-            print(f"The json file {output_filename}, was not created: {e}")
+            print(f"{cim_type} error: {e}")
             json_failcount += 1
+            json_fail_files.append(cim_type)
 
     print(f"RDF fails: {rdf_failcount}, JSON fails: {json_failcount}")
+    print(json_fail_files)

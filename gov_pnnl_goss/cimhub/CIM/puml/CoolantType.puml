@@ -1,0 +1,17 @@
+@startjson
+{
+  "CoolantType_12345": {
+    "IdentifiedObject": {
+      "description": "A complex coolant type",
+      "name": "ExampleCoolantType"
+    },
+    "CoolantType": {
+      "flashPoint": "50.0",
+      "dielectricConstant": "2.5",
+      "conductivity": "0.001",
+      "temperatureRange": "-20\u00b0C to 100\u00b0C"
+    },
+    "type": "CoolantType"
+  }
+}
+@endjson
