@@ -1,9 +1,0 @@
-{
-  "SinglePhaseKind": {
-    "type": "Class",
-    "comment": "The type of single phase connection.",
-    "label": "SinglePhaseKind",
-    "symbol": "SinglePhaseKind",
-    "subClassOf": "SinglePhaseType"
-  }
-}

@@ -1,8 +1,0 @@
-{
-  "RegulatingControlModeKind": {
-    "comment": "RegulatingControlModeKind is an abstract class used to define the specific control modes for regulation.",
-    "label": "Regulating Control Mode Kind",
-    "subClassOf": "IdentifiedObject",
-    "type": "Class"
-  }
-}
