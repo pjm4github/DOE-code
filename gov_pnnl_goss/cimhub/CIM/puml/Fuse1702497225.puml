@@ -1,0 +1,51 @@
+@startjson
+{
+  "Fuse": {
+    "type": 
+      "Fuse"
+    ,
+    "Equipment": {
+      "EquipmentContainer": 
+        "FuseContainer"
+      ,
+      "EquipmentPowerSystemResources": 
+        "FusePSR1"
+      
+    },
+    "IdentifiedObject": {
+      "name": 
+        "Fuse1"
+      ,
+      "mRID": 
+        "example.Fuse1"
+      
+    }
+  },
+  "FusePSR1": {
+    "IdentifiedObject": {
+      "mRID": 
+        "example.FusePSR1"
+      ,
+      "name": 
+        "FusePSR1"
+      
+    },
+    "type": 
+      "PowerSystemResource"
+    
+  },
+  "FuseContainer": {
+    "IdentifiedObject": {
+      "name": 
+        "FuseContainer1"
+      ,
+      "mRID": 
+        "example.FuseContainer1"
+      
+    },
+    "type": 
+      "EquipmentContainer"
+    
+  }
+}
+@endjson

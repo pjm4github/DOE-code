@@ -1,0 +1,17 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+
+cim:LinearShuntCompensatorPhase rdf:type cim:LinearShuntCompensatorPhase ;
+    cim:ShuntCompensatorPhase.bPerSection "0.25"^^xsd:double ;
+    cim:ShuntCompensatorPhase.gPerSection "0.1"^^xsd:double ;
+    cim:ShuntCompensatorPhase.maximumSections "10"^^xsd:integer ;
+    cim:ShuntCompensatorPhase.nomU "20000"^^xsd:double ;
+    cim:ShuntCompensatorPhase.sectionCount "5"^^xsd:integer ;
+    cim:ShuntCompensatorPhase.aVRDelay "2.0"^^xsd:double ;
+    cim:ShuntCompensatorPhase.aVRType cim:RegulatingControlModeKind.fixed ;
+    cim:ShuntCompensatorPhase.bPerSection "0.25"^^xsd:double ;
+    cim:ShuntCompensatorPhase.gPerSection "0.1"^^xsd:double ;
+    cim:ShuntCompensatorPhase.maximumSections "10"^^xsd:integer ;
+    cim:ShuntCompensatorPhase.nomU "20000"^^xsd:double ;
+    cim:ShuntCompensatorPhase.sectionCount "5"^^xsd:integer .

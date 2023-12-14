@@ -1,0 +1,31 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-cim16#> .
+
+<http://example.com/Line/1> a cim:ACLineSegment ;
+    cim:IdentifiedObject.name "Example Line 1" ;
+    cim:IdentifiedObject.mRID "1" ;
+    cim:ConductingEquipment.BaseVoltage <http://example.com/BaseVoltage/1> ;
+    cim:ACLineSegment.length 10.0 ;
+    cim:ACLineSegment.r 0.02 ;
+    cim:ACLineSegment.x 0.04 ;
+    cim:ACLineSegment.bch 0.5 ;
+    cim:ACLineSegment.gch 0.0 ;
+    cim:Conductor.length 100.0 ;
+    cim:Conductor.wireCount 3 ;
+    cim:ACLineSegment.PerLengthImpedance <http://example.com/PerLengthImpedance/1> .
+
+<http://example.com/BaseVoltage/1> a cim:BaseVoltage ;
+    cim:IdentifiedObject.mRID "2" ;
+    cim:IdentifiedObject.name "Example Base Voltage" ;
+    cim:BaseVoltage.nominalVoltage 11000.0 .
+
+<http://example.com/PerLengthImpedance/1> a cim:PerLengthImpedance ;
+    cim:IdentifiedObject.mRID "3" ;
+    cim:IdentifiedObject.name "Example Per Length Impedance" ;
+    cim:PerLengthImpedance.conductorCount 3 ;
+    cim:PerLengthImpedance.r 0.1 ;
+    cim:PerLengthImpedance.x 0.2 ;
+    cim:PerLengthImpedance.r0 0.12 ;
+    cim:PerLengthImpedance.x0 0.24 ;
+    cim:PerLengthImpedance.GMR 0.004 ;
+    cim:PerLengthImpedance.GMD 1.0 .

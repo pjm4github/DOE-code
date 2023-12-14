@@ -1,0 +1,17 @@
+@startjson
+{
+  "SynchronousMachineOperatingMode": {
+    "type": [
+      "SynchronousMachineOperatingMode"
+    ],
+    "SynchronousMachineOperatingMode": {
+      "operatingMode": [
+        "synchronousCondensing"
+      ],
+      "SynchronousMachine:": [
+        "SynchronousMachine_001"
+      ]
+    }
+  }
+}
+@endjson

@@ -1,0 +1,20 @@
+@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-cim16#>.
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+
+cim:ACLineSegment rdf:type cim:ConductingEquipment;
+  cim:Equipment.aggregateProduction: 0.0;
+  cim:ConductingEquipment.BaseVoltage: cim:BaseVoltage rdf:about= "#BaseVoltage1";
+  cim:ConductingEquipment.length: 60.0;
+  cim:ConductingEquipment.ACLineSegment.endCond: cim:Terminal rdf:about= "#Terminal1";
+  cim:ConductingEquipment.ACLineSegment.endCond: cim:Terminal rdf:about= "#Terminal2";
+  cim:ConductingEquipment.ACLine.endCond: cim:Terminal rdf:about= "#Terminal3";
+  cim:ConductingEquipment.ACLineSegment.r: 0.08;
+  cim:ConductingEquipment.ACLineSegment.x: 0.24;
+  cim:ConductingEquipment.ACLineSegment.b: 6.7E-4;
+  cim:ConductingEquipment.ACLineSegment.g: 8.9E-5;
+  cim:ConductingEquipment.ACLineSegment.r0: 0.08;
+  cim:ConductingEquipment.ACLineSegment.x0: 0.24;
+  cim:ConductingEquipment.ACLineSegment.b0: 6.7E-4;
+  cim:ConductingEquipment.ACLineSegment.g0: 8.9E-5.

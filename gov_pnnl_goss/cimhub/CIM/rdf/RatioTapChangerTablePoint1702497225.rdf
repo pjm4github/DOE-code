@@ -1,0 +1,13 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM#> .
+@prefix ex: <http://example.org#> .
+
+ex:TapChangerTablePoint1 a cim:RatioTapChangerTablePoint ;
+    cim:TapChangerTablePoint_x ex:TapChangerTablePoint1_x ;
+    cim:TapChangerTablePoint_U ex:TapChangerTablePoint1_U ;
+    cim:TapChangerTablePoint_G ex:TapChangerTablePoint1_G ;
+    cim:TapChangerTablePoint_B ex:TapChangerTablePoint1_B ;
+    cim:TapChangerTablePoint_R ex:TapChangerTablePoint1_R ;
+    cim:TapChangerTablePoint_p ex:TapChangerTablePoint1_p ;
+    cim:TapChangerTablePoint_q ex:TapChangerTablePoint1_q .

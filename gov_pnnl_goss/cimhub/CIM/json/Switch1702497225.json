@@ -1,0 +1,33 @@
+{
+  "cim/Switch": {
+    "label": [
+      "Switch"
+    ],
+    "subClassOf": [
+      "cim/ConductingEquipment"
+    ]
+  },
+  "cim/SW1": {
+    "cim/IdentifiedObject": {
+      "name": [
+        "Switch 1"
+      ],
+      "mRID": [
+        "123456789"
+      ]
+    },
+    "cim/Switch": {
+      "normalOpen": [
+        "true"
+      ]
+    },
+    "type": [
+      "cim/Switch"
+    ],
+    "cim/Equipment": {
+      "EquipmentContainer": [
+        "cim/Substation1"
+      ]
+    }
+  }
+}

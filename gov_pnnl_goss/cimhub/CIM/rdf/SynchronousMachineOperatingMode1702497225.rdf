@@ -1,0 +1,7 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+cim:SynchronousMachineOperatingMode rdf:type cim:SynchronousMachineOperatingMode ;
+                                 cim:SynchronousMachineOperatingMode.operatingMode "synchronous" ;
+                                 cim:SynchronousMachineOperatingMode.description "Normal synchronous operation" .

@@ -1,0 +1,14 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM#> .
+
+cim:TransformerEnd rdf:type cim:PowerTransformerEnd ;
+    cim:IdentifiedObject.name "TransformerEnd1" ;
+    cim:PowerTransformerEnd.TransformerEndInfo cim:TransformerEndInfo1 ;
+    cim:PowerTransformerEnd.ratedS 10000.0 ;
+    cim:PowerTransformerEnd.connectionKind "Yn" ;
+    cim:PowerTransformerEnd.x 0.05 ;
+    cim:PowerTransformerEnd.r 0.2 ;
+    cim:PowerTransformerEnd.g 0.0 ;
+    cim:PowerTransformerEnd.b 0.0 ;
+    cim:PowerTransformerEnd.@id "f6dae22b-621d-4323-8e81-327e0dda28dc" .

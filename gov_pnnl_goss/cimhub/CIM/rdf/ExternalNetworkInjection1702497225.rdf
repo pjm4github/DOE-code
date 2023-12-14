@@ -1,0 +1,22 @@
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+cim:ExternalNetworkInjection rdf:type cim:EnergyConnection ;
+    cim:IdentifiedObject.name "ExternalNetworkInjection1" ;
+    cim:PowerSystemResource.Location <http://example.org/substation1> ;
+    cim:EnergyConnection.connectivityNode <http://example.org/cnode1> ;
+    cim:EnergyConnection.BaseVoltage <http://example.org/baseVoltage1> ;
+    cim:EnergyConnection.phases "ABC" ;
+    cim:EnergyConnection.p "100" ;
+    cim:EnergyConnection.q "50" .
+
+<http://example.org/substation1> rdf:type cim:Substation ;
+    cim:IdentifiedObject.name "Substation1" .
+
+<http://example.org/cnode1> rdf:type cim:ConnectivityNode ;
+    cim:IdentifiedObject.name "CNode1" .
+
+<http://example.org/baseVoltage1> rdf:type cim:BaseVoltage ;
+    cim:IdentifiedObject.name "BaseVoltage1" ;
+    cim:BaseVoltage.nominalVoltage "11000" .

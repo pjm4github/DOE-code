@@ -1,0 +1,17 @@
+@startjson
+{
+  "Disconnector": {
+    "type": [
+      "ProtectedSwitch",
+      "Switch"
+    ],
+    "label": "exampleDisconnector",
+    "IdentifiedObject": {
+      "mRID": "12345678-1234-1234-1234-123456789012"
+    },
+    "Equipment": {
+      "EquipmentContainer": "exampleSubstation"
+    }
+  }
+}
+@endjson

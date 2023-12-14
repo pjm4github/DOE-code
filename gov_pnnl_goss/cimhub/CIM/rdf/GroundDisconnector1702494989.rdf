@@ -1,0 +1,27 @@
+@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-cim16#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:GroundDisconnector rdf:type cim:Disconnector ;
+    cim:IdentifiedObject.mRID "GroundDisconnector1" ;
+    cim:IdentifiedObject.name "GD1" ;
+    cim:Equipment.aggregate false ;
+    cim:ConductingEquipment.BaseVoltage <http://iec.ch/TC57/2013/CIM-schema-cim16#BaseVoltage1> ;
+    cim:ConductingEquipment.Terminal <http://iec.ch/TC57/2013/CIM-schema-cim16#Terminal1> ;
+    cim:ConductingEquipment.EquipmentContainer <http://iec.ch/TC57/2013/CIM-schema-cim16#Substation1> ;
+    cim:Disconnector.normalOpen true ;
+    cim:Disconnector.open false .
+
+cim:Disconnector rdf:type rdfs:Class .
+cim:IdentifiedObject rdf:type rdfs:Class ;
+    rdfs:subClassOf rdf:Resource .
+
+<http://iec.ch/TC57/2013/CIM-schema-cim16#BaseVoltage1> rdf:type cim:BaseVoltage ;
+    cim:BaseVoltage.nominalVoltage "11000.0" .
+
+<http://iec.ch/TC57/2013/CIM-schema-cim16#Terminal1> rdf:type cim:Terminal ;
+    cim:Terminal.sequenceNumber "1" .
+
+<http://iec.ch/TC57/2013/CIM-schema-cim16#Substation1> rdf:type cim:Substation ;
+    cim:Substation.name "Substation1" .

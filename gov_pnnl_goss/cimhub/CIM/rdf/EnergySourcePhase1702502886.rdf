@@ -1,0 +1,13 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM#> .
+@prefix ex: <http://example.com/ontology#> .
+
+ex:EnergySourcePhase1 a cim:EnergySourcePhase ;
+    cim:EnergySourcePhase.phase "A" ;
+    cim:EnergySourcePhase.phaseConnection cim:PhaseCode.A ;
+    cim:EnergySourcePhase.phaseNominalVoltage "11000" ;
+    cim:EnergySourcePhase.VoltageLevel ex:VoltageLevel1 .
+
+ex:VoltageLevel1 a cim:VoltageLevel ;
+    cim:VoltageLevel.nominalVoltage "11000" .

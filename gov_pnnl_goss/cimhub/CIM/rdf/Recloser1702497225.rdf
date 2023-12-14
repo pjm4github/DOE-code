@@ -1,0 +1,35 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix ex: <http://example.com#> .
+
+ex:Recloser1 a cim:Recloser ;
+    cim:IdentifiedObject.mRID "123456" ;
+    cim:IdentifiedObject.name "Recloser1" ;
+    cim:Equipment.EquipmentContainer ex:Substation1 ;
+    cim:ConductingEquipment.BaseVoltage ex:BaseVoltage1 ;
+    cim:PowerSystemResource.Location ex:Location1 ;
+    cim:Switch.normalOpen "false"^^xsd:boolean ;
+    cim:ProtectedSwitch.normalOpen "false"^^xsd:boolean ;
+    cim:Recloser.normalOpen "true"^^xsd:boolean ;
+    cim:Recloser.phaseTripRating 100.0 ;
+    cim:Recloser.groundTripRating 60.0 ;
+    cim:Recloser.accuracyLimit 0.1 ;
+    cim:Recloser.lowVoltageLimit 15.0 ;
+    cim:Recloser.highVoltageLimit 138.0 .
+
+ex:Substation1 a cim:Substation ;
+    cim:IdentifiedObject.mRID "789012" ;
+    cim:IdentifiedObject.name "Substation1" ;
+    cim:VoltageLevel.Substation ex:Substation1 .
+
+ex:BaseVoltage1 a cim:BaseVoltage ;
+    cim:IdentifiedObject.mRID "345678" ;
+    cim:IdentifiedObject.name "BaseVoltage1" ;
+    cim:BaseVoltage.nominalVoltage 138.0 ;
+    cim:BaseVoltage.nominalVoltage "kV" .
+    
+ex:Location1 a cim:Location ;
+    cim:IdentifiedObject.mRID "901234" ;
+    cim:IdentifiedObject.name "Location1" .

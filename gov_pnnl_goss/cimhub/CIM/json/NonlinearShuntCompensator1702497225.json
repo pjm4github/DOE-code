@@ -1,0 +1,51 @@
+{
+  "NonlinearShuntCompensator": {
+    "ShuntCompensator": {
+      "nomU": [
+        "110.0"
+      ],
+      "gPerSection": [
+        "0.0"
+      ],
+      "bPerSection": [
+        "0.0032"
+      ],
+      "maximumSections": [
+        "15"
+      ],
+      "normalSections": [
+        "10"
+      ]
+    },
+    "IdentifiedObject": {
+      "mRID": [
+        "NSC1"
+      ],
+      "name": [
+        "NonlinearShuntCompensator1"
+      ]
+    },
+    "Equipment": {
+      "EquipmentContainer": [
+        "container1"
+      ],
+      "memberOf_EquipmentContainer": [
+        "subcontainer1"
+      ]
+    },
+    "NonlinearShuntCompensator": {
+      "p": [
+        "0.0VAr"
+      ],
+      "aVRDelay": [
+        "1.5"
+      ],
+      "aVRDelayCharacteristic": [
+        "reactivePower"
+      ]
+    },
+    "type": [
+      "ShuntCompensator"
+    ]
+  }
+}

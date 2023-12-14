@@ -1,0 +1,81 @@
+@startjson
+{
+  "OperationalLimitKindNormal": {
+    "type": 
+      "OperationalLimitKind"
+    
+  },
+  "EnergyConnection": {
+    "Equipment": {
+      "normalState": 
+        "OperationalLimitKindNormal"
+      ,
+      "EquipmentContainer": 
+        "Substation_1"
+      ,
+      "aggregate": 
+        "false"
+      
+    },
+    "PowerSystemResource": {
+      "AssetRoles": [
+        "AssetRoleType_Equipment",
+        "AssetRoleType_PowerSystemResource"
+      ]
+    },
+    "type": 
+      "Equipment"
+    
+  },
+  "Substation_1": {
+    "type": 
+      "Substation"
+    ,
+    "IdentifiedObject": {
+      "name": 
+        "ExampleSubstation"
+      
+    },
+    "Substation": {
+      "Region": 
+        "SubGeographicalRegion_1"
+      
+    }
+  },
+  "AssetRoleType_PowerSystemResource": {
+    "type": 
+      "AssetRoleType"
+    
+  },
+  "AssetRoleType_Equipment": {
+    "type": 
+      "AssetRoleType"
+    
+  },
+  "GeographicalRegion_1": {
+    "IdentifiedObject": {
+      "name": 
+        "ExampleGeographicalRegion"
+      
+    },
+    "type": 
+      "GeographicalRegion"
+    
+  },
+  "SubGeographicalRegion_1": {
+    "IdentifiedObject": {
+      "name": 
+        "ExampleRegion"
+      
+    },
+    "type": 
+      "SubGeographicalRegion"
+    ,
+    "SubGeographicalRegion": {
+      "Region": 
+        "GeographicalRegion_1"
+      
+    }
+  }
+}
+@endjson

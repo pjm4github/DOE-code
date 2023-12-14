@@ -1,0 +1,12 @@
+{
+  "VoltageControlMode": {
+    "subClassOf": "SVCControlMode",
+    "type": "Class",
+    "comment": "A voltage control mode"
+  },
+  "SVCControlMode": {
+    "comment": "A voltage control mode employed by a static var compensator (SVC)",
+    "subClassOf": "ControlMode",
+    "type": "Class"
+  }
+}

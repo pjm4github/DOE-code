@@ -1,0 +1,9 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM#> .
+
+cim:Disconnector rdf:type cim:Switch .
+cim:Disconnector rdf:type cim:ProtectedSwitch .
+cim:Disconnector rdfs:label "exampleDisconnector" .
+cim:Disconnector cim:IdentifiedObject.mRID "12345678-1234-1234-1234-123456789012" .
+cim:Disconnector cim:Equipment.EquipmentContainer "exampleSubstation" .

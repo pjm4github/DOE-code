@@ -1,0 +1,13 @@
+@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-cim16#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+cim:PerLengthLineParameter rdf:type cim:ConductancePerLength .
+cim:PerLengthLineParameter cim:Conductor cim:Conductor1 .
+cim:PerLengthLineParameter cim:Length 10.0 .
+cim:PerLengthLineParameter cim:ConductorCount 2 .
+cim:PerLengthLineParameter cim:ConductorSpacing cim:ConductorSpacing1 .
+cim:ConductorSpacing1 cim:distance cim:LengthMeasure1 .
+cim:LengthMeasure1 cim:value "1.0"^^xsd:float .
+cim:LengthMeasure1 cim:unitMultiplier cim:UnitMultiplierEnum1 .
+cim:LengthMeasure1 cim:unitSymbol cim:UnitSymbolEnum1 .

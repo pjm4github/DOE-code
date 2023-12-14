@@ -1,0 +1,19 @@
+@startjson
+{
+  "Sectionaliser": {
+    "Switch": {
+      "normalOpen": "false"
+    },
+    "ProtectedSwitch": {
+      "isNormallyOpen": "false"
+    },
+    "type": [
+      "ProtectedSwitch",
+      "Switch"
+    ],
+    "Equipment": {
+      "EquipmentContainer": "SomeSubstationID"
+    }
+  }
+}
+@endjson

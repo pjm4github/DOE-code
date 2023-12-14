@@ -1,0 +1,39 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://www.iec.ch/TC57/2013/CIM-schema-cim16#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix example: <http://www.example.com/CIMExample#> .
+
+example:PhaseTapChangerTable rdf:type cim:PhaseTapChangerTable ;
+  cim:PhaseTapChangerTable.highStep <http://www.example.com/CIMExample#PhaseTapChangerTable.highStep> ;
+  cim:PhaseTapChangerTable.initialDelay <http://www.example.com/CIMExample#PhaseTapChangerTable.initialDelay> ;
+  cim:PhaseTapChangerTable.lowStep <http://www.example.com/CIMExample#PhaseTapChangerTable.lowStep> ;
+  cim:PhaseTapChangerTable.neutralStep <http://www.example.com/CIMExample#PhaseTapChangerTable.neutralStep> ;
+  cim:PhaseTapChangerTable.normalStep <http://www.example.com/CIMExample#PhaseTapChangerTable.normalStep> ;
+  cim:PhaseTapChangerTable.step <http://www.example.com/CIMExample#PhaseTapChangerTable.step> ;
+  cim:PhaseTapChangerTable.stepVoltageIncrement <http://www.example.com/CIMExample#PhaseTapChangerTable.stepVoltageIncrement> ;
+  cim:PhaseTapChangerTable.subsequentDelay <http://www.example.com/CIMExample#PhaseTapChangerTable.subsequentDelay> .
+
+example:PhaseTapChangerTable.highStep rdf:type cim:Integer ;
+  cim:Integer.value "1" .
+
+example:PhaseTapChangerTable.initialDelay rdf:type cim:Float ;
+  cim:Float.value "0.0"^^xsd:float .
+
+example:PhaseTapChangerTable.lowStep rdf:type cim:Integer ;
+  cim:Integer.value "-1" .
+
+example:PhaseTapChangerTable.neutralStep rdf:type cim:Integer ;
+  cim:Integer.value "0" .
+
+example:PhaseTapChangerTable.normalStep rdf:type cim:Integer ;
+  cim:Integer.value "0" .
+
+example:PhaseTapChangerTable.step rdf:type cim:Integer ;
+  cim:Integer.value "0" .
+
+example:PhaseTapChangerTable.stepVoltageIncrement rdf:type cim:Float ;
+  cim:Float.value "0.01"^^xsd:float .
+
+example:PhaseTapChangerTable.subsequentDelay rdf:type cim:Float ;
+  cim:Float.value "0.0"^^xsd:float .

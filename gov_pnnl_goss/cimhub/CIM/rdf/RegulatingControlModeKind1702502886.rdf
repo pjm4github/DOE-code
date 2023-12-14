@@ -1,0 +1,8 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/2016/CIM-schema-cim16#> .
+
+cim:RegulatingControlModeKind rdf:type rdfs:Class ;
+    rdfs:label "Regulating Control Mode Kind"@en ;
+    rdfs:subClassOf cim:IdentifiedObject ;
+    rdfs:comment "RegulatingControlModeKind is an abstract class used to define the specific control modes for regulation."@en .

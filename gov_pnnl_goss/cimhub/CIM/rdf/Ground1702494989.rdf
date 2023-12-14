@@ -1,0 +1,27 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix cim: <http://iec.ch/TC57/CIM#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+cim:Ground a rdfs:Class ;
+    rdfs:label "Ground"@en ;
+    rdfs:comment "A conducting connection, whether intentional or accidental, by which an electric circuit or equipment is connected to the earth, or to some conducting body of relatively large extent that serves in place of the earth"@en .
+
+cim:GroundingConnection a rdfs:Class ;
+    rdfs:label "Grounding Connection"@en ;
+    rdfs:comment "A connection to ground used to protect from transient overvoltages and to provide a path for fault current. The connection may be to earth or to some conducting body of large extent that serves in place of the earth, especially for audio frequencies"@en .
+
+cim:GroundingInductance a rdfs:Class ;
+    rdfs:label "Grounding Inductance"@en ;
+    rdfs:comment "Inductance of grounding (earthing) impedance or admittance"@en .
+
+cim:GroundedWyeConnection a rdfs:Class ;
+    rdfs:label "Grounded Wye Connection"@en ;
+    rdfs:comment "A grounded wye connection"@en .
+
+cim:GroundedDeltaConnection a rdfs:Class ;
+    rdfs:label "Grounded Delta Connection"@en ;
+    rdfs:comment "A grounded delta connection"@en .
+
+cim:GroundedEnd a rdfs:Class ;
+    rdfs:label "Grounded End"@en ;
+    rdfs:comment "One or other of the two end terminals of a grounded shunt reactor or other device, such as lightning arrester or surge arrester"@en .

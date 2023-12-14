@@ -1,0 +1,10 @@
+@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-cim16#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:ACLineSegment rdf:type cim:ConductingEquipment ;
+    cim:Equipment.EquipmentContainer "exampleContainer"^^xsd:string ;
+    cim:ConductingEquipment.length 100.0^^xsd:float ;
+    cim:ConductingEquipment.rating "150.0"^^xsd:float ;
+    cim:ConductingEquipment.BaseVoltage "1000"^^xsd:integer .

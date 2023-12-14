@@ -1,0 +1,28 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:GroundingImpedance rdf:type cim:GroundingImpedance ;
+    cim:GroundingImpedance.nominalZ _ _:nominalZ12345 ;
+    cim:GroundingImpedance.ratedU cim:Voltage :ratedU12345 ;
+    cim:GroundingImpedance.r neutralWireAdd cim:ConductingEquipment :neutralWireAdd12345 .
+
+_:nominalZ12345 rdf:type cim:ComplexImpedance ;
+    cim:ComplexImpedance.value1 "0.005" ;
+    cim:ComplexImpedance.value2 "0.035" ;
+    cim:ComplexImpedance.unit cim:UnitSymbolKind "ohm" .
+
+:cim:Voltage rdf:type cim:Voltage ;
+    cim:Voltage.value "120" ;
+    cim:Voltage.multiplier cim:UnitMultiplier "k" ;
+    cim:Voltage.unit cim:UnitSymbolKind "V".
+
+:cim:ConductingEquipment rdf:type cim:ConductingEquipment ;
+    cim:ConductingEquipment.name "neutralWireAdd12345" ;
+    cim:ConductingEquipment.operatingU cim:Voltage :neutralWireAddU12345 .
+
+:neutralWireAddU12345 rdf:type cim:Voltage ;
+    cim:Voltage.value "120" ;
+    cim:Voltage.multiplier cim:UnitMultiplier "k" ;
+    cim:Voltage.unit cim:UnitSymbolKind "V" .

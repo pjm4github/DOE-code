@@ -1,0 +1,24 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-cim16#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:PetersenCoil rdf:type cim:RegulatingControl ;
+    cim:IdentifiedObject.name "PetersenCoil1" ;
+    cim:RegulatingControl.limitsActivePower [ 
+        a cim:ActivePower ;
+        cim:ActivePower.value "0.0"^^xsd:float
+    ] ;
+    cim:RegulatingControl.limitsReactivePower [
+        a cim:ReactivePower ;
+        cim:ReactivePower.value "0.0"^^xsd:float
+    ] ;
+    cim:RegulatingControl.enabled "true"^^xsd:boolean .
+
+cim:RegulatingControl a rdfs:Class .
+cim:IdentifiedObject.name a rdfs:Property .
+cim:RegulatingControl.limitsActivePower a rdfs:Property .
+cim:ActivePower a rdfs:Class .
+cim:ReactivePower a rdfs:Class .
+cim:RegulatingControl.limitsReactivePower a rdfs:Property .
+cim:RegulatingControl.enabled a rdfs:Property.

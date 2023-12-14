@@ -1,0 +1,136 @@
+{
+  "Jumper": {
+    "ConductingEquipment": {
+      "PowerSystemResource": [
+        "Location1"
+      ],
+      "BaseVoltage": [
+        "BaseVoltage1"
+      ],
+      "phases": [
+        "ABC"
+      ]
+    },
+    "type": [
+      "ConductingEquipment"
+    ],
+    "Equipment": {
+      "aggregate": [
+        "Line1"
+      ],
+      "EquipmentContainer": [
+        "Substation1"
+      ]
+    },
+    "IdentifiedObject": {
+      "name": [
+        "Jumper1"
+      ]
+    }
+  },
+  "Line1": {
+    "ConductingEquipment": {
+      "BaseVoltage": [
+        "BaseVoltage1"
+      ]
+    },
+    "PowerSystemResource": {
+      "Location": [
+        "Location1"
+      ]
+    },
+    "type": [
+      "ACLineSegment"
+    ],
+    "IdentifiedObject": {
+      "name": [
+        "Line1"
+      ]
+    }
+  },
+  "Location1": {
+    "PositionPoint": {
+      "yPosition": [
+        "20.0"
+      ],
+      "CoordinateSystem": [
+        "CoordinateSystem1"
+      ],
+      "xPosition": [
+        "10.0"
+      ],
+      "LocationIdentifier": [
+        "12345"
+      ]
+    },
+    "IdentifiedObject": {
+      "name": [
+        "Location1"
+      ]
+    },
+    "type": [
+      "Location"
+    ]
+  },
+  "GeographicalRegion1": {
+    "type": [
+      "GeographicalRegion"
+    ],
+    "IdentifiedObject": {
+      "name": [
+        "GeographicalRegion1"
+      ]
+    }
+  },
+  "Region1": {
+    "IdentifiedObject": {
+      "name": [
+        "Region1"
+      ]
+    },
+    "SubGeographicalRegion": {
+      "Region": [
+        "GeographicalRegion1"
+      ]
+    },
+    "type": [
+      "SubGeographicalRegion"
+    ]
+  },
+  "Substation1": {
+    "type": [
+      "Substation"
+    ],
+    "IdentifiedObject": {
+      "name": [
+        "Substation1"
+      ]
+    },
+    "Substation": {
+      "Region": [
+        "Region1"
+      ]
+    }
+  },
+  "CoordinateSystem1": {
+    "IdentifiedObject": {
+      "name": [
+        "CoordinateSystem1"
+      ]
+    },
+    "type": [
+      "CoordinateSystem"
+    ]
+  },
+  "BaseVoltage1": {
+    "BaseVoltage": {
+      "nominalVoltage": [
+        "V",
+        "11000.0"
+      ]
+    },
+    "type": [
+      "BaseVoltage"
+    ]
+  }
+}

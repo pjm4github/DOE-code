@@ -1,0 +1,10 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+
+cim:TransformerTankEnd rdf:type cim:TransformerTankEnd ;
+    cim:IdentifiedObject.name "ExampleTransformerTankEnd" ;
+    cim:PowerSystemResource.AssetRoles cim:AssetRole.Assets3 ;
+    cim:Equipment.EquipmentContainer cim:TransformerTank ;
+    cim:TransformerTankEnd.TransformerEnd cim:TransformerEnd.E ; 
+    cim:TransformerEnd.BaseVoltage cim:BaseVoltage.V-11 ;
+    cim:TransformerTankEnd.TransformerTank cim:TransformerTankInfo.TT-1 .

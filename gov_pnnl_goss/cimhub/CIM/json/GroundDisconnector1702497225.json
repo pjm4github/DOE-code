@@ -1,0 +1,64 @@
+{
+  "GroundDisconnector": {
+    "type": [
+      "Disconnector"
+    ],
+    "Disconnector": {
+      "normalOpen": [
+        "true"
+      ]
+    },
+    "Equipment": {
+      "EquipmentContainer": [
+        "Substation1"
+      ]
+    },
+    "ConductingEquipment": {
+      "BaseVoltage": [
+        "11000"
+      ]
+    }
+  },
+  "Disconnector.normalOpen": {
+    "type": [
+      "Property"
+    ],
+    "label": [
+      "normalOpen"
+    ],
+    "range": [
+      "boolean"
+    ],
+    "domain": [
+      "Disconnector"
+    ]
+  },
+  "ConductingEquipment.BaseVoltage": {
+    "type": [
+      "Property"
+    ],
+    "label": [
+      "BaseVoltage"
+    ],
+    "domain": [
+      "ConductingEquipment"
+    ],
+    "range": [
+      "string"
+    ]
+  },
+  "Equipment.EquipmentContainer": {
+    "type": [
+      "Property"
+    ],
+    "label": [
+      "EquipmentContainer"
+    ],
+    "domain": [
+      "Equipment"
+    ],
+    "range": [
+      "string"
+    ]
+  }
+}

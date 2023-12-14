@@ -1,0 +1,59 @@
+{
+  "SinglePhaseKindPhaseCode2": {
+    "label": [
+      "Phase B"
+    ],
+    "subClassOf": [
+      "SinglePhaseKind"
+    ],
+    "type": [
+      "PhaseCode"
+    ],
+    "comment": [
+      "The phase B in a single phase system."
+    ]
+  },
+  "SinglePhaseKindPhaseCode3": {
+    "type": [
+      "PhaseCode"
+    ],
+    "comment": [
+      "The phase C in a single phase system."
+    ],
+    "subClassOf": [
+      "SinglePhaseKind"
+    ],
+    "label": [
+      "Phase C"
+    ]
+  },
+  "SinglePhaseKind": {
+    "subClassOf": [
+      "PhaseCode",
+      "Kind"
+    ],
+    "comment": [
+      "A kind of single phase."
+    ],
+    "label": [
+      "SinglePhaseKind"
+    ],
+    "type": [
+      "Class"
+    ]
+  },
+  "SinglePhaseKindPhaseCode1": {
+    "label": [
+      "Phase A"
+    ],
+    "comment": [
+      "The phase A in a single phase system."
+    ],
+    "type": [
+      "PhaseCode"
+    ],
+    "subClassOf": [
+      "SinglePhaseKind"
+    ]
+  }
+}

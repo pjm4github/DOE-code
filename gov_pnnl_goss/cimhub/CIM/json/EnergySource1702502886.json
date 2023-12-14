@@ -1,0 +1,31 @@
+{
+  "EnergySource": {
+    "IdentifiedObject": {
+      "description": "Solar panel located on rooftop",
+      "name": "Solar Panel 1"
+    },
+    "EnergySource": {
+      "energyType": "Renewable"
+    },
+    "Equipment": {
+      "Equipment": "Substation1"
+    },
+    "type": "EnergySource"
+  },
+  "Substation1": {
+    "IdentifiedObject": {
+      "description": "Primary substation receiving power from solar panels",
+      "name": "Substation 1"
+    },
+    "type": "Substation"
+  },
+  "SolarPanel1": {
+    "type": "SolarPanel",
+    "SolarPanel": {
+      "ratedCapacity": "250"
+    },
+    "Equipment": {
+      "ratedVoltage": "24"
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "LoadBreakSwitch1": {
+    "type": [
+      "LoadBreakSwitch"
+    ],
+    "IdentifiedObject": {
+      "mRID": [
+        "LoadBreakSwitch1"
+      ]
+    },
+    "Equipment": {
+      "EquipmentContainer": [
+        "Substation1"
+      ]
+    }
+  },
+  "LoadBreakSwitch": {
+    "subClassOf": [
+      "Switch"
+    ],
+    "type": [
+      "Class"
+    ]
+  }
+}

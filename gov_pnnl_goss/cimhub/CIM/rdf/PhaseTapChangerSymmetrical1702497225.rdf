@@ -1,0 +1,25 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:PhaseTapChangerSymmetrical rdf:type cim:TapChanger ;
+    cim:IdentifiedObject.mRID "example123" ;
+    cim:IdentifiedObject.name "ExampleSymmetricalTapChanger" ;
+    cim:TapChanger.normalStep 16 ;
+    cim:TapChanger.stepCount 32 ;
+    cim:TapChanger.TapChangerControl cim:PhaseTapChangerControl ;
+    cim:TapChanger.TapChangerInfo cim:PhaseTapChangerInfo .
+
+cim:PhaseTapChangerControl rdf:type cim:TapChangerControl ;
+    cim:IdentifiedObject.mRID "control123" ;
+    cim:IdentifiedObject.name "ExampleControl" ;
+    cim:TapChangerControl.lineDropCompensation false .
+
+cim:PhaseTapChangerInfo rdf:type cim:TapChangerInfo ;
+    cim:IdentifiedObject.mRID "info123" ;
+    cim:IdentifiedObject.name "ExampleInfo" ;
+    cim:TapChangerInfo.highStep 8 ;
+    cim:TapChangerInfo.lowStep -8 ;
+    cim:TapChangerInfo.neutralStep 0 ;
+    cim:TapChangerInfo.stepVoltageIncrement 1.0 .

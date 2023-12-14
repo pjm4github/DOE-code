@@ -1,0 +1,13 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:ShuntCompensatorPhase rdf:type cim:ShuntCompensatorPhase ;
+    cim:IdentifiedObject.name "ShuntCompensatorPhase1" ;
+    cim:IdentifiedObject.mRID "1fda34e1-c121-4e7e-8dd0-134b40bf3c3c" ;
+    cim:ConductingEquipment.BaseVoltage "110000"^^xsd:double ;
+    cim:ConductingEquipment.Aggreagte "false"^^xsd:boolean ;
+    cim:ShuntCompensator.bPerSection "0.001"^^xsd:double ;
+    cim:ShuntCompensator.gPerSection "0.0005"^^xsd:double ;
+    cim:ShuntCompensator_step.PhaseCode "A" .

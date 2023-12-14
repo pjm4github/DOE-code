@@ -1,0 +1,22 @@
+@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-cim16#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+cim:RegulatingControlModeKind rdf:type rdfs:Class ;
+    rdfs:subClassOf cim:StateVariable ;
+
+cim:RegulatingControlModeKind.nominalValue rdf:type rdfs:DatatypeProperty ;
+    rdfs:domain cim:RegulatingControlModeKind ;
+    rdfs:range rdfs:Literal .
+
+cim:RegulatingControlModeKind.lowValueLimit rdf:type rdfs:DatatypeProperty ;
+    rdfs:domain cim:RegulatingControlModeKind ;
+    rdfs:range rdfs:Literal .
+
+cim:RegulatingControlModeKind.highValueLimit rdf:type rdfs:DatatypeProperty ;
+    rdfs:domain cim:RegulatingControlModeKind ;
+    rdfs:range rdfs:Literal .
+
+cim:RegulatingControlModeKind.normalValue rdf:type rdfs:DatatypeProperty ;
+    rdfs:domain cim:RegulatingControlModeKind ;
+    rdfs:range rdfs:Literal .

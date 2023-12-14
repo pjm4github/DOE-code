@@ -1,0 +1,24 @@
+{
+  "NonlinearShuntCompensator rdf:id=\"exampleNonlinearShuntCompensator\"": {
+    "ConnectivityNodeEquipment": {
+      "ConnectivityNodeEquipment": "ConnectivityNodeEquipment rdf:id=\"exampleCNE\""
+    },
+    "NonlinearShuntCompensator": {
+      "b0": "0.2",
+      "g0": "0.8",
+      "type": "NonlinearShuntCompensatorTypeKind.enumG",
+      "g1": "0.1",
+      "b1": "-0.1"
+    },
+    "Equipment": {
+      "Equipment": "true"
+    },
+    "ConductingEquipment": {
+      "BaseVoltage": "10000.0"
+    },
+    "IdentifiedObject": {
+      "name": "ExampleNonlinearShuntCompensator"
+    },
+    "type": "NonlinearShuntCompensator"
+  }
+}

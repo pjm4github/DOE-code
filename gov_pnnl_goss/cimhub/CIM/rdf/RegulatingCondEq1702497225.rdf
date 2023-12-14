@@ -1,0 +1,10 @@
+@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-cim16#> .
+
+cim:RegulatingCondEq rdf:type cim:RegulatingCondEq ;
+   cim:Equipment.Equipment rdf:type cim:Equipment ;
+   cim:IdentifiedObject.mRID "UUID-12345678-1234-1234-1234-123456789abc" .
+
+cim:RegulatingCondEq.cim:RegulatingControl rdf:type cim:RegulatingControl ;
+   cim:RegulatingControl.Equipment cim:RegulatingCondEq ;
+   cim:RegulatingControl.mode cim:RegulatingControlModeKind.manual ;
+   cim:RegulatingControl.targetValue "100" .

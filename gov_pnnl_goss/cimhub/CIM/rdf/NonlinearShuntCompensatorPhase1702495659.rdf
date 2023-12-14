@@ -1,0 +1,24 @@
+@prefix : <http://iec.ch/TC57/2013/CIM-schema-cim16#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-cim16#> .
+
+:NonlinearShuntCompensatorPhase rdf:type cim:NonlinearShuntCompensatorPhase ;
+    cim:Equipment.EquipmentContainer <equipmentContainerURI> ;
+    cim:NonlinearShuntCompensator.stepY2 0.0 ;
+    cim:RegulatingCondEq.controlledElement <controlledElementURI> ;
+    cim:RegulatingCondEq.Terminal <terminalURI> ;
+    cim:ShuntCompensator.bPerSection 0.0 ;
+    cim:ShuntCompensator.maximumSections 0 ;
+    cim:ShuntCompensator.nomU 0.0 ;
+    cim:ShuntCompensator.numberOfSections 0 ;
+    cim:ShuntCompensator.aVRDelay 0.0 .
+
+<controlledElementURI> rdf:type cim:PowerTransformer ;
+    rdfs:label "PowerTransformer1" .
+
+<terminalURI> rdf:type cim:Terminal ;
+    rdfs:label "Terminal1" .
+
+<equipmentContainerURI> rdf:type cim:Substation ;
+    rdfs:label "Substation1" .

@@ -1,0 +1,16 @@
+@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-cim16#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:ACLineSegmentPhase_1 a cim:ACLineSegmentPhase ;
+    cim:ACLineSegment "ACLineSegment_1"^^xsd:ID ;
+    cim:PhaseCode "A" .
+
+cim:ACLineSegmentPhase_2 a cim:ACLineSegmentPhase ;
+    cim:ACLineSegment "ACLineSegment_1"^^xsd:ID ;
+    cim:PhaseCode "B" .
+
+cim:ACLineSegmentPhase_3 a cim:ACLineSegmentPhase ;
+    cim:ACLineSegment "ACLineSegment_1"^^xsd:ID ;
+    cim:PhaseCode "C" .

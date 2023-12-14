@@ -1,0 +1,17 @@
+@startjson
+{
+  "CompositeSwitch": {
+    "ProtectedSwitch": {
+      "NormalOpen": "true",
+      "Retained": "false"
+    },
+    "type": [
+      "Switch",
+      "ProtectedSwitch"
+    ],
+    "Equipment": {
+      "EquipmentContainer": "substation1"
+    }
+  }
+}
+@endjson

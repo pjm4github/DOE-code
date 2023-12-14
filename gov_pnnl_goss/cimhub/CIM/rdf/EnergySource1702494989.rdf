@@ -1,0 +1,16 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-cim16#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix ex: <http://example.org#> .
+
+ex:EnergySource rdf:type cim:EnergySource ;
+  cim:IdentifiedObject.name "ExampleEnergySource" ;
+  cim:PowerSystemResource.nominalVoltage "11000"^^xsd:float ;
+  cim:PowerSystemResource.Location ex:ExampleLocation ;
+  cim:EnergySource.energyType "wind" .
+
+ex:ExampleLocation rdf:type cim:Location ;
+  cim:IdentifiedObject.name "ExampleLocation" ;
+  cim:Location.latitude "51.509865"^^xsd:float ;
+  cim:Location.longitude "-0.118092"^^xsd:float .

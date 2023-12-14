@@ -1,0 +1,8 @@
+@startjson
+{
+  "HydroPumpStorage": {
+    "subClassOf": "GeneratingUnit",
+    "type": "SynchronousMachineKind"
+  }
+}
+@endjson

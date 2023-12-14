@@ -1,0 +1,28 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix cim: <http://iec.ch/TC57/CIM#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+
+# Define a Substation instance
+cim:Substation_001 a cim:Substation.
+
+# Define attributes of the Substation
+cim:Substation_001 cim:IdentifiedObject.name "Substation001".
+cim:Substation_001 cim:Substation.region cim:SubGeographicalRegion_001.
+
+# Define the location of the Substation
+cim:Location_001 a cim:Location.
+cim:Location_001 cim:IdentifiedObject.name "Location001".
+cim:Location_001 cim:Location.CoordinateSystem "WGS84"^^xsd:string.
+cim:Location_001 cim:Location.Latitude "38.12345"^^xsd:double.
+cim:Location_001 cim:Location.Longitude "-122.67890"^^xsd:double.
+cim:Location_001 cim:Location.Elevation "100"^^xsd:double.
+
+# Connect the Substation to its location
+cim:Substation_001 cim:Substation.Location cim:Location_001.
+
+# Define the sub-geographical region
+cim:SubGeographicalRegion_001 a cim:SubGeographicalRegion.
+cim:SubGeographicalRegion_001 cim:IdentifiedObject.name "Region001".
+
+# Additional properties and relationships can be represented as needed.

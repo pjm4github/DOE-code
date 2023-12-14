@@ -1,0 +1,26 @@
+{
+  "NonlinearShuntCompensator": {
+    "ShuntCompensator": {
+      "maximumSections": [
+        "10"
+      ],
+      "normalSections": [
+        "5"
+      ],
+      "nomU": [
+        "11000.0"
+      ],
+      "bPerSection": [
+        "-0.0001"
+      ]
+    },
+    "IdentifiedObject": {
+      "name": [
+        "ExampleNonlinearShuntCompensator"
+      ]
+    },
+    "type": [
+      "ShuntCompensator"
+    ]
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "Ground": {
+    "ConductingEquipment": {
+      "phases": [
+        "ABC"
+      ],
+      "x": [
+        "0.002ohm"
+      ],
+      "r": [
+        "0.001ohm"
+      ],
+      "b": [
+        "0.0S"
+      ],
+      "g": [
+        "0.0S"
+      ],
+      "BaseVoltage": [
+        "20kV"
+      ]
+    },
+    "IdentifiedObject": {
+      "name": [
+        "Ground1"
+      ],
+      "mRID": [
+        "gnd1"
+      ]
+    },
+    "Equipment": {
+      "EquipmentContainer": [
+        "Substation1"
+      ]
+    },
+    "type": [
+      "ConductingEquipment"
+    ]
+  }
+}

@@ -1,0 +1,12 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM#> .
+
+cim:LinearShuntCompensatorPhase rdf:type cim:LinearShuntCompensatorPhase ;
+    cim:IdentifiedObject.name "LinearShuntCompensatorPhase1" ;
+    cim:IdentifiedObject.description "A single phase linear shunt compensator." ;
+    cim:ConductingEquipment.BaseVoltage 220 ;
+    cim:ShuntCompensatorPhase.phaseConnection "Y" ;
+    cim:LinearShuntCompensator.bPerSection "0.5" ;
+    cim:LinearShuntCompensator.gPerSection "0.0" ;
+    cim:ShuntCompensatorPhase.maximumSections "10" ;
+    cim:ShuntCompensatorPhase.sections "5" .

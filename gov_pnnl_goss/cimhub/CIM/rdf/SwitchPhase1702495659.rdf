@@ -1,0 +1,13 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-cim16#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:SwitchPhase rdf:type cim:Switch ;
+    cim:IdentifiedObject.name "SwitchPhase1" ;
+    cim:Equipment.EquipmentContainer "Substation1"^^xsd:string ;
+    cim:ConductingEquipment.BaseVoltage "HV"^^xsd:string ;
+    cim:Switch.normalOpen true^^xsd:boolean ;
+    cim:SwitchPhase.open "true"^^xsd:boolean ;
+    cim:SwitchPhase.phase cim:SinglePhaseKind.A ;
+    cim:SwitchPhase.Switch "Switch1" .

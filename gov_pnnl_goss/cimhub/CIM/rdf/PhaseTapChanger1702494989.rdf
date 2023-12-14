@@ -1,0 +1,16 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+
+# Create a PhaseTapChanger instance
+cim:PhaseTapChanger rdf:type cim:PhaseTapChanger ;
+    cim:TapChanger.step = "1" ;
+    cim:TapChanger.normalStep = "5" ;
+    cim:PhaseTapChanger.TransformerEndInfo cim:TransformerEndInfo_1 .
+
+# Create a TransformerEndInfo instance
+cim:TransformerEndInfo_1 rdf:type cim:TransformerEndInfo ;
+    cim:TransformerEndInfo.Transformer cim:Transformer_1 .
+
+# Create a Transformer instance
+cim:Transformer_1 rdf:type cim:Transformer .

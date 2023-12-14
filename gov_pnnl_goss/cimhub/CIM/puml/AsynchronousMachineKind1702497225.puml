@@ -1,0 +1,22 @@
+@startjson
+{
+  "AsynchronousMachineKind": {
+    "PowerSystemResource": {
+      "nominalVoltage": 
+        "11000.0"
+      
+    },
+    "RotatingMachine": {
+      "ratedS": 
+        "20000.0"
+      
+    },
+    "RdfID": 
+      "AsynchronousMachineKind1"
+    ,
+    "type": 
+      "AsynchronousMachine"
+    
+  }
+}
+@endjson

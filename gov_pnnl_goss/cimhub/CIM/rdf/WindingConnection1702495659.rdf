@@ -1,0 +1,24 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-cim16#> .
+
+cim:WindingConnection rdf:type cim:WindingConnection ;
+    cim:WindingConnection.connectionKind "D" ;
+    cim:WindingConnection.sequenceNumber "1" ;
+    cim:WindingConnection.Winding cim:TransformerEndInfo ;
+    cim:WindingConnection.ConductingEquipment cim:PowerTransformer ;
+    cim:WindingConnection.phaseToPhase cim:PhaseCode_A ;
+    cim:WindingConnection.grounded false .
+
+cim:TransformerEndInfo rdf:type cim:TransformerEndInfo ;
+    cim:TransformerEndInfo.ratedS "100000" ;
+    cim:TransformerEndInfo.ratedU "110" ;
+    cim:TransformerEndInfo.endNumber "1" ;
+    cim:TransformerEndInfo.BaseVoltage cim:BaseVoltage ;
+    cim:TransformerEndInfo.connectionKind "D" ;
+    cim:TransformerEndInfo.phaseAngleClock cim:550.0 .
+
+cim:PowerTransformer rdf:type cim:PowerTransformer ;
+    cim:PowerTransformer.TransformerInfo cim:TransformerEndInfo .
+
+cim:PhaseCode_A rdf:type cim:PhaseCode_A .

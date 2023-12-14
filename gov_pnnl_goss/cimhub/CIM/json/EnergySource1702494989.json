@@ -1,0 +1,43 @@
+{
+  "EnergySource": {
+    "EnergySource": {
+      "energyType": [
+        "wind"
+      ]
+    },
+    "PowerSystemResource": {
+      "nominalVoltage": [
+        "11000.0"
+      ],
+      "Location": [
+        "ExampleLocation"
+      ]
+    },
+    "IdentifiedObject": {
+      "name": [
+        "ExampleEnergySource"
+      ]
+    },
+    "type": [
+      "EnergySource"
+    ]
+  },
+  "ExampleLocation": {
+    "type": [
+      "Location"
+    ],
+    "Location": {
+      "longitude": [
+        "-0.118092"
+      ],
+      "latitude": [
+        "51.509865"
+      ]
+    },
+    "IdentifiedObject": {
+      "name": [
+        "ExampleLocation"
+      ]
+    }
+  }
+}

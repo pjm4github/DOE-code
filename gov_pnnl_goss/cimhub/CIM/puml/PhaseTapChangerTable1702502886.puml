@@ -1,0 +1,15 @@
+@startjson
+{
+  "PhaseTapChangerTable": {
+    "PhaseTapChangerTable": {
+      "PhaseTapChangerStep": "true"
+    },
+    "TapChangerTable": {
+      "normalStepIncrement": "1",
+      "stepVoltageIncrement": "-0.05",
+      "ltcFlag": "false"
+    },
+    "type": "TapChangerTable"
+  }
+}
+@endjson

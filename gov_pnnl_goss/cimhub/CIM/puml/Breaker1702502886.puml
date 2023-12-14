@@ -1,0 +1,18 @@
+@startjson
+{
+  "Breaker": {
+    "Equipment": {
+      "aggregateAsset": "trans001"
+    },
+    "type": "ACLineSegment",
+    "IdentifiedObject": {
+      "name": "Breaker 001",
+      "mRID": "bkr001"
+    },
+    "ConductingEquipment": {
+      "BaseVoltage": "voltage001",
+      "Terminal": "term001"
+    }
+  }
+}
+@endjson

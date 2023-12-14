@@ -1,0 +1,23 @@
+{
+  "NonlinearShuntCompensatorPhasePo": {
+    "Equipment": {
+      "EquipmentContainer": [
+        "container1"
+      ]
+    },
+    "NonlinearShuntCompensatorPhase": {
+      "minimumSections": [
+        "3"
+      ],
+      "maximumSections": [
+        "8"
+      ],
+      "normalSections": [
+        "5"
+      ]
+    },
+    "type": [
+      "NonlinearShuntCompensatorPhase"
+    ]
+  }
+}

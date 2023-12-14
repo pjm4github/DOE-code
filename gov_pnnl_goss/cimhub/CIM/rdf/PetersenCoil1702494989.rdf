@@ -1,0 +1,13 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM#> .
+
+cim:PetersenCoil rdf:type cim:VoltageControlZone ;
+    cim:Equipment.EquipmentContainer "PetersenCoil1" ;
+    cim:IdentifiedObject.name "PetersenCoil1" ;
+    cim:VoltageControlZone.nominalU 20000.0 ;
+    cim:VoltageControlZone.X0 0.5 ;
+    cim:VoltageControlZone.R 2.0 ;
+    cim:VoltageControlZone.ratedU 20000.0 ;
+    cim:VoltageControlZone.b0ch 1.0 ;
+    cim:VoltageControlZone.G0ch 0.1 ;
+    cim:VoltageControlZone.VoltageControlZoneType "PetersenCoil" . 

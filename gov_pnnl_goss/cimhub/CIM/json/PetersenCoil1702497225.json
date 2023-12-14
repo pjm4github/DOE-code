@@ -1,0 +1,31 @@
+{
+  "PetersenCoil": {
+    "type": [
+      "ConductingEquipment"
+    ],
+    "ConductingEquipment": {
+      "BaseVoltage": [
+        "BaseVoltage0"
+      ],
+      "PowerSystemResource": [
+        "Substation1"
+      ]
+    },
+    "IdentifiedObject": {
+      "name": [
+        "Petersen Coil 1"
+      ],
+      "mRID": [
+        "PetersenCoil1"
+      ]
+    },
+    "Equipment": {
+      "normallyInService": [
+        "true"
+      ],
+      "EquipmentContainer": [
+        "VoltageLevel1"
+      ]
+    }
+  }
+}

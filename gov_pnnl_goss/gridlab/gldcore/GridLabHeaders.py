@@ -1,0 +1,1 @@
+# Common variables collected from gridlab*.h files.

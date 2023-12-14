@@ -1,0 +1,11 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+cim:LoadBreakSwitch rdf:type rdfs:Class ;
+    rdfs:subClassOf cim:Switch .
+
+cim:LoadBreakSwitch1 rdf:type cim:LoadBreakSwitch ;
+    cim:IdentifiedObject.mRID "LoadBreakSwitch1" .
+
+cim:LoadBreakSwitch1 cim:Equipment.EquipmentContainer cim:Substation1 .

@@ -1,0 +1,13 @@
+@startjson
+{
+  "RatioTapChangerTablePoint": {
+    "type": "TapChangerTablePoint",
+    "TapChangerTablePoint": {
+      "stepPhaseShift:": "30",
+      "xPlacement:": "2.5",
+      "angleU:": "0.5",
+      "stepVoltage:": "1.05"
+    }
+  }
+}
+@endjson

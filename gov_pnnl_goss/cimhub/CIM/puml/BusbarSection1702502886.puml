@@ -1,0 +1,13 @@
+@startjson
+{
+  "BusbarSection": {
+    "ConductingEquipment": {
+      "BaseVoltage": "132000"
+    },
+    "Equipment": {
+      "EquipmentContainer": "SomeContainerID"
+    },
+    "type": "ConductingEquipment"
+  }
+}
+@endjson

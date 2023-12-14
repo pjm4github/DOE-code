@@ -1,0 +1,24 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:GroundDisconnector rdf:type cim:Disconnector ;
+    cim:Disconnector.normalOpen true ;
+    cim:ConductingEquipment.BaseVoltage "11000" ;
+    cim:Equipment.EquipmentContainer "Substation1" .
+
+cim:Disconnector.normalOpen a rdf:Property ;
+    rdfs:label "normalOpen" ;
+    rdfs:domain cim:Disconnector ;
+    rdfs:range xsd:boolean .
+
+cim:ConductingEquipment.BaseVoltage a rdf:Property ;
+    rdfs:label "BaseVoltage" ;
+    rdfs:domain cim:ConductingEquipment ;
+    rdfs:range xsd:string .
+
+cim:Equipment.EquipmentContainer a rdf:Property ;
+    rdfs:label "EquipmentContainer" ;
+    rdfs:domain cim:Equipment ;
+    rdfs:range xsd:string .

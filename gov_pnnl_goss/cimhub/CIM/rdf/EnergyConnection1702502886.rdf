@@ -1,0 +1,11 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-cim16#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+cim:EnergyConnection rdf:type cim:ConductingEquipment ;
+    cim:Equipment.EquipmentContainer cim:Substation_1 ;
+    cim:ConductingEquipment.BaseVoltage cim:BaseVoltage_1 ;
+    cim:IdentifiedObject.name "EnergyConnection1" ;
+    cim:ConductingEquipment.phases "ABC" ;
+    cim:EnergyConnection.isEnergyConsumer "true" ;
+    cim:EnergyConnection.isEnergySource "false" .

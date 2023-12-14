@@ -1,0 +1,41 @@
+{
+  "PhaseTapChangerControl_CtmuMinV": {
+    "type": "Float",
+    "Float": {
+      "value": "90.0"
+    }
+  },
+  "PhaseTapChanger_TransformerEnd": {
+    "type": "TransformerEndInfo",
+    "TransformerEndInfo": {
+      "TransformerEndVoltage": "TransformerEndInfo_TransformerEndVoltage"
+    }
+  },
+  "PhaseTapChangerControl_CtmuMaxV": {
+    "type": "Float",
+    "Float": {
+      "value": "100.0"
+    }
+  },
+  "TransformerEndInfo_TransformerEndVoltage": {
+    "type": "PerCent",
+    "PerCent": {
+      "value": "105.0"
+    }
+  },
+  "PhaseTapChanger": {
+    "PhaseTapChanger": {
+      "Ctmu": "PhaseTapChanger_Ctmu",
+      "TransformerEnd": "PhaseTapChanger_TransformerEnd"
+    },
+    "subClassOf": "TapChanger",
+    "type": "TapChanger"
+  },
+  "PhaseTapChanger_Ctmu": {
+    "PhaseTapChangerControl": {
+      "CtmuMinV": "PhaseTapChangerControl_CtmuMinV",
+      "CtmuMaxV": "PhaseTapChangerControl_CtmuMaxV"
+    },
+    "type": "PhaseTapChangerControl"
+  }
+}

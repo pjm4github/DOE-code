@@ -1,0 +1,17 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:LoadBreakSwitch rdf:type rdfs:Class ;
+  rdfs:subClassOf cim:Switch ;
+
+cim:LoadBreakSwitch rdf:type cim:Equipment ;
+  cim:IdentifiedObject.name "LoadBreakSwitch1"^^xsd:string ;
+  cim:IdentifiedObject.mRID "123456"^^xsd:ID ;
+  cim:IdentifiedObject.description "Example Load Break Switch"^^xsd:string ;
+  cim:Equipment.aggregate false^^xsd:boolean ;
+  cim:Equipment.normallyInService true^^xsd:boolean ;
+  cim:ConductingEquipment.BaseVoltage "11000"^^xsd:float ;
+  cim:Switch.normalOpen false^^xsd:boolean ;
+  cim:Switch.retained true^^xsd:boolean .

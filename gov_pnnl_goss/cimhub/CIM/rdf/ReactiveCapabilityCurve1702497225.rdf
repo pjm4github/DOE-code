@@ -1,0 +1,11 @@
+@prefix rcc: <http://iec.ch/TC57/2013/CIM-schema-cim16#ReactiveCapabilityCurve> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+
+rcc:ReactiveCapabilityCurve rdf:type cim:Curve .
+rcc:ReactiveCapabilityCurve cim:Curve.curveStyle "constantYValue"^^xsd:string .
+rcc:ReactiveCapabilityCurve cim:Curve.xvalue "0"^^xsd:float .
+rcc:ReactiveCapabilityCurve cim:Curve.y1value "0"^^xsd:float .
+rcc:ReactiveCapabilityCurve cim:Curve.xUnit "MVAr"^^xsd:string .
+rcc:ReactiveCapabilityCurve cim:Curve.y1Unit "MVAr"^^xsd:string .

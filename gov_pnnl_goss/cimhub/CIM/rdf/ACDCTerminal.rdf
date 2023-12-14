@@ -1,0 +1,20 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix cim: <http://iec.ch/TC57/CIM#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+
+# Define an ACDCTerminal instance
+cim:ACDCTerminal_001 a cim:ACDCTerminal.
+
+# Define attributes of the ACDCTerminal
+cim:ACDCTerminal_001 cim:IdentifiedObject.name "Terminal001".
+cim:ACDCTerminal_001 cim:Terminal.sequenceNumber "1"^^xsd:int.
+
+# Define the connectivity node to which the terminal is connected
+cim:ConnectivityNode_001 a cim:ConnectivityNode.
+cim:ConnectivityNode_001 cim:IdentifiedObject.name "Node001".
+
+# Connect the ACDCTerminal to the ConnectivityNode
+cim:ACDCTerminal_001 cim:Terminal.ConnectivityNode cim:ConnectivityNode_001.
+
+# Additional properties and relationships can be represented as needed.

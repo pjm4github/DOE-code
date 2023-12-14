@@ -1,0 +1,10 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:Fuse rdf:type cim:ConductingEquipment ;
+    cim:Equipment.EquipmentContainer "ExampleSubstation"^^xsd:string ;
+    cim:IdentifiedObject.mRID "123456789"^^xsd:string ;
+    cim:IdentifiedObject.name "ExampleFuse"^^xsd:string ;
+    cim:ConductingEquipment.BaseVoltage "12000"^^xsd:decimal .

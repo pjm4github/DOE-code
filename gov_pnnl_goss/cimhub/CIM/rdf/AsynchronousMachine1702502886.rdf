@@ -1,0 +1,14 @@
+@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-cim16#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+cim:AsynchronousMachine rdf:type cim:GeneratingUnit .
+cim:AsynchronousMachine rdf:type cim:RotatingMachine .
+cim:AsynchronousMachine rdf:type cim:RegulatingCondEq .
+cim:AsynchronousMachine cim:Equipment.Location "Substation1" .
+
+cim:AsynchronousMachine cim:IdentifiedObject.mRID "123456" .
+cim:AsynchronousMachine cim:IdentifiedObject.name "ASyncMachine1" .
+cim:AsynchronousMachine cim:AsynchronousMachine.ratedMechanicalPower "1000" .
+cim:AsynchronousMachine cim:AsynchronousMachine.ratedElectricalPower "950" .
+cim:AsynchronousMachine cim:AsynchronousMachine.ratedVoltage "13800" .

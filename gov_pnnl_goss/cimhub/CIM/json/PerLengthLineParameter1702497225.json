@@ -1,0 +1,51 @@
+{
+  "PerLengthLineParameter_12345": {
+    "IdentifiedObject": {
+      "name": [
+        "examplePerLengthLineParameter"
+      ],
+      "mRID": [
+        "12345"
+      ]
+    },
+    "LineParameters": {
+      "r": [
+        "0.1"
+      ],
+      "b0ch": [
+        "0.001"
+      ],
+      "gch": [
+        "0.01"
+      ],
+      "bch": [
+        "0.01"
+      ],
+      "x0": [
+        "0.2"
+      ],
+      "g0ch": [
+        "0.001"
+      ],
+      "x": [
+        "0.2"
+      ]
+    },
+    "Sectionaliser": {
+      "nominalLength": [
+        "50"
+      ]
+    },
+    "PowerSystemResource": {
+      "nominalVoltage": [
+        "110000"
+      ]
+    },
+    "Conductance": [
+      "0.01"
+    ],
+    "type": [
+      "PerLengthLineParameter"
+    ]
+  }
+}

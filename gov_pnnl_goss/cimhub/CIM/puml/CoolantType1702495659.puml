@@ -1,0 +1,32 @@
+@startjson
+{
+  "CoolantType": {
+    "comment": 
+      "Specifies the type of coolant used in the cooling system"
+    ,
+    "type": 
+      "Class"
+    ,
+    "subClassOf": 
+      "TypeAsset"
+    ,
+    "label": 
+      "CoolantType"
+    
+  },
+  "Oil": {
+    "subClassOf": 
+      "CoolantType"
+    ,
+    "label": 
+      "Oil"
+    ,
+    "comment": 
+      "Type of oil used as coolant"
+    ,
+    "type": 
+      "Class"
+    
+  }
+}
+@endjson

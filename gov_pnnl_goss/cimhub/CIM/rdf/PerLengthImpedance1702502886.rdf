@@ -1,0 +1,12 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/2012/CIM-schema-cim16#> .
+
+cim:PerLengthImpedance rdf:type cim:ConductingEquipment ;
+    cim:IdentifiedObject.name "ExamplePerLengthImpedance" ;
+    cim:PowerSystemResource.AssetDatasheet "ExampleDatasheet123" ;
+    cim:ConductingEquipment.BaseVoltage "123" ;
+    cim:ConductingEquipment.aggregate "true" ;
+    cim:ConductingEquipment.normallyInService "true" ;
+    cim:ConductingEquipment.phases "AB" ;
+    cim:PerLengthImpedance.conductorCount "3" ;
+    cim:ConductingEquipment.MemberOf_EquipmentContainer "ExampleSubstation" .

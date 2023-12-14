@@ -1,0 +1,10 @@
+@prefix cim: <http://iec.ch/TC57/2012/CIM-schema-cim16#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:Disconnector rdf:type cim:Switch .
+cim:Disconnector rdf:type cim:ProtectedSwitch .
+cim:Disconnector cim:IdentifiedObject.name "ExampleDisconnector"^^xsd:string .
+cim:Disconnector cim:Equipment.EquipmentContainer "ExampleSubstation"^^xsd:string .
+# Add more properties as needed

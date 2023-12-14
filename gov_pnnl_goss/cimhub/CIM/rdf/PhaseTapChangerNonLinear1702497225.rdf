@@ -1,0 +1,17 @@
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:PhaseTapChangerNonLinear rdf:type cim:TapChanger ;
+    cim:TapChanger.nominalOpenStep 16 ;
+    cim:TapChanger.stepVoltageIncrement 2.0 ;
+    cim:TapChanger.TapBase.nominalU 110.0 .
+
+cim:TapChanger rdf:type cim:TapChangerInfo ;
+    cim:TapChangerInfo.operationalLimitSet cim:OperationalLimitSet2 .
+
+cim:OperationalLimitSet2 rdf:type cim:OperationalLimitSet ;
+    cim:OperationalLimitSet.maximumStep 20 ;
+    cim:OperationalLimitSet.minimumStep -20 ;
+    cim:OperationalLimitSet.normalStep 0 .

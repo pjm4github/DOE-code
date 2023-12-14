@@ -1,0 +1,6 @@
+@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-cim16#> .
+
+cim:SynchronousMachine rdf:type cim:SynchronousMachineKind ;
+    cim:RatedS cim:100 ;
+    cim:InitialReactiveCapabilityCurve cim:ReactiveCapabilityCurve_12345 ;
+    cim:OperationalMode "generator" .

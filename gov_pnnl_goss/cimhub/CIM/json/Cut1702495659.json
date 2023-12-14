@@ -1,0 +1,53 @@
+{
+  "Cut1": {
+    "ratedVoltage": [
+      "110"
+    ],
+    "type": [
+      "Cut"
+    ],
+    "ratedCurrent": [
+      "100"
+    ],
+    "ID": [
+      "Cut1"
+    ]
+  },
+  "Substation1": {
+    "contains": [
+      "Cut2",
+      "Cut1"
+    ],
+    "ID": [
+      "Substation1"
+    ],
+    "type": [
+      "Substation"
+    ]
+  },
+  "Line1": {
+    "type": [
+      "Line"
+    ],
+    "ID": [
+      "Line1"
+    ],
+    "hasCut": [
+      "Cut1"
+    ]
+  },
+  "Cut2": {
+    "ratedCurrent": [
+      "200"
+    ],
+    "ratedVoltage": [
+      "220"
+    ],
+    "ID": [
+      "Cut2"
+    ],
+    "type": [
+      "Cut"
+    ]
+  }
+}

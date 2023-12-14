@@ -1,0 +1,47 @@
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+
+cim:Jumper rdf:type cim:ConductingEquipment ;
+  cim:Equipment.EquipmentContainer cim:VoltageLevel_1 ;
+  cim:IdentifiedObject.mRID "Jumper1" ;
+  cim:IdentifiedObject.name "Jumper 1" ;
+  cim:ConductingEquipment.BaseVoltage cim:BaseVoltage_1 ;
+  cim:ConductingEquipment.Terminal cim:Terminal_1, cim:Terminal_2 .
+
+cim:VoltageLevel_1 rdf:type cim:VoltageLevel ;
+  cim:IdentifiedObject.mRID "VoltageLevel1" ;
+  cim:VoltageLevel.Substation cim:Substation_1 .
+
+cim:BaseVoltage_1 rdf:type cim:BaseVoltage ;
+  cim:IdentifiedObject.mRID "BaseVoltage1" ;
+  cim:BaseVoltage.nominalVoltage "110" .
+
+cim:Terminal_1 rdf:type cim:Terminal ;
+  cim:IdentifiedObject.mRID "Terminal1" ;
+  cim:Terminal.ConductingEquipment cim:Jumper ;
+  cim:Terminal.ConnectivityNode cim:ConnectivityNode_1 .
+
+cim:Terminal_2 rdf:type cim:Terminal ;
+  cim:IdentifiedObject.mRID "Terminal2" ;
+  cim:Terminal.ConductingEquipment cim:Jumper ;
+  cim:Terminal.ConnectivityNode cim:ConnectivityNode_2 .
+
+cim:Substation_1 rdf:type cim:Substation ;
+  cim:IdentifiedObject.mRID "Substation1" ;
+  cim:Substation.Region cim:Region_1 .
+
+cim:ConnectivityNode_1 rdf:type cim:ConnectivityNode ;
+  cim:IdentifiedObject.mRID "ConnNode1" .
+
+cim:ConnectivityNode_2 rdf:type cim:ConnectivityNode ;
+  cim:IdentifiedObject.mRID "ConnNode2" .
+
+cim:Region_1 rdf:type cim:SubGeographicalRegion ;
+  cim:IdentifiedObject.mRID "Region1" ;
+  cim:SubGeographicalRegion.Region cim:GeographicalRegion_1 .
+
+cim:GeographicalRegion_1 rdf:type cim:GeographicalRegion ;
+  cim:IdentifiedObject.mRID "GeoRegion1" ;
+  cim:GeographicalRegion.Region cim:TopologicalNode_1 .
+
+cim:TopologicalNode_1 rdf:type cim:TopologicalNode ;
+  cim:IdentifiedObject.mRID "TopoNode1" .

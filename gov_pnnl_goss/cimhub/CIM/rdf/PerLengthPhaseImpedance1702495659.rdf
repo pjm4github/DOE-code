@@ -1,0 +1,14 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM#> .
+
+cim:PerLengthPhaseImpedance rdf:type cim:PerLengthImpedance .
+cim:PerLengthPhaseImpedance rdf:type cim:PhaseImpedance .
+cim:PerLengthPhaseImpedance rdf:type cim:ConductancePerLength .
+
+cim:PerLengthPhaseImpedance cim:length "1.0"^^xsd:double .
+cim:PerLengthPhaseImpedance cim:r "0.01"^^xsd:double .
+cim:PerLengthPhaseImpedance cim:x "0.05"^^xsd:double .
+cim:PerLengthPhaseImpedance cim:perLengthPhase:"A" "0.02"^^xsd:double .
+cim:PerLengthPhaseImpedance cim:perLengthPhase:"B" "0.03"^^xsd:double .
+cim:PerLengthPhaseImpedance cim:perLengthPhase:"C" "0.04"^^xsd:double .

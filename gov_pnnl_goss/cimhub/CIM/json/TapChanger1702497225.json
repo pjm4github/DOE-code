@@ -1,0 +1,61 @@
+{
+  "ExampleTapChangerTableID": {
+    "TapChangerTable": {
+      "initialDelay": [
+        "5.0"
+      ],
+      "highStep": [
+        "10"
+      ],
+      "subsequentDelay": [
+        "2.0"
+      ],
+      "stepVoltageIncrement": [
+        "1.0"
+      ],
+      "stepPhaseIncrement": [
+        "1.0"
+      ]
+    },
+    "IdentifiedObject": {
+      "name": [
+        "ExampleTapChangerTable"
+      ],
+      "mRID": [
+        "ExampleTapChangerTableID"
+      ]
+    },
+    "type": [
+      "TapChangerTable"
+    ]
+  },
+  "TapChanger": {
+    "TapChanger": {
+      "stepVoltageIncrement": [
+        "1.0"
+      ],
+      "tculControlYVc": [
+        "ExampleControlMode"
+      ],
+      "tcTapChgTable": [
+        "ExampleTapChangerTableID"
+      ]
+    },
+    "type": [
+      "TapChanger"
+    ],
+    "Equipment": {
+      "EquipmentContainer": [
+        "ExampleContainer"
+      ]
+    },
+    "IdentifiedObject": {
+      "mRID": [
+        "ExampleTapChangerID"
+      ],
+      "name": [
+        "ExampleTapChanger"
+      ]
+    }
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "GroundedDeltaConnection": {
+    "type": [
+      "Class"
+    ],
+    "label": [
+      "Grounded Delta Connection"
+    ],
+    "comment": [
+      "A grounded delta connection"
+    ]
+  },
+  "GroundedWyeConnection": {
+    "type": [
+      "Class"
+    ],
+    "comment": [
+      "A grounded wye connection"
+    ],
+    "label": [
+      "Grounded Wye Connection"
+    ]
+  },
+  "Ground": {
+    "label": [
+      "Ground"
+    ],
+    "type": [
+      "Class"
+    ],
+    "comment": [
+      "A conducting connection, whether intentional or accidental, by which an electric circuit or equipment is connected to the earth, or to some conducting body of relatively large extent that serves in place of the earth"
+    ]
+  },
+  "GroundingConnection": {
+    "comment": [
+      "A connection to ground used to protect from transient overvoltages and to provide a path for fault current. The connection may be to earth or to some conducting body of large extent that serves in place of the earth, especially for audio frequencies"
+    ],
+    "label": [
+      "Grounding Connection"
+    ],
+    "type": [
+      "Class"
+    ]
+  },
+  "GroundedEnd": {
+    "comment": [
+      "One or other of the two end terminals of a grounded shunt reactor or other device, such as lightning arrester or surge arrester"
+    ],
+    "label": [
+      "Grounded End"
+    ],
+    "type": [
+      "Class"
+    ]
+  },
+  "GroundingInductance": {
+    "comment": [
+      "Inductance of grounding (earthing) impedance or admittance"
+    ],
+    "label": [
+      "Grounding Inductance"
+    ],
+    "type": [
+      "Class"
+    ]
+  }
+}

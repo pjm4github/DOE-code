@@ -1,0 +1,18 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:PhaseTapChangerLinear1 a cim:PhaseTapChangerLinear ;
+    cim:IdentifiedObject.mRID "PhaseTapChangerLinear1"^^xsd:ID ;
+    cim:IdentifiedObject.name "ExamplePhaseTapChangerLinear"^^xsd:string ;
+    cim:PowerSystemResource.Location cim:Location1 ;
+    cim:TapChanger.TransformerWinding cim:TransformerWinding1 .
+
+cim:Location1 a cim:Location ;
+    cim:IdentifiedObject.mRID "Location1"^^xsd:ID ;
+    cim:IdentifiedObject.name "ExampleLocation"^^xsd:string .
+
+cim:TransformerWinding1 a cim:TransformerWinding ;
+    cim:IdentifiedObject.mRID "TransformerWinding1"^^xsd:ID ;
+    cim:IdentifiedObject.name "ExampleTransformerWinding"^^xsd:string .

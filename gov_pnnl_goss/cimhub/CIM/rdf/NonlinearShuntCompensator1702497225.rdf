@@ -1,0 +1,17 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+
+cim:NonlinearShuntCompensator rdf:type cim:ShuntCompensator ;
+    cim:Equipment.EquipmentContainer "container1" ;
+    cim:Equipment.memberOf_EquipmentContainer "subcontainer1" ;
+    cim:IdentifiedObject.mRID "NSC1" ;
+    cim:IdentifiedObject.name "NonlinearShuntCompensator1" ;
+    cim:ShuntCompensator.bPerSection 0.0032 ;
+    cim:ShuntCompensator.gPerSection 0.0 ;
+    cim:ShuntCompensator.nomU 110.0 ;
+    cim:ShuntCompensator.normalSections 10 ;
+    cim:ShuntCompensator.maximumSections 15 ;
+    cim:NonlinearShuntCompensator.aVRDelay 1.5 ;
+    cim:NonlinearShuntCompensator.aVRDelayCharacteristic "reactivePower" ;
+    cim:NonlinearShuntCompensator.p "0.0VAr" .

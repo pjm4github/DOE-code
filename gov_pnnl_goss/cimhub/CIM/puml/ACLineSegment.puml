@@ -1,0 +1,62 @@
+@startjson
+{
+  "ACLineSegment_1": {
+    "IdentifiedObject": {
+      "name":
+        "Line 2"
+      ,
+      "mRID":
+        "f7bbd047-a7d2-47f9-8154-8c398ffc6733"
+
+    },
+    "ACLineSegment": {
+      "bch":
+        "24.967936"
+      ,
+      "bch0":
+        "0.0"
+      ,
+      "length":
+        "20.0"
+      ,
+      "baseVoltage":
+        "BaseVoltage_1"
+      ,
+      "gch0":
+        "0.0"
+      ,
+      "b0ch":
+        "0.03201"
+      ,
+      "gch":
+        "0.0"
+      ,
+      "x":
+        "0.44081"
+      ,
+      "g0ch":
+        "0.0"
+      ,
+      "r":
+        "0.077722"
+
+    },
+    "Equipment": {
+      "EquipmentContainer":
+        "Substation_1"
+
+    },
+    "Conductor": {
+      "material":
+        "copper"
+      ,
+      "length":
+        "20.0"
+
+    },
+    "type":
+      "ACLineSegment"
+
+  }
+}
+@endjson

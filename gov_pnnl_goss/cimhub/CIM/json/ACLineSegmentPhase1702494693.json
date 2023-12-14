@@ -1,0 +1,32 @@
+{
+  "ACLineSegment_1": {
+    "type": [
+      "ACLineSegment"
+    ],
+    "Name": [
+      "1"
+    ]
+  },
+  "SinglePhaseKind": {
+    "type": [
+      "PhaseCode"
+    ]
+  },
+  "ACLineSegmentPhase": {
+    "BaseVoltage": [
+      "138000.0"
+    ],
+    "type": [
+      "ConductingEquipment"
+    ],
+    "Phase": [
+      "SinglePhaseKind"
+    ],
+    "Length": [
+      "10.0"
+    ],
+    "ACLineSegment": [
+      "ACLineSegment_1"
+    ]
+  }
+}

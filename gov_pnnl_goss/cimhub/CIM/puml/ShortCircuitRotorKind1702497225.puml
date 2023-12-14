@@ -1,0 +1,38 @@
+@startjson
+{
+  "ShortCircuitRotorKind1": {
+    "ShortCircuitLosses": 
+      "1500.0"
+    ,
+    "ShortCircuitType": 
+      "Damping"
+    ,
+    "RotorLoopType": 
+      "DoubleCage"
+    ,
+    "ShortCircuitReactance": 
+      "0.1"
+    ,
+    "type": 
+      "ShortCircuitRotorKind"
+    
+  },
+  "ShortCircuitRotorKind2": {
+    "ShortCircuitType": 
+      "DeadLine"
+    ,
+    "RotorLoopType": 
+      "SingleCage"
+    ,
+    "ShortCircuitReactance": 
+      "0.05"
+    ,
+    "type": 
+      "ShortCircuitRotorKind"
+    ,
+    "ShortCircuitLosses": 
+      "1000.0"
+    
+  }
+}
+@endjson

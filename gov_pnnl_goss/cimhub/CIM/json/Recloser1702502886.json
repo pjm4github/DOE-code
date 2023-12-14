@@ -1,0 +1,22 @@
+{
+  "Recloser": {
+    "Equipment": {
+      "aggregate": "false",
+      "normallyInService": "true"
+    },
+    "IdentifiedObject": {
+      "mRID": "recloser1",
+      "name": "Recloser 1"
+    },
+    "PowerSystemResource": {
+      "Asset": "asset1",
+      "Location": "location1"
+    },
+    "type": "ACLineSegment",
+    "Recloser": {
+      "phaseTripMultiplier": "3",
+      "groundTripMultiplier": "4",
+      "normalOpen": "false"
+    }
+  }
+}

@@ -1,0 +1,47 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:ProtectedSwitch rdf:type rdfs:Class ;
+    rdfs:subClassOf cim:Switch ;
+
+    cim:ProtectedSwitch.normalOpen "0"^^xsd:boolean ;
+    cim:ProtectedSwitch.retained "0"^^xsd:boolean ;
+    cim:ProtectedSwitch.switchOnCount 0 .
+
+cim:ProtectedSwitch.open cim:ProtectedSwitch .
+
+cim:ProtectedSwitch.openNormalOpen0 rdf:type rdfs:Class ;
+    rdfs:subClassOf cim:SwitchAction ;
+    cim:SwitchAction.Switch cim:ProtectedSwitch.open ;
+    cim:SwitchAction.normalOpen "0"^^xsd:boolean .
+
+cim:ProtectedSwitch.openRetained0 rdf:type rdfs:Class ;
+    rdfs:subClassOf cim:SwitchAction ;
+    cim:SwitchAction.Switch cim:ProtectedSwitch.open ;
+    cim:SwitchAction.retained "0"^^xsd:boolean .
+
+cim:ProtectedSwitch.closed cim:ProtectedSwitch .
+
+cim:ProtectedSwitch.closedNormalOpen1 rdf:type rdfs:Class ;
+    rdfs:subClassOf cim:SwitchAction ;
+    cim:SwitchAction.Switch cim:ProtectedSwitch.closed ;
+    cim:SwitchAction.normalOpen "1"^^xsd:boolean .
+
+cim:ProtectedSwitch.closedRetained0 rdf:type rdfs:Class ;
+    rdfs:subClassOf cim:SwitchAction ;
+    cim:SwitchAction.Switch cim:ProtectedSwitch.closed ;
+    cim:SwitchAction.retained "0"^^xsd:boolean .
+
+cim:ProtectedSwitch.open1 cim:ProtectedSwitch .
+
+cim:ProtectedSwitch.openNormalOpen1 rdf:type rdfs:Class ;
+    rdfs:subClassOf cim:SwitchAction ;
+    cim:SwitchAction.Switch cim:ProtectedSwitch.open1 ;
+    cim:SwitchAction.normalOpen "1"^^xsd:boolean .
+
+cim:ProtectedSwitch.openRetained0 rdf:type rdfs:Class ;
+    rdfs:subClassOf cim:SwitchAction ;
+    cim:SwitchAction.Switch cim:ProtectedSwitch.open1 ;
+    cim:SwitchAction.retained "0"^^xsd:boolean .

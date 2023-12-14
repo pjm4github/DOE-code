@@ -1,0 +1,7 @@
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+cim:PetersenCoilModeKind a rdfs:Class ;
+    rdfs:label "PetersenCoilModeKind"@en ;
+    rdfs:comment "The operational mode of a Petersen coil used to compensate capacitive currents in an unearthed network, i.e. the method in which the coil is connected and operates."@en .

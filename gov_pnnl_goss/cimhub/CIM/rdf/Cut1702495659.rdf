@@ -1,0 +1,21 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM#> .
+
+cim:Cut1 rdf:type cim:Cut ;
+    cim:ID "Cut1" ;
+    cim:ratedCurrent "100" ;
+    cim:ratedVoltage "110" .
+
+cim:Cut2 rdf:type cim:Cut ;
+    cim:ID "Cut2" ;
+    cim:ratedCurrent "200" ;
+    cim:ratedVoltage "220" .
+
+cim:Substation1 rdf:type cim:Substation ;
+    cim:contains cim:Cut1, cim:Cut2 ;
+    cim:ID "Substation1" .
+
+cim:Line1 rdf:type cim:Line ;
+    cim:hasCut cim:Cut1 ;
+    cim:ID "Line1" .

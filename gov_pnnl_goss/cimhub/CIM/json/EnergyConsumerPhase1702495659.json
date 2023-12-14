@@ -1,0 +1,13 @@
+{
+  "EnergyConsumerPhase": {
+    "type": [
+      "Class"
+    ],
+    "label": [
+      "EnergyConsumerPhase"
+    ],
+    "subClassOf": [
+      "EnergyConsumer"
+    ]
+  }
+}

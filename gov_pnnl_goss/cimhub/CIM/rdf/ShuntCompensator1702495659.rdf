@@ -1,0 +1,18 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix r: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+cim:ShuntCompensator rdf:type cim:RegulatingCondEq ;
+    cim:Equipment.Equipment container "container_id" ;
+    cim:Equipment.aggregate "aggregate_id" ;
+    cim:IdentifiedObject.mRID "shuntcompensator1" ;
+    cim:IdentifiedObject.name "ShuntCompensator1" ;
+    cim:RegulatingCondEq.phaseCode "ABC" ;
+    cim:ShuntCompensator.aVRDelay "0.15"^^xsd:float ;
+    cim:ShuntCompensator.aVRVoltage "0.98"^^xsd:float ;
+    cim:ShuntCompensator.maximumSectionalizingCount 3 ;
+    cim:ShuntCompensator.normalSections 5 ;
+    cim:ShuntCompensator.switchOnCount "4"^^xsd:int ;
+    cim:ShuntCompensator.voltageSensitivity "1.5"^^xsd:float .

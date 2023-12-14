@@ -1,0 +1,21 @@
+{
+  "ShuntCompensatorPhase": {
+    "ShuntCompensatorPhase": {
+      "phaseCode": "SinglePhaseCode_A",
+      "aVRDelay": "AVRDelay1"
+    },
+    "ConductingEquipment": {
+      "BaseVoltage": "BaseVoltage_1"
+    },
+    "Equipment": {
+      "EquipmentContainer": "Substation_1"
+    },
+    "ShuntCompensator": {
+      "bPerSection": "0.1"
+    },
+    "IdentifiedObject": {
+      "name": "ShuntCompensatorPhase1"
+    },
+    "type": "ShuntCompensatorPhase"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "FrequencyConverter": {
+    "ConductingEquipment": {
+      "BaseVoltage": [
+        "BaseVoltage_1"
+      ]
+    },
+    "PowerSystemResource": {
+      "Location": [
+        "Location_1"
+      ]
+    },
+    "IdentifiedObject": {
+      "name": [
+        "Converter 1"
+      ],
+      "mRID": [
+        "FC1"
+      ]
+    },
+    "Equipment": {
+      "EquipmentContainer": [
+        "Substation_1"
+      ]
+    },
+    "type": [
+      "FrequencyConverter"
+    ],
+    "FrequencyConverter": {
+      "maximunModulationIndex": [
+        "0.9"
+      ],
+      "convertedVoltage": [
+        "BaseVoltage_2"
+      ]
+    }
+  }
+}

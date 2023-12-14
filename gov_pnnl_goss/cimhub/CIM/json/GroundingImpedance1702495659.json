@@ -1,0 +1,25 @@
+{
+  "GroundingImpedance": {
+    "type": [
+      "Impedance"
+    ],
+    "BaseVoltage": {
+      "nominalVoltage": [
+        "11kV"
+      ]
+    },
+    "IdentifiedObject": {
+      "mRID": [
+        "GroundingImpedance1"
+      ]
+    },
+    "Impedance": {
+      "r": [
+        "0.4"
+      ],
+      "x": [
+        "0.2"
+      ]
+    }
+  }
+}

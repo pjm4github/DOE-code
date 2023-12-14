@@ -1,0 +1,13 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:PowerElectronicsConnection rdf:type rdfs:Class ;
+    rdfs:subClassOf cim:ConductingEquipment .
+
+cim:PowerElectronicsConnection_CutInTime rdf:type rdfs:Datatype ;
+    rdfs:subClassOf xsd:dateTime .
+
+cim:PowerElectronicsConnection_CutOutTime rdf:type rdfs:Datatype ;
+    rdfs:subClassOf xsd:dateTime . 

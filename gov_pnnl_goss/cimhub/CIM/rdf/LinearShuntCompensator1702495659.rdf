@@ -1,0 +1,15 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:LinearShuntCompensator rdf:type cim:LinearShuntCompensator ;
+    cim:IdentifiedObject.mRID "LinearShuntCompensator1"^^xsd:string ;
+    cim:IdentifiedObject.name "ShuntCompensator1"^^xsd:string ;
+    cim:ShuntCompensator.bPerSection 0.05^^xsd:float ;
+    cim:ShuntCompensator.gPerSection 0.0^^xsd:float ;
+    cim:ShuntCompensator.maximumSections 10^^xsd:integer ;
+    cim:ShuntCompensator.nomU 10000.0^^xsd:float ;
+    cim:ShuntCompensator.normalSections 5^^xsd:integer ;
+    cim:ShuntCompensator.stepVoltage "100.0"^^xsd:float ;
+    cim:ShuntCompensator.aVRDelay "0"^^xsd:float .

@@ -1,0 +1,37 @@
+{
+  "Connector": {
+    "type": [
+      "ConductingEquipment"
+    ],
+    "IdentifiedObject": {
+      "name": [
+        "Connector1"
+      ]
+    },
+    "Equipment": {
+      "EquipmentContainer": [
+        "Substation1"
+      ]
+    },
+    "ConductingEquipment": {
+      "BaseVoltage": [
+        "BaseVoltage1"
+      ]
+    }
+  },
+  "BaseVoltage1": {
+    "IdentifiedObject": {
+      "name": [
+        "LowVoltage"
+      ]
+    },
+    "BaseVoltage": {
+      "nominalVoltage": [
+        "400.0"
+      ]
+    },
+    "type": [
+      "BaseVoltage"
+    ]
+  }
+}

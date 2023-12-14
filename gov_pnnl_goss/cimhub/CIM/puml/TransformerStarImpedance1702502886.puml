@@ -1,0 +1,23 @@
+@startjson
+{
+  "TransformerStarImpedance": {
+    "TransformerStarImpedance": {
+      "x1": "0.1",
+      "r1": "0.03"
+    },
+    "TransformerTankInfo": {
+      "oilQuantity": "5000"
+    },
+    "PowerTransformer": {
+      "vectorGroup": "Dyn11"
+    },
+    "PowerSystemResource": {
+      "nominalVoltage": "110000"
+    },
+    "type": "PowerTransformer",
+    "IdentifiedObject": {
+      "name": "TSTransformer1"
+    }
+  }
+}
+@endjson

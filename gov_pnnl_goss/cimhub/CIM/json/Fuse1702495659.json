@@ -1,0 +1,36 @@
+{
+  "Fuse_001": {
+    "Equipment": {
+      "aggregate": [
+        "false"
+      ],
+      "normalInsulation": [
+        "true"
+      ]
+    },
+    "IdentifiedObject": {
+      "mRID": [
+        "85ee5a67-22d3-4d77-b3d6-1ff5f810f0a1"
+      ],
+      "name": [
+        "Fuse1"
+      ]
+    },
+    "ProtectedSwitch": {
+      "normalOpen": [
+        "false"
+      ],
+      "Fuses:fuseLinkCount": [
+        "3"
+      ]
+    },
+    "ConductingEquipment": {
+      "BaseVoltage": [
+        "11000"
+      ]
+    },
+    "type": [
+      "Fuse"
+    ]
+  }
+}

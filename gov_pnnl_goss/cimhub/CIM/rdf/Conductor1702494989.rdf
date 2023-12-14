@@ -1,0 +1,23 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:Conductor rdf:type rdfs:Class ;
+    rdfs:subClassOf cim:Equipment .
+
+cim:Conductor1 rdf:type cim:Conductor ;
+    cim:IdentifiedObject.mRID "exampleConductor1"^^xsd:string ;
+    cim:IdentifiedObject.name "Conductor 1"^^xsd:string ;
+    cim:ConductingEquipment.BaseVoltage "7300"^^xsd:float ;
+    cim:ConductingEquipment.phases "ABC"^^xsd:string ;
+    cim:ConductingEquipment.length "1200"^^xsd:float ;
+    cim:ConductingEquipment.aggregated "false"^^xsd:boolean .
+
+cim:Conductor2 rdf:type cim:Conductor ;
+    cim:IdentifiedObject.mRID "exampleConductor2"^^xsd:string ;
+    cim:IdentifiedObject.name "Conductor 2"^^xsd:string ;
+    cim:ConductingEquipment.BaseVoltage "12000"^^xsd:float ;
+    cim:ConductingEquipment.phases "A"^^xsd:string ;
+    cim:ConductingEquipment.length "800"^^xsd:float ;
+    cim:ConductingEquipment.aggregated "true"^^xsd:boolean .

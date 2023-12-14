@@ -1,0 +1,23 @@
+{
+  "RegulatingCondEq": {
+    "type": [
+      "ConductingEquipment"
+    ],
+    "Equipment": {
+      "EquipmentBases": [
+        "someBaseID"
+      ],
+      "EquipmentPower": [
+        "somePowerID"
+      ],
+      "EquipmentContainer": [
+        "someContainerID"
+      ]
+    }
+  },
+  "ConductingEquipment": {
+    "subClassOf": [
+      "Equipment"
+    ]
+  }
+}

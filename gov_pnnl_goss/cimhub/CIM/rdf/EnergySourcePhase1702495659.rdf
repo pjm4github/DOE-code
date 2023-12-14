@@ -1,0 +1,8 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-cim16#> .
+
+cim:EnergySourcePhase rdf:type cim:EnergySource ;
+    cim:PowerSystemResource.nominalVoltage "11000"^^xsd:float ;
+    cim:ConductingEquipment.phases "A" , "B" , "C" ;
+    cim:HasConductingEquipment cim:Breaker .

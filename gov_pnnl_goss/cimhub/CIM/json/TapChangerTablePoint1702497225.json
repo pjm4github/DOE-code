@@ -1,0 +1,15 @@
+{
+  "TapChangerTablePointPoint_1": {
+    "TapChangerTablePoint": {
+      "ratio": [
+        "1.01"
+      ],
+      "step": [
+        "1"
+      ]
+    },
+    "type": [
+      "TapChangerTablePoint"
+    ]
+  }
+}

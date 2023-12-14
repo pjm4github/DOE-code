@@ -1,0 +1,12 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-cim16#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix base: <http://iec.ch/TC57/CIM/ACLineSegmentPhase#> .
+
+base:ACLineSegmentPhase_1234 a cim:ConductingEquipment ;
+    cim:IdentifiedObject.name "ExamplePhase" ;
+    cim:ACLineSegmentPhase.sequenceNumber "1"^^xsd:integer ;
+    cim:ACLineSegmentPhase.ACLineSegment <http://iec.ch/TC57/CIM/ACLineSegment#ACLineSegment_5678> ;
+    cim:ACLineSegmentPhase.phase "C" ;
+    cim:ConductingEquipment.BaseVoltage <http://iec.ch/TC57/CIM/BaseVoltage#BaseVoltage_7890> .

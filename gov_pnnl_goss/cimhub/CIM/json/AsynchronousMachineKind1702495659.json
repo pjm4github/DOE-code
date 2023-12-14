@@ -1,0 +1,24 @@
+{
+  "AsynchronousMachine": {
+    "subClassOf": [
+      "RotatingMachine"
+    ],
+    "label": [
+      "AsynchronousMachine"
+    ],
+    "type": [
+      "Class"
+    ]
+  },
+  "synchronousMachineKind": {
+    "subClassOf": [
+      "RotatingMachine"
+    ],
+    "type": [
+      "Class"
+    ],
+    "label": [
+      "SynchronousMachine"
+    ]
+  }
+}

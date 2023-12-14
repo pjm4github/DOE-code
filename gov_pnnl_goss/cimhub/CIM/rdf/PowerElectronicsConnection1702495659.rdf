@@ -1,0 +1,11 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+
+cim:PowerElectronicsConnection rdf:type cim:PowerSystemResource ;
+    cim:Equipment.EquipmentContainer "ExampleContainer" ;
+    cim:Equipment.normallyInService "true" ;
+    cim:Equipment.BaseVoltage "11000" ;
+    cim:Equipment.memberOf_EquipmentContainer "ExampleSubstation" ;
+    cim:PowerElectronicsConnection.p "0.9" ;
+    cim:PowerElectronicsConnection.q "0.3" ;
+    cim:ConductingEquipment.phaseCount "3" .

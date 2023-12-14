@@ -1,0 +1,27 @@
+{
+  "NonlinearShuntCompensatorPoint": {
+    "ShuntCompensatorPoint": {
+      "b": [
+        "0.0"
+      ],
+      "sequenceNumber": [
+        "1"
+      ],
+      "g": [
+        "0.0"
+      ],
+      "shuntCompensatorType": [
+        "ShuntCompensatorTypeKind.fixed"
+      ],
+      "y": [
+        "0.0"
+      ],
+      "x": [
+        "0.0"
+      ]
+    },
+    "type": [
+      "NonlinearShuntCompensatorPoint"
+    ]
+  }
+}

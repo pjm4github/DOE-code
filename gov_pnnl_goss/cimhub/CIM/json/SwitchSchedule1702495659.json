@@ -1,0 +1,98 @@
+{
+  "SwitchSchedule.TimePoint.value4": {
+    "subClassOf": [
+      "boolean"
+    ],
+    "type": [
+      "Datatype"
+    ]
+  },
+  "SwitchSchedule.TimePoint.value6": {
+    "subClassOf": [
+      "boolean"
+    ],
+    "type": [
+      "Datatype"
+    ]
+  },
+  "SwitchSchedule.TimePoint.value2": {
+    "subClassOf": [
+      "boolean"
+    ],
+    "type": [
+      "Datatype"
+    ]
+  },
+  "SwitchSchedule.TimePoint.Season": {
+    "subClassOf": [
+      "string"
+    ],
+    "type": [
+      "Datatype"
+    ]
+  },
+  "SwitchSchedule.TimePoint.value5": {
+    "subClassOf": [
+      "boolean"
+    ],
+    "type": [
+      "Datatype"
+    ]
+  },
+  "SwitchSchedule.TimePoint": {
+    "subClassOf": [
+      "RegularIntervalSchedule"
+    ],
+    "type": [
+      "Class"
+    ]
+  },
+  "SwitchSchedule": {
+    "type": [
+      "Class"
+    ],
+    "subClassOf": [
+      "Schedule"
+    ]
+  },
+  "SwitchSchedule.TimePoint.value8": {
+    "subClassOf": [
+      "boolean"
+    ],
+    "type": [
+      "Datatype"
+    ]
+  },
+  "SwitchSchedule.TimePoint.value1": {
+    "subClassOf": [
+      "boolean"
+    ],
+    "type": [
+      "Datatype"
+    ]
+  },
+  "SwitchSchedule.TimePoint.value3": {
+    "subClassOf": [
+      "boolean"
+    ],
+    "type": [
+      "Datatype"
+    ]
+  },
+  "SwitchSchedule.TimePoint.scheduledEventInterval": {
+    "subClassOf": [
+      "duration"
+    ],
+    "type": [
+      "Datatype"
+    ]
+  },
+  "SwitchSchedule.TimePoint.value7": {
+    "type": [
+      "Datatype"
+    ],
+    "subClassOf": [
+      "boolean"
+    ]
+  }
+}

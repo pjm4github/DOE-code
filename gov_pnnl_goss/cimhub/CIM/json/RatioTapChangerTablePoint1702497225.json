@@ -1,0 +1,28 @@
+{
+  "TapChangerTablePoint1": {
+    "TapChangerTablePoint_G": [
+      "TapChangerTablePoint1_G"
+    ],
+    "TapChangerTablePoint_U": [
+      "TapChangerTablePoint1_U"
+    ],
+    "TapChangerTablePoint_B": [
+      "TapChangerTablePoint1_B"
+    ],
+    "TapChangerTablePoint_x": [
+      "TapChangerTablePoint1_x"
+    ],
+    "TapChangerTablePoint_R": [
+      "TapChangerTablePoint1_R"
+    ],
+    "TapChangerTablePoint_p": [
+      "TapChangerTablePoint1_p"
+    ],
+    "type": [
+      "RatioTapChangerTablePoint"
+    ],
+    "TapChangerTablePoint_q": [
+      "TapChangerTablePoint1_q"
+    ]
+  }
+}

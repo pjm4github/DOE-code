@@ -1,0 +1,21 @@
+{
+  "LinearShuntCompensatorPhase": {
+    "ShuntCompensatorPhase": {
+      "bPerSection": [
+        "0.005"
+      ],
+      "phase": [
+        "SinglePhaseKind.A"
+      ],
+      "gPerSection": [
+        "0.0"
+      ],
+      "maximumSections": [
+        "10"
+      ]
+    },
+    "type": [
+      "ShuntCompensatorPhase"
+    ]
+  }
+}

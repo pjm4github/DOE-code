@@ -1,0 +1,11 @@
+@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-cim15#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:Sectionaliser rdf:type cim:Switch .
+cim:Sectionaliser rdf:type cim:ProtectedSwitch .
+cim:Sectionaliser.cim:IdentifiedObject.mRID "exampleSectionaliser_1" .
+cim:Sectionaliser.cim:IdentifiedObject.name "Sectionaliser 1" .
+cim:Sectionaliser.cim:Equipment.EquipmentContainer "exampleFeeder_1" .
+cim:Sectionaliser.cim:Switch.normalOpen true .

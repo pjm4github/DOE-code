@@ -1,0 +1,16 @@
+@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-cim16#> .
+
+cim:Clamp1 a cim:Clamp ;
+    cim:Clamp.clampType "ABC123" ;
+    cim:Clamp.nominalDiameter 10.0 ;
+    cim:Clamp.nominalVoltage 110 ;
+    cim:Clamp.currentRating 100 ;
+    cim:Clamp.temperatureRating 90 ;
+    cim:Equipment.Equipment.container cim:EquipmentContainer1 .
+
+cim:EquipmentContainer1 a cim:EquipmentContainer ;
+    cim:EquipmentContainer.name "Container1" ;
+    cim:EquipmentContainer.Equipment cim:Transformer1 .
+
+cim:Transformer1 a cim:Transformer ;
+    cim:IdentifiedObject.name "Transformer1" .

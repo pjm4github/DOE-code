@@ -1,0 +1,26 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-cim16#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix ex: <http://example.com#> .
+
+ex:Clamp rdf:type cim:ConductingEquipment ;
+    cim:IdentifiedObject.mRID "123456" ;
+    cim:IdentifiedObject.name "Clamp1" ;
+    cim:Equipment.EquipmentContainer ex:Substation1 ;
+    cim:ConductingEquipment.BaseVoltage ex:BaseVoltage1 ;
+    cim:ConductingEquipment.SvVoltage ex:Voltage1 .
+
+ex:Substation1 rdf:type cim:Substation ;
+    cim:IdentifiedObject.mRID "789012" ;
+    cim:IdentifiedObject.name "Substation1" .
+
+ex:BaseVoltage1 rdf:type cim:BaseVoltage ;
+    cim:IdentifiedObject.mRID "345678" ;
+    cim:BaseVoltage.nominalVoltage "11000" ;
+    cim:BaseVoltage.nominalVoltageUnits "V" .
+
+ex:Voltage1 rdf:type cim:SvVoltage ;
+    cim:IdentifiedObject.mRID "901234" ;
+    cim:MeasurementValue.value "11000" ;
+    cim:MeasurementValue.unit "V" .

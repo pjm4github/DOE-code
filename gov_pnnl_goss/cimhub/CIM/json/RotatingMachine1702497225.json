@@ -1,0 +1,68 @@
+{
+  "RotatingMachine": {
+    "RotatingMachine": {
+      "rotorType": [
+        "RotorType_Cage"
+      ],
+      "ratedS": [
+        "100.0"
+      ],
+      "ratedPowerFactor": [
+        "0.9"
+      ],
+      "statorType": [
+        "StatorType_SalientPole"
+      ]
+    },
+    "IdentifiedObject": {
+      "description": [
+        "Example Rotating Machine"
+      ],
+      "mRID": [
+        "1"
+      ],
+      "name": [
+        "RotatingMachine1"
+      ]
+    },
+    "type": [
+      "RotatingMachine"
+    ]
+  },
+  "Terminal": {
+    "IdentifiedObject": {
+      "mRID": [
+        "2"
+      ],
+      "name": [
+        "Terminal1"
+      ]
+    },
+    "Terminal": {
+      "ConductingEquipment": [
+        "RotatingMachine"
+      ]
+    },
+    "type": [
+      "Terminal"
+    ]
+  },
+  "Measurement": {
+    "IdentifiedObject": {
+      "name": [
+        "VoltageMeasurement"
+      ],
+      "mRID": [
+        "3"
+      ]
+    },
+    "type": [
+      "Measurement"
+    ],
+    "Measurement": {
+      "Terminal": [
+        "Terminal"
+      ]
+    }
+  }
+}

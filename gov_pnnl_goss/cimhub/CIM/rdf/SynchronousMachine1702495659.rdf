@@ -1,0 +1,24 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix ex: <http://example.org/> .
+
+ex:SynchronousMachine rdf:type cim:SynchronousMachine ;
+    cim:Equipment.EquipmentContainer ex:Substation1 ;
+    cim:Equipment.mRID "123456"^^xsd:ID ;
+    cim:Equipment.aggregate false ;
+    cim:IdentifiedObject.name "SyncMachine1" .
+
+ex:Substation1 rdf:type cim:Substation ;
+    cim:Substation.Region ex:Region1 ;
+    cim:Equipment.EquipmentContainer ex:VoltageLevel1 .
+
+ex:Region1 rdf:type cim:SubGeographicalRegion ;
+    cim:IdentifiedObject.name "NorthRegion" .
+
+ex:VoltageLevel1 rdf:type cim:VoltageLevel ;
+    cim:VoltageLevel.Substation ex:Substation1 ;
+    cim:VoltageLevel.HighLimit 132000 ;
+    cim:VoltageLevel.LowLimit 110000 ;
+    cim:VoltageLevel.nominalVoltage 115000 .

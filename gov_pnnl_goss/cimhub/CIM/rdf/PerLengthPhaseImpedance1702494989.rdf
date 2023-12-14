@@ -1,0 +1,12 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix cim: <http://iec.ch/TC57/2017/CIM-schema-cim17#> .
+
+cim:PerLengthPhaseImpedance rdf:type cim:PerLengthPhaseImpedance ;
+    rdfs:subClassOf cim:EquivalentEquipment ;
+    cim:PerLengthPhaseImpedance.conductorCount "3"^^<http://www.w3.org/2001/XMLSchema#int> ;
+    cim:PerLengthPhaseImpedance.b0ch "0.0005"^^<http://www.w3.org/2001/XMLSchema#float> ;
+    cim:PerLengthPhaseImpedance.bch "0.05"^^<http://www.w3.org/2001/XMLSchema#float> ;
+    cim:PerLengthPhaseImpedance.gch "0.0"^^<http://www.w3.org/2001/XMLSchema#float> ;
+    cim:PerLengthPhaseImpedance.r "0.0"^^<http://www.w3.org/2001/XMLSchema#float> ;
+    cim:PerLengthPhaseImpedance.x "0.00431"^^<http://www.w3.org/2001/XMLSchema#float> .

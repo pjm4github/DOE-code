@@ -1,0 +1,19 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+
+cim:ShuntCompensator rdf:type cim:ShuntCompensator ;
+    cim:IdentifiedObject.mRID "shuntCompensator1" ;
+    cim:IdentifiedObject.name "ShuntCompensator1" ;
+    cim:Equipment.equipmentContainer cim:Substation1 ;
+    cim:Equipment.nominalVoltage "11000" .
+
+cim:Substation1 rdf:type cim:Substation ;
+    cim:IdentifiedObject.mRID "substation1" ;
+    cim:IdentifiedObject.name "Substation1" .
+
+cim:VoltageLevel1 rdf:type cim:VoltageLevel ;
+    cim:IdentifiedObject.mRID "voltageLevel1" ;
+    cim:IdentifiedObject.name "VoltageLevel1" ;
+    cim:VoltageLevel.Substation cim:Substation1 ;
+    cim:VoltageLevel.nominalVoltage "11000" .

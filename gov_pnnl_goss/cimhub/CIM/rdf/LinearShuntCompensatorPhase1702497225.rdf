@@ -1,0 +1,10 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:LinearShuntCompensatorPhase rdf:type cim:ShuntCompensatorPhase ;
+                                cim:ShuntCompensatorPhase.phase cim:SinglePhaseKind.A ;
+                                cim:ShuntCompensatorPhase.bPerSection "0.005"^^xsd:float ;
+                                cim:ShuntCompensatorPhase.gPerSection "0.0"^^xsd:float ;
+                                cim:ShuntCompensatorPhase.maximumSections 10 .

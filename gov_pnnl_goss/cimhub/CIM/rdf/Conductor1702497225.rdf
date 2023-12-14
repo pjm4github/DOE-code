@@ -1,0 +1,20 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM#> .
+
+cim:Conductor rdf:type rdfs:Class ;
+  rdfs:label "Conductor" .
+
+cim:Conductor_voltage rdf:type rdf:Property ;
+  rdfs:domain cim:Conductor ;
+  rdfs:range cim:Voltage .
+
+cim:Conductor_length rdf:type rdf:Property ;
+  rdfs:domain cim:Conductor ;
+  rdfs:range xsd:double .
+
+cim:Conductor {
+  cim:ID "001" ;
+  cim:Conductor_voltage cim:HighVoltage ;
+  cim:Conductor_length "100.0" .
+}

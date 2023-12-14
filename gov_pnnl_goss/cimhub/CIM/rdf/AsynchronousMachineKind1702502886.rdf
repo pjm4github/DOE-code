@@ -1,0 +1,7 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+
+cim:AsynchronousMachineKind a rdf:Class ;
+    rdfs:subClassOf cim:RotatingMachineKind ;
+    rdfs:label "AsynchronousMachineKind"@en ;
+    rdfs:comment "Extension of rotating machine kind for asynchronous machines."@en .

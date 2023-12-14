@@ -1,0 +1,35 @@
+@prefix cim: <http://iec.ch/TC57/2017/CIM-schema-cim17#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+cim:Recloser rdf:type cim:Recloser ;
+    cim:IdentifiedObject.mRID "Recloser1" ;
+    cim:IdentifiedObject.name "R1" ;
+    cim:IdentifiedObject.description "A recloser for feeder 1" ;
+    cim:Equipment.EquipmentContainer cim:Substation1 ;
+    cim:PowerSystemResource.nominalVoltage "12470" ;
+    cim:ConductingEquipment.BaseVoltage cim:BaseVoltage1 ;
+    cim:ConductingEquipment.Terminal cim:Terminal1 .
+
+cim:Substation1 rdf:type cim:Substation ;
+    cim:IdentifiedObject.mRID "Substation1" ;
+    cim:IdentifiedObject.name "Sub1" ;
+    cim:Substation.Region cim:Region1 .
+
+cim:Region1 rdf:type cim:SubGeographicalRegion ;
+    cim:IdentifiedObject.mRID "Region1" ;
+    cim:IdentifiedObject.name "NorthRegion" .
+
+cim:BaseVoltage1 rdf:type cim:BaseVoltage ;
+    cim:IdentifiedObject.mRID "BaseVoltage1" ;
+    cim:BaseVoltage.nominalVoltage "12470" ;
+    cim:BaseVoltage.nominalVoltageValue "12470" .
+
+cim:Terminal1 rdf:type cim:Terminal ;
+    cim:IdentifiedObject.mRID "Terminal1" ;
+    cim:Terminal.ConductingEquipment cim:Recloser1 ;
+    cim:Terminal.ConnectivityNode cim:ConnectivityNode1 .
+
+cim:ConnectivityNode1 rdf:type cim:ConnectivityNode ;
+    cim:IdentifiedObject.mRID "ConnectivityNode1" ;
+    cim:IdentifiedObject.name "CNode1" .

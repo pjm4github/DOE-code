@@ -1,0 +1,67 @@
+{
+  "WindingConnection": {
+    "WindingConnection": {
+      "sequenceNumber": [
+        "1"
+      ],
+      "connectionKind": [
+        "D"
+      ],
+      "ConductingEquipment": [
+        "PowerTransformer"
+      ],
+      "Winding": [
+        "TransformerEndInfo"
+      ],
+      "phaseToPhase": [
+        "PhaseCode_A"
+      ],
+      "grounded": [
+        "false"
+      ]
+    },
+    "type": [
+      "WindingConnection"
+    ]
+  },
+  "TransformerEndInfo": {
+    "TransformerEndInfo": {
+      "connectionKind": [
+        "D"
+      ],
+      "phaseAngleClock": [
+        "550.0"
+      ],
+      "endNumber": [
+        "1"
+      ],
+      "ratedS": [
+        "100000"
+      ],
+      "BaseVoltage": [
+        "BaseVoltage"
+      ],
+      "ratedU": [
+        "110"
+      ]
+    },
+    "type": [
+      "TransformerEndInfo"
+    ]
+  },
+  "PhaseCode_A": {
+    "type": [
+      "PhaseCode_A"
+    ]
+  },
+  "PowerTransformer": {
+    "type": [
+      "PowerTransformer"
+    ],
+    "PowerTransformer": {
+      "TransformerInfo": [
+        "TransformerEndInfo"
+      ]
+    }
+  }
+}

@@ -1,0 +1,19 @@
+@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-cim16#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+cim:TapSchedule rdf:type rdfs:Class ;
+    rdfs:subClassOf cim:SeasonDayTypeSchedule .
+
+cim:TapSchedule.SwitchingSchedule rdf:type rdfs:Class ;
+    rdfs:subClassOf cim:SeasonDayTypeSchedule.SwitchingSchedule .
+
+cim:TapSchedule.SwitchingSchedule.Switch rdf:type rdfs:Class ;
+    rdfs:subClassOf cim:SeasonDayTypeSchedule.SwitchingSchedule.Switch .
+
+cim:TapSchedule.SwitchingSchedule.Switch.SwitchSchedule rdf:type rdfs:Class ;
+    rdfs:subClassOf cim:SeasonDayTypeSchedule.SwitchingSchedule.Switch.SwitchSchedule .
+
+cim:TapSchedule.SwitchingSchedule.Switch.SwitchSchedule.SwitchAction rdf:type rdfs:Class ;
+    rdfs:subClassOf cim:SeasonDayTypeSchedule.SwitchingSchedule.Switch.SwitchSchedule.SwitchAction .
+
+# Add more properties and instances as needed

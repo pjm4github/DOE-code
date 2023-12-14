@@ -1,0 +1,33 @@
+@startjson
+{
+  "TransformerEnd": {
+    "type": 
+      "PowerTransformerEnd"
+    ,
+    "PowerTransformerEnd": {
+      "grounded": 
+        "false"
+      ,
+      "endingConnection": 
+        "WindingConnection.Y"
+      
+    },
+    "TransformerEnd": {
+      "ratedI": 
+        "200.0"
+      ,
+      "ratedS": 
+        "100.0"
+      ,
+      "ratedU": 
+        "110.0"
+      
+    },
+    "Equipment": {
+      "EquipmentAggregateData": 
+        "Example Aggregate Data"
+      
+    }
+  }
+}
+@endjson

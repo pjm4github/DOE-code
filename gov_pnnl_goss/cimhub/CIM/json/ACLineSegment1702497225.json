@@ -1,0 +1,110 @@
+{
+  "ACLineSegment.r1": {
+    "Equipment": {
+      "Aggregate": [
+        "false"
+      ],
+      "normallyInService": [
+        "true"
+      ]
+    },
+    "type": [
+      "ACLineSegment"
+    ],
+    "Conductor": {
+      "phaseCount": [
+        "3"
+      ],
+      "length": [
+        "10"
+      ],
+      "usage": [
+        "ConductorUsageKind.synchronous"
+      ]
+    },
+    "ConductingEquipment": {
+      "BaseVoltage": [
+        "110000",
+        "cim:VoltageLevel.r1"
+      ],
+      "Terminal": [
+        "1"
+      ]
+    },
+    "IdentifiedObject": {
+      "mRID": [
+        "01"
+      ],
+      "name": [
+        "Mains Line"
+      ]
+    }
+  },
+  "ConductorUsageKind.synchronous": {
+    "type": [
+      "Class"
+    ],
+    "label": [
+      "synchronous"
+    ]
+  },
+  "BaseVoltage.r1": {
+    "type": [
+      "BaseVoltage"
+    ],
+    "BaseVoltage": {
+      "conductingEquipment": [
+        "cim:ACLineSegment.r1"
+      ],
+      "nominalVoltage": [
+        "110000"
+      ]
+    }
+  },
+  "Substation.r1": {
+    "label": [
+      "Main Substation"
+    ],
+    "type": [
+      "Substation"
+    ],
+    "Substation": {
+      "Region": [
+        "cim:SubGeographicalRegion.r1"
+      ]
+    }
+  },
+  "ACLineSegment": {
+    "type": [
+      "Class"
+    ],
+    "subClassOf": [
+      "Conductor"
+    ],
+    "label": [
+      "ACLineSegment"
+    ]
+  },
+  "VoltageLevel.r1": {
+    "type": [
+      "VoltageLevel"
+    ],
+    "VoltageLevel": {
+      "nominalVoltage": [
+        "110000"
+      ],
+      "lowVoltageLimit": [
+        "11000"
+      ],
+      "BaseVoltage": [
+        "cim:BaseVoltage.r1"
+      ],
+      "highVoltageLimit": [
+        "132000"
+      ],
+      "substation": [
+        "cim:Substation.r1"
+      ]
+    }
+  }
+}

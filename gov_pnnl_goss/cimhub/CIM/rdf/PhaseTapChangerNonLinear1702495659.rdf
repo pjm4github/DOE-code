@@ -1,0 +1,17 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-cim16#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:PhaseTapChangerNonLinear rdf:type cim:TapChanger ;
+    cim:IdentifiedObject.name "PhaseTapChangerNonLinear_example" ;
+    cim:TapChanger.highStep 16 ;
+    cim:TapChanger.normalStep 8 ;
+    cim:TapChanger.step 11 ;
+    cim:TapChanger.lowStep 4 ;
+    cim:TapChanger.stepVoltageIncrement 2.5 .
+
+cim:TapChanger.stepRatio <http://iec.ch/TC57/2012/CIM-schema-cim16#PhaseTapChangerSymmetrical#>
+        :PhaseTapChangerSymmetrical_example .
+
+cim:TapChanger.neutralStep 7 .

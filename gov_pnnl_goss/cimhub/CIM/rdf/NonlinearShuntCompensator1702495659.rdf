@@ -1,0 +1,11 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:NonlinearShuntCompensator rdf:type cim:ShuntCompensator ;
+    cim:IdentifiedObject.name "ExampleNonlinearShuntCompensator" ;
+    cim:ShuntCompensator.maximumSections 10 ;
+    cim:ShuntCompensator.nomU 11000.0 ;
+    cim:ShuntCompensator.normalSections 5 ;
+    cim:ShuntCompensator.bPerSection -1.0E-4 .

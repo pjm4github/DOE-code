@@ -1,0 +1,15 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+
+cim:PetersenCoilModeKind rdf:type cim:Enumeration ;
+    rdfs:label "PetersenCoilModeKind" ;
+    cim:Enumeration.enumerationValue [
+        rdf:type cim:EnumPetersenCoilModeKind ;
+        cim:EnumPetersenCoilModeKind.value "sensitive" ;
+        cim:EnumPetersenCoilModeKind.description "Petersen coil is designed to be sensitive to earth fault current"^^xsd:string
+    ] ,
+    [
+        rdf:type cim:EnumPetersenCoilModeKind ;
+        cim:EnumPetersenCoilModeKind.value "non-sensitive" ;
+        cim:EnumPetersenCoilModeKind.description "Petersen coil is designed not to be sensitive to earth fault current"^^xsd:string
+    ] .

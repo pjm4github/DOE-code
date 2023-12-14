@@ -1,0 +1,120 @@
+@startjson
+{
+  "PowerTransformerEnd": {
+    "PowerTransformerEnd": {
+      "endNumber:": 
+        "1"
+      ,
+      "ratedU:": 
+        "138.0"
+      ,
+      "x:": 
+        "0.001"
+      ,
+      "ratedS:": 
+        "10.0"
+      ,
+      "connectionKind:": 
+        "Wye"
+      ,
+      "r:": 
+        "0.0002"
+      
+    },
+    "ConductingEquipment": {
+      "BaseVoltage:": 
+        "BaseVoltage_HV_132"
+      
+    },
+    "TransformerEnd": {
+      "basetransformer:": 
+        "PowerTransformer_ID_123456"
+      ,
+      "Terminal:": 
+        "Terminal_ID_789012"
+      
+    },
+    "type": 
+      "TransformerEnd"
+    ,
+    "Equipment": {
+      "Equipment:": 
+        "P1"
+      
+    }
+  },
+  "PowerTransformer_ID_123456": {
+    "type": 
+      "PowerTransformer"
+    ,
+    "PowerSystemResource": {
+      "Location:": 
+        "Substation A"
+      
+    },
+    "IdentifiedObject": {
+      "name:": 
+        "Transformer 1"
+      
+    }
+  },
+  "ConnectivityNode_ID_345678": {
+    "ConnectivityNode": {
+      "TopologicalNode:": 
+        "TopologicalNode_ID_901234"
+      
+    },
+    "type": 
+      "ConnectivityNode"
+    ,
+    "IdentifiedObject": {
+      "name:": 
+        "Node 1"
+      
+    }
+  },
+  "Terminal_ID_789012": {
+    "Terminal": {
+      "ConnectivityNode:": 
+        "ConnectivityNode_ID_345678"
+      ,
+      "ConductingEquipment:": 
+        "P1"
+      
+    },
+    "type": 
+      "Terminal"
+    ,
+    "IdentifiedObject": {
+      "name:": 
+        "Terminal 1"
+      
+    }
+  },
+  "TopologicalNode_ID_901234": {
+    "type": 
+      "TopologicalNode"
+    ,
+    "IdentifiedObject": {
+      "name:": 
+        "TN 1"
+      
+    }
+  },
+  "BaseVoltage_HV_132": {
+    "BaseVoltage": {
+      "nominalVoltage:": 
+        "132000.0"
+      
+    },
+    "IdentifiedObject": {
+      "name:": 
+        "132 kV"
+      
+    },
+    "type": 
+      "BaseVoltage"
+    
+  }
+}
+@endjson

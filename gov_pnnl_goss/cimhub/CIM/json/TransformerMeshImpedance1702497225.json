@@ -1,0 +1,24 @@
+{
+  "TransformerMeshImpedance": {
+    "TransformerMeshImpedance": {
+      "r01": [
+        "0.01"
+      ],
+      "xground": [
+        "0.08"
+      ],
+      "rground": [
+        "7.9104E-4"
+      ],
+      "nominalU0": [
+        "10000.0"
+      ],
+      "nominalU": [
+        "10000.0"
+      ]
+    },
+    "type": [
+      "TransformerMeshImpedance"
+    ]
+  }
+}

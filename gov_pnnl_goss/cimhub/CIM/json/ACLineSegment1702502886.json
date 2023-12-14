@@ -1,0 +1,27 @@
+{
+  "ACLineSegment_12345": {
+    "ACLineSegment": {
+      "gch": "0.0",
+      "b0ch": "0.0",
+      "x": "0.03",
+      "r": "0.01",
+      "bch": "0.0",
+      "g0ch": "0.01"
+    },
+    "type": "ACLineSegment",
+    "IdentifiedObject": {
+      "name": "ExampleACLineSegment",
+      "mRID": "12345"
+    },
+    "ConductingEquipment": {
+      "PerLengthPhaseImpedance": "0.01+0.03i",
+      "BaseVoltage": "123"
+    },
+    "PowerSystemResource": {
+      "AssetRoles": "AssetInfo"
+    }
+  },
+  "AssetInfo": {
+    "type": "AssetInfo"
+  }
+}

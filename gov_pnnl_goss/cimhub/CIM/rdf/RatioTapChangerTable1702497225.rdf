@@ -1,0 +1,19 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:RatioTapChangerTable rdf:type cim:TapChangerTable ;
+    cim:TapChangerTable.maxValue "1.1" ;
+    cim:TapChangerTable.minValue "0.9" ;
+    cim:TapChangerTable.normalStep "0.01" ;
+    cim:RatioTapChangerTable.highStep "0.02" ;
+    cim:RatioTapChangerTable.lowStep "0.02" ;
+    cim:RatioTapChangerTable.neutralStep "0.01" .
+
+cim:TapChangerTable.maxValue rdf:type xsd:float .
+cim:TapChangerTable.minValue rdf:type xsd:float .
+cim:TapChangerTable.normalStep rdf:type xsd:float .
+cim:RatioTapChangerTable.highStep rdf:type xsd:float .
+cim:RatioTapChangerTable.lowStep rdf:type xsd:float .
+cim:RatioTapChangerTable.neutralStep rdf:type xsd:float .

@@ -1,0 +1,56 @@
+{
+  "Substation1": {
+    "type": [
+      "Substation"
+    ],
+    "IdentifiedObject": {
+      "mRID": [
+        "789012"
+      ],
+      "name": [
+        "Substation 1"
+      ]
+    }
+  },
+  "Switch1": {
+    "IdentifiedObject": {
+      "name": [
+        "Switch 1"
+      ],
+      "mRID": [
+        "123456"
+      ]
+    },
+    "Equipment": {
+      "EquipmentContainer": [
+        "Substation1"
+      ]
+    },
+    "type": [
+      "Switch"
+    ],
+    "ConductingEquipment": {
+      "BaseVoltage": [
+        "BaseVoltage1"
+      ]
+    }
+  },
+  "BaseVoltage1": {
+    "BaseVoltage": {
+      "nominalVoltage": [
+        "132000.0"
+      ]
+    },
+    "type": [
+      "BaseVoltage"
+    ],
+    "IdentifiedObject": {
+      "mRID": [
+        "345678"
+      ],
+      "name": [
+        "132kV"
+      ]
+    }
+  }
+}

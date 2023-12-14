@@ -1,0 +1,43 @@
+{
+  "PowerTransformer": {
+    "type": [
+      "PowerTransformer"
+    ],
+    "PowerTransformer": {
+      "vectorGroup": [
+        "Dyn11"
+      ]
+    },
+    "Equipment": {
+      "EquipmentContainer": [
+        "Substation1"
+      ]
+    },
+    "IdentifiedObject": {
+      "name": [
+        "PowerTransformer1"
+      ],
+      "mRID": [
+        "123456789"
+      ]
+    },
+    "PowerSystemResource": {
+      "AssetDatasheet": [
+        "SampleDatasheet"
+      ]
+    }
+  },
+  "Substation1": {
+    "type": [
+      "Substation"
+    ],
+    "IdentifiedObject": {
+      "mRID": [
+        "987654321"
+      ],
+      "name": [
+        "Substation1"
+      ]
+    }
+  }
+}

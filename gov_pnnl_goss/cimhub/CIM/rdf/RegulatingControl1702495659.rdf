@@ -1,0 +1,16 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/2012/CIM-schema-cim16#> .
+
+cim:RegulatingControl rdf:type cim:RegulatingControl ;
+    cim:RegulatingControl.name "RegulatingControl1" ;
+    cim:RegulatingControl.controlEnabled "true"^^xsd:boolean ;
+    cim:RegulatingControl.targetValue "150.0"^^xsd:float ;
+    cim:RegulatingControl.monitoredControlArea cim:ControlArea1 ;
+    cim:RegulatingControl.RegulatingControlType "voltage" ;
+    cim:RegulatingControl.Terminal cim:Terminal1 .
+
+cim:ControlArea1 rdf:type cim:ControlArea ;
+    cim:IdentifiedObject.name "ControlArea1" .
+
+cim:Terminal1 rdf:type cim:Terminal ;
+    cim:IdentifiedObject.name "Terminal1" .

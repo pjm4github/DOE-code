@@ -1,0 +1,18 @@
+@startjson
+{
+  "PhaseImpedanceData": {
+    "type": "ImpedanceData",
+    "PhaseImpedanceData": {
+      "x0": "0.15",
+      "r": "0.1",
+      "x": "0.05",
+      "r0": "0.2",
+      "sequenceNumber": "1"
+    },
+    "IdentifiedObject": {
+      "description": "Sample Phase Impedance Data for demonstration purposes",
+      "name": "SamplePhaseImpedanceData"
+    }
+  }
+}
+@endjson

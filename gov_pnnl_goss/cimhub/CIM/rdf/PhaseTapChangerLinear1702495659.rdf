@@ -1,0 +1,25 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM#> .
+
+cim:PhaseTapChangerLinear rdf:type cim:PhaseTapChanger ;
+    cim:Equipment.Equipment.EquipmentContainer <equipmentContainerURI> ;
+    cim:PhaseTapChanger.highStep <highStepValue> ;
+    cim:PhaseTapChanger.initialDelay <initialDelayValue> ;
+    cim:PhaseTapChanger.lowStep <lowStepValue> ;
+    cim:PhaseTapChanger.neutralStep <neutralStepValue> ;
+    cim:PhaseTapChanger.normalStep <normalStepValue> ;
+    cim:PhaseTapChanger.stepCount <stepCountValue> ;
+    cim:PhaseTapChangerSubPhase.phaseTapChangerSubPhase <tapChangerSubPhaseURI> .
+
+<tapChangerSubPhaseURI> rdf:type cim:PhaseTapChangerSubPhase ;
+    cim:PhaseTapChangerSubPhaseSubStepCount <subStepCountValue> ;
+    cim:PhaseTapChangerSubPhase.tapChanger <tapChangerURI> .
+
+<tapChangerURI> rdf:type cim:PhaseTapChanger ;
+    cim:PhaseTapChanger.highStep <subHighStepValue> ;
+    cim:PhaseTapChanger.initialDelay <subInitialDelayValue> ;
+    cim:PhaseTapChanger.lowStep <subLowStepValue> ;
+    cim:PhaseTapChanger.neutralStep <subNeutralStepValue> ;
+    cim:PhaseTapChanger.normalStep <subNormalStepValue> ;
+    cim:PhaseTapChanger.stepCount <subStepCountValue> .

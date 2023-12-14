@@ -1,0 +1,65 @@
+@startjson
+{
+  "PowerTransformer_001": {
+    "PowerTransformer": {
+      "ratedU": "138.0",
+      "PowerTransformerEnd": [
+        "PowerTransformerEnd_002",
+        "PowerTransformerEnd_001"
+      ],
+      "ratedS": "1000.0"
+    },
+    "type": "PowerTransformer",
+    "PowerSystemResource": {
+      "Location": "Location_001"
+    },
+    "IdentifiedObject": {
+      "name": "Transformer001"
+    },
+    "Equipment": {
+      "Equipment": "ABC Transformers Ltd."
+    }
+  },
+  "PowerTransformerEnd_001": {
+    "IdentifiedObject": {
+      "name": "Winding_1"
+    },
+    "PowerTransformerEnd": {
+      "ratedU": "138.0",
+      "ratedS": "500.0"
+    },
+    "type": "PowerTransformerEnd"
+  },
+  "PowerTransformerEnd_002": {
+    "type": "PowerTransformerEnd",
+    "PowerTransformerEnd": {
+      "ratedS": "500.0",
+      "ratedU": "13.8"
+    },
+    "IdentifiedObject": {
+      "name": "Winding_2"
+    }
+  },
+  "Location_001": {
+    "Location": {
+      "Longitude": "-122.6789",
+      "Elevation": "100.0",
+      "CoordinateSystem": "WGS84",
+      "Latitude": "38.12345"
+    },
+    "IdentifiedObject": {
+      "name": "SubstationLocation"
+    },
+    "type": "Location"
+  },
+  "Substation_001": {
+    "Equipment": {
+      "Equipment": "PowerTransformer_001"
+    },
+    "type": "Substation",
+    "IdentifiedObject": {
+      "name": "Substation001"
+    }
+  }
+}
+@endjson

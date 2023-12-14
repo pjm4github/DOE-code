@@ -1,0 +1,10 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+
+cim:ShuntCompensatorPhase rdf:type cim:ShuntCompensatorPhase ;
+    cim:Equipment.EquipmentContainer "container123" ;
+    cim:ShuntCompensator.bPerSection "0.2" ;
+    cim:ShuntCompensator.maximumSections "10" ;
+    cim:ShuntCompensator.nomU "10000" ;
+    cim:ShuntCompensator.normalSections "5" ;
+    cim:ShuntCompensatorPhase.PhaseCode "A" .

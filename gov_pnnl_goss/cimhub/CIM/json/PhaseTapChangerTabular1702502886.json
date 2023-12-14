@@ -1,0 +1,36 @@
+{
+  "PhaseTapChangerTabular": {
+    "TapChangerInfo": "tapChangerInfo1",
+    "tapPosition": "tapPosition1",
+    "TapChangerControl": "tapChangerControl1",
+    "PowerTransformerInfo": "powerTransformerInfo1",
+    "type": "PhaseTapChangerTabular"
+  },
+  "powerTransformerInfo1": {
+    "IdentifiedObject": {
+      "name": "PT Info 1"
+    },
+    "type": "PowerTransformerInfo"
+  },
+  "tapChangerInfo1": {
+    "IdentifiedObject": {
+      "name": "Tap Changer Info 1"
+    },
+    "type": "TapChangerInfo"
+  },
+  "tapChangerControl1": {
+    "type": "TapChangerControl",
+    "IdentifiedObject": {
+      "name": "Tap Changer Control 1"
+    }
+  },
+  "tapPosition1": {
+    "TapPosition": {
+      "step": "1"
+    },
+    "IdentifiedObject": {
+      "name": "Tap Position 1"
+    },
+    "type": "TapPosition"
+  }
+}

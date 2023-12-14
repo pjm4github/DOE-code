@@ -1,0 +1,25 @@
+{
+  "Fuse": {
+    "type": [
+      "ConductingEquipment"
+    ],
+    "IdentifiedObject": {
+      "name": [
+        "ExampleFuse"
+      ],
+      "mRID": [
+        "123456789"
+      ]
+    },
+    "Equipment": {
+      "EquipmentContainer": [
+        "ExampleSubstation"
+      ]
+    },
+    "ConductingEquipment": {
+      "BaseVoltage": [
+        "12000"
+      ]
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "PhaseTapChangerTable": {
+    "type": [
+      "TapChangerTable"
+    ],
+    "TapChangerTable": {
+      "step:": [
+        "32"
+      ],
+      "table:": [
+        "Fixed"
+      ],
+      "normalStep:": [
+        "16"
+      ],
+      "highStep:": [
+        "31"
+      ]
+    }
+  }
+}

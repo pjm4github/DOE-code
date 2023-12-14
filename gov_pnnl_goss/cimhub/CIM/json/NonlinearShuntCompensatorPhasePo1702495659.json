@@ -1,0 +1,25 @@
+{
+  "NonlinearShuntCompensatorPhasePo": {
+    "Equipment": {
+      "aggregate": [
+        "Boolean"
+      ],
+      "normallyInService": [
+        "Boolean"
+      ]
+    },
+    "ConductingEquipment": {
+      "nomU": [
+        "Voltage"
+      ]
+    },
+    "type": [
+      "NonlinearShuntCompensatorPhasePo"
+    ],
+    "RegulatingCondEq": {
+      "controlEnabled": [
+        "Boolean"
+      ]
+    }
+  }
+}

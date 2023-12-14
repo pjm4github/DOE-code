@@ -1,0 +1,26 @@
+{
+  "EnergyConsumerPhase": {
+    "EnergyConsumerPhase": {
+      "phase": [
+        "SinglePhaseKind.B"
+      ],
+      "q": [
+        "40.0"
+      ],
+      "p": [
+        "80.0"
+      ]
+    },
+    "type": [
+      "EnergyConsumer"
+    ],
+    "EnergyConsumer": {
+      "qfixed": [
+        "50.0"
+      ],
+      "pfixed": [
+        "100.0"
+      ]
+    }
+  }
+}

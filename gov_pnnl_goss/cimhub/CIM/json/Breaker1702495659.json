@@ -1,0 +1,104 @@
+{
+  "Breaker": {
+    "ConductingEquipment": {
+      "BaseVoltage": [
+        "BaseVoltage1"
+      ],
+      "Terminal": [
+        "Terminal1"
+      ]
+    },
+    "type": [
+      "Asset"
+    ],
+    "IdentifiedObject": {
+      "mRID": [
+        "ExampleBreaker01"
+      ],
+      "name": [
+        "ExampleBreaker"
+      ]
+    },
+    "Equipment": {
+      "Equipment": [
+        "Asset1"
+      ],
+      "EquipmentContainer": [
+        "Substation1"
+      ]
+    },
+    "PowerSystemResource": {
+      "AssetRoles": [
+        "AssetRole1"
+      ],
+      "Asset": [
+        "Asset1"
+      ]
+    }
+  },
+  "AssetRole1": {
+    "IdentifiedObject": {
+      "name": [
+        "ExampleAssetRole1"
+      ],
+      "mRID": [
+        "AssetRole01"
+      ]
+    },
+    "type": [
+      "AssetRole"
+    ]
+  },
+  "BaseVoltage1": {
+    "IdentifiedObject": {
+      "mRID": [
+        "BaseVoltage01"
+      ],
+      "name": [
+        "ExampleBaseVoltage1"
+      ]
+    },
+    "type": [
+      "BaseVoltage"
+    ]
+  },
+  "Terminal1": {
+    "IdentifiedObject": {
+      "mRID": [
+        "Terminal01"
+      ],
+      "name": [
+        "ExampleTerminal1"
+      ]
+    },
+    "type": [
+      "Terminal"
+    ]
+  },
+  "Asset1": {
+    "type": [
+      "Asset"
+    ],
+    "IdentifiedObject": {
+      "name": [
+        "ExampleAsset1"
+      ],
+      "mRID": [
+        "Asset01"
+      ]
+    }
+  },
+  "Substation1": {
+    "IdentifiedObject": {
+      "name": [
+        "ExampleSubstation1"
+      ],
+      "mRID": [
+        "Substation01"
+      ]
+    },
+    "type": [
+      "Substation"
+    ]
+  }
+}

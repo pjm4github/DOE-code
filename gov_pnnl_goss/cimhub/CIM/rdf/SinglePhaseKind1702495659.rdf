@@ -1,0 +1,24 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+
+cim:SinglePhaseKind a rdfs:Class ;
+  rdfs:label "SinglePhaseKind" ;
+  rdfs:comment "A kind of single phase." ;
+  rdfs:subClassOf cim:PhaseCode ;
+  rdfs:subClassOf cim:Kind .
+
+cim:SinglePhaseKindPhaseCode1 a cim:PhaseCode ;
+  rdfs:label "Phase A" ;
+  rdfs:comment "The phase A in a single phase system." ;
+  rdfs:subClassOf cim:SinglePhaseKind .
+
+cim:SinglePhaseKindPhaseCode2 a cim:PhaseCode ;
+  rdfs:label "Phase B" ;
+  rdfs:comment "The phase B in a single phase system." ;
+  rdfs:subClassOf cim:SinglePhaseKind .
+
+cim:SinglePhaseKindPhaseCode3 a cim:PhaseCode ;
+  rdfs:label "Phase C" ;
+  rdfs:comment "The phase C in a single phase system." ;
+  rdfs:subClassOf cim:SinglePhaseKind .

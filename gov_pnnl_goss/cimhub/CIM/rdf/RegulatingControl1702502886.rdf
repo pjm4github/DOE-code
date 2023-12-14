@@ -1,0 +1,10 @@
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+cim:RegulatingControl rdf:type cim:RegulatingControl ;
+  cim:RegulatingControl.RegulatingControlType "voltage" ;
+  cim:RegulatingControl.enabled "true" ;
+  cim:RegulatingControl.discrete "false" ;
+  cim:RegulatingControl.targetValue "1.0" ;
+  cim:RegulatingControl.targetDeadband "0.01" .

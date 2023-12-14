@@ -1,0 +1,27 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+
+cim:PowerTransformer rdf:type cim:PowerTransformer ;
+    cim:IdentifiedObject.name "ExamplePowerTransformer" ;
+    cim:IdentifiedObject.description "This is an example of a power transformer" ;
+    cim:PowerSystemResource.AssetDatasheet "ExampleDatasheet123" ;
+    cim:Equipment.EquipmentContainer cim:Substation123 ;
+    cim:PowerTransformer.vectorGroup "Dyn11" ;
+    cim:PowerTransformer.PowerTransformerEnd cim:PTEnd1, cim:PTEnd2 .
+
+cim:PTEnd1 rdf:type cim:PowerTransformerEnd ;
+    cim:PowerSystemResource.AssetDatasheet "End1Datasheet456" ;
+    cim:TransformerEnd.ratedS 10.0 ;
+    cim:TransformerEnd.ratedU 132.0 ;
+    cim:TransformerEnd.ratedInsulationLevel 123.0 .
+
+cim:PTEnd2 rdf:type cim:PowerTransformerEnd ;
+    cim:PowerSystemResource.AssetDatasheet "End2Datasheet789" ;
+    cim:TransformerEnd.ratedS 10.0 ;
+    cim:TransformerEnd.ratedU 33.0 ;
+    cim:TransformerEnd.ratedInsulationLevel 123.0 .
+
+cim:Substation123 rdf:type cim:Substation ;
+    cim:IdentifiedObject.name "ExampleSubstation" ;
+    cim:IdentifiedObject.description "This is an example substation" .

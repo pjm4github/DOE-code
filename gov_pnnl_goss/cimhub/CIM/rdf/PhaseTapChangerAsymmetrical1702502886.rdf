@@ -1,0 +1,21 @@
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://iec.ch/TC57/CIM100#PhaseTapChangerAsymmetrical>
+  a cim:PhaseTapChangerAsymmetrical ;
+  cim:TapChanger.stepVoltageIncrement "1.0" ;
+  cim:TapChanger.lowStep "1" ;
+  cim:TapChanger.highStep "16" ;
+  cim:PhaseTapChangerAsymmetrical.neutralStep "8" ;
+  cim:PhaseTapChangerAsymmetrical.neutralU "0.95" .
+
+<http://iec.ch/TC57/CIM100#PhaseTapChangerAsymmetrical.neutralStep> 
+  a rdf:Property, cim:Integer ;
+  rdfs:label "neutralStep" ;
+  rdfs:comment "The neutral tap step. This attribute defines the number of tap steps between the phase and the neutral position. It is a positive or a negative value, usually less than or equal to 0. " .
+
+<http://iec.ch/TC57/CIM100#PhaseTapChangerAsymmetrical.neutralU>
+  a rdf:Property, cim:Float ;
+  rdfs:label "neutralU" ;
+  rdfs:comment "The neutral tap voltage in per unit. " .

@@ -1,0 +1,17 @@
+{
+  "PhaseTapChangerLinear_123": {
+    "PhaseTapChanger": {
+      "tculControl": "3",
+      "highStep": "3",
+      "lineDropCompensation": "0.05",
+      "lineDropR": "0.002",
+      "lowStep": "1",
+      "normalStep": "2",
+      "stepVoltageIncrement": "2.5e3"
+    },
+    "PowerTransformerEnd": {
+      "endNumber": "2"
+    },
+    "type": "PhaseTapChangerLinear"
+  }
+}

@@ -1,0 +1,50 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:SwitchSchedule rdf:type rdfs:Class ;
+    rdfs:subClassOf cim:Schedule.
+
+cim:SwitchSchedule.TimePoint rdf:type rdfs:Class ;
+    rdfs:subClassOf cim:RegularIntervalSchedule .
+
+cim:SwitchSchedule.TimePoint.scheduledEventInterval
+     rdf:type rdfs:Datatype ;
+     rdfs:subClassOf xsd:duration .
+
+cim:SwitchSchedule.TimePoint.value1
+     rdf:type rdfs:Datatype ;
+     rdfs:subClassOf xsd:boolean .
+
+cim:SwitchSchedule.TimePoint.value2
+     rdf:type rdfs:Datatype ;
+     rdfs:subClassOf xsd:boolean .
+
+cim:SwitchSchedule.TimePoint.value3
+     rdf:type rdfs:Datatype ;
+     rdfs:subClassOf xsd:boolean .
+
+cim:SwitchSchedule.TimePoint.value4
+     rdf:type rdfs:Datatype ;
+     rdfs:subClassOf xsd:boolean .
+
+cim:SwitchSchedule.TimePoint.value5
+    rdf:type rdfs:Datatype ;
+    rdfs:subClassOf xsd:boolean .
+
+cim:SwitchSchedule.TimePoint.value6
+    rdf:type rdfs:Datatype ;
+    rdfs:subClassOf xsd:boolean .
+
+cim:SwitchSchedule.TimePoint.value7
+    rdf:type rdfs:Datatype ;
+    rdfs:subClassOf xsd:boolean .
+
+cim:SwitchSchedule.TimePoint.value8
+    rdf:type rdfs:Datatype ;
+    rdfs:subClassOf xsd:boolean .
+
+cim:SwitchSchedule.TimePoint.Season
+    rdf:type rdfs:Datatype ;
+    rdfs:subClassOf xsd:string . 

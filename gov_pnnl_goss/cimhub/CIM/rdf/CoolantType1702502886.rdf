@@ -1,0 +1,7 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix cim: <http://iec.ch/TC57/CIM#> .
+
+cim:CoolantType rdf:type cim:Type.
+cim:CoolantType rdf:type cim:PowerSystemResourceType.
+cim:CoolantType rdfs:subClassOf cim:PowerSystemResource.
+cim:CoolantType rdfs:comment "The type of coolant (or refrigerant) in the cooling system, for example, water, air, hydrogen, etc."@en.

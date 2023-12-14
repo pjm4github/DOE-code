@@ -1,0 +1,113 @@
+{
+  "PhaseTapChangerTable.subsequentDelay": {
+    "Float": {
+      "value": [
+        "0.0"
+      ]
+    },
+    "type": [
+      "Float"
+    ]
+  },
+  "PhaseTapChangerTable.step": {
+    "Integer": {
+      "value": [
+        "0"
+      ]
+    },
+    "type": [
+      "Integer"
+    ]
+  },
+  "PhaseTapChangerTable.stepVoltageIncrement": {
+    "Float": {
+      "value": [
+        "0.01"
+      ]
+    },
+    "type": [
+      "Float"
+    ]
+  },
+  "PhaseTapChangerTable": {
+    "PhaseTapChangerTable": {
+      "normalStep": [
+        "PhaseTapChangerTable.normalStep"
+      ],
+      "step": [
+        "PhaseTapChangerTable.step"
+      ],
+      "subsequentDelay": [
+        "PhaseTapChangerTable.subsequentDelay"
+      ],
+      "stepVoltageIncrement": [
+        "PhaseTapChangerTable.stepVoltageIncrement"
+      ],
+      "initialDelay": [
+        "PhaseTapChangerTable.initialDelay"
+      ],
+      "lowStep": [
+        "PhaseTapChangerTable.lowStep"
+      ],
+      "highStep": [
+        "PhaseTapChangerTable.highStep"
+      ],
+      "neutralStep": [
+        "PhaseTapChangerTable.neutralStep"
+      ]
+    },
+    "type": [
+      "PhaseTapChangerTable"
+    ]
+  },
+  "PhaseTapChangerTable.neutralStep": {
+    "Integer": {
+      "value": [
+        "0"
+      ]
+    },
+    "type": [
+      "Integer"
+    ]
+  },
+  "PhaseTapChangerTable.highStep": {
+    "type": [
+      "Integer"
+    ],
+    "Integer": {
+      "value": [
+        "1"
+      ]
+    }
+  },
+  "PhaseTapChangerTable.lowStep": {
+    "type": [
+      "Integer"
+    ],
+    "Integer": {
+      "value": [
+        "-1"
+      ]
+    }
+  },
+  "PhaseTapChangerTable.normalStep": {
+    "Integer": {
+      "value": [
+        "0"
+      ]
+    },
+    "type": [
+      "Integer"
+    ]
+  },
+  "PhaseTapChangerTable.initialDelay": {
+    "Float": {
+      "value": [
+        "0.0"
+      ]
+    },
+    "type": [
+      "Float"
+    ]
+  }
+}

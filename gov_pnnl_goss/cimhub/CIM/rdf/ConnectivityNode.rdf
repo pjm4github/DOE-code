@@ -1,0 +1,19 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix cim: <http://iec.ch/TC57/CIM#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+
+# Define a ConnectivityNode instance
+cim:ConnectivityNode_001 a cim:ConnectivityNode.
+
+# Define attributes of the ConnectivityNode
+cim:ConnectivityNode_001 cim:IdentifiedObject.name "Node001".
+
+# Define the associated Substation
+cim:Substation_001 a cim:Substation.
+cim:Substation_001 cim:IdentifiedObject.name "Substation001".
+
+# Connect the ConnectivityNode to its Substation
+cim:ConnectivityNode_001 cim:ConnectivityNode.ConnectivityNodeContainer cim:Substation_001.
+
+# Additional properties and relationships can be represented as needed.

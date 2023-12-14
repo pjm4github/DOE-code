@@ -1,0 +1,15 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-cim16#> .
+@prefix ex: <http://example.com/transformerTank#> .
+
+ex:TransformerTank1 a cim:TransformerTank ;
+    cim:IdentifiedObject.name "TransformerTank1" ;
+    cim:PowerSystemResource.AssetRoles ex:Substation1 ;
+    cim:TransformerTank.PowerTransformer ex:Transformer1 .
+
+ex:Substation1 a cim:Substation ;
+    cim:IdentifiedObject.name "Substation1" .
+
+ex:Transformer1 a cim:PowerTransformer ;
+    cim:IdentifiedObject.name "Transformer1" .

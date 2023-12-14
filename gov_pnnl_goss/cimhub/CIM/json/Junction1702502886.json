@@ -1,0 +1,17 @@
+{
+  "Junction": {
+    "subClassOf": "PowerSystemResource",
+    "type": "Class",
+    "label": "Junction"
+  },
+  "J1": {
+    "type": "Junction",
+    "Equipment": {
+      "EquipmentContainer": "Substation1"
+    },
+    "IdentifiedObject": {
+      "name": "Junction 1",
+      "mRID": "J1"
+    }
+  }
+}

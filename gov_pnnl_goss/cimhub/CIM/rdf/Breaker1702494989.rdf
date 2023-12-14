@@ -1,0 +1,15 @@
+@prefix cim: <http://iec.ch/TC57/2012/CIM-schema-cim16#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:Breaker rdf:type cim:ACLineSegment ;
+    cim:IdentifiedObject.name "Breaker1" ;
+    cim:IdentifiedObject.mRID "12345" ;
+    cim:PowerSystemResource.Location "Substation001" ;
+    cim:Equipment.EquipmentContainer "Substation001" ;
+    cim:ConductingEquipment.BaseVoltage "132000" ;
+    cim:ConductingEquipment.OperationalLimit.minimumVoltage "0.0"^^xsd:float ;
+    cim:ConductingEquipment.OperationalLimit.maximumVoltage "145000"^^xsd:float ;
+    cim:Switch.NormalOpen "false"^^xsd:boolean ;
+    cim:Switch.ratedVoltage "145000"^^xsd:float .

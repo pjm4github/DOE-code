@@ -1,0 +1,21 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+
+cim:WindingConnection rdf:type rdfs:Class ;
+    rdfs:subClassOf cim:IdentifiedObject .
+
+cim:WindingConnection rdf:type rdfs:Class ;
+    rdfs:label "The connection between windings." ;
+    rdfs:comment "The connection between two windings." .
+
+cim:WindingConnection.measurementDirection rdf:type rdfs:Property ;
+    rdfs:domain cim:WindingConnection ;
+    rdfs:range cim:PhaseCode .
+
+cim:WindingConnection.phaseAngle rdf:type rdfs:Property ;
+    rdfs:domain cim:WindingConnection ;
+    rdfs:range cim:AngleDegrees .
+
+cim:WindingConnection.phaseConnection rdf:type rdfs:Property ;
+    rdfs:domain cim:WindingConnection ;
+    rdfs:range cim:PhaseCode .

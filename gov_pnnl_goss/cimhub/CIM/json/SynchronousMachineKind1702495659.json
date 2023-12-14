@@ -1,0 +1,42 @@
+{
+  "SynchronousMachineKind": {
+    "type": [
+      "Class"
+    ],
+    "subClassOf": [
+      "RotatingMachineKind"
+    ]
+  },
+  "SynchronousMotor": {
+    "type": [
+      "Class"
+    ],
+    "subClassOf": [
+      "SynchronousMachineKind"
+    ]
+  },
+  "SynchronousGenerator": {
+    "type": [
+      "Class"
+    ],
+    "subClassOf": [
+      "SynchronousMachineKind"
+    ]
+  },
+  "HydroTurbine": {
+    "type": [
+      "Class"
+    ],
+    "subClassOf": [
+      "SynchronousMachineKind"
+    ]
+  },
+  "SteamTurbine": {
+    "type": [
+      "Class"
+    ],
+    "subClassOf": [
+      "SynchronousMachineKind"
+    ]
+  }
+}

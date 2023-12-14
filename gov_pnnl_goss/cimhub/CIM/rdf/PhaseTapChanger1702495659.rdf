@@ -1,0 +1,21 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-CIM16#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:PhaseTapChanger rdf:type cim:TapChanger ;
+    cim:TapChanger.stepVoltageIncrement "-1"^^xsd:float ;
+    cim:PhaseTapChanger.lowStep 2 ;
+    cim:PhaseTapChanger.highStep 8 ;
+    cim:PhaseTapChanger.neutralStep 5 ;
+    cim:PhaseTapChanger.normalStep 6 ;
+    cim:PhaseTapChanger.targetVoltage
+    [
+        rdf:type cim:Voltage ;
+        cim:Voltage.value "10000"^^xsd:float ;
+        cim:Voltage.unit cim:UnitSymbolKind 'V'
+    ] .
+
+cim:TapChanger.stepCount "17"^^xsd:int ;
+    cim:TapChanger.normalStep "7"^^xsd:int ;
+    cim:TapChanger.ltcFlag "true"^^xsd:boolean .

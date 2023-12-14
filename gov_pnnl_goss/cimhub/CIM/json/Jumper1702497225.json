@@ -1,0 +1,98 @@
+{
+  "Region1": {
+    "type": [
+      "SubGeographicalRegion"
+    ],
+    "IdentifiedObject": {
+      "mRID": [
+        "Reg1"
+      ],
+      "name": [
+        "Region 1"
+      ]
+    },
+    "SubGeographicalRegion": {
+      "Region": [
+        "Country1"
+      ]
+    }
+  },
+  "Country1": {
+    "type": [
+      "Country"
+    ],
+    "IdentifiedObject": {
+      "mRID": [
+        "C1"
+      ],
+      "name": [
+        "Country 1"
+      ]
+    }
+  },
+  "Jumper": {
+    "IdentifiedObject": {
+      "name": [
+        "Jumper 1"
+      ],
+      "mRID": [
+        "Jumper1"
+      ]
+    },
+    "type": [
+      "ConductingEquipment"
+    ],
+    "PowerSystemResource": {
+      "AssetRoles": [
+        "Conductor1"
+      ]
+    },
+    "Equipment": {
+      "EquipmentContainer": [
+        "VoltageLevel1"
+      ]
+    }
+  },
+  "Substation1": {
+    "IdentifiedObject": {
+      "mRID": [
+        "SS1"
+      ],
+      "name": [
+        "Substation 1"
+      ]
+    },
+    "type": [
+      "Substation"
+    ],
+    "Substation": {
+      "Region": [
+        "Region1"
+      ]
+    }
+  },
+  "VoltageLevel1": {
+    "VoltageLevel": {
+      "Substation": [
+        "Substation1"
+      ],
+      "LowVoltageLimit": [
+        "1000"
+      ],
+      "HighVoltageLimit": [
+        "1100"
+      ]
+    },
+    "IdentifiedObject": {
+      "mRID": [
+        "VL1"
+      ],
+      "name": [
+        "Voltage Level 1"
+      ]
+    },
+    "type": [
+      "VoltageLevel"
+    ]
+  }
+}

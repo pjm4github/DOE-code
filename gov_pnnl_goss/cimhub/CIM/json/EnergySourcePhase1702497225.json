@@ -1,0 +1,10 @@
+{
+  "EnergySourcePhase": {
+    "subClassOf": [
+      "EnergySource"
+    ],
+    "type": [
+      "Class"
+    ]
+  }
+}

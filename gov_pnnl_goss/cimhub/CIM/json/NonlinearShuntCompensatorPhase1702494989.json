@@ -1,0 +1,34 @@
+{
+  "NonlinearShuntCompensatorPhase": {
+    "x": [
+      "0.05"
+    ],
+    "b": [
+      "0.0"
+    ],
+    "nomU": [
+      "10.0"
+    ],
+    "vMax": [
+      "1.1"
+    ],
+    "vMin": [
+      "0.9"
+    ],
+    "type": [
+      "NonlinearShuntCompensatorPhase"
+    ],
+    "g": [
+      "0.0"
+    ],
+    "vSet": [
+      "1.0"
+    ],
+    "OperationalLimitSet": [
+      "NLC_Phase"
+    ],
+    "r": [
+      "0.0"
+    ]
+  }
+}

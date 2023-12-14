@@ -1,0 +1,26 @@
+{
+  "Clamp": {
+    "IdentifiedObject": {
+      "mRID": [
+        "Clamp1"
+      ],
+      "name": [
+        "Example Clamp"
+      ]
+    },
+    "Equipment": {
+      "normallyInService": [
+        "true"
+      ],
+      "aggregated": [
+        "false"
+      ],
+      "EquipmentContainer": [
+        "transformer1"
+      ]
+    },
+    "type": [
+      "Equipment"
+    ]
+  }
+}

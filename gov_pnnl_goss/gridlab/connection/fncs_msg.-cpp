@@ -1,0 +1,754 @@
+/** $Id$
+ * FNCS message object
+ */
+#include <stdlib.h>
+#include <stdio.h>
+#include <errno.h>
+#include <math.h>
+#include <gld_complex.h>
+
+#include "fncs_msg.h"
+
+EXPORT_CREATE(fncs_msg);
+EXPORT_INIT(fncs_msg);
+EXPORT_PRECOMMIT(fncs_msg);
+EXPORT_SYNC(fncs_msg);
+EXPORT_COMMIT(fncs_msg);
+EXPORT_FINALIZE(fncs_msg);
+EXPORT_NOTIFY(fncs_msg);
+EXPORT_PLC(fncs_msg);
+EXPORT_LOADMETHOD(fncs_msg,route);
+EXPORT_LOADMETHOD(fncs_msg,option);
+EXPORT_LOADMETHOD(fncs_msg,publish);
+EXPORT_LOADMETHOD(fncs_msg,subscribe);
+EXPORT_LOADMETHOD(fncs_msg,configure);
+
+EXPORT TIMESTAMP fncs_clocks_update(void *ptr, TIMESTAMP t1)
+{
+	fncs_msg*my = (fncs_msg*)ptr;
+	return my->clk_update(t1);
+}
+
+EXPORT SIMULATIONMODE fncs_dInterupdate(void *ptr, unsigned int dIntervalCounter, TIMESTAMP t0, unsigned int64 dt)
+{
+	fncs_msg *my = (fncs_msg *)ptr;
+	return my->deltaInterUpdate(dIntervalCounter, t0, dt);
+}
+
+EXPORT SIMULATIONMODE fncs_dClockupdate(void *ptr, double t1, unsigned long timestep, SIMULATIONMODE sysmode)
+{
+	fncs_msg *my = (fncs_msg *)ptr;
+	return my->deltaClockUpdate(t1, timestep, sysmode);
+}
+
+static FUNCTIONSRELAY *first_fncsfunction = NULL;
+
+CLASS *fncs_msg::oclass = NULL;
+fncs_msg *fncs_msg::defaults = NULL;
+
+//Constructor
+fncs_msg::fncs_msg(MODULE *module)
+{
+	// register to receive notice for first top down. bottom up, and second top down synchronizations
+	oclass = gld_class::create(module,"fncs_msg",sizeof(fncs_msg),PC_AUTOLOCK|PC_PRETOPDOWN|PC_BOTTOMUP|PC_POSTTOPDOWN|PC_OBSERVER);
+	if (oclass == NULL)
+		throw "connection/fncs_msg::fncs_msg(MODULE*): unable to register class connection:fncs_msg";
+	else
+		oclass->trl = TRL_UNKNOWN;
+
+	defaults = this;
+	if (gl_publish_variable(oclass,
+		PT_double, "version", get_version_offset(), PT_DESCRIPTION, "fncs_msg version",
+		PT_enumeration, "message_type", PADDR(message_type), PT_DESCRIPTION, "set the type of message format you wish to construct",
+			PT_KEYWORD, "GENERAL", enumeration(MT_GENERAL), PT_DESCRIPTION, "use this for sending a general fncs topic/value pair",
+			PT_KEYWORD, "JSON", enumeration(MT_JSON), PT_DESCRIPTION, "use this for wanting to send a bundled json formatted message in a single topic",
+		PT_int32, "gridappd_publish_period", PADDR(real_time_gridappsd_publish_period), PT_DESCRIPTION, "use this with json bundling to set the period [s] at which data is published.",
+			// PT_KEYWORD, "JSON_SB", enumeration(MT_JSON_SB), PT_DESCRIPTION, "use this for wanting to subsribe a bundled json formatted message in a single topic",
+		PT_bool, "aggregate_publications", PADDR(aggregate_pub), PT_DESCRIPTION, "enable FNCS flag to aggregate publications",
+		PT_bool, "aggregate_subscriptions", PADDR(aggregate_sub), PT_DESCRIPTION, "enable FNCS flag to aggregate subscriptions",
+		// TODO add published properties here
+		NULL)<1)
+			throw "connection/fncs_msg::fncs_msg(MODULE*): unable to publish properties of connection:fncs_msg";
+	if ( !gl_publish_loadmethod(oclass,"route",(int (*)(void*, char*))loadmethod_fncs_msg_route) )
+		throw "connection/fncs_msg::fncs_msg(MODULE*): unable to publish route method of connection:fncs_msg";
+	if ( !gl_publish_loadmethod(oclass,"option",(int (*)(void*, char*))loadmethod_fncs_msg_option) )
+		throw "connection/fncs_msg::fncs_msg(MODULE*): unable to publish option method of connection:fncs_msg";
+	if ( !gl_publish_loadmethod(oclass,"publish",(int (*)(void*, char*))loadmethod_fncs_msg_publish) )
+		throw "connection/fncs_msg::fncs_msg(MODULE*): unable to publish publish method of connection:fncs_msg";
+	if ( !gl_publish_loadmethod(oclass,"subscribe",(int (*)(void*, char*))loadmethod_fncs_msg_subscribe) )
+		throw "connection/fncs_msg::fncs_msg(MODULE*): unable to publish subscribe method of connection:fncs_msg";
+	if ( !gl_publish_loadmethod(oclass,"configure",(int (*)(void*, char*))loadmethod_fncs_msg_configure) )
+		throw "connection/fncs_msg::fncs_msg(MODULE*): unable to publish configure method of connection:fncs_msg";
+}
+
+int fncs_msg::create(){
+	version = 1.0;
+	message_type = MT_GENERAL;
+	add_clock_update((void *)this,fncs_clocks_update);
+	register_object_interupdate((void *)this, fncs_dInterupdate);
+	register_object_deltaclockupdate((void *)this, fncs_dClockupdate);
+	// setup all the variable maps
+	for ( int n=1 ; n<14 ; n++ )
+		vmap[n] = new varmap;
+	port = new string("");
+	header_version = new string("");
+	hostname = new string("");
+	inFunctionTopics = new vector<string>();
+	real_time_gridappsd_publish_period = 3;
+
+	// default FNCS message aggregation flags to false
+	aggregate_pub = false;
+	aggregate_sub = false;
+
+	return 1;
+}
+
+int fncs_msg::publish(char *value)
+{
+	// gl_warning("entering fncs_msg::publish()"); //renke debug
+
+	int rv = 0;
+	rv = fncs_link(value, CT_PUBSUB);
+	return rv;
+}
+
+int fncs_msg::subscribe(char *value)
+{
+	// gl_warning("entering fncs_msg::subscribe()"); //renke debug
+
+	int rv = 0;
+	rv = fncs_link(value, CT_PUBSUB);
+	return rv;
+}
+
+int fncs_msg::route(char *value)
+{
+	int rv = 0;
+	rv = fncs_link(value, CT_ROUTE);
+	return rv;
+}
+
+void fncs_send_die(void)
+{
+	//need to check the exit code. send die with an error exit code.
+	int a;
+	a = 0;
+
+	gld_global exitCode("exit_code");
+	if(exitCode.get_int16() != 0){
+		fncs::die();
+//	} else {
+	//	fncs::finalize();
+	}
+}
+
+int fncs_msg::precommit(TIMESTAMP t1){
+	int result = 0;
+
+	if (message_type == MT_GENERAL){
+
+		//process external function calls
+		incoming_fncs_function();
+		//publish precommit variables
+		if(t1<gl_globalstoptime){
+			result = publishVariables(vmap[4]);
+			if(result == 0){
+				return result;
+			}
+			//read precommit variables from cache
+			result = subscribeVariables(vmap[4]);
+			if(result == 0){
+				return result;
+			}
+		}
+	}
+	// read precommit json variables from GridAPPSD, renke
+	//TODO
+	//else if (message_type == MT_JSON)
+	//{
+	//	result = subscribeJsonVariables();
+	//	if(result == 0){
+	//		return result;
+	//	}
+	//}
+
+	return 1;
+}
+
+TIMESTAMP fncs_msg::presync(TIMESTAMP t1){
+
+	int result = 0;
+	if (message_type == MT_GENERAL) {
+		result = publishVariables(vmap[5]);
+		if(result == 0){
+			return TS_INVALID;
+		}
+		//read presync variables from cache
+		result = subscribeVariables(vmap[5]);
+		if(result == 0){
+			return TS_INVALID;
+		}
+	} else if (message_type == MT_JSON)
+	{
+		result = subscribeJsonVariables();
+		if(result == 0){
+			return TS_INVALID;
+		}
+	}
+	return TS_NEVER;
+}
+
+TIMESTAMP fncs_msg::plc(TIMESTAMP t1){
+
+	int result = 0;
+	if(t1<gl_globalstoptime){
+		result = publishVariables(vmap[12]);
+		if(result == 0){
+			return TS_INVALID;
+		}
+		//read plc variables from cache
+		result = subscribeVariables(vmap[12]);
+		if(result == 0){
+			return TS_INVALID;
+		}
+	}
+	return TS_NEVER;
+}
+
+TIMESTAMP fncs_msg::sync(TIMESTAMP t1){
+
+	int result = 0;
+	TIMESTAMP t2;
+	if(t1<gl_globalstoptime){
+		result = publishVariables(vmap[6]);
+		if(result == 0){
+			return TS_INVALID;
+		}
+		//read sync variables from cache
+		result = subscribeVariables(vmap[6]);
+		if(result == 0){
+			return TS_INVALID;
+		}
+	}
+	if (message_type == MT_GENERAL)
+		return TS_NEVER;
+	else if (message_type == MT_JSON ){
+		t2=t1+1;
+		return t2;
+	}
+	return TS_INVALID;
+}
+
+TIMESTAMP fncs_msg::postsync(TIMESTAMP t1){
+
+	int result = 0;
+	if(t1<gl_globalstoptime){
+		result = publishVariables(vmap[7]);
+		if(result == 0){
+			return TS_INVALID;
+		}
+		//read postsync variables from cache
+		result = subscribeVariables(vmap[7]);
+		if(result == 0){
+			return TS_INVALID;
+		}
+	}
+	return TS_NEVER;
+}
+
+int fncs_msg::prenotify(PROPERTY* p,char* v){
+
+	int result = 0;
+	//publish prenotify variables
+	result = publishVariables(vmap[9]);
+	if(result == 0){
+		return result;
+	}
+	//read prenotify variables from cache
+	result = subscribeVariables(vmap[9]);
+	if(result == 0){
+		return result;
+	}
+	return 1;
+}
+
+int fncs_msg::postnotify(PROPERTY* p,char* v){
+
+	int result = 0;
+	//publish postnotify variables
+	result = publishVariables(vmap[10]);
+	if(result == 0){
+		return result;
+	}
+	//read postnotify variables from cache
+	result = subscribeVariables(vmap[10]);
+	if(result == 0){
+		return result;
+	}
+	return 1;
+}
+
+SIMULATIONMODE fncs_msg::deltaInterUpdate(unsigned int delta_iteration_counter, TIMESTAMP t0, unsigned int64 dt)
+{
+	int result = 0;
+	gld_global dclock("deltaclock");
+	if (!dclock.is_valid()) {
+		gl_error("fncs_msg::deltaInterUpdate: Unable to find global deltaclock!");
+		return SM_ERROR;
+	}
+	if(dclock.get_int64() > 0){
+		if(delta_iteration_counter == 0){
+			//publish commit variables
+			result = publishVariables(vmap[8]);
+			if(result == 0){
+				return SM_ERROR;
+			}
+			//read commit variables from cache
+			result = subscribeVariables(vmap[8]);
+			if(result == 0){
+				return SM_ERROR;
+			}
+
+			//process external function calls
+			incoming_fncs_function();
+
+			//publish precommit variables
+			result = publishVariables(vmap[4]);
+			if(result == 0){
+				return SM_ERROR;
+			}
+			//read precommit variables from cache
+			result = subscribeVariables(vmap[4]);
+			if(result == 0){
+				return SM_ERROR;
+			}
+			return SM_DELTA_ITER;
+		}
+
+		if(delta_iteration_counter == 1)
+		{
+			//publish presync variables
+			result = publishVariables(vmap[5]);
+			if(result == 0){
+				return SM_ERROR;
+			}
+			//read presync variables from cache
+			result = subscribeVariables(vmap[5]);
+			if(result == 0){
+				return SM_ERROR;
+			}
+			return SM_DELTA_ITER;
+		}
+
+		if(delta_iteration_counter == 2)
+		{
+			//publish plc variables
+			result = publishVariables(vmap[12]);
+			if(result == 0){
+				return SM_ERROR;
+			}
+			//read plc variables from cache
+			result = subscribeVariables(vmap[12]);
+			if(result == 0){
+				return SM_ERROR;
+			}
+			return SM_DELTA_ITER;
+		}
+
+		if(delta_iteration_counter == 3)
+		{
+			//publish sync variables
+			result = publishVariables(vmap[6]);
+			if(result == 0){
+				return SM_ERROR;
+			}
+			//read sync variables from cache
+			result = subscribeVariables(vmap[6]);
+			if(result == 0){
+				return SM_ERROR;
+			}
+			return SM_DELTA_ITER;
+		}
+
+		if(delta_iteration_counter == 4)
+			{
+			//publish postsync variables
+			result = publishVariables(vmap[7]);
+			if(result == 0){
+				return SM_ERROR;
+			}
+			//read postsync variables from cache
+			result = subscribeVariables(vmap[7]);
+			if(result == 0){
+				return SM_ERROR;
+			}
+		}
+	}
+	return SM_EVENT;
+}
+
+SIMULATIONMODE fncs_msg::deltaClockUpdate(double t1, unsigned long timestep, SIMULATIONMODE sysmode)
+{
+	SIMULATIONMODE rv = SM_DELTA;
+#if HAVE_FNCS
+	if (t1 > last_delta_fncs_time){
+		fncs::time fncs_time = 0;
+		fncs::time t = 0;
+		double dt = 0;
+		dt = (t1 - (double)initial_sim_time) * 1000000000.0;
+		if(sysmode == SM_EVENT) {
+			t = (fncs::time)((dt + (1000000000.0 / 2.0)) - fmod((dt + (1000000000.0 / 2.0)), 1000000000.0));
+		} else {
+			t = (fncs::time)((dt + ((double)(timestep) / 2.0)) - fmod((dt + ((double)(timestep) / 2.0)), (double)timestep));
+		}
+		fncs::update_time_delta((fncs::time)timestep);
+		fncs_time = fncs::time_request(t);
+		if(sysmode == SM_EVENT)
+			exitDeltamode = true;
+			rv = SM_EVENT;
+		if(fncs_time != t){
+			gl_error("fncs_msg::deltaClockUpdate: Cannot return anything other than the time GridLAB-D requested in deltamode.");
+			return SM_ERROR;
+		} else {
+			last_delta_fncs_time = (double)(fncs_time)/1000000000.0 + (double)(initial_sim_time);
+		}
+	}
+#endif
+	return rv; // We should've only gotten here by being in SM_DELTA to begin with.
+}
+
+TIMESTAMP fncs_msg::clk_update(TIMESTAMP t1)
+{
+	// TODO move t1 back if you want, but not to global_clock or before
+	TIMESTAMP fncs_time = 0;
+	if(exitDeltamode == true){
+#if HAVE_FNCS
+		fncs::update_time_delta(fncs_step);
+#endif
+		exitDeltamode = false;
+	}
+	if(t1 > last_approved_fncs_time){
+		if(gl_globalclock == gl_globalstoptime){
+#if HAVE_FNCS
+			fncs::finalize();
+#endif
+			//t1 = gl_globalstoptime + 1;
+			return TS_NEVER;
+		} else if (t1 > gl_globalstoptime && gl_globalclock < gl_globalstoptime){
+			t1 == gl_globalstoptime;
+		}
+#if HAVE_FNCS
+		fncs::time t = 0;
+		t = (fncs::time)((t1 - initial_sim_time)*1000000000);
+		fncs_time = ((TIMESTAMP)fncs::time_request(t))/1000000000 + initial_sim_time;
+#endif
+
+		if(fncs_time <= gl_globalclock){
+			gl_error("fncs_msg::clock_update: Cannot return the current time or less than the current time.");
+			return TS_INVALID;
+		} else {
+			last_approved_fncs_time = fncs_time;
+			t1 = fncs_time;
+		}
+	}
+	return t1;
+}
+
+int fncs_msg::finalize(){
+
+	int nvecsize = vjson_publish_gld_property_name.size();
+	for (int isize=0 ; isize<nvecsize ; isize++){
+	   delete vjson_publish_gld_property_name[isize]->obj;
+	   delete vjson_publish_gld_property_name[isize]->prop;
+	}
+
+	return 1;
+}
+
+int fncs_msg::get_varmapindex(const char *name)
+{
+	const char *varmapname[] = {"","allow","forbid","init","precommit","presync","sync","postsync","commit","prenotify","postnotify","finalize","plc","term"};
+	int n;
+	for ( n=1 ; n<14 ; n++ )
+	{
+		if ( strcmp(varmapname[n],name)==0 )
+			return n;
+	}
+	return 0;
+}
+
+int fncs_msg::fncs_link(char *value, COMMUNICATIONTYPE comtype){
+	int rv = 0;
+	int n = 0;
+	char command[1024] = "";
+	char argument[1024] = "";
+	VARMAP *mp = NULL;
+	//parse argument to fill the relay function link list and the varmap link list.
+	if(sscanf(value, "%[^:]:%[^\n]", command, argument) == 2){
+		if(strncmp(command,"init", 4) == 0){
+			gl_warning("fncs_msg::publish: It is not possible to pass information at init time with fncs. communication is ignored");
+			rv = 1;
+		} else if(strncmp(command, "function", 8) == 0){
+			rv = parse_fncs_function(argument, comtype);
+		} else {
+			n = get_varmapindex(command);
+			if(n != 0){
+				rv = vmap[n]->add(argument, comtype);
+			}
+		}
+	} else {
+		gl_error("fncs_msg::publish: Unable to parse input %s.", value);
+		rv = 0;
+	}
+	return rv;
+}
+int fncs_msg::parse_fncs_function(char *value, COMMUNICATIONTYPE comtype){
+	int rv = 0;
+	char localClass[64] = "";
+	char localFuncName[64] = "";
+	char direction[8] = "";
+	char remoteClassName[64] = "";
+	char remoteFuncName[64] = "";
+	char topic[1024] = "";
+	CLASS *fclass = NULL;
+	FUNCTIONADDR flocal = NULL;
+	if(sscanf(value, "%[^/]/%[^-<>\t ]%*[\t ]%[-<>]%*[\t ]%[^\n]", localClass, localFuncName, direction, topic) != 4){
+		gl_error("fncs_msg::parse_fncs_function: Unable to parse input %s.", value);
+		return rv;
+	}
+	// get local class structure
+	fclass = callback->class_getname(localClass);
+	if ( fclass==NULL )
+	{
+		gl_error("fncs_msg::parse_fncs_function(const char *spec='%s'): local class '%s' does not exist", value, localClass);
+		return rv;
+	}
+	flocal = callback->function.get(localClass, localFuncName);
+	// setup outgoing call
+	if(strcmp(direction, "->") == 0){
+		// check local class function map
+		if ( flocal!=NULL )
+			gl_warning("fncs_msg::parse_fncs_function(const char *spec='%s'): outgoing call definition of '%s' overwrites existing function definition in class '%s'",value,localFuncName,localClass);
+
+		sscanf(topic, "%[^/]/%[^\n]", remoteClassName, remoteFuncName);
+		// get relay function
+		flocal = add_fncs_function(this,localClass, localFuncName,remoteClassName,remoteFuncName,NULL,DXD_WRITE, comtype);
+
+		if ( flocal==NULL )
+			return rv;
+
+		// define relay function
+		rv = callback->function.define(fclass,localFuncName,flocal)!=NULL;
+		if(rv == 0){
+			gl_error("fncs_msg::parse_fncs_function(const char *spec='%s'): failed to define the function '%s' in local class '%s'.", value, localFuncName, localClass);
+			return rv;
+		}
+	// setup incoming call
+	} else if ( strcmp(direction,"<-")==0 ){
+		// check to see is local class function is valid
+		if( flocal == NULL){
+			gl_error("fncs_msg::parse_fncs_function(const char *spec='%s'): local function '%s' is not valid.",value, localFuncName);
+			return 0;
+		}
+		flocal = add_fncs_function(this, localClass, localFuncName, "", topic, NULL, DXD_READ, comtype);
+		if( flocal == NULL){
+			rv = 1;
+		}
+	}
+	return rv;
+}
+
+
+int fncs_msg::publish_fncsjson_link()  //Renke add
+{
+	// check whether the json configure has content
+	if (publish_json_config.isNull()) {
+		gl_warning(" publish json configure is empty!!! \n");
+		return 1;
+	}
+
+	vjson_publish_gld_property_name.clear();
+	JsonProperty *gldProperty = NULL;
+	for (Json::ValueIterator it = publish_json_config.begin(); it != publish_json_config.end(); it++) {
+
+		const string gldObjectName = it.name();
+		string gldPropertyName;
+		string gldObjpropertyName;
+
+
+		int nsize = publish_json_config[gldObjectName].size();
+		//gl_verbose("fncs_msg.publish_fncsjson_link(): gldObjectName: %s, nsize: %d . \n", gldObjectName.c_str(), nsize); //renke debug
+
+		for (int isize=0; isize<nsize ; isize++) {
+			gldPropertyName = publish_json_config[gldObjectName][isize].asString();
+			gldProperty = new JsonProperty(gldObjectName, gldPropertyName);
+			//gldObjpropertyName = gldObjectName + ".";
+			//gldObjpropertyName = gldObjpropertyName + gldPropertyName;
+			//gl_verbose("fncs_msg.publish_fncsjson_link(): processing json configure publish properties: %s \n",
+					//gldObjpropertyName.c_str());  //renke debug
+			vjson_publish_gld_property_name.push_back(gldProperty);
+		}
+
+	}
+
+	return 1;
+}
+
+static char fncs_hex(char c)
+{
+	if ( c<10 ) return c+'0';
+	else if ( c<16 ) return c-10+'A';
+	else return '?';
+}
+
+static char fncs_unhex(char h)
+{
+	if ( h>='0' && h<='9' )
+		return h-'0';
+	else if ( h>='A' && h<='F' )
+		return h-'A'+10;
+	else if ( h>='a' && h<='f' )
+		return h-'a'+10;
+  else return '?';
+}
+
+static size_t fncs_to_hex(char *out, size_t max, const char *in, size_t len)
+{
+	size_t hlen = 0;
+	for ( size_t n=0; n<len ; n++,hlen+=2 )
+	{
+		char byte = in[n];
+		char lo = in[n]&0xf;
+		char hi = (in[n]>>4)&0xf;
+		*out++ = fncs_hex(lo);
+		*out++ = fncs_hex(hi);
+		if ( hlen>=max ) return -1; // buffer overrun
+	}
+	*out = '\0';
+	return hlen;
+}
+
+extern "C" size_t fncs_from_hex(void *buf, size_t len, const char *hex, size_t hexlen)
+{
+	char *p = (char*)buf;
+	char lo = (char)NULL;
+	char hi = (char)NULL;
+	char c = (char)NULL;
+	size_t n = 0;
+	for(n = 0; n < hexlen && *hex != '\0'; n += 2)
+	{
+		c = fncs_unhex(*hex);
+		if ( c==-1 ) return -1; // bad hex data
+		lo = c&0x0f;
+		c = fncs_unhex(*(hex+1));
+		hi = (c<<4)&0xf0;
+		if ( c==-1 ) return -1; // bad hex data
+		*p = hi|lo;
+		p++;
+		hex = hex + 2;
+		if ( (n/2) >= len ) return -1; // buffer overrun
+	}
+	return n;
+}
+
+
+
+/// relay function to handle outgoing function calls
+extern "C" void outgoing_fncs_function(char *from, char *to, char *funcName, char *funcClass, void *data, size_t len)
+{
+	int64 result = -1;
+	char *rclass = funcClass;
+	char *lclass = from;
+	size_t hexlen = 0;
+	FUNCTIONSRELAY *relay = find_fncs_function(funcClass, funcName);
+	if(relay == NULL){
+		throw("fncs_msg::outgoing_route_function: the relay function for function name %s could not be found.", funcName);
+	}
+	if( relay->drtn != DXD_WRITE){
+		throw("fncs_msg:outgoing_fncs_function: the relay function for the function name ?s could not be found.", funcName);
+	}
+	char message[3000] = "";
+
+	size_t msglen = 0;
+
+	// check from and to names
+	if ( to==NULL || from==NULL )
+	{
+		throw("from objects and to objects must be named.");
+	}
+
+	// convert data to hex
+	hexlen = fncs_to_hex(message,sizeof(message),(const char*)data,len);
+
+	if(hexlen > 0){
+		//TODO: deliver message to fncs
+		stringstream payload;
+		char buffer[sizeof(len)];
+		sprintf(buffer, "%ld", len);
+		payload << "\"{\"from\":\"" << from << "\", " << "\"to\":\"" << to << "\", " << "\"function\":\"" << funcName << "\", " <<  "\"data\":\"" << message << "\", " << "\"data length\":\"" << buffer <<"\"}\"";
+		string key = string(relay->remotename);
+		if( relay->ctype == CT_PUBSUB){
+#if HAVE_FNCS
+			fncs::publish(key, payload.str());
+#endif
+		} else if( relay->ctype == CT_ROUTE){
+			string sender = string((const char *)from);
+			string recipient = string((const char *)to);
+#if HAVE_FNCS
+			fncs::route(sender, recipient, key, payload.str());
+#endif
+		}
+	}
+}
+
+extern "C" FUNCTIONADDR add_fncs_function(fncs_msg *route, const char *fclass, const char *flocal, const char *rclass, const char *rname, TRANSLATOR *xlate, DATAEXCHANGEDIRECTION direction, COMMUNICATIONTYPE ctype)
+{
+	// check for existing of relay (note only one relay is allowed per class pair)
+	FUNCTIONSRELAY *relay = find_fncs_function(rclass, rname);
+	if ( relay!=NULL )
+	{
+		gl_error("fncs_msg::add_fncs_function(rclass='%s', rname='%s') a relay function is already defined for '%s/%s'", rclass,rname,rclass,rname);
+		return 0;
+	}
+
+	// allocate space for relay info
+	relay = (FUNCTIONSRELAY*)malloc(sizeof(FUNCTIONSRELAY));
+	if ( relay==NULL )
+	{
+		gl_error("fncs_msg::add_fncs_function(rclass='%s', rname='%s') memory allocation failed", rclass,rname);
+		return 0;
+	}
+
+	// setup relay info
+	strncpy(relay->localclass,fclass, sizeof(relay->localclass)-1);
+	strncpy(relay->localcall,flocal,sizeof(relay->localcall)-1);
+	strncpy(relay->remoteclass,rclass,sizeof(relay->remoteclass)-1);
+	strncpy(relay->remotename,rname,sizeof(relay->remotename)-1);
+	relay->drtn = direction;
+	relay->next = first_fncsfunction;
+	relay->xlate = xlate;
+
+	// link to existing relay list (if any)
+	relay->route = route;
+	relay->ctype = ctype;
+	first_fncsfunction = relay;
+
+	// return entry point for relay function
+	if( direction == DXD_WRITE){
+		return (FUNCTIONADDR)outgoing_fncs_function;
+	} else {
+		return NULL;
+	}
+}
+
+extern "C" FUNCTIONSRELAY *find_fncs_function(const char *rclass, const char*rname)
+{
+	// TODO: this is *very* inefficient -- a hash should be used instead
+	FUNCTIONSRELAY *relay;
+	for ( relay=first_fncsfunction ; relay!=NULL ; relay=relay->next )
+	{
+		if (strcmp(relay->remotename, rname)==0 && strcmp(relay->remoteclass, rclass)==0)
+			return relay;
+	}
+	return NULL;
+}

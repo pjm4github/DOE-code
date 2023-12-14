@@ -1,0 +1,12 @@
+@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-cim16#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:GroundDisconnector rdf:type cim:Switch .
+cim:GroundDisconnector rdf:type cim:ProtectedSwitch .
+cim:GroundDisconnector rdf:type cim:ConductingEquipment .
+cim:GroundDisconnector.cim:Switch.open "false"^^xsd:boolean .
+cim:GroundDisconnector.cim:Switch.normalOpen "false"^^xsd:boolean .
+cim:GroundDisconnector.cim:Equipment.EquipmentContainer "abc123" .
+cim:GroundDisconnector.cim:Equipment.normallyInService "true"^^xsd:boolean .

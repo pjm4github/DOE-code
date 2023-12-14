@@ -1,0 +1,26 @@
+{
+  "PowerElectronicsConnection_CutOutTime": {
+    "subClassOf": [
+      "dateTime"
+    ],
+    "type": [
+      "Datatype"
+    ]
+  },
+  "PowerElectronicsConnection_CutInTime": {
+    "subClassOf": [
+      "dateTime"
+    ],
+    "type": [
+      "Datatype"
+    ]
+  },
+  "PowerElectronicsConnection": {
+    "subClassOf": [
+      "ConductingEquipment"
+    ],
+    "type": [
+      "Class"
+    ]
+  }
+}

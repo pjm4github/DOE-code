@@ -1,0 +1,14 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-cim16#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:Conductor rdf:type rdfs:Class ;
+    rdfs:subClassOf cim:Equipment ;
+    rdfs:label "Conductor"@en ;
+    rdfs:comment "A wire or combination of wires, with or without insulation, stranded or solid, installed for the conveyance of electricity."@en .
+
+cim:Conductor.ratedVoltage rdf:type rdfs:Property ;
+    rdfs:domain cim:Conductor ;
+    rdfs:range xsd:float ;
+    rdfs:label "ratedVoltage"@en ;
+    rdfs:comment "The rated voltage of the conductor."@en .

@@ -1,0 +1,25 @@
+{
+  "GroundingImpedance": {
+    "IdentifiedObject": {
+      "name": [
+        "GZ1"
+      ]
+    },
+    "GroundingImpedance": {
+      "sequences": [
+        "3"
+      ],
+      "GroundingType": [
+        "solid"
+      ]
+    },
+    "ConductingEquipment": {
+      "BaseVoltage": [
+        "400"
+      ]
+    },
+    "type": [
+      "PowerSystemResource"
+    ]
+  }
+}

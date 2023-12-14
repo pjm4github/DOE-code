@@ -1,0 +1,63 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/2012/CIM-schema-cim17#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:PerLengthSequenceImpedance rdf:type rdfs:Class ;
+  rdfs:subClassOf cim:PerLengthImpedance ;
+  rdfs:label "PerLengthSequenceImpedance"@en ;
+  rdfs:comment "Per unit length sequence impedance components."@en .
+
+cim:PerLengthSequenceImpedance.Z11 rdf:type rdf:Property ;
+  rdfs:domain cim:PerLengthSequenceImpedance ;
+  rdfs:range xsd:float ;
+  rdfs:label "Z11"@en ;
+  rdfs:comment "Zero sequence impedance."@en .
+
+cim:PerLengthSequenceImpedance.Z12 rdf:type rdf:Property ;
+  rdfs:domain cim:PerLengthSequenceImpedance ;
+  rdfs:range xsd:float ;
+  rdfs:label "Z12"@en ;
+  rdfs:comment "Positive sequence to zero sequence impedance."@en .
+
+cim:PerLengthSequenceImpedance.Z13 rdf:type rdf:Property ;
+  rdfs:domain cim:PerLengthSequenceImpedance ;
+  rdfs:range xsd:float ;
+  rdfs:label "Z13"@en ;
+  rdfs:comment "Negative sequence to zero sequence impedance."@en .
+
+cim:PerLengthSequenceImpedance.Z21 rdf:type rdf:Property ;
+  rdfs:domain cim:PerLengthSequenceImpedance ;
+  rdfs:range xsd:float ;
+  rdfs:label "Z21"@en ;
+  rdfs:comment "Zero sequence to positive sequence impedance."@en .
+
+cim:PerLengthSequenceImpedance.Z22 rdf:type rdf:Property ;
+  rdfs:domain cim:PerLengthSequenceImpedance ;
+  rdfs:range xsd:float ;
+  rdfs:label "Z22"@en ;
+  rdfs:comment "Positive sequence impedance."@en .
+
+cim:PerLengthSequenceImpedance.Z23 rdf:type rdf:Property ;
+  rdfs:domain cim:PerLengthSequenceImpedance ;
+  rdfs:range xsd:float ;
+  rdfs:label "Z23"@en ;
+  rdfs:comment "Negative sequence to positive sequence impedance."@en .
+
+cim:PerLengthSequenceImpedance.Z31 rdf:type rdf:Property ;
+  rdfs:domain cim:PerLengthSequenceImpedance ;
+  rdfs:range xsd:float ;
+  rdfs:label "Z31"@en ;
+  rdfs:comment "Zero sequence to negative sequence impedance."@en .
+
+cim:PerLengthSequenceImpedance.Z32 rdf:type rdf:Property ;
+  rdfs:domain cim:PerLengthSequenceImpedance ;
+  rdfs:range xsd:float ;
+  rdfs:label "Z32"@en ;
+  rdfs:comment "Positive sequence to negative sequence impedance."@en .
+
+cim:PerLengthSequenceImpedance.Z33 rdf:type rdf:Property ;
+  rdfs:domain cim:PerLengthSequenceImpedance ;
+  rdfs:range xsd:float ;
+  rdfs:label "Z33"@en ;
+  rdfs:comment "Negative sequence impedance."@en .

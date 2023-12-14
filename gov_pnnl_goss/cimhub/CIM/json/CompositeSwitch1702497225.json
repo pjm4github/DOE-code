@@ -1,0 +1,21 @@
+{
+  "CompositeSwitch": {
+    "type": [
+      "Equipment",
+      "ProtectedSwitch",
+      "ConductingEquipment",
+      "Switch"
+    ],
+    "comment": [
+      "A composite switch normally open as a disconnector, grounding switch, or the like."
+    ],
+    "Equipment": {
+      "EquipmentContainer": [
+        "Substation1"
+      ],
+      "normallyOpen": [
+        "false"
+      ]
+    }
+  }
+}

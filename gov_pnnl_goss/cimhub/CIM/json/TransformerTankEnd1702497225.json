@@ -1,0 +1,29 @@
+{
+  "TransformerTankEnd/123456": {
+    "TransformerTankEnd": {
+      "PhaseAngle": [
+        "0.0"
+      ],
+      "FromMeshImpedance": [
+        "0.0"
+      ],
+      "CoreAdmittance": [
+        "0.0"
+      ],
+      "PhaseShift": [
+        "0.0"
+      ],
+      "ToMeshImpedance": [
+        "0.0"
+      ]
+    },
+    "type": [
+      "TransformerTankEnd"
+    ],
+    "IdentifiedObject": {
+      "name": [
+        "TransformerTankEnd1"
+      ]
+    }
+  }
+}

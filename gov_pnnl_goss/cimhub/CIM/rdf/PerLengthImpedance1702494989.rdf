@@ -1,0 +1,21 @@
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+cim:PerLengthImpedance rdf:type cim:ConductingEquipment ;
+    cim:BaseVoltage "110000" ;
+    cim:Length "10" ;
+    cim:conductorCount "3" ;
+    cim:sequenceNumber "1" ;
+    cim:ConductingEquipment.end1 cim:Terminal_1 ;
+    cim:ConductingEquipment.end2 cim:Terminal_2 .
+
+cim:Terminal_1 rdf:type cim:Terminal ;
+    cim:Terminal.ConductingEquipment cim:Line_1 ;
+    cim:Terminal.PhaseCode "abc" .
+
+cim:Terminal_2 rdf:type cim:Terminal ;
+    cim:Terminal.ConductingEquipment cim:Line_1 ;
+    cim:Terminal.PhaseCode "abc" .
+
+cim:Line_1 rdf:type cim:ACLineSegment ;
+    cim:IdentifiedObject.name "Line1" .

@@ -1,0 +1,59 @@
+{
+  "RatioTapChangerTable": {
+    "type": [
+      "TapChangerTable"
+    ],
+    "RatioTapChangerTable": {
+      "highStep": [
+        "0.02"
+      ],
+      "lowStep": [
+        "0.02"
+      ],
+      "neutralStep": [
+        "0.01"
+      ]
+    },
+    "TapChangerTable": {
+      "normalStep": [
+        "0.01"
+      ],
+      "minValue": [
+        "0.9"
+      ],
+      "maxValue": [
+        "1.1"
+      ]
+    }
+  },
+  "RatioTapChangerTable.neutralStep": {
+    "type": [
+      "float"
+    ]
+  },
+  "TapChangerTable.maxValue": {
+    "type": [
+      "float"
+    ]
+  },
+  "TapChangerTable.minValue": {
+    "type": [
+      "float"
+    ]
+  },
+  "TapChangerTable.normalStep": {
+    "type": [
+      "float"
+    ]
+  },
+  "RatioTapChangerTable.highStep": {
+    "type": [
+      "float"
+    ]
+  },
+  "RatioTapChangerTable.lowStep": {
+    "type": [
+      "float"
+    ]
+  }
+}

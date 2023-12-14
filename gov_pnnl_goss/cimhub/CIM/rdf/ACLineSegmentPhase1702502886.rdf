@@ -1,0 +1,11 @@
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+cim:ACLineSegmentPhase rdf:type cim:ACLineSegmentPhase ;
+    cim:Equipment.EquipmentContainer "exampleEquipmentContainer" ;
+    cim:IdentifiedObject.mRID "exampleMRID" ;
+    cim:IdentifiedObject.name "exampleName" ;
+    cim:IdentifiedObject.description "Example AC line segment phase" ;
+    cim:ConductingEquipment.BaseVoltage "exampleBaseVoltage" ;
+    cim:ConductingEquipment.phases "examplePhases" ;
+    cim:ConductingEquipment.normallyInService "true" .

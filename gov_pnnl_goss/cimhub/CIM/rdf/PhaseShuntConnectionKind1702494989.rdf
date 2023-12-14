@@ -1,0 +1,16 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/2010/CIM-schema-cim15#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:PhaseShuntConnectionKind rdf:type rdfs:Class ;
+    rdfs:subClassOf cim:ShuntConnectionKind ;
+    rdfs:comment "The phase shunt connection for an equipment winding." .
+
+cim:PhaseShuntConnectionKind A rdfs:subClassOf cim:ShuntConnectionKind
+
+cim:PhaseShuntConnectionKind#Y rdfs:label "Y phase connection" ;
+    rdfs:comment "Y phase connection." .
+
+cim:PhaseShuntConnectionKind#D rdfs:label "Delta phase connection" ;
+    rdfs:comment "Delta phase connection." .

@@ -1,0 +1,13 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-cim16#> .
+
+cim:ProtectedSwitch rdf:type cim:Switch .
+cim:ProtectedSwitch rdf:type cim:ConductingEquipment .
+cim:ProtectedSwitch rdf:type cim:ProtectedSwitch .
+cim:ProtectedSwitch cim:Equipment.EquipmentContainer cim:Substation1 .
+cim:ProtectedSwitch cim:ProtectedSwitch.NormalOpen true .
+cim:ProtectedSwitch cim:ProtectedSwitch.normalOpen true .
+cim:ProtectedSwitch cim:ConductingEquipment.BaseVoltage cim:BaseVoltage1 .
+cim:ProtectedSwitch cim:ConductingEquipment.Terminals cim:ProtectedSwitchTerminals .
+cim:ProtectedSwitch cim:Switch.NormalOpen true .

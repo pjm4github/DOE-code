@@ -1,0 +1,37 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:Breaker rdf:type cim:Asset ;
+    cim:IdentifiedObject.name "ExampleBreaker" ;
+    cim:IdentifiedObject.mRID "ExampleBreaker01" ;
+    cim:Equipment.EquipmentContainer cim:Substation1 ;
+    cim:Equipment.Equipment.EquipmentContainer cim:Substation1 ;
+    cim:ConductingEquipment.BaseVoltage cim:BaseVoltage1 ;
+    cim:ConductingEquipment.Terminal cim:Terminal1 ;
+    cim:PowerSystemResource.AssetRoles cim:AssetRole1 ;
+    cim:PowerSystemResource.Asset cim:Asset1 ;
+    cim:Equipment.Equipment.AssetRoles cim:AssetRole1 ;
+    cim:Equipment.Equipment.Asset cim:Asset1 ;
+    cim:Equipment.Equipment.normallyInService "true"^^xsd:boolean .
+
+cim:Substation1 rdf:type cim:Substation ;
+    cim:IdentifiedObject.name "ExampleSubstation1" ;
+    cim:IdentifiedObject.mRID "Substation01" .
+
+cim:BaseVoltage1 rdf:type cim:BaseVoltage ;
+    cim:IdentifiedObject.name "ExampleBaseVoltage1" ;
+    cim:IdentifiedObject.mRID "BaseVoltage01" .
+
+cim:Terminal1 rdf:type cim:Terminal ;
+    cim:IdentifiedObject.name "ExampleTerminal1" ;
+    cim:IdentifiedObject.mRID "Terminal01" .
+
+cim:AssetRole1 rdf:type cim:AssetRole ;
+    cim:IdentifiedObject.name "ExampleAssetRole1" ;
+    cim:IdentifiedObject.mRID "AssetRole01" .
+
+cim:Asset1 rdf:type cim:Asset ;
+    cim:IdentifiedObject.name "ExampleAsset1" ;
+    cim:IdentifiedObject.mRID "Asset01" .

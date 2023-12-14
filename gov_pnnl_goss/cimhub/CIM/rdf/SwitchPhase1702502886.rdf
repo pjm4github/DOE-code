@@ -1,0 +1,14 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/2012/CIM-schema-cim17#> .
+
+<http://example.com/SwitchPhase_A> a cim:SwitchPhase ;
+    cim:IdentifiedObject.name "SwitchPhase_A" ;
+    cim:IdentifiedObject.description "Example SwitchPhase A" ;
+    cim:SwitchPhase.phaseSide1 "A" ;
+    cim:SwitchPhase.normalOpen true .
+
+<http://example.com/SwitchPhase_B> a cim:SwitchPhase ;
+    cim:IdentifiedObject.name "SwitchPhase_B" ;
+    cim:IdentifiedObject.description "Example SwitchPhase B" ;
+    cim:SwitchPhase.phaseSide1 "B" ;
+    cim:SwitchPhase.normalOpen false .

@@ -1,0 +1,11 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+
+cim:PerLengthSequenceImpedance rdf:type cim:PerLengthSequenceImpedance ;
+    rdfs:label "PerLengthSequenceImpedance" ;
+    cim:ACLineSegment_Length+ cim:LengthConductor seq:1.0 ;
+    cim:ACLineSegment_LengthY+ cim:LengthConductor seq:0.1 ;
+    cim:ACLineSegment_Length+ cim:LengthSpacing seq:10.0 ;
+    cim:ACLineSegment_LengthY+ cim:LengthSpacing seq:0.5 ;
+    cim:ACLineSegment_Length+ cim:LengthLine seq:5.0 ;
+    cim:ACLineSegment_LengthY+ cim:LengthLine seq:0.2 .

@@ -1,0 +1,19 @@
+@startjson
+{
+  "NonlinearShuntCompensatorPhase": {
+    "NonlinearShuntCompensatorPhase": {
+      "bMax": "0.0",
+      "gMax": "0.0",
+      "gMin": "0.0",
+      "x0PerSection": "0.0",
+      "normalSections": "1.0",
+      "xMin": "0.0",
+      "b0PerSection": "0.0",
+      "bMin": "0.0",
+      "xMax": "0.0",
+      "g0PerSection": "0.0"
+    },
+    "type": "NonlinearShuntCompensatorPhase"
+  }
+}
+@endjson

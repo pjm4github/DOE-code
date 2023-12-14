@@ -1,0 +1,14 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM#> .
+@prefix ex: <http://example.com#> .
+
+ex:EnergyConnection rdf:type cim:EnergyConnection ;
+    cim:Equipment.EquipmentContainer ex:Substation1 ;
+    cim:IdentifiedObject.name "Energy Connection 1" ;
+    cim:IdentifiedObject.description "Connection point for energy flow" ;
+    cim:IdentifiedObject.mRID "1-234-567" .
+
+ex:Substation1 rdf:type cim:Substation ;
+    cim:IdentifiedObject.name "Substation 1" ;
+    cim:IdentifiedObject.mRID "11-22-33" .

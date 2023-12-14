@@ -1,0 +1,19 @@
+@startjson
+{
+  "equipmentContainer1": {
+    "type": "EquipmentContainer",
+    "IdentifiedObject": {
+      "name": "Substation1"
+    }
+  },
+  "PowerElectronicsConnection": {
+    "Equipment": {
+      "EquipmentContainer": "equipmentContainer1"
+    },
+    "IdentifiedObject": {
+      "name": "PowerElectronicsConnection1"
+    },
+    "type": "PowerSystemResource"
+  }
+}
+@endjson

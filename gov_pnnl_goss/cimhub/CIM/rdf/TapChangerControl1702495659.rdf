@@ -1,0 +1,17 @@
+@prefix ex: <http://example.org/cim#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/61970/CIM-schema-CIM100#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:TapChangerControl1 a cim:TapChangerControl ;
+    cim:IdentifiedObject.name "TapChangerControl1" ;
+    cim:Equipment.EquipmentContainer ex:Substation1 ;
+    cim:RegulatingControl.mode "voltage" ;
+    cim:RegulatingControl.targetRange ex:VoltageLevel1 .
+
+ex:Substation1 a cim:Substation ;
+    cim:IdentifiedObject.name "Substation1" .
+
+ex:VoltageLevel1 a cim:VoltageLevel ;
+    cim:IdentifiedObject.name "VoltageLevel1" .

@@ -1,0 +1,16 @@
+{
+  "ShortCircuitRotorKind": {
+    "comment": [
+      "Kind of short circuit for rotor."
+    ],
+    "type": [
+      "Class"
+    ],
+    "subClassOf": [
+      "RotatingMachineKind"
+    ],
+    "label": [
+      "ShortCircuitRotorKind"
+    ]
+  }
+}

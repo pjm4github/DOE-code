@@ -1,0 +1,137 @@
+{
+  "PowerTransformerEnd": {
+    "IdentifiedObject": {
+      "name": [
+        "PowerTransformerEnd1",
+        "PowerTransformerEnd2"
+      ],
+      "mRID": [
+        "4",
+        "3"
+      ]
+    },
+    "PowerTransformerEnd": {
+      "ratedV": [
+        "11"
+      ],
+      "PowerTransformer": [
+        "PowerTransformer"
+      ],
+      "ratedS": [
+        "100"
+      ],
+      "ratedU": [
+        "110"
+      ]
+    },
+    "type": [
+      "PowerTransformerEnd"
+    ],
+    "PowerSystemResource": {
+      "AssetRoles": [
+        "AssetInfo"
+      ]
+    }
+  },
+  "TransformerCore": {
+    "IdentifiedObject": {
+      "mRID": [
+        "5"
+      ],
+      "name": [
+        "TransformerCore1"
+      ]
+    },
+    "type": [
+      "TransformerCore"
+    ],
+    "TransformerCore": {
+      "PowerTransformer": [
+        "PowerTransformer"
+      ]
+    }
+  },
+  "TransformerMeshImpedance": {
+    "IdentifiedObject": {
+      "mRID": [
+        "6"
+      ],
+      "name": [
+        "TransformerMeshImpedance1"
+      ]
+    },
+    "type": [
+      "TransformerMeshImpedance"
+    ],
+    "TransformerMeshImpedance": {
+      "PowerTransformer": [
+        "PowerTransformer"
+      ]
+    }
+  },
+  "TransformerEndInfo": {
+    "IdentifiedObject": {
+      "mRID": [
+        "7"
+      ],
+      "name": [
+        "TransformerEndInfo1"
+      ]
+    },
+    "TransformerEndInfo": {
+      "PowerTransformer": [
+        "PowerTransformer"
+      ]
+    },
+    "type": [
+      "TransformerEndInfo"
+    ]
+  },
+  "TransformerTank": {
+    "IdentifiedObject": {
+      "name": [
+        "TransformerTank1"
+      ],
+      "mRID": [
+        "2"
+      ]
+    },
+    "type": [
+      "TransformerTank"
+    ],
+    "TransformerTank": {
+      "PowerTransformer": [
+        "PowerTransformer"
+      ]
+    }
+  },
+  "PowerTransformer": {
+    "type": [
+      "PowerTransformer"
+    ],
+    "Equipment": {
+      "nominalVoltage": [
+        "110"
+      ],
+      "aggregate": [
+        "false"
+      ]
+    },
+    "IdentifiedObject": {
+      "mRID": [
+        "1"
+      ],
+      "description": [
+        "Example PowerTransformer"
+      ],
+      "name": [
+        "PowerTransformer1"
+      ]
+    },
+    "PowerSystemResource": {
+      "AssetRoles": [
+        "AssetInfo"
+      ]
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "EarthFaultCompensator": {
+    "type": [
+      "RegulatingCondEq"
+    ],
+    "RegulatingCondEq": {
+      "mode": [
+        "fixed"
+      ],
+      "controlEnabled": [
+        "false"
+      ]
+    }
+  }
+}

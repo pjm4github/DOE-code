@@ -1,0 +1,13 @@
+{
+  "PetersenCoilModeKind": {
+    "comment": [
+      "The operational mode of a Petersen coil used to compensate capacitive currents in an unearthed network, i.e. the method in which the coil is connected and operates."
+    ],
+    "type": [
+      "Class"
+    ],
+    "label": [
+      "PetersenCoilModeKind"
+    ]
+  }
+}

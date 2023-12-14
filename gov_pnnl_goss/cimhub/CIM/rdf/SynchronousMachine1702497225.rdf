@@ -1,0 +1,24 @@
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+cim:SynchronousMachine rdf:type cim:RotatingMachine ;
+    cim:Equipment.aggregate false ;
+    cim:Equipment.normallyInService true ;
+    cim:ConductingEquipment.BaseVoltage <BaseVoltage_id> ;
+    cim:RotatingMachine.p <p_value> ;
+    cim:RotatingMachine.q <q_value> ;
+    cim:RotatingMachine.ratedS <ratedS_value> ;
+    cim:RotatingMachine.ratedU <ratedU_value> ;
+    cim:RotatingMachine.GeneratingUnit <GeneratingUnit_id> ;
+    cim:RotatingMachine.networkequipmentcontainer <Substation_id> ;
+    cim:IdentifiedObject.name "ExampleSynchronousMachine" .
+
+<GeneratingUnit_id> rdf:type cim:GeneratingUnit ;
+    cim:IdentifiedObject.name "ExampleGeneratingUnit" .
+
+<Substation_id> rdf:type cim:Substation ;
+    cim:IdentifiedObject.name "ExampleSubstation" .
+
+<BaseVoltage_id> rdf:type cim:BaseVoltage ;
+    cim:IdentifiedObject.nominalVoltage <nominalVoltage_value> .

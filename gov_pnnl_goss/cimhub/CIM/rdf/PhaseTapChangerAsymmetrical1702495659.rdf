@@ -1,0 +1,27 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/2012/CIM-schema-cim16#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix ex: <http://example.org#> .
+
+ex:PhaseTapChangerAsymmetrical rdf:type cim:PhaseTapChangerAsymmetrical ;
+    cim:PhaseTapChanger-TapChangerControlMode "reactivePower" ;
+    cim:TapChangerControlStep cim:TapChangerControlStepKind.6 ;
+    cim:TapChangerTcul "2.5"^^xsd:float ;
+    cim:TransformerEnd ex:Transformers_1 ;
+    cim:tapChangerInitialDelay "12.0"^^xsd:float ;
+    cim:tapChangerP "3.0"^^xsd:float ;
+    cim:tapChangerUDC "5.0"^^xsd:float ;
+    cim:tapChangerUdcSetting "10.0"^^xsd:float ;
+    cim:tapChangerUac "7.0"^^xsd:float .
+
+ex:Transformers_1 rdf:type cim:PowerTransformerInfo ;
+    cim:AltTransformers ex:TransformerEndInfo ;
+    cim:tapChangerVoltageStep "345.0"^^xsd:float .
+
+ex:TransformerEndInfo rdf:type cim:TransformerEndInfo ;
+    cim:Bb "0.0"^^xsd:float ;
+    cim:Rb "0.0"^^xsd:float ;
+    cim:conOffDate "2017-01-01T00:00:00"^^xsd:dateTime ;
+    cim:tapChangerB "0.0"^^xsd:float ;
+    cim:tapChangerG "0.0"^^xsd:float .

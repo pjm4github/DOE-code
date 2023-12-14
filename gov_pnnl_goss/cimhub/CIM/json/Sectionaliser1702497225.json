@@ -1,0 +1,48 @@
+{
+  "exampleBaseVoltage": {
+    "type": [
+      "BaseVoltage"
+    ],
+    "BaseVoltage": {
+      "nominalVoltage": [
+        "11000"
+      ]
+    }
+  },
+  "Sectionaliser": {
+    "IdentifiedObject": {
+      "name": [
+        "Example Sectionaliser"
+      ],
+      "mRID": [
+        "exampleSectionaliser"
+      ]
+    },
+    "ConductingEquipment": {
+      "BaseVoltage": [
+        "exampleBaseVoltage"
+      ],
+      "phases": [
+        "ABC"
+      ]
+    },
+    "Equipment": {
+      "EquipmentContainer": [
+        "exampleEquipmentContainer"
+      ]
+    },
+    "type": [
+      "Sectionaliser"
+    ],
+    "Switch": {
+      "normalOpen": [
+        "true"
+      ]
+    }
+  },
+  "exampleEquipmentContainer": {
+    "type": [
+      "EquipmentContainer"
+    ]
+  }
+}

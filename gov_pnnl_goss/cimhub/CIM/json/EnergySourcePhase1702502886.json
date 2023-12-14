@@ -1,0 +1,17 @@
+{
+  "EnergySourcePhase1": {
+    "type": "EnergySourcePhase",
+    "EnergySourcePhase": {
+      "phaseConnection": "PhaseCode.A",
+      "VoltageLevel": "VoltageLevel1",
+      "phase": "A",
+      "phaseNominalVoltage": "11000"
+    }
+  },
+  "VoltageLevel1": {
+    "type": "VoltageLevel",
+    "VoltageLevel": {
+      "nominalVoltage": "11000"
+    }
+  }
+}

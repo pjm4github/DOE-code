@@ -1,0 +1,13 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-cim16#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:PhaseTapChangerTablePoint rdf:type cim:TapChangerTablePoint ;
+    cim:TapChangerTablePoint.tcul 50.0 ;
+    cim:TapChangerTablePoint.step phaseTapChangerStep ;
+    cim:PhaseTapChangerTablePoint.phases "A" .
+
+phaseTapChangerStep rdf:type cim:PhaseTapChangerStep ;
+    cim:TapChangerStep.normalStepNum 5 ;
+    cim:PhaseTapChangerStep.phases "A" .

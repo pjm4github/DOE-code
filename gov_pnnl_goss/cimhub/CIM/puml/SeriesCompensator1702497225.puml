@@ -1,0 +1,63 @@
+@startjson
+{
+  "BaseVoltage1": {
+    "type": 
+      "BaseVoltage"
+    ,
+    "IdentifiedObject": {
+      "name": 
+        "BaseVoltage1"
+      
+    },
+    "BaseVoltage": {
+      "nominalVoltage": 
+        "110"
+      
+    }
+  },
+  "SeriesCompensator": {
+    "IdentifiedObject": {
+      "name": 
+        "SeriesCompensator1"
+      
+    },
+    "SeriesCompensator": {
+      "g0": 
+        "0.0"
+      ,
+      "x": 
+        "0.5"
+      ,
+      "b0": 
+        "0.0"
+      ,
+      "r": 
+        "0.2"
+      
+    },
+    "ConductingEquipment": {
+      "BaseVoltage": 
+        "cim:BaseVoltage1"
+      
+    },
+    "Equipment": {
+      "EquipmentContainer": 
+        "cim:Substation1"
+      
+    },
+    "type": 
+      "SeriesCompensator"
+    
+  },
+  "Substation1": {
+    "type": 
+      "Substation"
+    ,
+    "IdentifiedObject": {
+      "name": 
+        "Substation1"
+      
+    }
+  }
+}
+@endjson

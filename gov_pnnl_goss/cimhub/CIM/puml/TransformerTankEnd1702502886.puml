@@ -1,0 +1,24 @@
+@startjson
+{
+  "TransformerTankEnd_002": {
+    "TransformerTankEnd": {
+      "insulatingOilTemperature": "65",
+      "insulatingOilBayID": "Bay002",
+      "name": "TankEnd2",
+      "insulatingOilStorageVolume": "700",
+      "insulatingOilDielectricStrength": "35"
+    },
+    "type": "TransformerTankEnd"
+  },
+  "TransformerTankEnd_001": {
+    "TransformerTankEnd": {
+      "insulatingOilStorageVolume": "500",
+      "insulatingOilBayID": "Bay001",
+      "name": "TankEnd1",
+      "insulatingOilDielectricStrength": "30",
+      "insulatingOilTemperature": "60"
+    },
+    "type": "TransformerTankEnd"
+  }
+}
+@endjson

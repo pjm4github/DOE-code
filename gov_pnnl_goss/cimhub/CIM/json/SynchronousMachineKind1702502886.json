@@ -1,0 +1,6 @@
+{
+  "HydroPumpStorage": {
+    "subClassOf": "GeneratingUnit",
+    "type": "SynchronousMachineKind"
+  }
+}

@@ -1,0 +1,12 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/61970-301/CDV#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:SinglePhaseKind rdf:type rdfs:Class ;
+  rdfs:label "SinglePhaseKind" ;
+  rdfs:comment "The type of single phase connection." .
+
+cim:SinglePhaseKind cim:symbol "SinglePhaseKind" .
+
+cim:SinglePhaseKind cim:subClassOf cim:SinglePhaseType .

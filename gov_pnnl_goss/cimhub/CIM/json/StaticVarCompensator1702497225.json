@@ -1,0 +1,28 @@
+{
+  "SVC1": {
+    "Equipment": {
+      "EquipmentContainer": [
+        "SS1"
+      ],
+      "aggregate": [
+        "false"
+      ]
+    },
+    "RegulatingCondEq": {
+      "operatingMode": [
+        "voltage"
+      ],
+      "bNormalValue": [
+        "1.0"
+      ]
+    },
+    "IdentifiedObject": {
+      "name": [
+        "SVC1"
+      ]
+    },
+    "type": [
+      "StaticVarCompensator"
+    ]
+  }
+}

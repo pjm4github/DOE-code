@@ -1,0 +1,18 @@
+{
+  "PerLengthImpedance": {
+    "type": [
+      "ConductancePerLength",
+      "ResistancePerLength",
+      "ReactancePerLength"
+    ],
+    "hasUnit": [
+      "ohm per km"
+    ],
+    "value": [
+      "0.001"
+    ],
+    "isDefinedBy": [
+      "CIM100"
+    ]
+  }
+}

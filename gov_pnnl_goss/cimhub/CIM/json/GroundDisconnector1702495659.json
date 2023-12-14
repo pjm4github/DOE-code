@@ -1,0 +1,30 @@
+{
+  "GroundDisconnector": {
+    "Equipment": {
+      "EquipmentContainer": [
+        "Substation1"
+      ]
+    },
+    "Switch": {
+      "normalOpen": [
+        "true"
+      ],
+      "open": [
+        "false"
+      ]
+    },
+    "IdentifiedObject": {
+      "name": [
+        "GD1"
+      ]
+    },
+    "type": [
+      "Switch"
+    ],
+    "ConductingEquipment": {
+      "BaseVoltage": [
+        "HV"
+      ]
+    }
+  }
+}

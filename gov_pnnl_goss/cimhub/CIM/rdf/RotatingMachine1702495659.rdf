@@ -1,0 +1,19 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix ex: <http://example.org#> .
+
+ex:Generator rdf:type cim:GeneratingUnit ;
+    cim:GeneratingUnit.equipmentContainer ex:Substation1 ;
+    cim:Equipment.aggregate ex:Aggregate1 ;
+    cim:Equipment.installationDate "2010-01-01T00:00:00"^^xsd:dateTime ;
+    cim:IdentifiedObject.name "GEN-1" ;
+    cim:IdentifiedObject.description "Generator 1" ;
+    cim:PowerSystemResource.nominalVoltage "11000" .
+
+ex:Substation1 rdf:type cim:Substation ;
+    cim:Equipment.EquipmentContainer "Substation 1" .
+
+ex:Aggregate1 rdf:type cim:Aggregate ;
+    cim:Equipment.aggregateEntity "Aggregate 1" .

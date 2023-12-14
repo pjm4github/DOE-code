@@ -1,0 +1,15 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/2012/CIM-schema-cim16#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+cim:FrequencyConverter rdf:type cim:FrequencyConverter ;
+    cim:IdentifiedObject.name "FrequencyConverter1" ;
+    cim:IdentifiedObject.mRID "1234567890" ;
+    cim:Equipment.aggregate "false"^^xsd:boolean ;
+    cim:Equipment.nominalVoltage "110"^^xsd:float ;
+    cim:Equipment.equipmentContainer cim:Substation1 ;
+    cim:PowerSystemResource.Location "Sample location" .
+
+cim:Substation1 rdf:type cim:Substation ;
+    cim:IdentifiedObject.name "Substation1" ;
+    cim:IdentifiedObject.mRID "9876543210" .

@@ -1,0 +1,191 @@
+{
+  "LoadBreakSwitch1": {
+    "PowerSystemResource": {
+      "AssetDatasheet": [
+        "AssetInfo1"
+      ],
+      "Location": [
+        "Location1"
+      ],
+      "Assets": [
+        "AssetInfo1"
+      ]
+    },
+    "Equipment": {
+      "Equipment": [
+        "Substation1"
+      ],
+      "aggregate": [
+        "false"
+      ]
+    },
+    "IdentifiedObject": {
+      "name": [
+        "LoadBreakSwitch1"
+      ],
+      "description": [
+        "Example Load Break Switch"
+      ],
+      "MRID": [
+        "8d2446b2-56ad-44ec-91b7-9370493e66ab"
+      ]
+    },
+    "ConductingEquipment": {
+      "OperationalLimitSet": [
+        "OperationalLimitSet1"
+      ],
+      "BaseVoltage": [
+        "BaseVoltage1"
+      ]
+    },
+    "Switch": {
+      "NormalOpen": [
+        "false"
+      ],
+      "retained": [
+        "false"
+      ],
+      "ratedVoltage": [
+        "120.0",
+        "120.0"
+      ],
+      "normalOpen": [
+        "false"
+      ],
+      "ratedCurrent": [
+        "120.0",
+        "120.0"
+      ]
+    },
+    "type": [
+      "LoadBreakSwitch"
+    ]
+  },
+  "OperationalLimitSet1": {
+    "OperationalLimitSet": {
+      "acceptableMomentaryReleaseDurationUnit": [
+        "cycles",
+        "cycles"
+      ],
+      "voltageLimit": [
+        "120.0",
+        "120.0"
+      ],
+      "acceptablePermanentRelease": [
+        "0"
+      ],
+      "acceptablePermanentReleaseUnit": [
+        "cycles",
+        "cycles"
+      ],
+      "acceptableDuration": [
+        "0"
+      ],
+      "currentLimit": [
+        "120.0",
+        "120.0"
+      ],
+      "conductingEquipment": [
+        "LoadBreakSwitch1"
+      ],
+      "acceptableDurationUnit": [
+        "minutes",
+        "minutes"
+      ],
+      "acceptableMomentaryReleaseDuration": [
+        "0"
+      ]
+    },
+    "IdentifiedObject": {
+      "name": [
+        "OperationalLimitSet1"
+      ]
+    },
+    "type": [
+      "OperationalLimitSet"
+    ]
+  },
+  "Substation1": {
+    "VoltageLevel": {
+      "Substation": [
+        "Substation1"
+      ],
+      "HighVoltageLimit": [
+        "120.0",
+        "120.0"
+      ],
+      "LowVoltageLimit": [
+        "120.0",
+        "120.0"
+      ]
+    },
+    "type": [
+      "Substation"
+    ],
+    "ConductingEquipment": {
+      "BaseVoltage": [
+        "BaseVoltage1"
+      ]
+    },
+    "IdentifiedObject": {
+      "name": [
+        "Substation1"
+      ]
+    },
+    "GeographicalRegion": {
+      "Substations": [
+        "Substation1"
+      ]
+    },
+    "Region": {
+      "RegionSubstation": [
+        "Substation1"
+      ]
+    },
+    "Substation": {
+      "Region": [
+        "Region1"
+      ]
+    }
+  },
+  "AssetInfo1": {
+    "type": [
+      "AssetDatasheet"
+    ],
+    "AssetDatasheet": {
+      "function": [
+        "Load Break Switch"
+      ],
+      "manufacturer": [
+        "Example Manufacturer"
+      ],
+      "model": [
+        "Example Model"
+      ]
+    },
+    "IdentifiedObject": {
+      "name": [
+        "AssetInfo1"
+      ]
+    }
+  },
+  "BaseVoltage1": {
+    "IdentifiedObject": {
+      "name": [
+        "BaseVoltage1"
+      ]
+    },
+    "BaseVoltage": {
+      "conductingEquipment": [
+        "LoadBreakSwitch1"
+      ],
+      "nominalVoltage": [
+        "120.0",
+        "120.0"
+      ]
+    },
+    "type": [
+      "BaseVoltage"
+    ]
+  }
+}

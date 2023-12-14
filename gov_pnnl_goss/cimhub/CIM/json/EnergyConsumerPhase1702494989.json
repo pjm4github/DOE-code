@@ -1,0 +1,33 @@
+{
+  "EnergyConsumerPhase_123456": {
+    "type": [
+      "EnergyConsumerPhase"
+    ],
+    "EnergyConsumerPhase": {
+      "phase": [
+        "A"
+      ],
+      "q": [
+        "80.0"
+      ],
+      "p": [
+        "100.0"
+      ]
+    },
+    "IdentifiedObject": {
+      "mRID": [
+        "123456"
+      ]
+    },
+    "PowerSystemResource": {
+      "nomU": [
+        "10.0"
+      ]
+    },
+    "ConnectivityNodeContainer": {
+      "name": [
+        "ExampleEnergyConsumerPhase"
+      ]
+    }
+  }
+}

@@ -1,0 +1,53 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-cim16#> .
+
+<http://iec.ch/TC57/2013/CIM-schema-cim16#PhaseImpedanceData> a rdfs:Class ;
+    rdfs:label "PhaseImpedanceData" ;
+    rdfs:comment "A set of three-phase or phase-to-phase impedances, and optionally zero sequence impedances." ;
+    cim:Class.category "core" .
+
+<http://iec.ch/TC57/PhaseImpedanceData#PhaseImpedanceData_1> a cim:PhaseImpedanceData ;
+    cim:PhaseImpedanceData.r @<http://iec.ch/TC57/PhaseImpedanceData#Resistance> ;
+    cim:PhaseImpedanceData.x @<http://iec.ch/TC57/PhaseImpedanceData#Reactance> ;
+    cim:PhaseImpedanceData.b @<http://iec.ch/TC57/PhaseImpedanceData#Conductance> ;
+    cim:PhaseImpedanceData.g @<http://iec.ch/TC57/PhaseImpedanceData#Susceptance> ;
+    cim:PhaseImpedanceData.zeroSequenceR @<http://iec.ch/TC57/PhaseImpedanceData#ZeroSequenceResistance> ;
+    cim:PhaseImpedanceData.zeroSequenceX @<http://iec.ch/TC57/PhaseImpedanceData#ZeroSequenceReactance> ;
+    cim:PhaseImpedanceData.zeroSequenceB @<http://iec.ch/TC57/PhaseImpedanceData#ZeroSequenceConductance> ;
+    cim:PhaseImpedanceData.zeroSequenceG @<http://iec.ch/TC57/PhaseImpedanceData#ZeroSequenceSusceptance> .
+
+<http://iec.ch/TC57/PhaseImpedanceData#Resistance> a cim:Resistance ;
+    rdfs:label "Resistance" ;
+    rdfs:comment "The resistance of the branch." ;
+    cim:Resistance.phases "ABC" .
+
+<http://iec.ch/TC57/PhaseImpedanceData#Reactance> a cim:Reactance ;
+    rdfs:label "Reactance" ;
+    rdfs:comment "The reactance of the branch." ;
+    cim:Reactance.phases "ABC" .
+
+<http://iec.ch/TC57/PhaseImpedanceData#Conductance> a cim:Conductance ;
+    rdfs:label "Conductance" ;
+    rdfs:comment "The susceptance of the branch." ;
+    cim:Conductance.phases "ABC" .
+
+<http://iec.ch/TC57/PhaseImpedanceData#Susceptance> a cim:Susceptance ;
+    rdfs:label "Susceptance" ;
+    rdfs:comment "The susceptance of the branch." ;
+    cim:Susceptance.phases "ABC" .
+
+<http://iec.ch/TC57/PhaseImpedanceData#ZeroSequenceResistance> a cim:Resistance ;
+    rdfs:label "ZeroSequenceResistance" ;
+    rdfs:comment "The zero sequence resistance." .
+
+<http://iec.ch/TC57/PhaseImpedanceData#ZeroSequenceReactance> a cim:Reactance ;
+    rdfs:label "ZeroSequenceReactance" ;
+    rdfs:comment "The zero sequence reactance." .
+
+<http://iec.ch/TC57/PhaseImpedanceData#ZeroSequenceConductance> a cim:Conductance ;
+    rdfs:label "ZeroSequenceConductance" ;
+    rdfs:comment "The zero sequence conductance." .
+
+<http://iec.ch/TC57/PhaseImpedanceData#ZeroSequenceSusceptance> a cim:Susceptance ;
+    rdfs:label "ZeroSequenceSusceptance" ;
+    rdfs:comment "The zero sequence susceptance." .

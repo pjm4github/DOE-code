@@ -1,0 +1,19 @@
+@startjson
+{
+  "Substation1": {
+    "type": "Substation",
+    "IdentifiedObject": {
+      "name": "Substation1"
+    }
+  },
+  "Clamp1": {
+    "type": "Clamp",
+    "Equipment": {
+      "EquipmentContainer": "Substation1"
+    },
+    "IdentifiedObject": {
+      "name": "Clamp1"
+    }
+  }
+}
+@endjson

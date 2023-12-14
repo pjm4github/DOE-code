@@ -1,0 +1,11 @@
+{
+  "Conductor": {
+    "comment": "An overhead electrical line conductor.",
+    "subClassOf": [
+      "Equipment",
+      "ConductingEquipment"
+    ],
+    "type": "Class",
+    "label": "Conductor"
+  }
+}

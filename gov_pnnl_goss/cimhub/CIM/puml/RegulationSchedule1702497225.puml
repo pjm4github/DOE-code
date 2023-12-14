@@ -1,0 +1,31 @@
+@startjson
+{
+  "RegulationSchedule": {
+    "Document": {
+      "lastModified": 
+        "2019-08-13T10:51:17.770000"
+      ,
+      "createdBy": 
+        "JohnDoe"
+      ,
+      "created": 
+        "2019-08-13T10:51:17.770000"
+      ,
+      "lastModifiedBy": 
+        "JohnDoe"
+      
+    },
+    "IdentifiedObject": {
+      "mRID": 
+        "ea5aaa3c-c67c-4634-8768-4823d06bc02d"
+      ,
+      "description": 
+        "Regulation schedule in the form of occurences at absolute times of the day. A special feature is that the schedule can wrap around midnight. For a 24-hours, hourly schedule, there will be 24 scheduled occurences of events."
+      
+    },
+    "type": 
+      "Document"
+    
+  }
+}
+@endjson

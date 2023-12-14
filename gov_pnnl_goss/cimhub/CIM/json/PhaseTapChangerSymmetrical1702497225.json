@@ -1,0 +1,74 @@
+{
+  "PhaseTapChangerSymmetrical": {
+    "TapChanger": {
+      "TapChangerInfo": [
+        "PhaseTapChangerInfo"
+      ],
+      "TapChangerControl": [
+        "PhaseTapChangerControl"
+      ],
+      "stepCount": [
+        "32"
+      ],
+      "normalStep": [
+        "16"
+      ]
+    },
+    "type": [
+      "TapChanger"
+    ],
+    "IdentifiedObject": {
+      "name": [
+        "ExampleSymmetricalTapChanger"
+      ],
+      "mRID": [
+        "example123"
+      ]
+    }
+  },
+  "PhaseTapChangerControl": {
+    "type": [
+      "TapChangerControl"
+    ],
+    "IdentifiedObject": {
+      "mRID": [
+        "control123"
+      ],
+      "name": [
+        "ExampleControl"
+      ]
+    },
+    "TapChangerControl": {
+      "lineDropCompensation": [
+        "false"
+      ]
+    }
+  },
+  "PhaseTapChangerInfo": {
+    "IdentifiedObject": {
+      "name": [
+        "ExampleInfo"
+      ],
+      "mRID": [
+        "info123"
+      ]
+    },
+    "TapChangerInfo": {
+      "lowStep": [
+        "-8"
+      ],
+      "highStep": [
+        "8"
+      ],
+      "stepVoltageIncrement": [
+        "1.0"
+      ],
+      "neutralStep": [
+        "0"
+      ]
+    },
+    "type": [
+      "TapChangerInfo"
+    ]
+  }
+}

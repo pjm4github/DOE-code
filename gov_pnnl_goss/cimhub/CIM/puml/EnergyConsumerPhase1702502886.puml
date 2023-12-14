@@ -1,0 +1,23 @@
+@startjson
+{
+  "EnergyConsumerPhase_EnergyConsumerPhase1": {
+    "Equipment": {
+      "EquipmentContainer": "SubGeographicalRegion_SubGeographicalRegion1"
+    },
+    "type": "EnergyConsumerPhase",
+    "EnergyConsumerPhase": {
+      "phase": "A"
+    },
+    "IdentifiedObject": {
+      "mRID": "1",
+      "name": "EnergyConsumerPhase1"
+    },
+    "ConductingEquipment": {
+      "BaseVoltage": "BaseVoltage_BaseVoltage1"
+    },
+    "EnergyConsumer": {
+      "pfixed": "120.5"
+    }
+  }
+}
+@endjson

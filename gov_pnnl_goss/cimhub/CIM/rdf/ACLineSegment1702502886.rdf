@@ -1,0 +1,20 @@
+@prefix cim: <http://iec.ch/TC57/CIM#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix base: <http://iec.ch/TC57/CIM#> .
+
+base:ACLineSegment_12345 a cim:ACLineSegment ;
+    cim:IdentifiedObject.mRID "12345" ;
+    cim:IdentifiedObject.name "ExampleACLineSegment" ;
+    cim:PowerSystemResource.AssetRoles cim:AssetInfo ;
+    cim:ConductingEquipment.BaseVoltage "123" ;
+    cim:ACLineSegment.b0ch 0.0 ;
+    cim:ACLineSegment.bch 0.0 ;
+    cim:ACLineSegment.g0ch 0.01 ;
+    cim:ACLineSegment.gch 0.0 ;
+    cim:ACLineSegment.r "0.01"^^xsd:float ;
+    cim:ACLineSegment.x "0.03"^^xsd:float ;
+    cim:ConductingEquipment.PerLengthPhaseImpedance "0.01+0.03i" .
+
+cim:AssetInfo a cim:AssetInfo .

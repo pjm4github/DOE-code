@@ -1,0 +1,54 @@
+{
+  "TransformerTank": {
+    "IdentifiedObject": {
+      "mRID": [
+        "12345"
+      ],
+      "name": [
+        "TransformerTank1"
+      ]
+    },
+    "type": [
+      "Equipment"
+    ],
+    "Equipment": {
+      "aggregate": [
+        "false"
+      ],
+      "EquipmentContainer": [
+        "Substation1"
+      ]
+    },
+    "PowerSystemResource": {
+      "AssetRoles": [
+        "TransformerAssets1"
+      ]
+    }
+  },
+  "TransformerAssets1": {
+    "IdentifiedObject": {
+      "mRID": [
+        "54321"
+      ],
+      "name": [
+        "TransformerAssets1"
+      ]
+    },
+    "type": [
+      "TransformerAsset"
+    ]
+  },
+  "Substation1": {
+    "IdentifiedObject": {
+      "mRID": [
+        "98765"
+      ],
+      "name": [
+        "Substation1"
+      ]
+    },
+    "type": [
+      "Equipment"
+    ]
+  }
+}

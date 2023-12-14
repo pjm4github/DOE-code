@@ -1,0 +1,58 @@
+@startjson
+{
+  "BaseVoltage1": {
+    "BaseVoltage": {
+      "nominalVoltage": 
+        "110000"
+      
+    },
+    "IdentifiedObject": {
+      "name": 
+        "BV1"
+      ,
+      "mRID": 
+        "ExampleBaseVoltage1"
+      
+    },
+    "type": 
+      "BaseVoltage"
+    
+  },
+  "BusbarSection": {
+    "IdentifiedObject": {
+      "mRID": 
+        "ExampleBusbarSection1"
+      ,
+      "name": 
+        "BBSection1"
+      
+    },
+    "type": 
+      "ConductingEquipment"
+    ,
+    "ConductingEquipment": {
+      "BaseVoltage": 
+        "BaseVoltage1"
+      
+    },
+    "Equipment": {
+      "EquipmentContainer": 
+        "Substation1"
+      
+    }
+  },
+  "Substation1": {
+    "type": 
+      "Substation"
+    ,
+    "IdentifiedObject": {
+      "mRID": 
+        "ExampleSubstation1"
+      ,
+      "name": 
+        "Substation1"
+      
+    }
+  }
+}
+@endjson

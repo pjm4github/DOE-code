@@ -1,0 +1,16 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix cim: <http://iec.ch/TC57/CIM#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:Conductor rdf:type rdfs:Class ;
+    rdfs:subClassOf cim:Equipment .
+
+cim:Conductor rdf:type rdfs:Class ;
+    rdfs:subClassOf cim:ConductingEquipment .
+
+cim:Conductor rdf:type rdfs:Class ;
+    rdfs:label "Conductor" .
+
+cim:Conductor rdf:type rdfs:Class ;
+    rdfs:comment "An overhead electrical line conductor." .

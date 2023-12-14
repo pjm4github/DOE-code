@@ -1,0 +1,20 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix ex: <http://example.com#> .
+
+ex:Switch1 a cim:Switch ;
+    cim:IdentifiedObject.mRID "123456" ;
+    cim:IdentifiedObject.name "Switch 1" ;
+    cim:Equipment.EquipmentContainer ex:Substation1 ;
+    cim:ConductingEquipment.BaseVoltage ex:BaseVoltage1 .
+
+ex:Substation1 a cim:Substation ;
+    cim:IdentifiedObject.mRID "789012" ;
+    cim:IdentifiedObject.name "Substation 1" .
+
+ex:BaseVoltage1 a cim:BaseVoltage ;
+    cim:IdentifiedObject.mRID "345678" ;
+    cim:IdentifiedObject.name "132kV" ;
+    cim:BaseVoltage.nominalVoltage "132000"^^xsd:float .

@@ -1,0 +1,7 @@
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+
+cim:TransformerCoreAdmittance rdf:type cim:EquivalentInjection ;
+    cim:BaseVoltage "10000.0" ;
+    cim:b "0.0" ;
+    cim:g "0.0" ;
+    cim:CoreComponent "PhaseTapChanger" .

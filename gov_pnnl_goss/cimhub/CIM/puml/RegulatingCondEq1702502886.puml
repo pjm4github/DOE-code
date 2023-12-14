@@ -1,0 +1,18 @@
+@startjson
+{
+  "RegulatingCondEq": {
+    "type": "ConductingEquipment",
+    "ConductingEquipment": {
+      "BaseVoltage": "123.4"
+    },
+    "IdentifiedObject": {
+      "mRID": "12345",
+      "name": "Regulating Equipment 1"
+    },
+    "RegulatingCondEq": {
+      "targetValue": "50.0",
+      "controlEnabled": "true"
+    }
+  }
+}
+@endjson

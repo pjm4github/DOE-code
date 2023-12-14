@@ -1,0 +1,30 @@
+@startjson
+{
+  "CompositeSwitch": {
+    "IdentifiedObject": {
+      "mrid": 
+        "1"
+      ,
+      "name": 
+        "CompositeSwitch1"
+      
+    },
+    "Switch": {
+      "ratedCurrent": 
+        "120.0"
+      ,
+      "normalOpen": 
+        "false"
+      ,
+      "isActive": 
+        "true"
+      
+    },
+    "type": [
+      "ConductingEquipment",
+      "ProtectedSwitch",
+      "Switch"
+    ]
+  }
+}
+@endjson

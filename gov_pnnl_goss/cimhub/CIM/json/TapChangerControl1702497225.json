@@ -1,0 +1,21 @@
+{
+  "TapChangerControl_12345": {
+    "TapChangerControl": {
+      "lineDropCompensation": [
+        "0.5"
+      ],
+      "MonitoredPhase": [
+        "singlePhase"
+      ],
+      "normalStep": [
+        "2"
+      ],
+      "targetValue": [
+        "1.05"
+      ]
+    },
+    "type": [
+      "TapChangerControl"
+    ]
+  }
+}

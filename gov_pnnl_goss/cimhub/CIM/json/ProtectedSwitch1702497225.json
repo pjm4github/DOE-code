@@ -1,0 +1,35 @@
+{
+  "ProtectedSwitch": {
+    "Switch": {
+      "NormalOpen": [
+        "true"
+      ]
+    },
+    "Equipment": {
+      "EquipmentContainer": [
+        "Substation1"
+      ]
+    },
+    "ProtectedSwitch": {
+      "normalOpen": [
+        "true"
+      ],
+      "NormalOpen": [
+        "true"
+      ]
+    },
+    "type": [
+      "Switch",
+      "ProtectedSwitch",
+      "ConductingEquipment"
+    ],
+    "ConductingEquipment": {
+      "Terminals": [
+        "ProtectedSwitchTerminals"
+      ],
+      "BaseVoltage": [
+        "BaseVoltage1"
+      ]
+    }
+  }
+}

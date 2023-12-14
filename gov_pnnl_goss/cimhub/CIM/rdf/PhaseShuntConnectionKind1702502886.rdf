@@ -1,0 +1,14 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-cim16#> .
+
+cim:PhaseShuntConnectionKind a rdfs:Class ;
+  rdfs:subClassOf cim:PhaseShuntConnection .
+
+cim:PhaseShuntConnectionKind.rYn a cim:PhaseShuntConnectionKind .
+cim:PhaseShuntConnectionKind.rYn rdfs:label "rYn" .
+
+cim:PhaseShuntConnectionKind.yN a cim:PhaseShuntConnectionKind .
+cim:PhaseShuntConnectionKind.yN rdfs:label "yN" .
+
+cim:PhaseShuntConnectionKind.d wye a cim:PhaseShuntConnectionKind .
+cim:PhaseShuntConnectionKind.d rdfs:label "d" .

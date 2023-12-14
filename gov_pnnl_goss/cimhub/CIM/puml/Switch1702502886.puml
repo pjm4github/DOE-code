@@ -1,0 +1,35 @@
+@startjson
+{
+  "Switch1": {
+    "Equipment": {
+      "EquipmentContainer": "Substation1"
+    },
+    "type": "Switch",
+    "ConductingEquipment": {
+      "BaseVoltage": "VoltageLevel1"
+    },
+    "IdentifiedObject": {
+      "name": "Switch 1",
+      "mRID": "Switch1"
+    }
+  },
+  "VoltageLevel1": {
+    "IdentifiedObject": {
+      "mRID": "VoltageLevel1",
+      "name": "Voltage Level 1"
+    },
+    "type": "VoltageLevel",
+    "VoltageLevel": {
+      "Substation": "Substation1",
+      "nominalVoltage": "11000"
+    }
+  },
+  "Substation1": {
+    "IdentifiedObject": {
+      "mRID": "Substation1",
+      "name": "Substation 1"
+    },
+    "type": "Substation"
+  }
+}
+@endjson

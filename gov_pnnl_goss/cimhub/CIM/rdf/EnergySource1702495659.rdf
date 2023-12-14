@@ -1,0 +1,21 @@
+@prefix cim: <http://iec.ch/TC57/CIM#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+cim:EnergySource a rdfs:Class ;
+    rdfs:label "EnergySource"^^xsd:string ;
+    rdfs:comment "The EnergySource class provides a superclass for all equipment that can produce or store energy such as a generator or a storage pump."^^xsd:string ;
+    rdfs:subClassOf cim:PowerSystemResource .
+
+cim:EnergySource rdf:type cim:EnergySource ;
+    cim:IdentifiedObject.mRID "1"^^xsd:ID ;
+    cim:IdentifiedObject.name "EnergySource1"^^xsd:string ;
+    cim:Equipment.aggregated "false"^^xsd:boolean ;
+    cim:Equipment.EquipmentContainer "Substation1"^^xsd:string ;
+    cim:ConductingEquipment.BaseVoltage "MV"^^xsd:string ;
+    cim:PowerSystemResource.Location "Location1"^^xsd:string ;
+    cim:PowerSystemResource.description "Example EnergySource"^^xsd:string ;
+    cim:EnergySource.maxOperatingP "10000"^^xsd:float ;
+    cim:EnergySource.activePower "8000"^^xsd:float .

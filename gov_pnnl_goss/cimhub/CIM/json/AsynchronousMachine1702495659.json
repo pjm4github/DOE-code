@@ -1,0 +1,27 @@
+{
+  "AsynchronousMachine": {
+    "label": [
+      "AsynchronousMachine"
+    ],
+    "type": [
+      "Class"
+    ],
+    "subClassOf": [
+      "RotatingMachine"
+    ]
+  },
+  "AsynchronousMachine.ratedS": {
+    "type": [
+      "Property"
+    ],
+    "label": [
+      "ratedS"
+    ],
+    "range": [
+      "ActivePower"
+    ],
+    "domain": [
+      "AsynchronousMachine"
+    ]
+  }
+}

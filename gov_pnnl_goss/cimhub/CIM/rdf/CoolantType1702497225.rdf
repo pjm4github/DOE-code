@@ -1,0 +1,12 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix cim: <http://iec.ch/TC57/2013/CIM-schema-cim16#> .
+
+cim:CoolantType a rdfs:Class ;
+  rdfs:label "CoolantType"@en ;
+  rdfs:comment "Type of coolant."@en .
+
+cim:Water a cim:CoolantType ;
+  rdfs:label "Water"@en .
+
+cim:Oil a cim:CoolantType ;
+  rdfs:label "Oil"@en .

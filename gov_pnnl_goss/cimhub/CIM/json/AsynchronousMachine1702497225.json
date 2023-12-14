@@ -1,0 +1,29 @@
+{
+  "AsynchronousMachine1": {
+    "RotatingMachine": {
+      "ratedS": [
+        "5000"
+      ],
+      "ratedVS": [
+        "6000"
+      ],
+      "Xd1": [
+        "1.0"
+      ],
+      "Xd": [
+        "1.2"
+      ],
+      "Xd2": [
+        "0.5"
+      ]
+    },
+    "Equipment": {
+      "EquipmentContainer": [
+        "substation1"
+      ]
+    },
+    "type": [
+      "AsynchronousMachine"
+    ]
+  }
+}

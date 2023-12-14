@@ -1,0 +1,7 @@
+@prefix cim: <http://iec.ch/TC57/2012/CIM-schema-cim16#> .
+
+cim:AsynchronousMachineKind
+    a cim:AsynchronousMachine ;
+    cim:PowerSystemResource.nominalVoltage "11000.0" ;
+    cim:RotatingMachine.ratedS "20000.0" ;
+    cim:RdfID "AsynchronousMachineKind1" .

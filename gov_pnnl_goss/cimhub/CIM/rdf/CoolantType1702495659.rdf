@@ -1,0 +1,13 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/2016/CIM-schema-cim17#> .
+
+cim:CoolantType rdf:type rdfs:Class ;
+    rdfs:subClassOf cim:TypeAsset ;
+    rdfs:label "CoolantType"@en ;
+    rdfs:comment "Specifies the type of coolant used in the cooling system"@en .
+
+cim:Oil rdf:type rdfs:Class ;
+    rdfs:subClassOf cim:CoolantType ;
+    rdfs:label "Oil"@en ;
+    rdfs:comment "Type of oil used as coolant"@en .

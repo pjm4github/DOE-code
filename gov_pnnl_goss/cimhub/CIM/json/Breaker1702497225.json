@@ -1,0 +1,39 @@
+{
+  "Breaker": {
+    "ProtectedSwitch": {
+      "ratedCurrent": [
+        "1200.0"
+      ],
+      "normalOpen": [
+        "false"
+      ],
+      "ratedVoltage": [
+        "138000.0"
+      ],
+      "breakingCapacity": [
+        "5000.0"
+      ]
+    },
+    "Equipment": {
+      "EquipmentContainer": [
+        "Substation1"
+      ],
+      "normalEnergised": [
+        "true"
+      ]
+    },
+    "IdentifiedObject": {
+      "name": [
+        "Bkr1"
+      ]
+    },
+    "ConductingEquipment": {
+      "BaseVoltage": [
+        "BaseVoltage1"
+      ]
+    },
+    "type": [
+      "ProtectedSwitch"
+    ]
+  }
+}

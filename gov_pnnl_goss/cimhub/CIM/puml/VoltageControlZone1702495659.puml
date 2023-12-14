@@ -1,0 +1,22 @@
+@startjson
+{
+  "VoltageControlZone1": {
+    "type": 
+      "VoltageControlZone"
+    ,
+    "IdentifiedObject": {
+      "name": 
+        "VoltageControlZone1"
+      
+    },
+    "VoltageControlZone": {
+      "Region": 
+        "Region1"
+      ,
+      "VoltageControlZoneType": 
+        "Substation"
+      
+    }
+  }
+}
+@endjson

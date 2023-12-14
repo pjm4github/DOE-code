@@ -1,0 +1,15 @@
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:PowerTransformer rdf:type cim:PowerTransformer ;
+    cim:IdentifiedObject.mRID "123456789"^^xsd:string ;
+    cim:IdentifiedObject.name "PowerTransformer1"^^xsd:string ;
+    cim:PowerSystemResource.AssetDatasheet "SampleDatasheet" ;
+    cim:PowerTransformer.vectorGroup "Dyn11"^^xsd:string ;
+    cim:Equipment.EquipmentContainer cim:Substation1 .
+
+cim:Substation1 rdf:type cim:Substation ;
+    cim:IdentifiedObject.mRID "987654321"^^xsd:string ;
+    cim:IdentifiedObject.name "Substation1"^^xsd:string .

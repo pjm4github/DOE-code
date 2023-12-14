@@ -1,0 +1,9 @@
+@prefix ex: <http://example.org/> .
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+ex:PeteresenCoilModeKind1 a cim:PeteresenCoilModeKind ;
+    rdfs:label "Earth @ 50%" ;
+    cim:PeteresenCoilModeKind.petersenCoilConnection cim:PetersenCoilConnectionKind.earth ;
+    cim:PeteresenCoilModeKind.percentNeutralCurrentEarth 50 .

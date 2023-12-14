@@ -1,0 +1,17 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM#> .
+
+cim:MutualCoupling rdf:type cim:PowerSystemResource ;
+                  cim:IdentifiedObject.name "ExampleMutualCoupling" ;
+                  cim:IdentifiedObject.description "A mutual coupling model for example purposes" ;
+                  cim:Equipment.Equipment.EquipmentContainer cim:Substation_1 ;
+                  cim:Equipment.Equipment.EquipmentContainer cim:Substation_2 ;
+                  cim:Equipment.Equipment.nominalVoltage "13200" ;
+                  cim:ConductingEquipment.BaseVoltage "13200" ;
+                  cim:ConductingEquipment.BaseVoltage.nominalVoltage "13200" ;
+                  cim:ConductingEquipment.BaseVoltage.nominalVoltage "13200" ;
+                  cim:MutualCoupling.mutualVoltage "300" ;
+                  cim:MutualCoupling.mutualResistance "0.02" ;
+                  cim:MutualCoupling.mutualReactance "0.05" ;
+                  cim:MutualCoupling.mutualSusceptance "0.01" .

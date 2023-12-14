@@ -1,0 +1,16 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:Junction rdf:type rdfs:Class .
+
+# Define properties
+cim:Junction rdfs:subClassOf cim:PowerSystemResource .
+cim:Junction rdfs:label "Junction"@en .
+
+# Individual junctions
+cim:J1 rdf:type cim:Junction .
+cim:J1 cim:IdentifiedObject.mRID "J1" .
+cim:J1 cim:IdentifiedObject.name "Junction 1" .
+cim:J1 cim:Equipment.EquipmentContainer cim:Substation1 .

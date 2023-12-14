@@ -1,0 +1,23 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM#> .
+
+cim:StaticVarCompensator rdf:type cim:Equipment ;
+                         cim:IdentifiedObject.name "SVC1" ;
+                         cim:Equipment.aggregated "false"^^rdf:boolean ;
+                         cim:Equipment.equipmentContainer cim:VoltageLevel1 ;
+                         cim:ConductingEquipment.cim:ConductingEquipment.BaseVoltage cim:BaseVoltage1 ;
+                         cim:ConductingEquipment.cim:ConductingEquipment.Terminal cim:Terminal1 ;
+                         cim:Equipment.normallyInService "true"^^rdf:boolean ;
+                         cim:RegulatingCondEq.cim:RegulatingCondEq.normalValue "0.95"^^rdf:float ;
+                         cim:RegulatingCondEq.cim:RegulatingCondEq.step "0.05"^^rdf:float ;
+                         cim:RegulatingCondEq.cim:RegulatingCondEq.targetValue "0.9"^^rdf:float .
+
+cim:VoltageLevel1 rdf:type cim:VoltageLevel ;
+                  cim:IdentifiedObject.name "VL1" .
+
+cim:BaseVoltage1 rdf:type cim:BaseVoltage ;
+                cim:IdentifiedObject.name "BV1" .
+
+cim:Terminal1 rdf:type cim:Terminal ;
+             cim:IdentifiedObject.name "T1" .

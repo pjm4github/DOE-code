@@ -1,0 +1,21 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix cim: <http://iec.ch/TC57/CIM100#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix : <http://iec.ch/TC57/CIM100#> .
+
+:MutualCoupling rdf:type cim:TransformerEndInfo ;
+    cim:TransformerEndInfo.ApparentPowerRating 100.0 ;
+    cim:TransformerEndInfo.RatedS ;
+    cim:TransformerEndInfo.RatedU 120.0 ;
+    cim:TransformerEndInfo.TransformerEndInfo  "TI" ;
+    cim:TransformerEndInfo.effPct 95.0 ;
+    cim:TransformerEndInfo.id "1" ;
+    cim:TransformerEndInfo.r 0.01 ;
+    cim:TransformerEndInfo.r0 0.02 ;
+    cim:TransformerEndInfo.re 0.015 ;
+    cim:TransformerEndInfo.re0 0.012 ;
+    cim:TransformerEndInfo.x 0.04 ;
+    cim:TransformerEndInfo.x0 0.03 ;
+    cim:TransformerEndInfo.xe 0.035 ;
+    cim:TransformerEndInfo.xe0 0.025 .

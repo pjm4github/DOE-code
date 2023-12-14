@@ -1,0 +1,37 @@
+@startjson
+{
+  "ProtectedSwitch": {
+    "Equipment": {
+      "EquipmentContainer": 
+        "EC1"
+      
+    },
+    "ProtectedSwitch": {
+      "breakingCapacity": 
+        "1000.0"
+      ,
+      "normalOpen": 
+        "false"
+      
+    },
+    "IdentifiedObject": {
+      "name": 
+        "PSW1"
+      
+    },
+    "ConductingEquipment": {
+      "BaseVoltage": 
+        "BV1"
+      
+    },
+    "PowerSystemResource": {
+      "Location": 
+        "L1"
+      
+    },
+    "type": 
+      "Switch"
+    
+  }
+}
+@endjson

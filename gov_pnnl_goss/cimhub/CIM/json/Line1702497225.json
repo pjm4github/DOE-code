@@ -1,0 +1,47 @@
+{
+  "Line": {
+    "IdentifiedObject": {
+      "name": [
+        "Line1"
+      ]
+    },
+    "Equipment": {
+      "EquipmentContainer": [
+        "Substation1"
+      ]
+    },
+    "type": [
+      "ConductingEquipment"
+    ],
+    "ConductingEquipment": {
+      "BaseVoltage": [
+        "BaseVoltage1"
+      ]
+    }
+  },
+  "BaseVoltage1": {
+    "type": [
+      "BaseVoltage"
+    ],
+    "BaseVoltage": {
+      "nominalVoltage": [
+        "132000"
+      ]
+    },
+    "IdentifiedObject": {
+      "name": [
+        "HV"
+      ]
+    }
+  },
+  "Substation1": {
+    "type": [
+      "Substation"
+    ],
+    "IdentifiedObject": {
+      "name": [
+        "Substation1"
+      ]
+    }
+  }
+}

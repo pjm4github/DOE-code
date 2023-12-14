@@ -1,0 +1,72 @@
+@startjson
+{
+  "SyncMachine": {
+    "SynchronousMachine": {
+      "BaseVoltage": "BaseVoltage01",
+      "XDirectSubtrans": "XDirectSubtrans01",
+      "CoolantType": "CoolantType01",
+      "DynamicModel": "DynamicModel01",
+      "XQuadSubtrans": "XQuadSubtrans01",
+      "SubtransNeutralX": "SubtransNeutralX01",
+      "InitialPQCapabilityCurve": "InitialPQCapabilityCurve01",
+      "XDirectTransDirectSync": "XDirectTransDirectSync01",
+      "XQuadTransQuadSync": "XQuadTransQuadSync01",
+      "PrimeMovers": "PrimeMovers01",
+      "InitialReactiveCapabilityCurve": "InitialReactiveCapabilityCurve01"
+    },
+    "type": "SynchronousMachine",
+    "PowerSystemResource": {
+      "Location": "Location01",
+      "HydroPumpOpSchedule": "HydroPumpOpSchedule01"
+    },
+    "Equipment": {
+      "EquipmentContainer": "Substation01"
+    },
+    "IdentifiedObject": {
+      "name": "SyncMachine1"
+    }
+  },
+  "BaseVoltage01": {
+    "type": "BaseVoltage"
+  },
+  "HydroPumpOpSchedule01": {
+    "type": "HydroPumpOpSchedule"
+  },
+  "InitialReactiveCapabilityCurve01": {
+    "type": "ReactiveCapabilityCurve"
+  },
+  "CoolantType01": {
+    "type": "CoolantType"
+  },
+  "XDirectTransDirectSync01": {
+    "type": "XDirectTransDirectSync"
+  },
+  "SubtransNeutralX01": {
+    "type": "SubtransNeutralX"
+  },
+  "Substation01": {
+    "type": "Substation"
+  },
+  "PrimeMovers01": {
+    "type": "PrimeMovers"
+  },
+  "Location01": {
+    "type": "Location"
+  },
+  "XDirectSubtrans01": {
+    "type": "XDirectSubtrans"
+  },
+  "DynamicModel01": {
+    "type": "DynamicModel"
+  },
+  "XQuadSubtrans01": {
+    "type": "XQuadSubtrans"
+  },
+  "InitialPQCapabilityCurve01": {
+    "type": "PQCapabilityCurve"
+  },
+  "XQuadTransQuadSync01": {
+    "type": "XQuadTransQuadSync"
+  }
+}
+@endjson

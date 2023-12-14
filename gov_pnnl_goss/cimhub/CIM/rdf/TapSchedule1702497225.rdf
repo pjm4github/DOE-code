@@ -1,0 +1,18 @@
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim:   <http://iec.ch/TC57/CIM#> .
+
+cim:TapSchedule rdf:type cim:TapSchedule ;
+    cim:IdentifiedObject.mRID "1" ;
+    cim:IdentifiedObject.name "TapSchedule1" ;
+    cim:IdentifiedObject.description "Example TapSchedule" ;
+    cim:TapSchedule.TapChangerControl cim:TapChangerControl1 .
+
+cim:TapChangerControl1 rdf:type cim:TapChangerControl ;
+    cim:IdentifiedObject.mRID "2" ;
+    cim:IdentifiedObject.name "TapChangerControl1" ;
+    cim:IdentifiedObject.description "Example TapChangerControl" ;
+    cim:TapChangerControl.highStep 10 ;
+    cim:TapChangerControl.lowStep 1 .
+
+# More properties and relationships can be added as needed

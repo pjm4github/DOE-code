@@ -1,0 +1,18 @@
+{
+  "Disconnector": {
+    "IdentifiedObject": {
+      "name": [
+        "ExampleDisconnector"
+      ]
+    },
+    "type": [
+      "ProtectedSwitch",
+      "Switch"
+    ],
+    "Equipment": {
+      "EquipmentContainer": [
+        "ExampleSubstation"
+      ]
+    }
+  }
+}

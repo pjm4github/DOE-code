@@ -1,0 +1,85 @@
+{
+  "OperationalLimit001": {
+    "type": [
+      "OperationalLimit"
+    ],
+    "IdentifiedObject": {
+      "name": [
+        "Maximum Active Power"
+      ]
+    },
+    "OperationalLimit": {
+      "value": [
+        "900000"
+      ],
+      "unit": [
+        "W"
+      ]
+    }
+  },
+  "EnergySource": {
+    "Equipment": {
+      "aggregate": [
+        "true"
+      ],
+      "ratedS": [
+        "1000000"
+      ],
+      "OperationalLimitSet": [
+        "OperationalLimitSet001"
+      ]
+    },
+    "EnergySource": {
+      "energyType": [
+        "Wind"
+      ]
+    },
+    "type": [
+      "EnergySource"
+    ],
+    "PowerSystemResource": {
+      "Location": [
+        "123.456, 789.012"
+      ]
+    },
+    "IdentifiedObject": {
+      "name": [
+        "Wind Farm"
+      ]
+    }
+  },
+  "OperationalLimitSet001": {
+    "type": [
+      "OperationalLimitSet"
+    ],
+    "OperationalLimitSet": {
+      "OperationalLimit": [
+        "OperationalLimit001",
+        "OperationalLimit002"
+      ]
+    },
+    "IdentifiedObject": {
+      "name": [
+        "Wind Farm Operational Limit Set"
+      ]
+    }
+  },
+  "OperationalLimit002": {
+    "type": [
+      "OperationalLimit"
+    ],
+    "OperationalLimit": {
+      "value": [
+        "100000"
+      ],
+      "unit": [
+        "W"
+      ]
+    },
+    "IdentifiedObject": {
+      "name": [
+        "Minimum Active Power"
+      ]
+    }
+  }
+}

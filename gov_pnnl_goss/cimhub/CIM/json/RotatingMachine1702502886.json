@@ -1,0 +1,38 @@
+{
+  "RotatingMachine": {
+    "SynchronousMachine": {
+      "p": "80",
+      "r": "0.05",
+      "coolantType": "water",
+      "xDirectSubtrans": "0.2",
+      "xQuadTrans": "0.15",
+      "q": "20",
+      "x": "0.2",
+      "machineType": "1"
+    },
+    "RotatingMachine": {
+      "ratedS": "100",
+      "ratedP": "90",
+      "initialP": "85",
+      "ratedU": "10000",
+      "initialQ": "20",
+      "ratedQ": "25"
+    },
+    "type": "RotatingMachine",
+    "IdentifiedObject": {
+      "mRID": "1",
+      "name": "ExampleRotatingMachine"
+    },
+    "Equipment": {
+      "aggregate": "true",
+      "normallyInService": "true",
+      "EquipmentContainer": "Substation1"
+    },
+    "ConductingEquipment": {
+      "BaseVoltage": "10000"
+    },
+    "PowerSystemResource": {
+      "gid": "123456"
+    }
+  }
+}

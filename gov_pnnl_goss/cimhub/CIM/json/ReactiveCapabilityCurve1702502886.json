@@ -1,0 +1,14 @@
+{
+  "ReactiveCapabilityCurve": {
+    "type": "ReactiveCapabilityCurve",
+    "ReactiveCapabilityCurve": {
+      "qMin": "0.0",
+      "qMax": "100.0",
+      "p": "1.0",
+      "q": "0.0"
+    },
+    "IdentifiedObject": {
+      "name": "RCC1"
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "SwitchPhase": {
+    "Equipment": {
+      "Equipment": [
+        "Substation1"
+      ]
+    },
+    "SwitchPhase": {
+      "phaseSide1": [
+        "PhaseCode.A"
+      ],
+      "phaseSide2": [
+        "PhaseCode.B"
+      ]
+    },
+    "Switch": {
+      "normalOpen": [
+        "true"
+      ]
+    },
+    "IdentifiedObject": {
+      "name": [
+        "SwitchPhase1"
+      ]
+    },
+    "type": [
+      "Switch"
+    ]
+  },
+  "Substation1": {
+    "type": [
+      "Substation"
+    ],
+    "IdentifiedObject": {
+      "name": [
+        "Substation1"
+      ]
+    }
+  }
+}

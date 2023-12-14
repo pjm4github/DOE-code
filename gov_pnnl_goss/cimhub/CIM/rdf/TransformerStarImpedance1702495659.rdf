@@ -1,0 +1,14 @@
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim:   <http://iec.ch/TC57/CIM#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+
+cim:TransformerStarImpedance rdf:type rdfs:Class ;
+    rdfs:subClassOf cim:TransformerEnd ;
+
+    cim:TransformerEnd.conductance "0.0"^^xsd:float ;
+    cim:TransformerEnd.resistance "0.03"^^xsd:float ;
+    cim:TransformerEnd.reactance "0.25"^^xsd:float ;
+    cim:TransformerEnd.ratedS "1500000.0"^^xsd:float ;
+    cim:TransformerEnd.ratedU "132000.0"^^xsd:float ;
+    cim:IdentifiedObject.name "T1-STAR" .

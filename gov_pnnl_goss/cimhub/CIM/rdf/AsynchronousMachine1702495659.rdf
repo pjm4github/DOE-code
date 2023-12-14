@@ -1,0 +1,14 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+cim:AsynchronousMachine rdf:type rdfs:Class ;
+  rdfs:subClassOf cim:RotatingMachine .
+
+cim:AsynchronousMachine rdf:type rdfs:Class ;
+  rdfs:label "AsynchronousMachine"@en .
+
+cim:AsynchronousMachine.ratedS rdf:type rdfs:Property ;
+  rdfs:label "ratedS"@en ;
+  rdfs:domain cim:AsynchronousMachine ;
+  rdfs:range cim:ActivePower .

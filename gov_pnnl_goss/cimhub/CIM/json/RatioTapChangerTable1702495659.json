@@ -1,0 +1,42 @@
+{
+  "RatioTapChangerTable": {
+    "RatioTapChangerTable": {
+      "TapChangerControl:": [
+        "TapChangerControl"
+      ],
+      "RatioTapChanger:": [
+        "RatioTapChanger"
+      ],
+      "tabDelayTolerance:": [
+        "0.05"
+      ],
+      "tabDelay:": [
+        "0.1"
+      ],
+      "highStep:": [
+        "16"
+      ],
+      "lowStep:": [
+        "1"
+      ]
+    },
+    "TapChangerTable": {
+      "StepVoltage:": [
+        "1.0"
+      ]
+    },
+    "type": [
+      "TapChangerTable"
+    ]
+  },
+  "RatioTapChanger": {
+    "type": [
+      "TapChanger"
+    ]
+  },
+  "TapChangerControl": {
+    "type": [
+      "TapChangerControl"
+    ]
+  }
+}

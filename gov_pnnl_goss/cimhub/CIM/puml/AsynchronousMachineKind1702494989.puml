@@ -1,0 +1,36 @@
+@startjson
+{
+  "SteamTurbine": {
+    "subClassOf": 
+      "AsynchronousMachineKind"
+    ,
+    "type": 
+      "Class"
+    
+  },
+  "HydroTurbine": {
+    "subClassOf": 
+      "AsynchronousMachineKind"
+    ,
+    "type": 
+      "Class"
+    
+  },
+  "AsynchronousMachineKind": {
+    "type": 
+      "Class"
+    ,
+    "subClassOf": 
+      "RotatingMachineKind"
+    
+  },
+  "WindTurbine": {
+    "type": 
+      "Class"
+    ,
+    "subClassOf": 
+      "AsynchronousMachineKind"
+    
+  }
+}
+@endjson

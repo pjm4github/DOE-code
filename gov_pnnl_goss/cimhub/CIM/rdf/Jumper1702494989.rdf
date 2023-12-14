@@ -1,0 +1,13 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix cim: <http://iec.ch/TC57/CIM#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+cim:Jumper rdf:type cim:ConductingEquipment ;
+    cim:Equipment.EquipmentContainer "ExampleSubstation" ;
+    cim:Equipment.Equipment.PowerSystemResource "ExamplePowerSystemResource" ;
+    cim:IdentifiedObject.mRID "12345678-1234-1234-1234-1234567890AB" ;
+    cim:IdentifiedObject.name "ExampleJumper" .
+
+cim:ConductingEquipment.ratedCurrent "100"^^xsd:float ;
+    cim:ConductingEquipment.ratedVoltage "11"^^xsd:float .

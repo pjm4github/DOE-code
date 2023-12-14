@@ -1,0 +1,89 @@
+{
+  "LinearShuntCompensator_1": {
+    "Equipment": {
+      "aggregate": [
+        "true"
+      ],
+      "normallyInService": [
+        "true"
+      ]
+    },
+    "ShuntCompensator": {
+      "normalSections": [
+        "3"
+      ],
+      "step": [
+        "1.0"
+      ],
+      "switchOnDate": [
+        "2019-01-01T00:00:00"
+      ],
+      "switchOnInterval": [
+        "0.0"
+      ],
+      "nomU": [
+        "110.0"
+      ],
+      "maximumSections": [
+        "5"
+      ],
+      "bPerSection": [
+        "0.5"
+      ],
+      "aVRDelay": [
+        "0.0"
+      ],
+      "switchOnCount": [
+        "0"
+      ],
+      "aVRTransientTime": [
+        "0.0"
+      ]
+    },
+    "type": [
+      "LinearShuntCompensator"
+    ],
+    "LinearShuntCompensator": {
+      "g0PerSection": [
+        "0.0"
+      ],
+      "gPerSection": [
+        "0.005"
+      ],
+      "minimumSections": [
+        "1"
+      ],
+      "numberOfSections": [
+        "2"
+      ],
+      "bPerSection": [
+        "0.05"
+      ],
+      "normalSections": [
+        "3"
+      ],
+      "nomU": [
+        "110.0"
+      ],
+      "b0PerSection": [
+        "0.0"
+      ],
+      "maximumSections": [
+        "5"
+      ]
+    },
+    "IdentifiedObject": {
+      "mRID": [
+        "1"
+      ],
+      "name": [
+        "LSComp1"
+      ]
+    },
+    "RegulatingCondEq": {
+      "controlEnabled": [
+        "true"
+      ]
+    }
+  }
+}
