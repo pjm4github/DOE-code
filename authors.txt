@@ -1,0 +1,79 @@
+gov_pnnl_goss/cimhub/utils/constants_deprecated.py:@author: thay838
+gov_pnnl_goss/cimhub/utils/CreateHouses.py:@author: thay838
+gov_pnnl_goss/cimhub/utils/eia_recs/housingData.py:@author: thay838
+gov_pnnl_goss/cimhub/utils/eia_recs/__init__.py:@author: thay838
+gov_pnnl_goss/cimhub/utils/InsertHouses.py:@author: thay838
+gov_pnnl_goss/core/server/DataSourceObject.py:    * @author Craig Allwardt
+gov_pnnl_goss/core/server/TokenIdentifierMap.py:    * @author Craig Allwardt
+gov_pnnl_goss/gridappsd/api/ConfigurationManager.py:    @author shar064
+gov_pnnl_goss/gridappsd/api/SimulationManager.py:    @author shar064
+gov_pnnl_goss/gridappsd/app/AppManagerImpl.py:     @author shar064
+gov_pnnl_goss/gridappsd/data/DataEvent.py:    @author shar064
+gov_pnnl_goss/gridappsd/test/CoreGossConfig.py:#  * @author Craig Allwardt
+gov_pnnl_goss/gridlab/connection/json_link_demo.py:@author: Bryan Palmintier, NREL 2013
+gov_pnnl_goss/gridlab/gldcore/debug.cpp:	@author David P. Chassin
+gov_pnnl_goss/gridlab/gldcore/find.cpp:	@author David P. Chassin
+gov_pnnl_goss/gridlab/gldcore/gridlabd.h:	@author David P. Chassin
+gov_pnnl_goss/gridlab/gldcore/GridLabD.py:    @author Matthew Hauer <matthew.hauer@pnl.gov>
+gov_pnnl_goss/gridlab/gldcore/GridLabD.py:        @author Matthew Hauer <matthew.hauer@pnl.gov>
+gov_pnnl_goss/gridlab/gldcore/legal.cpp:	@author David P. Chassin
+gov_pnnl_goss/gridlab/gldcore/main.cpp:	@author David P. Chassin
+gov_pnnl_goss/gridlab/gldcore/output.cpp:	@author David P. Chassin
+gov_pnnl_goss/gridlab/gldcore/platform.h:	@author David P. Chassin
+gov_pnnl_goss/gridlab/gldcore/threadpool.h:@author David P. Chassin (PNNL) 
+gov_pnnl_goss/gridlab/GLDebug/src/gov/pnnl/gridlab/gldebug/GLDebug.java: * @author Jon McCall
+gov_pnnl_goss/gridlab/GLDebug/src/gov/pnnl/gridlab/gldebug/model/GLDebugSession.java: * @author Jon McCall
+gov_pnnl_goss/gridlab/GLDebug/src/gov/pnnl/gridlab/gldebug/model/GLListener.java: * @author Jon McCall
+gov_pnnl_goss/gridlab/GLDebug/src/gov/pnnl/gridlab/gldebug/model/GLProjectListener.java: * @author Jon McCall
+gov_pnnl_goss/gridlab/GLDebug/src/gov/pnnl/gridlab/gldebug/model/GLVersion.java: * @author Jon McCall
+gov_pnnl_goss/gridlab/GLDebug/src/gov/pnnl/gridlab/gldebug/ui/GLDebugFrame.java: * @author Jon McCall
+gov_pnnl_goss/gridlab/GLDebug/src/gov/pnnl/gridlab/gldebug/ui/GLIcons.java: * @author Jon McCall
+gov_pnnl_goss/gridlab/GLDebug/src/gov/pnnl/gridlab/gldebug/ui/ProjectSettingsDlg.java: * @author Jon McCall
+gov_pnnl_goss/gridlab/GLDebug/src/gov/pnnl/gridlab/gldebug/ui/SplashScreen.java: * @author Jon McCall
+gov_pnnl_goss/gridlab/GLDebug/src/gov/pnnl/gridlab/gldebug/ui/util/FileChooserEx.java: * @author Jon McCall
+gov_pnnl_goss/gridlab/GLDebug/src/gov/pnnl/gridlab/gldebug/ui/util/FileLocationPanel.java: * @author
+gov_pnnl_goss/gridlab/GLDebug/src/gov/pnnl/gridlab/gldebug/ui/util/FileLocationPanel.java: * @author  Jon McCall
+gov_pnnl_goss/gridlab/GLDebug/src/gov/pnnl/gridlab/gldebug/ui/util/LoadRecentProject.java: * @author
+gov_pnnl_goss/gridlab/GLDebug/src/gov/pnnl/gridlab/gldebug/ui/util/LoadRecentProject.java: *   @author J McCall
+gov_pnnl_goss/gridlab/GLDebug/src/gov/pnnl/gridlab/gldebug/ui/util/RecentFileManager.java: * @author Jon McCall
+gov_pnnl_goss/gridlab/GLDebug/src/gov/pnnl/gridlab/gldebug/ui/util/StyledJTextPane.java: * @author Jon McCall
+gov_pnnl_goss/gridlab/GLDebug/src/gov/pnnl/gridlab/gldebug/ui/util/UserPreferences.java: * @author Jon McCall
+gov_pnnl_goss/gridlab/GLDebug/src/gov/pnnl/gridlab/gldebug/ui/util/UserPreferences.java: * @author
+gov_pnnl_goss/gridlab/GLDebug/src/gov/pnnl/gridlab/gldebug/ui/util/Utils.java: * @author unascribed
+gov_pnnl_goss/gridlab/GLDebug/src/gov/pnnl/gridlab/util/IniFileAccess.java: * @author Jon McCall
+gov_pnnl_goss/gridlab/GLDebug/src/gov/pnnl/gridlab/util/IniFileAccess.java: * @author
+gov_pnnl_goss/gridlab/java/GClass.java: * @author Matthew Hauer <matthew.hauer@pnl.gov>
+gov_pnnl_goss/gridlab/java/GModule.java: * @author Matthew Hauer <matthew.hauer@pnl.gov>
+gov_pnnl_goss/gridlab/java/GObject.java: * @author Matthew Hauer <matthew.hauer@pnl.gov>
+gov_pnnl_goss/gridlab/java/GProperty.java: * @author Matthew Hauer <matthew.hauer@pnl.gov>
+gov_pnnl_goss/gridlab/java/GridlabD.java: * @author Matthew Hauer <matthew.hauer@pnl.gov>
+gov_pnnl_goss/gridlab/java/gridlabd_java.h:	@author Matthew L. Hauer
+gov_pnnl_goss/gridlab/network/pw_load.cpp:	@author		Matt Hauer d3p988
+gov_pnnl_goss/gridlab/network/pw_model.cpp:	@author		Matt Hauer d3p988
+gov_pnnl_goss/gridlab/network/relay.cpp:	@author David Chassin
+gov_pnnl_goss/gridlab/powerflow/fuse_test.h:	@author Chunlian Jin
+gov_pnnl_goss/gridlab/python/gridspice/account.py:@author: jimmy
+gov_pnnl_goss/gridlab/python/gridspice/elementbase.py:@authors: kyle
+gov_pnnl_goss/gridlab/python/gridspice/model.py:@author: jimmy
+gov_pnnl_goss/gridlab/python/gridspice/project.py:@author: jimmy
+gov_pnnl_goss/gridlab/python/gridspice/result.py:@author: jimmy
+gov_pnnl_goss/gridlab/python/gridspice/script.py:@author: kyle
+gov_pnnl_goss/gridlab/python/gridspice/simulation.py:@author: jimmy
+gov_pnnl_goss/gridlab/Python Scripts/CSI_New/Inverter_add_glm_object_dictionary.py:@author: fish334
+gov_pnnl_goss/gridlab/Python Scripts/CSI_New/Inverter_Function_File.py:@author: srid966
+gov_pnnl_goss/gridlab/Python Scripts/CSI_New/Inverter_Monte_Carlo.py:@author: srid966
+gov_pnnl_goss/gridlab/Python Scripts/CSI_New/Sid_add_glm_object_dictionary.py:@author: fish334
+gov_pnnl_goss/gridlab/Python Scripts/CSI_New/Sid_Batch_File_Gen.py:@author: srid966
+gov_pnnl_goss/gridlab/Python Scripts/CSI_New/Sid_PNNL_Solar.py:@author: srid966
+gov_pnnl_goss/gridlab/Python Scripts/CSI_New/Sid_Test_for_calling_functions.py:@author: srid966
+gov_pnnl_goss/gridlab/Python Scripts/Old OMF Scripts/AddLoadShapes.py:@author: fish334
+gov_pnnl_goss/gridlab/Python Scripts/Old OMF Scripts/AddTapeObjects.py:@author: fish334
+gov_pnnl_goss/gridlab/Python Scripts/Old OMF Scripts/add_glm_object_dictionary.py:@author: fish334
+gov_pnnl_goss/gridlab/Python Scripts/Old OMF Scripts/CommercialLoads.py:@author: D3P988
+gov_pnnl_goss/gridlab/Python Scripts/Old OMF Scripts/Configuration.py:@author: D3P988
+gov_pnnl_goss/gridlab/Python Scripts/Old OMF Scripts/convert_cyme_model.py:@author: fish334
+gov_pnnl_goss/gridlab/Python Scripts/Old OMF Scripts/feeder_parse_mod.py:@author: mayh819
+gov_pnnl_goss/gridlab/Python Scripts/Old OMF Scripts/Sid_New/Sid_add_glm_object_dictionary.py:@author: fish334
+gov_pnnl_goss/gridlab/Python Scripts/Old OMF Scripts/Sid_New/Sid_PNNL_Solar.py:@author: srid966
+gov_pnnl_goss/gridlab/Python Scripts/Old OMF Scripts/Sid_New/Sid_Test_for_calling_functions.py:@author: srid966
+gov_pnnl_goss/gridlab/Python Scripts/Old OMF Scripts/TechnologyParameters.py:@author: D3P988
