@@ -87,8 +87,9 @@ MAX_TOKENS = 10000  # Maximum number of tokens that can be used with the OPENAI 
 
 if __name__ == "__main__":
 
-    directory_path = f"{os.path.expanduser('~')}/Documents/Git/GitHub/GOSS-GridAPPS-D-PYTHON/gov_pnnl_goss/" \
-                     f"AAGENCODE/TC57CIM/IEC61970/Base/Topology/"
+    # lots of hand-crafting here needed to work through each subdirectory under Base
+    directory_path = f"{os.path.expanduser('~')}/Documents/Git/GitHub/GOSS-GridAPPS-D-PYTHON/" \
+                     f"CIM_STD_JAVA/TC57CIM/IEC61970/Base/Topology/"
 
     output_path = f"{directory_path}/Converted/"
     try:

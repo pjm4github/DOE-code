@@ -1,5 +1,15 @@
 from typing import Optional
-from TC57CIM.IEC61970.Base.Domain import PerCent, Frequency, RotationSpeed, ActivePower, Resistance, Seconds, Reactance
+from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Domain.PerCent import PerCent
+from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Domain.Frequency import Frequency
+from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Domain.RotationSpeed import RotationSpeed
+from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Domain.ActivePower import ActivePower
+from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Domain.Resistance import Resistance
+from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Domain.Seconds import Seconds
+from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Domain.Reactance import Reactance
+
+from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Wires.AsynchronousMachineKind import AsynchronousMachineKind
+from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Wires.RotatingMachine import RotatingMachine
+
 
 class AsynchronousMachine(RotatingMachine):
     def __init__(self) -> None:

@@ -1,3 +1,5 @@
+import re
+
 import json
 import os
 import time
@@ -24,7 +26,7 @@ class GptCodeConverter():
         self.model_name = model
         self.language = language
         self.results = ''
-        self.system_instructions = """You will be an expert of the Common Information Model (CIM) prepared by the Technical Committee 57 of the IEC."""
+        self.system_instructions = """Create an example rdf model of the given CIM type using only the rdf, rdfs and cim schemas using the Common Information Model (CIM) prepared by the Technical Committee 57 of the IEC as a reference"""
     def create_rdf(self,  instructions):
         """
         Convert the given code snippet using GPT-3.
@@ -70,7 +72,7 @@ if __name__ == "__main__":
         lines = f.readlines()
     for line in lines:
         cim_type = line.strip()
-        instructions = f"Show me an example of a {cim_type} rdf model, in parsable turtle format. Do not include the xsd schema."
+        instructions = f'Create a complex example rdf model of a {cim_type} CIM object without using xml. Make sure all rdf triples have a cim prefix.'
         print(f"Building an example rdf file for {cim_type}")
         converter.create_rdf(instructions)
         results = converter.results
@@ -83,10 +85,25 @@ if __name__ == "__main__":
                 enclosure = False
                 break
             if enclosure:
-                clean_lines.append(r)
+                # regexp to remove all these
+                # line = line.replace("^^xsd:boolean", "").replace("^^xsd:float","").replace("^^xsd:int", "").\
+                #             replace("^^xsd:complex", "").replace("^^xsd:integer", "").replace("^^xsd:double", "").\
+                #             replace("^^xsd:string", "").replace("^^xsd:dateTime", "")  # .replace("rdf:type", "a"))
+
+                # new_lines.append(line.replace("^^rdf:boolean", "").replace("^^rdf:float","").
+                #                  replace("^^rdf:int", "").replace("^^rdf:complex", "").replace("^^rdf:integer", "").
+                #                  replace("^^rdf:double", "").replace("^^rdf:string", ""))  # .replace("rdf:type", "a"))
+
+                r2 = re.sub(r"""(\^\^[a-zA-Z0-9]*)\:([a-zA-Z0-0]*)""", "", r)
+                if r2.find("@en")>0:
+                    r3 = r2.replace("@en", "")
+                else:
+                    r3 = r2
+                clean_lines.append(r3)
             if not enclosure and r.find("```") == 0:
                 enclosure = True
         clean_results = '\n'.join(clean_lines)
+
         rdf_directory_path = f"{directory_path}rdf/"
         Path(rdf_directory_path).mkdir(parents=True, exist_ok=True)
         output_filename = f"{rdf_directory_path}{cim_type}{current_time}.rdf"
@@ -96,23 +113,28 @@ if __name__ == "__main__":
         except UnicodeEncodeError as e:
             rdf_failcount += 1
             print(e)
-
+        struct_dict = {}
+        json_text = "{}"
         try:
             json_directory_path = f"{directory_path}json/"
             Path(json_directory_path).mkdir(parents=True, exist_ok=True)
             output_filename = f"{json_directory_path}{cim_type}{current_time}.json"
             struct_dict = build_init_struct(cim_type, clean_results)
             json_text = json.dumps(struct_dict, indent=2)
-            with open(output_filename, 'w') as f2:
-                f2.write(json_text)
-            pjson = f"@startjson\n{json_text}\n@endjson\n"
-            output_filename = f"{directory_path}puml/{cim_type}{current_time}.puml"
-            with open(output_filename, 'w') as f2:
-                f2.write(pjson)
         except Exception as e:
-            print(f"{cim_type} error: {e}")
+            print(f">>>>>>>>>> Structure build/ json.dumps failed {cim_type} error: {e}")
             json_failcount += 1
             json_fail_files.append(cim_type)
+        with open(output_filename, 'w') as f2:
+            f2.write(json_text)
+        pjson = f"@startjson\n{json_text}\n@endjson\n"
+        # Use this file name to output a non timestamped version of the CIM model.
+        output_filename = f"{directory_path}puml/{cim_type}.puml"
+        # output_filename = f"{directory_path}puml/{cim_type}{current_time}.puml"
+        with open(output_filename, 'w') as f2:
+            f2.write(pjson)
 
     print(f"RDF fails: {rdf_failcount}, JSON fails: {json_failcount}")
-    print(json_fail_files)
+    with open(f"{directory_path}/failed_conversions.txt", 'w') as f:
+        for line in json_fail_files:
+            f.write(line)

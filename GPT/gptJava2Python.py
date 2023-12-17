@@ -84,37 +84,7 @@ MAX_TOKENS = 10000  # Maximum number of tokens that can be used with the OPENAI 
 
 if __name__ == "__main__":
     directory_path = f"{os.path.expanduser('~')}/Documents/Git/GitHub/GOSS-GridAPPS-D-PYTHON/gov_pnnl_goss/gridappsd/dto/field/"
-    #directory_path = f"{os.path.expanduser('~')}/Documents/Git/GitHub/GOSS-GridAPPS-D-PYTHON/gov_pnnl_goss/gridappsd/dto/events/"
-    #directory_path = f"{os.path.expanduser('~')}/Documents/Git/GitHub/GOSS-GridAPPS-D-PYTHON/gov_pnnl_goss/gridappsd/data/"
-    #directory_path = f"{os.path.expanduser('~')}/Documents/Git/GitHub/GOSS-GridAPPS-D-PYTHON/gov_pnnl_goss/gridappsd/data/handlers/"
-    #directory_path = f"{os.path.expanduser('~')}/Documents/Git/GitHub/GOSS-GridAPPS-D-PYTHON/gov_pnnl_goss/gridappsd/configuration/"
-    #directory_path = f"{os.path.expanduser('~')}/Documents/Git/GitHub/GOSS-GridAPPS-D-PYTHON/gov_pnnl_goss/gridappsd/app/"
-    #directory_path = f"{os.path.expanduser('~')}/Documents/Git/GitHub/GOSS-GridAPPS-D-PYTHON/gov_pnnl_goss/core/server/web/"
-    #directory_path = f"{os.path.expanduser('~')}/Documents/Git/GitHub/GOSS-GridAPPS-D-PYTHON/gov_pnnl_goss/core/server/"
-    #directory_path = f"{os.path.expanduser('~')}/Documents/Git/GitHub/GOSS-GridAPPS-D-PYTHON/gov_pnnl_goss/core/server/impl/"
-    #directory_path = f"{os.path.expanduser('~')}/Documents/Git/GitHub/GOSS-GridAPPS-D-PYTHON/gov_pnnl_goss/core/security/system/"
-    #directory_path = f"{os.path.expanduser('~')}/Documents/Git/GitHub/GOSS-GridAPPS-D-PYTHON/gov_pnnl_goss/core/security/propertyfile/"
-    #directory_path = f"{os.path.expanduser('~')}/Documents/Git/GitHub/GOSS-GridAPPS-D-PYTHON/gov_pnnl_goss/core/security/ldap/"
-    #directory_path = f"{os.path.expanduser('~')}/Documents/Git/GitHub/GOSS-GridAPPS-D-PYTHON/gov_pnnl_goss/core/security/jwt/"
-    #directory_path = f"{os.path.expanduser('~')}/Documents/Git/GitHub/GOSS-GridAPPS-D-PYTHON/gov_pnnl_goss/core/security/impl/"
-    #directory_path = f"{os.path.expanduser('~')}/Documents/Git/GitHub/GOSS-GridAPPS-D-PYTHON/gov_pnnl_goss/core/security/"
-    #directory_path = f"{os.path.expanduser('~')}/Documents/Git/GitHub/GOSS-GridAPPS-D-PYTHON/gov_pnnl_goss/core/exception/"
-    #directory_path = f"{os.path.expanduser('~')}/Documents/Git/GitHub/GOSS-GridAPPS-D-PYTHON/gov_pnnl_goss/core/commands/"
-    #directory_path = f"{os.path.expanduser('~')}/Documents/Git/GitHub/GOSS-GridAPPS-D-PYTHON/gov_pnnl_goss/core/client/"
-    #directory_path = f"{os.path.expanduser('~')}/Documents/Git/GitHub/GOSS-GridAPPS-D-PYTHON/gov_pnnl_goss/gridappsd/api/"
-    #directory_path = f"{os.path.expanduser('~')}/Documents/Git/GitHub/GOSS-GridAPPS-D-PYTHON/gov_pnnl_goss/gridappsd/dto/"
-    # base_path = f"{os.path.expanduser('~')}\\Documents\\Git\\GitHub\\GOSS-GridAPPS-D-PYTHON\\gov_pnnl_goss\\gridappsd\\test\\"
-    # input_code_filename = "AppManagerTest.java"
-    # input_code_filename = "GridappsdTest.java"
-    # input_code_filename = "BGPGModelManagerTest.java"
-    # input_code_filename =  "CoreGossConfig.java"
-    # input_code_filename = "AppManagerTest2.java"
-    # input_code_filename = "SampleTests.java"
-    # input_code_filename = "SimulationStartTest.java"
-    # input_code_filename = "TestBaseGossGridAppsD.java"
-    # input_code_filename = "TestConstants.java"
-    # input_code_filename = "TestTestManager.java"
-    # input_code_filename = "AppManagerImpl.java"
+
 
     try:
         for filename in os.listdir(directory_path):

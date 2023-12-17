@@ -1,3 +1,5 @@
+import re
+
 from rdflib import Graph
 import json
 
@@ -22,22 +24,12 @@ def process_dict(input_dict):
             # If the value is a nested dictionary, recursively process it
             process_dict(value)
 
-
 def build_init_struct(root_name, rdf_data):
     """
     :param root_name: A string that represents the class name of the object that will be created
     :param rdf_data: The RDF data field that is presented as an example of the
     :return:
     """
-    new_lines = []
-    lines = rdf_data.split('\n')
-    for line in lines:
-        new_lines.append(line.replace("^^xsd:boolean", "").replace("^^xsd:float","").
-                         replace("^^xsd:int", "").replace("^^xsd:complex", "").replace("^^xsd:integer", "").
-                         replace("^^xsd:double", "").replace("^^xsd:string", "").replace("rdf:type", "a"))
-
-    rdf_data = '\n'.join(new_lines)
-    # Create an RDF graph and parse the RDF data
 
     g = Graph()
 

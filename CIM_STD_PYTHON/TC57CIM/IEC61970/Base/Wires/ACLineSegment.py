@@ -1,3 +1,5 @@
+from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Wires.Conductor import Conductor
+
 
 class ACLineSegment(Conductor):
     def __init__(self):
