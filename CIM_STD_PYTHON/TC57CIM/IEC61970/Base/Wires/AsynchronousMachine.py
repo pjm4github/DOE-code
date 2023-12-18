@@ -12,6 +12,11 @@ from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Wires.RotatingMachine import RotatingM
 
 
 class AsynchronousMachine(RotatingMachine):
+    """
+    A rotating machine whose shaft rotates asynchronously with the electrical field.
+    Also known as an induction machine with no external connection to the rotor
+    windings, e.g squirrel-cage induction machine.
+    """
     def __init__(self) -> None:
         super().__init__()
         self.asynchronousMachineType: Optional[AsynchronousMachineKind] = None  # Type of Asynchronous Machine (motor or generator)
