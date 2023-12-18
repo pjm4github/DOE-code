@@ -819,7 +819,7 @@ def CreateLoad(f,Name,row):
         if ((Pa != 0) or (Qa != 0)) and (phs.find('A') >= 0):
             WriteOneLoad (f, Name + '_a', bus + '.1', Pa, Qa, kv, cls, 'wye')
         if ((Pb != 0) or (Qb != 0)) and (phs.find('B') >= 0):
-            WriteOneLoad (f, Name + '_b', bus + '.2', Pb, Qb, kv, cls, 'wye')
+            WriteOneLoad (f, Name + 'b', bus + '.2', Pb, Qb, kv, cls, 'wye')
         if ((Pc != 0) or (Qc != 0)) and (phs.find('C') >= 0):
             WriteOneLoad (f, Name + '_c', bus + '.3', Pc, Qc, kv, cls, 'wye')
     return
