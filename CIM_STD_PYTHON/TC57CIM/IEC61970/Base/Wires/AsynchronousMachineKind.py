@@ -10,7 +10,7 @@ class AsynchronousMachineKind(Enum):
     """
 
     # The Asynchronous Machine is a generator.
-    generator = 1
+    GENERATOR = 1
 
     # The Asynchronous Machine is a motor.
-    motor = 2
+    MOTOR = 2
