@@ -5,10 +5,10 @@ from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Domain.UnitSymbol import UnitSymbol
 
 
 class Area:
-    unit: UnitSymbol = UnitSymbol().m2
+    unit: UnitSymbol = UnitSymbol.m2
 
     def __init__(self) -> None:
-        self.multiplier: UnitMultiplier = UnitMultiplier()
+        self.multiplier: UnitMultiplier = UnitMultiplier.none
         value: float = 0.0
         pass
 

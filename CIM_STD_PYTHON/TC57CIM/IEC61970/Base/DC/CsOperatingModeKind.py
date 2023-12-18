@@ -8,5 +8,5 @@ class CsOperatingModeKind(Enum):
     @version 1.0
     @created 15-Dec-2023 4:38:26 PM
     """
-    inverter = 0  # "Operating as inverter"
-    rectifier = 1  # "Operating as rectifier"
+    INVERTER = 0  # "Operating as inverter"
+    RECTIFIER = 1  # "Operating as rectifier"

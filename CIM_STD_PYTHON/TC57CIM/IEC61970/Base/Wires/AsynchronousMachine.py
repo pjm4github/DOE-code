@@ -19,26 +19,26 @@ class AsynchronousMachine(RotatingMachine):
     """
     def __init__(self) -> None:
         super().__init__()
-        self.asynchronousMachineType: Optional[AsynchronousMachineKind] = None  # Type of Asynchronous Machine (motor or generator)
-        self.converterFedDrive: Optional[bool] = None  # Indicates if the machine is a converter fed drive
-        self.efficiency: Optional[PerCent] = None  # Efficiency of the asynchronous machine at nominal operation in percent
-        self.iaIrRatio: Optional[float] = None  # Ratio of locked-rotor current to the rated current of the motor (Ia/Ir)
-        self.nominalFrequency: Optional[Frequency] = None  # Nameplate data indicates if the machine is 50 or 60 Hz
-        self.nominalSpeed: Optional[RotationSpeed] = None  # Nameplate data (depends on the slip and number of pole pairs)
-        self.polePairNumber: Optional[int] = None  # Number of pole pairs of stator
-        self.ratedMechanicalPower: Optional[ActivePower] = None  # Rated mechanical power (Pr in the IEC 60909-0)
-        self.reversible: Optional[bool] = None  # Indicates if the power can be reversible (for converter drive motors)
-        self.rr1: Optional[Resistance] = None  # Damper 1 winding resistance
-        self.rr2: Optional[Resistance] = None  # Damper 2 winding resistance
-        self.rxLockedRotorRatio: Optional[float] = None  # Locked rotor ratio (R/X)
-        self.tpo: Optional[Seconds] = None  # Transient rotor time constant (greater than tppo)
-        self.tppo: Optional[Seconds] = None  # Sub-transient rotor time constant (greater than 0)
-        self.xlr1: Optional[Reactance] = None  # Damper 1 winding leakage reactance
-        self.xlr2: Optional[Reactance] = None  # Damper 2 winding leakage reactance
-        self.xm: Optional[Reactance] = None  # Magnetizing reactance
-        self.xp: Optional[Reactance] = None  # Transient reactance (unsaturated) (greater than or equal to xpp)
-        self.xpp: Optional[Reactance] = None  # Sub-transient reactance (unsaturated) (greater than Xl)
-        self.xs: Optional[Reactance] = None  # Synchronous reactance (greater than xp)
+        self.asynchronousMachineType: Optional[AsynchronousMachineKind] = AsynchronousMachineKind.MOTOR  # Type of Asynchronous Machine (motor or generator)
+        self.converterFedDrive: Optional[bool] = False  # Indicates if the machine is a converter fed drive
+        self.efficiency: Optional[PerCent] = PerCent()  # Efficiency of the asynchronous machine at nominal operation in percent
+        self.iaIrRatio: Optional[float] = 1.0  # Ratio of locked-rotor current to the rated current of the motor (Ia/Ir)
+        self.nominalFrequency: Optional[Frequency] = Frequency()  # Nameplate data indicates if the machine is 50 or 60 Hz
+        self.nominalSpeed: Optional[RotationSpeed] = RotationSpeed()  # Nameplate data (depends on the slip and number of pole pairs)
+        self.polePairNumber: Optional[int] = 0  # Number of pole pairs of stator
+        self.ratedMechanicalPower: Optional[ActivePower] = ActivePower()  # Rated mechanical power (Pr in the IEC 60909-0)
+        self.reversible: Optional[bool] = True  # Indicates if the power can be reversible (for converter drive motors)
+        self.rr1: Optional[Resistance] = Resistance()  # Damper 1 winding resistance
+        self.rr2: Optional[Resistance] = Resistance()  # Damper 2 winding resistance
+        self.rxLockedRotorRatio: Optional[float] = 1.0  # Locked rotor ratio (R/X)
+        self.tpo: Optional[Seconds] = Seconds()  # Transient rotor time constant (greater than tppo)
+        self.tppo: Optional[Seconds] = Seconds()  # Sub-transient rotor time constant (greater than 0)
+        self.xlr1: Optional[Reactance] = Reactance()  # Damper 1 winding leakage reactance
+        self.xlr2: Optional[Reactance] = Reactance()  # Damper 2 winding leakage reactance
+        self.xm: Optional[Reactance] = Reactance()  # Magnetizing reactance
+        self.xp: Optional[Reactance] = Reactance()  # Transient reactance (unsaturated) (greater than or equal to xpp)
+        self.xpp: Optional[Reactance] = Reactance()  # Sub-transient reactance (unsaturated) (greater than Xl)
+        self.xs: Optional[Reactance] = Reactance()  # Synchronous reactance (greater than xp)
 
     def get_asynchronousMachineType(self) -> Optional[AsynchronousMachineKind]:
         return self.asynchronousMachineType

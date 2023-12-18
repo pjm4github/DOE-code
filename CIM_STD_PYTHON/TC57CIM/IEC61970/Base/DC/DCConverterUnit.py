@@ -6,4 +6,4 @@ class DCConverterUnit(DCEquipmentContainer):
 
     def __init__(self) -> None:
         super().__init__()
-        self.operation_mode: DCConverterOperatingModeKind = DCConverterOperatingModeKind.monopolar_ground_return
+        self.operation_mode: DCConverterOperatingModeKind = DCConverterOperatingModeKind.MONOPOLAR_GROUND_RETURN

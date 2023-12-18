@@ -15,9 +15,6 @@ class EnergySourcePhase:
         self.energy_source = EnergySource()
         self.phase = SinglePhaseKind.N
 
-    def finalize(self) -> None:
-        pass
-
     def get_energy_source(self) -> EnergySource:
         return self.energy_source
 

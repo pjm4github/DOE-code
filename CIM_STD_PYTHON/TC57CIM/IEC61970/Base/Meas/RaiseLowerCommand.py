@@ -14,9 +14,3 @@ class RaiseLowerCommand(AnalogControl):
     def __init__(self) -> None:
         super().__init__()
 
-    def finalize(self) -> None:
-        """
-        The ValueAliasSet used for translation
-        of a Control value to a name.
-        """
-        super().finalize()

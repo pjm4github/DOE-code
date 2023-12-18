@@ -13,8 +13,8 @@ class CapacitancePerLength:
     @created 15-Dec-2023 4:38:26 PM
     """
 
-    unit: UnitSymbol = UnitSymbol().FPerm
+    unit: UnitSymbol = UnitSymbol.FPerm
 
     def __init__(self) -> None:
         self.value: Optional[float] = None
-        self.multiplier: UnitMultiplier = UnitMultiplier()
+        self.multiplier: UnitMultiplier = UnitMultiplier.none

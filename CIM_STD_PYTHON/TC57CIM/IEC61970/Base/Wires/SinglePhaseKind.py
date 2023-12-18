@@ -2,9 +2,13 @@
 from enum import Enum
 
 class SinglePhaseKind(Enum):
-    A = 1
-    B = 2
-    C = 3
-    N = 4
-    S1 = 5
-    S2 = 6
+    """
+    Enumeration of single phase identifiers. Allows designation of single phases for both
+    transmission and distribution equipment, circuits and loads.
+    """
+    A = 1  # Phase A.
+    B = 2  # Phase B.
+    C = 3  # Phase C.
+    N = 4  # Neutral.
+    S1 = 5  # Secondary phase 1.
+    S2 = 6  # Secondary phase 2.

@@ -18,4 +18,10 @@ class Control(IOPoint):
     that are used to change the state in a process, e.g. close or open breaker, a
     set point value or a raise lower command.
     """
-    pass
+    def __init__(self):
+        super().__init__()
+        self.control_type = ""
+        self.operation_in_progress = False
+        self.timestamp = DateTime ()
+        self.unit_multiplier = UnitMultiplier.none
+        self.unit_symbol = UnitSymbol.count

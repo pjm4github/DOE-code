@@ -21,5 +21,3 @@ class DateTimeInterval:
         """
         self.end:  DateTime = DateTime()
 
-    def __del__(self) -> None:
-        pass

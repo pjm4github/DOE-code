@@ -17,7 +17,10 @@ class CommunicationLink(PowerSystemResource):
     Measurements. These Measurements can be used to model link status as
     operational, out of service, unit failure etc.
     """
-    # RTUs may be attached to communication links.
-    RemoteUnits= RemoteUnit()
 
-    BilateralExchangeActor= BilateralExchangeActor()
+    def __init__(self):
+        super().__init__()
+        self.remote_units = [RemoteUnit()]    # RTUs may be attached to communication links.
+
+        self.bilateral_exchange_actor = BilateralExchangeActor()
+

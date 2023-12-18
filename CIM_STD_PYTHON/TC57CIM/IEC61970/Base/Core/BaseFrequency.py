@@ -2,6 +2,7 @@
 
 
 from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Core.IdentifiedObject import IdentifiedObject
+from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Domain.Frequency import Frequency
 
 
 class BaseFrequency(IdentifiedObject):

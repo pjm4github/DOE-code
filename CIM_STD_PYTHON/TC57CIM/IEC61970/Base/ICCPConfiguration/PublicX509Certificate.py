@@ -28,6 +28,3 @@ class PublicX509Certificate:
 
         self.tcp_access_point: Optional[TCPAccessPoint] = TCPAccessPoint()
         self.iso_upper_layer: Optional[ISOUpperLayer] = ISOUpperLayer()
-
-    def finalize(self) -> None:
-        pass

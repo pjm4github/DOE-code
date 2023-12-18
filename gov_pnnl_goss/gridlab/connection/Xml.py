@@ -66,9 +66,6 @@ class Xml:
     def postnotify(self, p, v):
         pass
 
-    def finalize(self):
-        pass
-
     def plc(self, t):
         pass
 

@@ -9,9 +9,9 @@ class OrientationKind(Enum):
     @created 15-Dec-2023 4:38:28 PM
     """
 
-    positive = 0  # "positive"  # For 2D diagrams, a positive orientation will result in X values increasing from left
+    POSITIVE = 0  # "positive"  # For 2D diagrams, a positive orientation will result in X values increasing from left
                   # to right and Y values increasing from bottom to top.  This is also known as a right hand orientation.
 
-    negative = 1  # "negative"  # For 2D diagrams, a negative orientation gives the left-hand orientation
+    NEGATIVE = 1  # "negative"  # For 2D diagrams, a negative orientation gives the left-hand orientation
                   # (favoured by computer graphics displays) with X values increasing from left to right and Y values
                   # increasing from top to bottom.  This is also known as a left hand orientation.

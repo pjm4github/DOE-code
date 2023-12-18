@@ -14,4 +14,6 @@ class PSRType(IdentifiedObject):
     flexibility outside the scope of this standard, i.e. provide customisation that
     is non standard.
     """
-    pass
+    def __init__(self):
+        super().__init__()
+

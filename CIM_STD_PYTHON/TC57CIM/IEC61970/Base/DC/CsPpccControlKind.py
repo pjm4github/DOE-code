@@ -9,6 +9,6 @@ class CsPpccControlKind(Enum):
     @created 15-Dec-2023 4:38:26 PM
     """
 
-    active_power = 1  # Active power control at AC side.
-    dc_voltage = 2  # DC voltage control.
-    dc_current = 3  # DC current control
+    ACTIVE_POWER = 1  # Active power control at AC side.
+    DC_VOLTAGE = 2  # DC voltage control.
+    DC_CURRENT = 3  # DC current control

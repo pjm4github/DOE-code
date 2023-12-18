@@ -13,19 +13,24 @@ from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Core.IdentifiedObject import Identifie
 from CIM_STD_PYTHON.TC57CIM.IEC61968.Common.ConfigurationEvent import ConfigurationEvent
 
 class PowerSystemResource(IdentifiedObject):
-    """A power system resource can be an item of equipment such as a switch, an
+    """
+    A power system resource can be an item of equipment such as a switch, an
     equipment container containing many individual items of equipment such as a
     substation, or an organisational entity such as sub-control area. Power system
     resources can have measurements associated.
     """
-    # The controller outputs used to actually govern a regulating device, e.g. the
-    # magnetization of a synchronous machine or capacitor bank breaker actuator.
-    Controls= Control()
 
-    # The measurements associated with this power system resource.
-    Measurements= Measurement()
+    def __init__(self):
 
-    # Custom classification for this power system resource.
-    PSRType= PSRType()
+        # The controller outputs used to actually govern a regulating device, e.g. the
+        # magnetization of a synchronous machine or capacitor bank breaker actuator.
+        super().__init__()
+        self.controls = [Control()]
 
-    ConfigurationEvent= ConfigurationEvent()
+        # The measurements associated with this power system resource.
+        self.measurements = [Measurement()]
+
+        # Custom classification for this power system resource.
+        self.psr_type = PSRType()
+
+        self.configuration_event = ConfigurationEvent()

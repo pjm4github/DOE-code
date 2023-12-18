@@ -14,5 +14,5 @@ class DCConductingEquipment(Equipment):
 
     def __init__(self) -> None:
         super().__init__()
-        self.rated_udc: Voltage
-        self.dc_terminals: DCTerminal
+        self.rated_udc: Voltage = Voltage()
+        self.dc_terminals: DCTerminal = DCTerminal()

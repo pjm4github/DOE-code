@@ -11,7 +11,7 @@ class Diagram(IdentifiedObject):
     
     def __init__(self) -> None:
         super().__init__()
-        self.orientation: OrientationKind = OrientationKind.negative
+        self.orientation: OrientationKind = OrientationKind.NEGATIVE
         self.x1_initial_view: float = 0.0
         self.x2_initial_view: float = 0.0
         self.y1_initial_view: float = 0.0

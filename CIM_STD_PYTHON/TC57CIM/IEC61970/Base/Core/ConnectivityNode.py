@@ -10,10 +10,11 @@ from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Core.ConnectivityNodeContainer import 
 from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Core.IdentifiedObject import IdentifiedObject
 
 class ConnectivityNode(IdentifiedObject):
-    """Connectivity nodes are points where terminals of AC conducting equipment are
+    """
+    Connectivity nodes are points where terminals of AC conducting equipment are
     connected together with zero impedance.
     """
 
     def __init__(self):
         super().__init__()
-        self.connectivity_node_container= ConnectivityNodeContainer()  # Container of this connectivity node.
+        self.connectivity_node_container = ConnectivityNodeContainer()  # Container of this connectivity node.

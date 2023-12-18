@@ -6,8 +6,4 @@ class DCBusbar(DCConductingEquipment):
 
     def __init__(self) -> None:
         super().__init__()
-        pass
-
-    def finalize(self) -> None:
-        super().finalize()
 

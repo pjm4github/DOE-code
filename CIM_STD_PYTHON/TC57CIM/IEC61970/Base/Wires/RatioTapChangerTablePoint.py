@@ -15,9 +15,6 @@ class RatioTapChangerTablePoint(TapChangerTablePoint):
         super().__init__()
         self.ratio_tap_changer_table = RatioTapChangerTable()
 
-    def finalize(self) -> None:
-        super().finalize()
-
     def get_ratio_tap_changer_table(self) -> RatioTapChangerTable:
         return self.ratio_tap_changer_table
 

@@ -16,5 +16,5 @@ class DCLine(DCEquipmentContainer):
         The SubGeographicalRegion containing the DC line.
         """
         super().__init__()
-        self.region: SubGeographicalRegion
+        self.region: SubGeographicalRegion = SubGeographicalRegion()
 

@@ -12,4 +12,6 @@ class ContingencyElement(IdentifiedObject):
     """An element of a system event to be studied by contingency analysis,
     representing a change in status of a single piece of equipment.
     """
-    pass
+    def __init__(self):
+        super().__init__()
+

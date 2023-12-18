@@ -26,6 +26,3 @@ class SvVoltage(StateVariable):
         self.phase: Optional[SinglePhaseKind] = None  # If specified the voltage is the line to ground voltage of the individual phase. If unspecified, then the voltage is assumed balanced.
         self.v: Optional[Voltage] = None  # The voltage magnitude at the topological node.
         self.topological_node: Optional[TopologicalNode] = None  # The topological node associated with the voltage state.
-
-    def finalize(self) -> None:
-        pass  # no finalize implementation in python

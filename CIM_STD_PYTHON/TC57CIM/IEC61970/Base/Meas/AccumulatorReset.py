@@ -10,6 +10,4 @@ class AccumulatorReset(Control):
     def __init__(self) -> None:
         pass
 
-    def finalize(self) -> None:
-        super().finalize()
 

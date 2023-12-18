@@ -17,5 +17,5 @@ class Frequency:
     unit = UnitSymbol.Hz
 
     def __init__(self):
-        self.multiplier = UnitMultiplier()
+        self.multiplier = UnitMultiplier.none
         self.value = 0.0

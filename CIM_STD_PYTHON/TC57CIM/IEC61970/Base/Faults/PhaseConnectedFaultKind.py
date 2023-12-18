@@ -2,6 +2,6 @@
 from enum import Enum
 
 class PhaseConnectedFaultKind(Enum):
-    line_to_ground = 1  # The fault connects the indicated phases to ground
-    line_to_line = 2  # The fault connects the specified phases together without a connection to ground
-    line_to_line_to_ground = 3  # The fault connects the indicated phases to ground and to each other
+    LINE_TO_GROUND = 1  # The fault connects the indicated phases to ground
+    LINE_TO_LINE = 2  # The fault connects the specified phases together without a connection to ground
+    LINE_TO_LINE_TO_GROUND = 3  # The fault connects the indicated phases to ground and to each other

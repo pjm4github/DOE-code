@@ -26,11 +26,6 @@ class NonlinearShuntCompensatorPhasePoint:
 
         # The number of the section.
         self.section_number: int = 0
-
-    def finalize(self) -> None:
-        """
-        Finalize method
-        """
     
     def get_b(self) -> Susceptance:
         return self.b

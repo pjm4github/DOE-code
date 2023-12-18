@@ -15,9 +15,6 @@ class EnergyConsumerPhase:
         self.qfixed: ReactivePower = ReactivePower()
         self.qfixed_pct: PerCent = PerCent()
 
-    def finalize(self) -> None:
-        pass
-
     def get_p(self) -> ActivePower:
         return self.p
 

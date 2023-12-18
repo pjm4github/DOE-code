@@ -8,6 +8,6 @@ class CostPerVolume:
     def __init__(self) -> None:
         self.denominator_multiplier: UnitMultiplier = UnitMultiplier()
         self.denominator_unit: UnitSymbol = UnitSymbol.m3  # 'm3'
-        self.multiplier: UnitMultiplier = UnitMultiplier()
+        self.multiplier: UnitMultiplier = UnitMultiplier.none
         self.unit: Currency = Currency()
         self.value: float = 0.0

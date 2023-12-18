@@ -4,9 +4,9 @@ from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Wires.ACLineSegment import ACLineSegme
 
 class ACLineSegmentPhase:
     def __init__(self):
-        self.phase: SinglePhaseKind = SinglePhaseKind()  # The phase connection of the wire at both ends
-        self.sequence_number = None  # Number designation for this line segment phase
-        self.ac_line_segment = None  # The line segment to which the phase belongs
+        self.phase: SinglePhaseKind = SinglePhaseKind.A # The phase connection of the wire at both ends
+        self.sequence_number = 0  # Number designation for this line segment phase
+        self.ac_line_segment = ACLineSegment()  # The line segment to which the phase belongs
 
     def get_ac_line_segment(self) -> ACLineSegment:
         return self.ac_line_segment

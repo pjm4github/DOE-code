@@ -18,9 +18,6 @@ class Clamp:
     def __init__(self) -> None:
         self.length_from_terminal_1: Length = Length()
 
-    def finalize(self) -> None:
-        pass
-
     def get_length_from_terminal_1(self) -> Length:
         return self.length_from_terminal_1
 

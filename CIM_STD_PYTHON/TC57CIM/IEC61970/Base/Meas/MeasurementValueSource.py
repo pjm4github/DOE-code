@@ -14,5 +14,8 @@ class MeasurementValueSource(IdentifiedObject):
     MeasurementValue. User conventions for how to use the MeasurementValueSource
     attributes are described in the introduction to IEC 61970-301.
     """
-    # The MeasurementValues updated by the source.
-    MeasurementValues= MeasurementValue()
+
+    def __init__(self):
+        # The MeasurementValues updated by the source.
+        super().__init__()
+        self.measurement_values = [MeasurementValue()]

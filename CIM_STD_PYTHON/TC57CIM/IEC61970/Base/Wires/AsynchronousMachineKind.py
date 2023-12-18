@@ -8,9 +8,5 @@ class AsynchronousMachineKind(Enum):
     @version 1.0
     @updated 15-Dec-2023 1:39:41 PM
     """
-
-    # The Asynchronous Machine is a generator.
-    GENERATOR = 1
-
-    # The Asynchronous Machine is a motor.
-    MOTOR = 2
+    GENERATOR = 1  # The Asynchronous Machine is a generator.
+    MOTOR = 2  # The Asynchronous Machine is a motor.

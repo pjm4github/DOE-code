@@ -17,6 +17,6 @@ class DCGround(DCConductingEquipment):
         Default constructor
         """
 
-        self.inductance: Inductance = None  # Inductance to ground
-        self.r: Resistance = None  # Resistance to ground
+        self.inductance: Inductance = Inductance()  # Inductance to ground
+        self.r: Resistance = Resistance()  # Resistance to ground
 

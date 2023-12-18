@@ -20,7 +20,7 @@ class RatioTapChanger(TapChanger):
         super().__init__()
         self.ratio_tap_changer_table = RatioTapChangerTable()
         self.step_voltage_increment = PerCent()
-        self.transformer_control_mode = TransformerControlMode.volt
+        self.transformer_control_mode = TransformerControlMode.VOLT
 
     def get_ratio_tap_changer_table(self) -> RatioTapChangerTable:
         return self.ratio_tap_changer_table

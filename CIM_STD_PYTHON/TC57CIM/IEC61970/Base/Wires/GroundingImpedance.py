@@ -15,8 +15,6 @@ class GroundingImpedance(EarthFaultCompensator):
         super().__init__()
         self.x = Reactance()
 
-
-
     def get_x(self) -> Reactance:
         return self.x
 

@@ -19,9 +19,9 @@ class UnitMultiplier:
       For example, if a unit symbol is "A2Perh" and the multiplier is "k", then the
     value is k(A^2/h), and the multiplier applies to the entire final value, not to
     any individual part of the value. This can be conceptualized by substituting a
-    derived unit symbol for the unit type. If one imagines that the symbol "ﬁ"
+    derived unit symbol for the unit type. If one imagines that the symbol "*"
     represents the derived unit "A2Perh", then applying the multiplier "k" can be
-    conceptualized simply as "kﬁ".
+    conceptualized simply as "k*".
     
       For example, the SI unit for mass is "kg" and not "g".  If the unit symbol is
     defined as "kg", then the multiplier is applied to "kg" as a whole and does not
@@ -31,8 +31,8 @@ class UnitMultiplier:
     in CIM is treated as a derived unit instead of as an SI unit, it makes more
     sense to conceptualize the "kg" as if it were replaced by one of the proposed
     replacements for the SI mass symbol. If one imagines that the "kg" were
-    replaced by a symbol "ﬁ", then it is easier to conceptualize the multiplier "m"
-    as creating the proper unit "mﬁ", and not the forbidden unit "mkg".
+    replaced by a symbol "*", then it is easier to conceptualize the multiplier "m"
+    as creating the proper unit "m*", and not the forbidden unit "mkg".
     """
     # yocto 10**-24.
     y = -24

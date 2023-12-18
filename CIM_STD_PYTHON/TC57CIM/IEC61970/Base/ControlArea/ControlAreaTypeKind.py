@@ -8,7 +8,7 @@ class ControlAreaTypeKind(Enum):
     AGC = 0  
     
     # Used for load forecast.
-    Forecast = 1  
+    FORECAST = 1
     
     # Used for interchange specification or control.
-    Interchange = 2  
+    INTERCHANGE = 2

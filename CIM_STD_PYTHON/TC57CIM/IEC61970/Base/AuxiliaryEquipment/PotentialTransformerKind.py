@@ -3,5 +3,5 @@ from enum import Enum
 from typing import List
 
 class PotentialTransformerKind(Enum):
-    inductive = 1  # The potential transformer is using induction coils to create secondary voltage.
-    capacitive_coupling = 2  # The potential transformer is using capacitive coupling to create secondary voltage.
+    INDUCTIVE = 1  # The potential transformer is using induction coils to create secondary voltage.
+    CAPACITIVE_COUPLING = 2  # The potential transformer is using capacitive coupling to create secondary voltage.

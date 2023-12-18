@@ -7,6 +7,6 @@ class ContingencyEquipmentStatusKind(Enum):
     contingency is applied.
     """
     # The equipment is to be put into service.
-    in_service = 0
-    out_of_service = 1
+    IN_SERVICE = 0
+    OUT_OF_SERVICE = 1
 

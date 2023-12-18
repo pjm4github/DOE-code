@@ -4,4 +4,4 @@ from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.AuxiliaryEquipment import AuxiliaryEqu
 
 class Sensor(AuxiliaryEquipment):
     def __init__(self) -> None:
-        pass
+        super().__init__()

@@ -63,7 +63,4 @@ class NonlinearShuntCompensatorPoint:
     def set_section_number(self, new_val: int) -> None:
         self.section_number = new_val
 
-    def finalize(self) -> None:
-        pass
-
 

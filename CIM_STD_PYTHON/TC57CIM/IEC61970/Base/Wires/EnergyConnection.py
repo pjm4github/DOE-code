@@ -7,10 +7,7 @@ from CIM_STD_PYTHON.TC57CIM.IEC61970.InfIEC61970.EnergyArea.EnergyComponent impo
 class EnergyConnection:
     def __init__(self) -> None:
         self.energy_component = EnergyComponent()
-    
-    def __del__(self) -> None:
-        pass
-    
+
     def get_energy_component(self) -> Optional[EnergyComponent]:
         return self.energy_component
     

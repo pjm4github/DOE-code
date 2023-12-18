@@ -17,7 +17,8 @@ class Bay(EquipmentContainer):
     typically represents a physical grouping related to modularization of equipment.
     """
     def __init__(self):
+        super().__init__()
         self.bay_energy_meas_flag: bool = False
         self.bay_power_meas_flag: bool = False
-        self.breaker_configuration: BreakerConfiguration = BreakerConfiguration()
-        self.bus_bar_configuration: BusbarConfiguration = BusbarConfiguration()
+        self.breaker_configuration: BreakerConfiguration = BreakerConfiguration.SINGLE_BREAKER
+        self.bus_bar_configuration: BusbarConfiguration = BusbarConfiguration.SINGLE_BUS

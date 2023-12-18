@@ -14,12 +14,20 @@ from CIM_STD_PYTHON.TC57CIM.IEC61970.InfIEC61970.SCADA_EMS.Meas.MeasurementValue
 from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Meas.MeasurementValueQuality import MeasurementValueQuality
 
 class MeasurementValue(IOPoint, MeasurementValueExt):
-    """The current state for a measurement. A state value is an instance of a
+    """
+    The current state for a measurement. A state value is an instance of a
     measurement from a specific source. Measurements can be associated with many
     state values, each representing a different source for the measurement.
     """
-    # Link to the physical telemetered point associated with this measurement.
-    RemoteSource= RemoteSource()
 
-    # A MeasurementValue has a MeasurementValueQuality associated with it.
-    MeasurementValueQuality= MeasurementValueQuality()
+    def __init__(self):
+        super().__init__()
+        self.sensor_accuracy: PerCent
+        # The limit, expressed as a percentage of the sensor maximum, that errors will
+        # not exceed when the sensor is used under  reference conditions.
+        self.timestamp: DateTime = DateTime()
+        # The time when the value was last updated
+        self.remote_source: RemoteSource = RemoteSource()
+        # Link to the physical telemetered point associated with this measurement.
+        self.measurement_value_quality: MeasurementValueQuality = MeasurementValueQuality()
+        # A MeasurementValue has a MeasurementValueQuality associated with it.

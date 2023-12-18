@@ -1,6 +1,8 @@
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106 on Fri Dec 15 17:03:56 2023
 from typing import Optional
 
+from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Core.IdentifiedObject import IdentifiedObject
+from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Core.NameType import NameType
 
 
 class Name:
@@ -23,11 +25,11 @@ class Name:
         """
         Type of this name.
         """
-        self.name_type: Optional[NameType] = None
+        self.name_type: Optional[NameType] = NameType()
 
         """
         Identified object that this name designates.
         """
-        self.identified_object: Optional[IdentifiedObject] = None
+        self.identified_object: Optional[IdentifiedObject] = IdentifiedObject()
 
 

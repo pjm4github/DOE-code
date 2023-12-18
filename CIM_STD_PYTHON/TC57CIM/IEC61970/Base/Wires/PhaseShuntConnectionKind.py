@@ -7,9 +7,10 @@ class PhaseShuntConnectionKind(Enum):
     load or capacitor.
     """
     
-    D = "Delta connection."
-    Y = "Wye connection."
-    Yn = "Wye, with neutral brought out for grounding."
-    I = "Independent winding, for single-phase connections."
-    G = "Ground connection; use when explicit connection to ground needs to be expressed in combination with the phase code, such as for electrical wire/cable or for meters."
+    D = 1  # "Delta connection."
+    Y = 2  # "Wye connection."
+    Yn = 3  # "Wye, with neutral brought out for grounding."
+    I = 4  # "Independent winding, for single-phase connections."
+    G = 5  # "Ground connection; use when explicit connection to ground needs to be expressed in
+           # combination with the phase code, such as for electrical wire/cable or for meters."
 

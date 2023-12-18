@@ -19,7 +19,7 @@ class Curve(IdentifiedObject):
 
     def __init__(self):
         super().__init__()
-        self.curve_style = CurveStyle()
+        self.curve_style = CurveStyle.STRAIGHT_LINE_Y_VALUES
         self.x_multiplier = UnitMultiplier()
         self.x_unit = UnitSymbol()
         self.y1_multiplier = UnitMultiplier()

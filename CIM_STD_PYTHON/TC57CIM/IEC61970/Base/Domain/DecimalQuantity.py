@@ -12,7 +12,7 @@ class DecimalQuantity:
 
     def __init__(self) -> None:
         self.currency: Currency = Currency()
-        self.multiplier: UnitMultiplier = UnitMultiplier()
-        self.unit: UnitSymbol = UnitSymbol()
+        self.multiplier: UnitMultiplier = UnitMultiplier.none
+        self.unit: UnitSymbol = UnitSymbol.none
         self.value: Decimal = Decimal(0)
 

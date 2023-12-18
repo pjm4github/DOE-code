@@ -1,4 +1,6 @@
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
+from typing import List
+
 from gov_pnnl_goss.cimhub.dto.Switch import Switch
 
 
@@ -17,15 +19,12 @@ class CompositeSwitch:
 
     def __init__(self) -> None:
         self.composite_switch_type: str = ""
-        self.switches: Switch = Switch()
-
-    def finalize(self) -> None:
-        pass
+        self.switches: List[Switch] = [Switch()]
 
     def get_composite_switch_type(self) -> str:
         return self.composite_switch_type
 
-    def get_switches(self) -> Switch:
+    def get_switches(self) -> List[Switch]:
         return self.switches
 
     def set_composite_switch_type(self, new_val: str) -> None:

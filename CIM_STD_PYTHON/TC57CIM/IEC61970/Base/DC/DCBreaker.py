@@ -4,4 +4,4 @@ from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.DC import DCSwitch
 class DCBreaker(DCSwitch):
     def __init__(self) -> None:
         super().__init__()
-        pass
+

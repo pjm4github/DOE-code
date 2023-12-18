@@ -12,5 +12,5 @@ class AltGeneratingUnitMeas(IdentifiedObject):
 
     def __init__(self) -> None:
         super().__init__()
-        self.priority: Optional[int] = None  # Priority of a measurement usage. Lower numbers have first priority.
-        self.analog_value: Optional[AnalogValue] = None  # The specific analog value used as a source.
+        self.priority: Optional[int] = 0  # Priority of a measurement usage. Lower numbers have first priority.
+        self.analog_value: Optional[AnalogValue] = AnalogValue()  # The specific analog value used as a source.

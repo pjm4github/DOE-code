@@ -11,7 +11,7 @@ class ActivePowerPerFrequency:
     ///////////////////////////////////////////////////////////
     """
     def __init__(self):
-        self.multiplier = UnitMultiplier()
+        self.multiplier = UnitMultiplier.none
         self.value = 0.0
 
-    unit = UnitSymbol()
+    unit = UnitSymbol.none

@@ -40,7 +40,6 @@ class ExternalNetworkInjection(RegulatingCondEq):
         self.reference_priority: int = 0  # Priority of unit for use as powerflow voltage phase angle reference bus selection. 0 = don't care (default) 1 = highest priority. 2 is less than 1 and so on.
         self.voltage_factor: Optional[PU] = None  # Voltage factor in pu, which was used to calculate short-circuit current Ik" and power Sk".
 
-
     def set_governor_scd(self, new_val: ActivePowerPerFrequency):
         self.governor_scd = new_val
 

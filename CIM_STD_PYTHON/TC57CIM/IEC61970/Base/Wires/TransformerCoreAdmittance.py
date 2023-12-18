@@ -20,9 +20,6 @@ class TransformerCoreAdmittance:
         self.g0: Conductance = Conductance()
         self.transformer_end: TransformerEnd = TransformerEnd()
 
-    def finalize(self) -> None:
-        pass
-
     def get_b(self) -> Susceptance:
         return self.b
 

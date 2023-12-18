@@ -1,3 +1,4 @@
+from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Domain.Conductance import Conductance
 from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Domain.Reactance import Reactance
 from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Domain.Resistance import Resistance
 from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Domain.Susceptance import Susceptance
@@ -8,25 +9,21 @@ from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Wires.Conductor import Conductor
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106 on Fri Dec 15 16:45:14 2023
 from typing import Optional
 
-from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Wires.NonlinearShuntCompensatorPhasePoint import Conductance
-
 
 class ACLineSegment(Conductor):
 
     def __init__(self) -> None:
         super().__init__()
-        self.b0ch: Susceptance = None  # Zero sequence shunt susceptance
-        self.bch: Susceptance = None   # Positive sequence shunt susceptance
-        self.g0ch: Conductance = None  # Zero sequence shunt conductance
-        self.gch: Conductance = None   # Positive sequence shunt conductance
-        self.r: Resistance = None     # Positive sequence series resistance
-        self.r0: Resistance = None    # Zero sequence series resistance
-        self.short_circuit_end_temperature: Temperature = None  # Maximum permitted temperature
-        self.x: Reactance = None     # Positive sequence series reactance
-        self.x0: Reactance = None    # Zero sequence series reactance
-        self.clamp: Clamp = None  # Clamps connected to the line segment
-
-
+        self.b0ch: Susceptance = Susceptance()  # Zero sequence shunt susceptance
+        self.bch: Susceptance = Susceptance()   # Positive sequence shunt susceptance
+        self.g0ch: Conductance = Conductance()  # Zero sequence shunt conductance
+        self.gch: Conductance = Conductance()   # Positive sequence shunt conductance
+        self.r: Resistance = Resistance()     # Positive sequence series resistance
+        self.r0: Resistance = Resistance()    # Zero sequence series resistance
+        self.short_circuit_end_temperature: Temperature = Temperature()  # Maximum permitted temperature
+        self.x: Reactance = Reactance()     # Positive sequence series reactance
+        self.x0: Reactance = Reactance()    # Zero sequence series reactance
+        self.clamp: Clamp = Clamp()  # Clamps connected to the line segment
 
     def get_b0ch(self) -> Optional[Susceptance]:
         return self.b0ch

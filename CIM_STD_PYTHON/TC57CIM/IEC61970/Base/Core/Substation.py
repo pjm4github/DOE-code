@@ -6,6 +6,7 @@
 from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Core.Bay import Bay
 from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Core.EquipmentContainer import EquipmentContainer
 from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Core.Feeder import Feeder
+from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Core.VoltageLevel import VoltageLevel
 from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.DC.DCConverterUnit import DCConverterUnit
 
 
@@ -16,6 +17,3 @@ class Substation(EquipmentContainer):
         self.bays = Bay()  # Bays contained in the substation.
         self.dc_converter_unit = DCConverterUnit()  # The DC converter unit belonging to the substation.
         self.normal_energized_feeder = Feeder()  # The normal energized feeders of the substation. Also used for naming purposes.
-
-    def __del__(self):
-        pass

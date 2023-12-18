@@ -11,7 +11,6 @@ class Cut(Switch):
         self.ac_line_segment = ACLineSegment()
         self.length_from_terminal1 = Length()
 
-
     def get_ac_line_segment(self) -> ACLineSegment:
         return self.ac_line_segment
 

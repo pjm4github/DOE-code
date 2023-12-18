@@ -5,10 +5,10 @@ class DCConverterOperatingModeKind(Enum):
     """The operating mode of an HVDC bipole."""
     
     # Bipolar operation.
-    bipolar = 0
+    BIPOLAR = 0
     
     # Monopolar operation with metallic return
-    monopolar_metallic_return = 1
+    MONOPOLAR_METALLIC_RETURN = 1
     
     # Monopolar operation with ground return
-    monopolar_ground_return = 2
+    MONOPOLAR_GROUND_RETURN = 2

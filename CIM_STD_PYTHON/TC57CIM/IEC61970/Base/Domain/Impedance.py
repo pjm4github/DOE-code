@@ -13,7 +13,7 @@ from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Domain.UnitSymbol import UnitSymbol
 class Impedance:
     """Ratio of voltage to current.
     """
-    unit = UnitSymbol().ohm
+    unit = UnitSymbol.ohm
     def __init__(self):
         self.value = 0.0
-        self.multipler = UnitMultiplier().none
+        self.multipler = UnitMultiplier.none

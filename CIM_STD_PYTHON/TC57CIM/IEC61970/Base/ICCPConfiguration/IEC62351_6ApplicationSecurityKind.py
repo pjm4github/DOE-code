@@ -17,4 +17,4 @@ class IEC62351_6ApplicationSecurityKind(Enum):
 
     # Indicates that the Edition 3, end-to-end security is needed. (this would not be
     # utilized for ICCP, but for IEC 61850).
-    end_to_end = 2
+    END_TO_END = 2

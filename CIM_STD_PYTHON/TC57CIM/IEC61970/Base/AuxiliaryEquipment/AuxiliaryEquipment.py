@@ -9,7 +9,6 @@ class AuxiliaryEquipment:
     AuxiliaryEquipment is attached to primary equipment via an association with
     Terminal.
     """
-    
     def __init__(self) -> None:
         self.terminal: Any = None  # The Terminal at the equipment where the AuxiliaryEquipment is attached.
         

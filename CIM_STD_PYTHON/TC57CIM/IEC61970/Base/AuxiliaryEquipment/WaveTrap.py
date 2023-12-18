@@ -13,4 +13,4 @@ class WaveTrap(AuxiliaryEquipment):
     """
 
     def __init__(self) -> None:
-        pass
+        super().__init__()

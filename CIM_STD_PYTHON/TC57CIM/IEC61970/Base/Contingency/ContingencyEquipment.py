@@ -1,7 +1,7 @@
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106 on Fri Dec 15 17:02:27 2023
-from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Contingency import ContingencyElement
-from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Contingency import ContingencyEquipmentStatusKind
-from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Core import Equipment
+from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Contingency.ContingencyElement import ContingencyElement
+from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Contingency.ContingencyEquipmentStatusKind import ContingencyEquipmentStatusKind
+from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Core.Equipment import Equipment
 
 class ContingencyEquipment(ContingencyElement):
     """
@@ -13,9 +13,10 @@ class ContingencyEquipment(ContingencyElement):
     """
 
     def __init__(self) -> None:
+        super().__init__()
         # The status for the associated equipment when in the contingency state.
         #     This status is independent of the case to which the contingency is originally applied,
         #     but defines the equipment status when the contingency is applied.
-        self.contingent_status: ContingencyEquipmentStatusKind = ContingencyEquipmentStatusKind.out_of_service
-        self.equipment: Equipment
+        self.contingent_status: ContingencyEquipmentStatusKind = ContingencyEquipmentStatusKind.OUT_OF_SERVICE
+        self.equipment: Equipment = Equipment()
 
