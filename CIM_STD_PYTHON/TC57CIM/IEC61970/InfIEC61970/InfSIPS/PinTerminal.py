@@ -14,4 +14,7 @@ from CIM_STD_PYTHON.TC57CIM.IEC61970.InfIEC61970.InfSIPS.GateInputPin import Gat
 class PinTerminal(GateInputPin):
     """Value associated with Terminal is used as compare.
     """
-    Terminal= Terminal()
+
+    def __init__(self):
+        super().__init__()
+        self.terminal = Terminal()

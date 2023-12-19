@@ -12,4 +12,5 @@
 class GateLogicKind:
     """Define the different logical operations.
     """
-    pass
+    def __init__(self):
+        pass

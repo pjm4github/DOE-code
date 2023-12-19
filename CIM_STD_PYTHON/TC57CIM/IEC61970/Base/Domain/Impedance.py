@@ -9,7 +9,6 @@
 from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Domain.UnitMultiplier import UnitMultiplier
 from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Domain.UnitSymbol import UnitSymbol
 
-
 class Impedance:
     """Ratio of voltage to current.
     """

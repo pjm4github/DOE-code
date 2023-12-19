@@ -12,4 +12,5 @@
 class CalculationKind:
     """Categorisation of calculation operation that can be done to Measurement.
     """
-    pass
+    def __init__(self):
+        pass

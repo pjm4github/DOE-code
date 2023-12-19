@@ -19,11 +19,7 @@ class PublicX509Certificate:
         """
         Represents the CA that issued the certificate.  Defined to be per X.509.
         """
-        self.issuer_name: Optional[str] = ""
-
-        """
-        Is the serial number of the certificate per X.509 definition.
-        """
+        self.issuer_name: Optional[str] = ""  #  Is the serial number of the certificate per X.509 definition.
         self.serial_number: Optional[str] = ""
 
         self.tcp_access_point: Optional[TCPAccessPoint] = TCPAccessPoint()

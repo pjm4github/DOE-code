@@ -29,7 +29,7 @@ class SvPowerFlow(StateVariable):
     def __init__(self) -> None:
         super().__init__()
         self.p: ActivePower = ActivePower()
-        self.phase: SinglePhaseKind = SinglePhaseKind()
+        self.phase: SinglePhaseKind = SinglePhaseKind.A
         self.q: ReactivePower = ReactivePower()
         self.terminal: Terminal = Terminal()
         self.energy_group: EnergyGroup = EnergyGroup()

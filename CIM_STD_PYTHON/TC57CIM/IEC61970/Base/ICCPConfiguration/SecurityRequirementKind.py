@@ -7,8 +7,6 @@ class SecurityRequirementKind(Enum):
     """
     # Indicates that the actor does not support any security options
     NOT_SUPPORTED = 0
-
     # Indicates that the transport level security, per IEC 62351-6, is required.
     TRANSPORT_SECURITY_REQUIRED = 1
-
     APPLICATION_SECURITY_REQUIRED = 2

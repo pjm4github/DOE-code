@@ -19,5 +19,7 @@ class RemoteUnit(PowerSystemResource):
     intention is to allow RemotUnits to have Measurements. These Measurements can
     be used to model unit status as operational, out of service, unit failure etc.
     """
-    # Remote points this Remote unit contains.
-    RemotePoints= RemotePoint()
+
+    def __init__(self):
+        super().__init__()
+        self.remote_points = [RemotePoint()]  # Remote points this Remote unit contains.

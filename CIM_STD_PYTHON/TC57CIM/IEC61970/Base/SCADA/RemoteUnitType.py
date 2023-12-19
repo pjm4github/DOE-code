@@ -11,4 +11,5 @@
 class RemoteUnitType:
     """Type of remote unit.
     """
-    pass
+    def __init__(self):
+        pass

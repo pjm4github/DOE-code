@@ -12,4 +12,5 @@
 class RemedialActionSchemeKind:
     """Classification of Remedial Action Scheme.
     """
-    pass
+    def __init__(self):
+        pass

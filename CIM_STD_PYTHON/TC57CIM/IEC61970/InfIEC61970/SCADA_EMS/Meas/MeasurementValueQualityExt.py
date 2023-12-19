@@ -14,4 +14,4 @@ from CIM_STD_PYTHON.TC57CIM.IEC61970.InfIEC61970.SCADA_EMS.Meas.MeasurementConfi
 class MeasurementValueQualityExt:
 
     def __init__(self):
-        self.configuration_status = MeasurementConfigurationStatus()
+        self.configuration_status = MeasurementConfigurationStatus.OK

@@ -16,7 +16,6 @@ class VoltageLevel(EquipmentContainer):
     The equipment typically consist of breakers, busbars, instrumentation, control,
     regulation and protection devices as well as assemblies of all these.
     """
-
     def __init__(self):
         super().__init__()
         self.high_voltage_limit = Voltage()  # The bus bar's high voltage limit

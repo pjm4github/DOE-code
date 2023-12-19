@@ -14,4 +14,6 @@ class RemoteSource(RemotePoint):
     """Remote sources are state variables that are telemetered or calculated within
     the remote unit.
     """
-    pass
+    def __init__(self):
+        super().__init__()
+

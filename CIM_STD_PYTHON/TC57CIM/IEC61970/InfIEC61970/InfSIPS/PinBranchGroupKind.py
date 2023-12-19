@@ -12,4 +12,5 @@
 class PinBranchGroupKind:
     """Categorisation of type of compare done on a branch group.
     """
-    pass
+    def __init__(self):
+        pass

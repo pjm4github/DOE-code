@@ -14,4 +14,7 @@ from CIM_STD_PYTHON.TC57CIM.IEC61970.InfIEC61970.InfSIPS.GateInputPin import Gat
 class PinBranchGroup(GateInputPin):
     """Value associated with branch group is used as compare.
     """
-    BranchGroup= BranchGroup()
+
+    def __init__(self):
+        super().__init__()
+        self.branch_group = BranchGroup()

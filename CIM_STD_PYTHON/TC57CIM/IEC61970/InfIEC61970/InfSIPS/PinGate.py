@@ -12,4 +12,5 @@ from CIM_STD_PYTHON.TC57CIM.IEC61970.InfIEC61970.InfSIPS.GateInputPin import Gat
 class PinGate(GateInputPin):
     """An output from one gate represent an input to another gate.
     """
-    pass
+    def __init__(self):
+        super().__init__()

@@ -11,4 +11,7 @@ from CIM_STD_PYTHON.TC57CIM.IEC61970.InfIEC61970.EnergyArea.EnergyGroup import E
 from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Core.IdentifiedObject import IdentifiedObject
 
 class EnergyComponent(IdentifiedObject):
-    m_EnergyGroup= EnergyGroup()
+
+    def __init__(self):
+        super().__init__()
+        self.m_energy_group= EnergyGroup()

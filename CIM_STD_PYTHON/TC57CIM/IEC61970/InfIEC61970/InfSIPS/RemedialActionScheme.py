@@ -16,4 +16,7 @@ class RemedialActionScheme(PowerSystemResource):
     """Remedial Action Scheme (RAS), Special Protection Schemes (SPS), System
     Protection Schemes (SPS) or System Integrity Protection Schemes (SIPS).
     """
-    Stage= Stage()
+
+    def __init__(self):
+        super().__init__()
+        self.stage = Stage()

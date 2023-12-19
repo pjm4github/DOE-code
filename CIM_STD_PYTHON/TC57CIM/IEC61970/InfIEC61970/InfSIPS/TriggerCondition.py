@@ -12,8 +12,11 @@ from CIM_STD_PYTHON.TC57CIM.IEC61970.InfIEC61970.InfSIPS.RemedialActionScheme im
 from CIM_STD_PYTHON.TC57CIM.IEC61970.InfIEC61970.InfSIPS.Gate import Gate
 
 class TriggerCondition(IdentifiedObject):
-    """A conditions that can trigger remedial actions.
     """
-    RemedialActionScheme= RemedialActionScheme()
+    A conditions that can trigger remedial actions.
+    """
 
-    GateTrigger= Gate()
+    def __init__(self):
+        super().__init__()
+        self.remedial_action_scheme = RemedialActionScheme()
+        self.gate_trigger = Gate()

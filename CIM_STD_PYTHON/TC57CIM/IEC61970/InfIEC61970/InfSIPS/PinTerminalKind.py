@@ -12,4 +12,5 @@
 class PinTerminalKind:
     """Categorisation of type of compare done on Terminal.
     """
-    pass
+    def __init__(self):
+        pass

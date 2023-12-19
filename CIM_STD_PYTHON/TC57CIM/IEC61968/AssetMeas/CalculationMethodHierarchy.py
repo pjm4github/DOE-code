@@ -13,4 +13,7 @@ from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Meas.MeasurementValue import Measureme
 class CalculationMethodHierarchy(IdentifiedObject):
     """The hierarchy of calculation methods used to derive this measurement.
     """
-    MeasurementValue= MeasurementValue()
+
+    def __init__(self):
+        super().__init__()
+        self.measurement_value = MeasurementValue()

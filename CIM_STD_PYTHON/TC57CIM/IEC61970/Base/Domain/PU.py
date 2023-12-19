@@ -15,7 +15,6 @@ class PU:
     referred to a defined base. Values typically range from -10 to +10.
     """
     unit = UnitSymbol.none
-
     def __init__(self):
         self.multiplier = UnitMultiplier.none
         self.value = 0.0

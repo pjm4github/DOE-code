@@ -12,4 +12,6 @@ class RemotePoint(IdentifiedObject):
     """For a RTU remote points correspond to telemetered values or control outputs.
     Other units (e.g. control centers) usually also contain calculated values.
     """
-    pass
+    def __init__(self):
+        super().__init__()
+

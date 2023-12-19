@@ -5,5 +5,5 @@ class MonthDay:
     """MonthDay format as "--mm-dd", which conforms with XSD data type gMonthDay.
     """
     def __init__(self) -> None:
-        monthday = "--12-31"
+        self.monthday = "--12-31"
 

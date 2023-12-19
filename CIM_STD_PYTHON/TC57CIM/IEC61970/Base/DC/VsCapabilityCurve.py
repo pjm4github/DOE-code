@@ -10,6 +10,5 @@ class VsCapabilityCurve(Curve):
     @version 1.0
     @created 15-Dec-2023 4:38:30 PM
     """
-
     def __init__(self) -> None:
         super().__init__()

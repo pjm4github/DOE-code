@@ -11,7 +11,6 @@ class DCGround(DCConductingEquipment):
     @version: 1.0
     @created: 15-Dec-2023 4:38:27 PM
     """
-
     def __init__(self) -> None:
         """
         Default constructor

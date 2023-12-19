@@ -17,5 +17,5 @@ class ResistancePerLength:
     unit = UnitSymbol.ohmPerm
 
     def __init__(self) -> None:
-        self.value: Optional[Decimal] = 0.0
+        self.value: Optional[Decimal] = Decimal(0.0)
         self.multiplier = UnitMultiplier.none

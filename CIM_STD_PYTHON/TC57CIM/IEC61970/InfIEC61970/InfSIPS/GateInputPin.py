@@ -15,4 +15,6 @@ class GateInputPin(IdentifiedObject):
     give a logical true or false. Result from measurement and calculation are
     converted to a true or false.
     """
-    pass
+    def __init__(self):
+        super().__init__()
+

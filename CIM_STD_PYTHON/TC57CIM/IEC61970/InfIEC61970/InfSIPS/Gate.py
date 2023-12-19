@@ -16,8 +16,9 @@ from CIM_STD_PYTHON.TC57CIM.IEC61970.InfIEC61970.InfSIPS.GateInputPin import Gat
 class Gate(IdentifiedObject):
     """Logical gate than support logical operation based on the input.
     """
-    RemedialActionScheme= RemedialActionScheme()
 
-    PinGate= PinGate()
-
-    GateInputPin= GateInputPin()
+    def __init__(self):
+        super().__init__()
+        self.remedial_action_scheme = RemedialActionScheme()
+        self.pin_gate = PinGate()
+        self.gate_input_pin = GateInputPin()

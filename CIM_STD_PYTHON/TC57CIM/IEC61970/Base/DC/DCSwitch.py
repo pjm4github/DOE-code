@@ -6,6 +6,5 @@ class DCSwitch(DCConductingEquipment):
     """
     A switch within the DC system.
     """
-
     def __init__(self) -> None:
         super().__init__()

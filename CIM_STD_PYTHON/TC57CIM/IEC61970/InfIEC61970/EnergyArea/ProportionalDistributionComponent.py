@@ -11,4 +11,7 @@ from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Domain.ActivePower import ActivePower
 from CIM_STD_PYTHON.TC57CIM.IEC61970.InfIEC61970.EnergyArea.EnergyComponent import EnergyComponent
 
 class ProportionalDistributionComponent(EnergyComponent):
-    pass
+
+    def __init__(self):
+        super().__init__()
+

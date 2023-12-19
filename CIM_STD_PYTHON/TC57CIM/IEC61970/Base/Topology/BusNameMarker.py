@@ -26,4 +26,4 @@ class BusNameMarker(IdentifiedObject):
         self.priority: int = 0
         self.reporting_group: ReportingGroup = ReportingGroup()
         self.terminal: ACDCTerminal = ACDCTerminal()
-        self.topological_node: TopologicalNode
+        self.topological_node: TopologicalNode = TopologicalNode()

@@ -13,6 +13,8 @@ from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Core.Terminal import Terminal
 from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Core.IdentifiedObject import IdentifiedObject
 
 class BoundaryFlow(IdentifiedObject):
-    m_EnergySchedulingAreaBoundary= EnergySchedulingAreaBoundary()
 
-    m_Terminal= Terminal()
+    def __init__(self):
+        super().__init__()
+        self.m_energy_scheduling_area_boundary= EnergySchedulingAreaBoundary()
+        self.m_terminal= Terminal()

@@ -12,6 +12,10 @@ from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Core.IdentifiedObject import Identifie
 from CIM_STD_PYTHON.TC57CIM.IEC61970.InfIEC61970.InfSIPS.StageTrigger import StageTrigger
 
 class Stage(IdentifiedObject):
-    """Stage of a remedial action scheme.
     """
-    StageTrigger= StageTrigger()
+    Stage of a remedial action scheme.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.stage_trigger = StageTrigger()

@@ -16,8 +16,6 @@ class HydroPump(Equipment):
     plant.
     """
 
-    HydroPumpOpSchedule= HydroPumpOpSchedule()
-
     def __init__(self):
         super().__init__()
         self.pump_disch_at_max_head = VolumeFlowRate()

@@ -13,11 +13,13 @@ from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Core.IdentifiedObject import Identifie
 from CIM_STD_PYTHON.TC57CIM.IEC61970.InfIEC61970.InfSIPS.Gate import Gate
 
 class StageTrigger(IdentifiedObject):
-    """Condition that is triggered either by TriggerCondition of by gate condition
+    """
+    Condition that is triggered either by TriggerCondition of by gate condition
     within a stage and has remedial action-s.
     """
-    GateArmed= Gate()
 
-    GateComCondition= Gate()
-
-    GateTrigger= Gate()
+    def __init__(self):
+        super().__init__()
+        self.gate_armed = Gate()
+        self.gate_com_condition = Gate()
+        self.gate_trigger = Gate()

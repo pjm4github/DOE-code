@@ -11,4 +11,6 @@
 class Source:
     """Source gives information related to the origin of a value.
     """
-    pass
+    def __init__(self):
+        pass
+

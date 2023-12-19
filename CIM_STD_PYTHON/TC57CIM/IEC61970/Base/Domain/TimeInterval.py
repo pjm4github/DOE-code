@@ -13,9 +13,9 @@ class TimeInterval:
         """
         Start time of this interval.
         """
-        self.start: Optional[Time] = None
+        self.start: Optional[Time] = Time()
 
         """
         End time of this interval.
         """
-        self.end: Optional[Time] = None
+        self.end: Optional[Time] = Time()

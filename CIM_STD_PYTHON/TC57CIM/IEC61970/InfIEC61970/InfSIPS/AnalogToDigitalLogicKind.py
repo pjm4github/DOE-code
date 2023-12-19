@@ -12,4 +12,5 @@
 class AnalogToDigitalLogicKind:
     """Categories of analog to digital (or logical result) comparison.
     """
-    pass
+    def __init__(self):
+        pass

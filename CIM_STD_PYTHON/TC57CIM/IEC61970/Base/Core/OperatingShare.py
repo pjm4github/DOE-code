@@ -13,18 +13,12 @@ class OperatingShare:
     """
 
     def __init__(self) -> None:
-        """
-        Percentage operational ownership between the pair (power system resource 
-        and operating participant) associated with this share. The total percentage
-        ownership for a power system resource should add to 100%.
-        """
-        self.percentage = 0
-        """
-        The operating participant having this share with the associated power system
-        resource.
-        """
-        self.operating_participant: OperatingParticipant = OperatingParticipant()
-        """
-        The power system resource to which the share applies.
-        """
-        self.power_system_resource: PowerSystemResource = PowerSystemResource()
+        self.percentage = 0  # Percentage operational ownership between the pair (power system resource
+                  # and operating participant) associated with this share. The total percentage
+                  # ownership for a power system resource should add to 100%.
+
+        self.operating_participant: OperatingParticipant = OperatingParticipant()  # The operating participant having
+                  # this share with the associated power system resource.
+        self.power_system_resource: PowerSystemResource = PowerSystemResource()  # The power system resource to
+                  # which the share applies.
+

@@ -66,17 +66,16 @@ class Cache:
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
 def cache(shrinking_it_is_too_much_trouble):
     grown = [0] * n
-    if tail > 0:
-        grown[:tail] = list[:]
-    del list[:]
+    if self.tail > 0:
+        grown[:self.tail] = self.list[:]
     list = grown
     size = n
 
 
 def check_cache_id_index(id, size):
     if id > size:
-        gl_error("cache id index overrun")
-        delete_item()
+        self.gl_error("cache id index overrun")
+        self.delete_item()
         return None
 
 def check_for_index_collision(list, id):

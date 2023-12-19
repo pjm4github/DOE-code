@@ -17,7 +17,6 @@ class DcShunt(DCConductingEquipment):
      * @created 15-Dec-2023 4:38:27 PM
      */
     """
-
     def __init__(self) -> None:
         super().__init__()
         self.capacitance: Capacitance = Capacitance()

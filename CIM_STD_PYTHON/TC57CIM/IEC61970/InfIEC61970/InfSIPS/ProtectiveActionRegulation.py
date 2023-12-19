@@ -12,7 +12,11 @@
 from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Wires.RegulatingControl import RegulatingControl
 from CIM_STD_PYTHON.TC57CIM.IEC61970.InfIEC61970.InfSIPS.ProtectiveAction import ProtectiveAction
 
+
 class ProtectiveActionRegulation(ProtectiveAction):
     """Protective action to change regulation to Equipment.
     """
-    RegulatingControl= RegulatingControl()
+
+    def __init__(self):
+        super().__init__()
+        self.regulating_control = RegulatingControl()

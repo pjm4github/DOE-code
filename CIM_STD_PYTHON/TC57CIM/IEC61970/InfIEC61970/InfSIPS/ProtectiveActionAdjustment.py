@@ -15,7 +15,10 @@ from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.DC.DCConductingEquipment import DCCond
 from CIM_STD_PYTHON.TC57CIM.IEC61970.InfIEC61970.InfSIPS.ProtectiveAction import ProtectiveAction
 
 class ProtectiveActionAdjustment(ProtectiveAction):
-    """Protective actions on non-switching equipment. The operating condition is
+    """
+    Protective actions on non-switching equipment. The operating condition is
     adjusted.
     """
-    DCConductingEquipment= DCConductingEquipment()
+    def __init__(self):
+        super().__init__()
+        self.dc_conducting_equipment = DCConductingEquipment()

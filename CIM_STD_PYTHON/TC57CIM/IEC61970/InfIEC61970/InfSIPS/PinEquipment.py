@@ -14,4 +14,7 @@ from CIM_STD_PYTHON.TC57CIM.IEC61970.InfIEC61970.InfSIPS.GateInputPin import Gat
 class PinEquipment(GateInputPin):
     """Value associated with Equipment is used as compare.
     """
-    Equipment= Equipment()
+
+    def __init__(self):
+        super().__init__()
+        self.equipment = Equipment()

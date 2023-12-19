@@ -7,7 +7,6 @@ from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Core.IdentifiedObject import Identifie
 
 
 class PerLengthDCLineParameter(IdentifiedObject):
-
     def __init__(self) -> None:
         super().__init__()
         self.capacitance: CapacitancePerLength = CapacitancePerLength()

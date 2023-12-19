@@ -13,4 +13,7 @@ from CIM_STD_PYTHON.TC57CIM.IEC61970.InfIEC61970.EnergyArea.BlockDispatchCompone
 from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Core.IdentifiedObject import IdentifiedObject
 
 class BlockDispatchOrder(IdentifiedObject):
-    m_BlockDispatchComponent= BlockDispatchComponent()
+
+    def __init__(self):
+        super().__init__()
+        self.m_block_dispatch_component = BlockDispatchComponent()

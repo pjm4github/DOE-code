@@ -12,6 +12,8 @@ from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Core.IdentifiedObject import Identifie
 from CIM_STD_PYTHON.TC57CIM.IEC61970.InfIEC61970.EnergyArea.BlockDispatchOrder import BlockDispatchOrder
 
 class BlockDispatchInstruction(IdentifiedObject):
-    m_EnergyGroup= EnergyGroup()
 
-    m_BlockDispatchOrder= BlockDispatchOrder()
+    def __init__(self):
+        super().__init__()
+        self.m_energy_group = EnergyGroup()
+        self.m_block_dispatch_order = BlockDispatchOrder()

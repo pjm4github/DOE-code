@@ -20,7 +20,7 @@ class SvInjection(StateVariable):
 
     def __init__(self) -> None:
         super().__init__()
-        self.phase: SinglePhaseKind = SinglePhaseKind()
+        self.phase: SinglePhaseKind = SinglePhaseKind.A
         self.p_injection: ActivePower = ActivePower()
         self.q_injection: ReactivePower = ReactivePower()
         self.topological_node: TopologicalNode = TopologicalNode()

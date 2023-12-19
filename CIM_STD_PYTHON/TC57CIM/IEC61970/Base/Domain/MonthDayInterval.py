@@ -15,12 +15,6 @@ class MonthDayInterval:
         """
         Constructor for MonthDayInterval
         """
-        self.end: Any
-        """
-        End time of this interval.
-        """
-        self.start: Any
-        """
-        Start time of this interval.
-        """
+        self.end: Any  # End time of this interval.
+        self.start: Any  # Start time of this interval.
 

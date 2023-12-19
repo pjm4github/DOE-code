@@ -9,11 +9,11 @@ class FrequencyConverter(RegulatingCondEq):
 
     def __init__(self):
         super().__init__()
-        self.frequency: Frequency
-        self.max_p: ActivePower
-        self.max_u: Voltage
-        self.min_p: ActivePower
-        self.min_u: Voltage
+        self.frequency: Frequency = Frequency()
+        self.max_p: ActivePower = ActivePower()
+        self.max_u: Voltage = Voltage()
+        self.min_p: ActivePower = ActivePower()
+        self.min_u: Voltage = Voltage()
 
     def get_frequency(self) -> Frequency:
         return self.frequency

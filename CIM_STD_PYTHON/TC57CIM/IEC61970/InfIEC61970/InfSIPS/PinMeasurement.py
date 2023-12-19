@@ -14,4 +14,7 @@ class PinMeasurement(GateInputPin):
     """Gate input pin that is associated with a Measurement or a calculation of
     Measurement.
     """
-    Measurement= Measurement()
+
+    def __init__(self):
+        super().__init__()
+        self.measurement = Measurement()

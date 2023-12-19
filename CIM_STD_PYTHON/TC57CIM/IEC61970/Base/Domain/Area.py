@@ -9,6 +9,6 @@ class Area:
 
     def __init__(self) -> None:
         self.multiplier: UnitMultiplier = UnitMultiplier.none
-        value: float = 0.0
+        self.value: float = 0.0
         pass
 

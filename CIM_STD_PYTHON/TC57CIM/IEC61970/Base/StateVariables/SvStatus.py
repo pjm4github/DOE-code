@@ -25,6 +25,6 @@ class SvStatus(StateVariable):
         Constructor
         """
         super().__init__()
-        self.in_service: Optional[bool] = None  # The in service status as a result of topology processing.
-        self.phase: Optional[SinglePhaseKind] = None  # The individual phase status. If the attribute is unspecified, then three phase model is assumed.
-        self.conducting_equipment: Optional[ConductingEquipment] = None  # The conducting equipment associated with the status state variable.
+        self.in_service: Optional[bool] = False  # The in service status as a result of topology processing.
+        self.phase: Optional[SinglePhaseKind] = SinglePhaseKind.A  # The individual phase status. If the attribute is unspecified, then three phase model is assumed.
+        self.conducting_equipment: Optional[ConductingEquipment] = ConductingEquipment()  # The conducting equipment associated with the status state variable.

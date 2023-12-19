@@ -2,6 +2,9 @@
 from datetime import datetime
 from typing import Any
 
+from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Core.Terminal import Terminal
+
+
 class AuxiliaryEquipment:
     """
     AuxiliaryEquipment describe equipment that is not performing any primary
@@ -10,6 +13,6 @@ class AuxiliaryEquipment:
     Terminal.
     """
     def __init__(self) -> None:
-        self.terminal: Any = None  # The Terminal at the equipment where the AuxiliaryEquipment is attached.
+        self.terminal: Any = Terminal()  # The Terminal at the equipment where the AuxiliaryEquipment is attached.
         
 

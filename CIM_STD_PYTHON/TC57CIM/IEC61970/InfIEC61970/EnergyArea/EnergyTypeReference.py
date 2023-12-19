@@ -11,4 +11,7 @@ from CIM_STD_PYTHON.TC57CIM.IEC61970.InfIEC61970.EnergyArea.EnergyTypeKind impor
 from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Core.IdentifiedObject import IdentifiedObject
 
 class EnergyTypeReference(IdentifiedObject):
-    pass
+
+    def __init__(self):
+        super().__init__()
+

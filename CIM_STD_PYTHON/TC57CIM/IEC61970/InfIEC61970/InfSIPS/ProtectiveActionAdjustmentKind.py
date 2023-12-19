@@ -10,7 +10,11 @@
 
 
 class ProtectiveActionAdjustmentKind:
-    """Categorisation of different protective action adjustments that can be performed
+    """
+    Categorisation of different protective action adjustments that can be performed
     on equipment.
     """
-    pass
+
+    def __init__(self):
+        pass
+

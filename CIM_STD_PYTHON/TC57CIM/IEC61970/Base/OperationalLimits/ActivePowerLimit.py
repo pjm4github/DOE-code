@@ -13,6 +13,6 @@ class ActivePowerLimit(OperationalLimit):
 
     def __init__(self) -> None:
         super().__init__()
-        self.normal_value: ActivePower
-        self.value: ActivePower
+        self.normal_value: ActivePower = ActivePower()
+        self.value: ActivePower = ActivePower()
 
