@@ -83,9 +83,10 @@ MAX_TOKENS = 10000  # Maximum number of tokens that can be used with the OPENAI 
 
 
 if __name__ == "__main__":
-    directory_path = f"{os.path.expanduser('~')}/Documents/Git/GitHub/GOSS-GridAPPS-D-PYTHON/gov_pnnl_goss/gridappsd/dto/field/"
-
-
+    # directory_path = f"{os.path.expanduser('~')}/Documents/Git/GitHub/GOSS-GridAPPS-D-PYTHON/gov_pnnl_goss/gridappsd/dto/field/"
+    subdir = """/Documents/Git/GitHub/GOSS-GridAPPS-D-PYTHON/CIM_STD_PYTHON/TC57CIM/IEC61968/InfIEC61968/InfERPSupport/"""
+    directory_path = f"{os.path.expanduser('~')}{subdir}"
+    directory_path += '/' if not directory_path.endswith('/') else ""
     try:
         for filename in os.listdir(directory_path):
             if filename.endswith(".java"):
@@ -97,7 +98,7 @@ if __name__ == "__main__":
                         code = file.readlines()
 
                     # remove all imports here
-                    REMOVE_IMPORTS = True
+                    REMOVE_IMPORTS = False
                     if REMOVE_IMPORTS:
                         clean_code = []
 
@@ -109,6 +110,7 @@ if __name__ == "__main__":
                     # create a blob of code
                     code_string = '\n'.join(clean_code)
                     # remove comments
+
                     if file_size > MAX_TOKENS:
                         code_string = remove_block_comments(code_string)
                         code_string = remove_multiline_comments(code_string)
@@ -117,8 +119,10 @@ if __name__ == "__main__":
                     # URL-encode the text
                     try:
                         code_string.encode('ascii')
-                    except UnicodeDecodeError:
-                        raise ValueError('code is not ASCII')
+                    except UnicodeEncodeError:
+                        print("... Removing non ascii characters")
+                        code_string = ''.join([i if ord(i) < 128 else ' ' for i in code_string])
+                        # raise ValueError('code is not ASCII')
                     encoded_text = urllib.parse.quote(code_string)
                     converted_code = convert_code(encoded_text)
                     if converted_code:
