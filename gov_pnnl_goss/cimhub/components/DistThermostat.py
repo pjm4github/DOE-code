@@ -25,19 +25,19 @@ class DistThermostat(DistComponent):
 
         if result.hasNext():
             soln = result.next()
-            self.name = self.safe_name(soln.get("?name").toString())
-            self.id = soln.get("?voltage_id").toString()
-            self.aggregatorName = self.safe_name(soln.get("?aggregatorName").toString())
-            self.baseSetpoint = float(soln.get("?baseSetpoint").toString())
-            control_mode_index = int(soln.get("?controlMode").toString())
+            self.name = self.safe_name(soln.get("?name").to"")
+            self.id = soln.get("?voltage_id").to""
+            self.aggregatorName = self.safe_name(soln.get("?aggregatorName").to"")
+            self.baseSetpoint = float(soln.get("?baseSetpoint").to"")
+            control_mode_index = int(soln.get("?controlMode").to"")
             self.controlMode = self.thermostat_control_mode(control_mode_index)
-            self.priceCap = float(soln.get("?priceCap").toString())
-            self.rampHigh = float(soln.get("?rampHigh").toString())
-            self.rampLow = float(soln.get("?rampLow").toString())
-            self.rangeHigh = float(soln.get("?rangeHigh").toString())
-            self.rangeLow = float(soln.get("?rangeLow").toString())
-            self.useOverride = bool(soln.get("?useOverride").toString())
-            self.usePredictive = bool(soln.get("?usePredictive").toString())
+            self.priceCap = float(soln.get("?priceCap").to"")
+            self.rampHigh = float(soln.get("?rampHigh").to"")
+            self.rampLow = float(soln.get("?rampLow").to"")
+            self.rangeHigh = float(soln.get("?rangeHigh").to"")
+            self.rangeLow = float(soln.get("?rangeLow").to"")
+            self.useOverride = bool(soln.get("?useOverride").to"")
+            self.usePredictive = bool(soln.get("?usePredictive").to"")
 
     def display_string(self):
         buf = [f"{self.name} aggregatorName={self.aggregatorName} base setpoint={self.baseSetpoint: .4f}",

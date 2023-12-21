@@ -366,10 +366,10 @@ class CsvReader(WeatherReader):
                 sample.month, sample.day, sample.hour, sample.minute, sample.second = map(int, match.groups())
 
         else:
-            match = re.match(self.timefmt.get_string(), token)
+            match = re.match(self.timefmt.get_"", token)
             if not match:
                 gl_error(R"(csv_reader::read_line ~ unable to read time string '%s' with format '%s')" % (
-                token, self.timefmt.get_string()))
+                token, self.timefmt.get_""))
                 sample = None
                 return 0
             else:

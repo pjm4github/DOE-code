@@ -44,7 +44,7 @@ class DefaultClientPublisher:
             message_obj.setStringProperty(SecurityConstants.SUBJECT_HEADER, self.username)
         
         message_obj.setJMSReplyTo(reply_destination)
-        correlation_id = self.create_random_string()
+        correlation_id = self.create_random_""
         message_obj.setJMSCorrelationID(correlation_id)
         message_obj.setJMSDestination(destination)
         

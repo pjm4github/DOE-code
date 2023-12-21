@@ -112,17 +112,17 @@ class ProvenTimeSeriesDataManagerImpl(TimeseriesDataManager, DataManagerHandler)
         else:
             self.proven_query_producer.rest_producer(self.proven_query_uri, None, None)
             self.proven_query_producer.set_message_info("GridAPPSD", "QUERY", self.__class__.__name__, self.keywords)
-            response = self.proven_query_producer.send_message(request_timeseries_data.to_string(), self.request_id)
+            response = self.proven_query_producer.send_message(request_timeseries_data.to_"", self.request_id)
 
         result = TimeSeriesEntryResult.parse(str(response.data))
 
         if len(result.get_data()) == 0:
             return None
 
-        orig_format = "PROVEN_" + request_timeseries_data.get_query_measurement().to_string()
+        orig_format = "PROVEN_" + request_timeseries_data.get_query_measurement().to_""
 
         if request_timeseries_data.get_original_format() is not None:
-            orig_format = "PROVEN_" + request_timeseries_data.get_original_format().to_string()
+            orig_format = "PROVEN_" + request_timeseries_data.get_original_format().to_""
 
         response_format = request_timeseries_data.get_response_format()
         converter = DataManager.get_converter(orig_format, response_format)
@@ -158,14 +158,14 @@ class ProvenTimeSeriesDataManagerImpl(TimeseriesDataManager, DataManagerHandler)
             app_or_service_id = event.get_destination().split(".")[2]
 
             if app_or_service_id is None:
-                data = json.loads(event.get_data().toString())
+                data = json.loads(event.get_data().to"")
                 if isinstance(data, dict) and "datatype" in data:
                     datatype = data["datatype"]
                     if datatype is not None:
-                        self.proven_write_producer.send_bulk_message(event.get_data().toString(), datatype, instance_id,
+                        self.proven_write_producer.send_bulk_message(event.get_data().to"", datatype, instance_id,
                                                                      simulation_id, int(time.time() * 1000))
             else:
-                self.proven_write_producer.send_bulk_message(event.get_data().toString(), app_or_service_id, instance_id,
+                self.proven_write_producer.send_bulk_message(event.get_data().to"", app_or_service_id, instance_id,
                                                         simulation_id, int(time.time() * 1000))
 
         except Exception as e:

@@ -67,7 +67,7 @@
 # 	public void callsMadeWhen_processStarted(){
 #
 # 		try {
-# 			Mockito.when(configuration_manager.getSimulationFile(Mockito.anyString(),  Mockito.any())).thenReturn(new File("test"));
+# 			Mockito.when(configuration_manager.getSimulationFile(Mockito.any"",  Mockito.any())).thenReturn(new File("test"));
 # 		} catch (Exception e) {
 # 			print(e);
 # 		}
@@ -85,7 +85,7 @@
 # 		assertEquals( "Parsed config " + REQUEST_SIMULATION_CONFIG, capturedMessage.getLogMessage());
 # 		assertEquals(LogLevel.INFO, capturedMessage.getLogLevel());
 # 		assertEquals(ProcessNewSimulationRequest.class.getName(), capturedMessage.getSource());
-# 		assertEquals(new Integer(simulation_id).toString(), capturedMessage.getProcessId());
+# 		assertEquals(new Integer(simulation_id).to"", capturedMessage.getProcessId());
 # 		assertEquals(ProcessStatus.RUNNING, capturedMessage.getProcessStatus());
 # 		assertEquals(false, capturedMessage.getStoreToDb());
 #
@@ -118,7 +118,7 @@
 # 	public void callsMadeWhen_processError(){
 #
 # 		try {
-# 			Mockito.when(configuration_manager.getSimulationFile(Mockito.anyString(),  Mockito.any())).thenReturn(new File("test"));
+# 			Mockito.when(configuration_manager.getSimulationFile(Mockito.any"",  Mockito.any())).thenReturn(new File("test"));
 # 		} catch (Exception e) {
 # 			print(e);
 # 		}
@@ -144,7 +144,7 @@
 # 		assertEquals(true, capturedMessage.getLogMessage().startsWith("Process Initialization error: "));
 # 		assertEquals(LogLevel.ERROR, capturedMessage.getLogLevel());
 # 		assertEquals(ProcessNewSimulationRequest.class.getName(), capturedMessage.getSource());
-# 		assertEquals(new Integer(simulation_id).toString(), capturedMessage.getProcessId());
+# 		assertEquals(new Integer(simulation_id).to"", capturedMessage.getProcessId());
 # 		assertEquals(ProcessStatus.ERROR, capturedMessage.getProcessStatus());
 # 		assertEquals(false, capturedMessage.getStoreToDb());
 # 	}
@@ -156,7 +156,7 @@
 # 	public void callsMadeWhen_processErrorBecauseNullConfig(){
 #
 # 		try {
-# 			Mockito.when(configuration_manager.getSimulationFile(Mockito.anyString(),  Mockito.any())).thenReturn(new File("test"));
+# 			Mockito.when(configuration_manager.getSimulationFile(Mockito.any"",  Mockito.any())).thenReturn(new File("test"));
 # 		} catch (Exception e) {
 # 			print(e);
 # 		}
@@ -179,7 +179,7 @@
 # 		LogMessage capturedMessage = argCaptorLogMessage.getValue();
 # 		assertEquals(true, capturedMessage.getLogMessage().startsWith("Process Initialization error: "));
 # 		assertEquals(LogLevel.ERROR, capturedMessage.getLogLevel());
-# 		assertEquals(new Integer(simulation_id).toString(), capturedMessage.getProcessId());
+# 		assertEquals(new Integer(simulation_id).to"", capturedMessage.getProcessId());
 # 		assertEquals(ProcessNewSimulationRequest.class.getName(), capturedMessage.getSource());
 # 		assertEquals(ProcessStatus.ERROR, capturedMessage.getProcessStatus());
 # 		assertEquals(false, capturedMessage.getStoreToDb());
@@ -193,7 +193,7 @@
 # 	public void callsMadeWhen_processErrorBecauseNullSimulationFile(){
 #
 # 		try {
-# 			Mockito.when(configuration_manager.getSimulationFile(Mockito.anyString(),  Mockito.any())).thenReturn(null);
+# 			Mockito.when(configuration_manager.getSimulationFile(Mockito.any"",  Mockito.any())).thenReturn(null);
 # 		} catch (Exception e) {
 # 			print(e);
 # 		}
@@ -294,7 +294,7 @@ class ProcessNewSimulationRequestComponentTests(unittest.TestCase):
 
     def test_callsMadeWhen_processStarted(self):
         try:
-            self.configurationManager.getSimulationFile(Mockito.anyString(),
+            self.configurationManager.getSimulationFile(Mockito.any"",
                                                         Mockito.any()).thenReturn(os.path.join(os.getcwd(), "test"))
         except Exception as e:
             print(e)
@@ -336,7 +336,7 @@ class ProcessNewSimulationRequestComponentTests(unittest.TestCase):
 
     def test_callsMadeWhen_processError(self):
         try:
-            self.configurationManager.getSimulationFile(Mockito.anyString(),
+            self.configurationManager.getSimulationFile(Mockito.any"",
                                                         Mockito.any()).thenReturn(os.path.join(os.getcwd(), "test"))
         except Exception as e:
             print(e)
@@ -369,7 +369,7 @@ class ProcessNewSimulationRequestComponentTests(unittest.TestCase):
 
     def test_callsMadeWhen_processErrorBecauseNullConfig(self):
         try:
-            self.configurationManager.getSimulationFile(Mockito.anyString(),  Mockito.any()).thenReturn(os.path.join(os.getcwd(), "test"))
+            self.configurationManager.getSimulationFile(Mockito.any"",  Mockito.any()).thenReturn(os.path.join(os.getcwd(), "test"))
         except Exception as e:
             print(e)
 
@@ -399,7 +399,7 @@ class ProcessNewSimulationRequestComponentTests(unittest.TestCase):
 
     def test_callsMadeWhen_processErrorBecauseNullSimulationFile(self):
         try:
-            self.configurationManager.getSimulationFile(Mockito.anyString(),  Mockito.any()).thenReturn(None)
+            self.configurationManager.getSimulationFile(Mockito.any"",  Mockito.any()).thenReturn(None)
         except Exception as e:
             print(e)
 

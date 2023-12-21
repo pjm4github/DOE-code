@@ -11,7 +11,7 @@ class difference_message:
         return json.dumps(self.__dict__)
 
     def to_json_element(self):
-        return json.loads(self.to_string())
+        return json.loads(self.to_"")
 
     @staticmethod
     def parse(jsonString):

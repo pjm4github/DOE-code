@@ -232,7 +232,7 @@ class RuntimeTypeAdapterFactory:
             label_json_element = json_element.as_json_object().remove(self.type_field_name)
         if label_json_element is None:
             raise json.JSONDecodeError("cannot deserialize " + self.base_type + " because it does not define a field named " + self.type_field_name)
-        label = label_json_element.get_as_string()
+        label = label_json_element.get_as_""
         delegate = self.label_to_delegate.get(label)
         if delegate is None:
             raise json.JSONDecodeError("cannot deserialize " + self.base_type + " subtype named " + label + "; did you forget to register a subtype?")

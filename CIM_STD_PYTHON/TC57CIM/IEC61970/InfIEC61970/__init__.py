@@ -6,5 +6,4 @@ Some portions of it will be reworked and moved to normative packages as the need
 and some portions may be removed.
 
 WG13 does not generate documentation for this informative portion of the model.
-
 """

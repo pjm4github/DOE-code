@@ -882,7 +882,7 @@ class FncsMsg:
                     elif gldpro_obj.is_integer():
                         self.publish_json_data[simName][vjson_publish_gld_property_name[isize].object_name][vjson_publish_gld_property_name[isize].object_property] = int(gldpro_obj.get_integer())
                     elif gldpro_obj.is_character() or gldpro_obj.is_enumeration() or gldpro_obj.is_complex() or gldpro_obj.is_objectref() or gldpro_obj.is_set():
-                        chtmp = gldpro_obj.to_string()
+                        chtmp = gldpro_obj.to_""
                         self.publish_json_data[simName][vjson_publish_gld_property_name[isize].object_name][vjson_publish_gld_property_name[isize].object_property] = chtmp
                     elif gldpro_obj.is_timestamp():
                         self.publish_json_data[simName][vjson_publish_gld_property_name[isize].object_name][vjson_publish_gld_property_name[isize].object_property] = int(gldpro_obj.get_timestamp())
@@ -1072,7 +1072,7 @@ class FncsMsg:
                             pub_value = True
                             mp.last_value = LastValueBuffer(value)
                         else:
-                            last_val = mp.last_value.get_string()
+                            last_val = mp.last_value.get_""
                             if value != last_val:
                                 pub_value = True
                                 mp.last_value.set(value)

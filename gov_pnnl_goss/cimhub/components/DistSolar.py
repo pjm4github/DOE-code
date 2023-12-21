@@ -24,16 +24,16 @@ class DistSolar(DistComponent):
         if results:
             if results.hasNext():
                 soln = results.next()
-                self.name = self.safe_name(soln["name"].toString())
-                self.id = soln["voltage_id"].toString()
-                self.bus = self.safe_name(soln["bus"].toString())
+                self.name = self.safe_name(soln["name"].to"")
+                self.id = soln["voltage_id"].to""
+                self.bus = self.safe_name(soln["bus"].to"")
                 self.phases = self.optional_string(soln, "?phases", "ABC")
                 self.phases = self.phases.replace('\n', ':')
-                self.p = float(soln["precisions"].toString())
-                self.q = float(soln["q"].toString())
-                self.ratedU = float(soln["ratedU"].toString())
-                self.ratedS = float(soln["ratedS"].toString())
-                self.maxIFault = float(soln["ipu"].toString())
+                self.p = float(soln["precisions"].to"")
+                self.q = float(soln["q"].to"")
+                self.ratedU = float(soln["ratedU"].to"")
+                self.ratedS = float(soln["ratedS"].to"")
+                self.maxIFault = float(soln["ipu"].to"")
                 self.bDelta = False
 
     def get_json_entry(self):

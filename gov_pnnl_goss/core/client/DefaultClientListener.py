@@ -30,13 +30,13 @@ class DefaultClientListener:
                 else:
                     response = DataResponse(object_message.get_object())
                     if response.get_destination() is None:
-                        response.set_destination(message.get_JMS_destination().to_string())
+                        response.set_destination(message.get_JMS_destination().to_"")
                     self.response_event.on_message(response)
             elif isinstance(message, TextMessage):
                 text_message = message
                 response = DataResponse(text_message.get_text())
                 if response.get_destination() is None:
-                    response.set_destination(message.get_JMS_destination().to_string())
+                    response.set_destination(message.get_JMS_destination().to_"")
                 self.response_event.on_message(response)
         except Exception as e:
             self.logger.error("ERROR Receiving message", e)

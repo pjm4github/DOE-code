@@ -90,9 +90,9 @@
 #                                          "?subregion cim:SubGeographicalRegion.Region ?region."+
 #                                          "?region cim:IdentifiedObject.name ?region_name"+
 #                                         "}";
-# 		pgDataRequest.setRequestType(PowergridModelDataRequest.RequestType.QUERY.toString());
+# 		pgDataRequest.setRequestType(PowergridModelDataRequest.RequestType.QUERY.to"");
 # 		pgDataRequest.setQueryString(queryString);
-# 		pgDataRequest.setResultFormat(PowergridModelDataRequest.ResultFormat.JSON.toString());
+# 		pgDataRequest.setResultFormat(PowergridModelDataRequest.ResultFormat.JSON.to"");
 # 		pgDataRequest.setModelId(null);
 #
 # 		DataResponse message = new DataResponse();
@@ -115,8 +115,8 @@
 #
 # 		PowergridModelDataRequest pgDataRequest = new PowergridModelDataRequest();
 #
-# 		pgDataRequest.setRequestType(PowergridModelDataRequest.RequestType.QUERY_OBJECT_TYPES.toString());
-# 		pgDataRequest.setResultFormat(PowergridModelDataRequest.ResultFormat.JSON.toString());
+# 		pgDataRequest.setRequestType(PowergridModelDataRequest.RequestType.QUERY_OBJECT_TYPES.to"");
+# 		pgDataRequest.setResultFormat(PowergridModelDataRequest.ResultFormat.JSON.to"");
 # 		pgDataRequest.setModelId("ieee13");
 #
 # 		DataResponse message = new DataResponse();
@@ -139,8 +139,8 @@
 #
 # 		PowergridModelDataRequest pgDataRequest = new PowergridModelDataRequest();
 #
-# 		pgDataRequest.setRequestType(PowergridModelDataRequest.RequestType.QUERY_MODEL_NAMES.toString());
-# 		pgDataRequest.setResultFormat(PowergridModelDataRequest.ResultFormat.JSON.toString());
+# 		pgDataRequest.setRequestType(PowergridModelDataRequest.RequestType.QUERY_MODEL_NAMES.to"");
+# 		pgDataRequest.setResultFormat(PowergridModelDataRequest.ResultFormat.JSON.to"");
 #
 # 		DataResponse message = new DataResponse();
 # 		message.setDestination(GridAppsDConstants.topic_requestData+".powergridmodel");

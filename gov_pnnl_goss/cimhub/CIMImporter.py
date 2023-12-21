@@ -231,7 +231,7 @@ class CIMImporter(QueryHandler, CIMQuerySetter, OperationalLimits):
     #     szQuery = self.query_setter.getSelectionQuery(szTag)
     #     results = self.query_handler.query(szQuery, szTag)
     #     for soln in results:
-    #         key = self.SafeName(soln["?key"].toString())
+    #         key = self.SafeName(soln["?key"].to"")
     #         count = soln["?count"].getInt()
     #         mapper[key] = count
     #     results.close()
@@ -567,7 +567,7 @@ class CIMImporter(QueryHandler, CIMQuerySetter, OperationalLimits):
         print(label)
         keys = sorted(component_map.keys())
         for key in keys:
-            print(component_map[key].display_string())
+            print(component_map[key].display_"")
 
     def print_one_count_map(self, count_map, label):
         print(label)
@@ -579,7 +579,7 @@ class CIMImporter(QueryHandler, CIMQuerySetter, OperationalLimits):
         print(label)
         keys = sorted(node_map.keys())
         for key in keys:
-            print(node_map[key].display_string())
+            print(node_map[key].display_"")
 
     def print_all_count_maps(self):
         self.print_one_count_map(self.map_count_bank, "Count of Bank Tanks")
@@ -1072,7 +1072,7 @@ class CIMImporter(QueryHandler, CIMQuerySetter, OperationalLimits):
 
         mapNodes = {}
         for soln in results:
-            bus = DistComponent.safe_name(soln.get("?name").toString())
+            bus = DistComponent.safe_name(soln.get("?name").to"")
             mapNodes[bus] = GldNode(bus)
 
         for pair in self.map_substations.items():
@@ -1362,9 +1362,9 @@ class CIMImporter(QueryHandler, CIMQuerySetter, OperationalLimits):
         measurements_not_linked = 0
         for pair in self.map_measurements:
             obj = pair.getValue()
-        #   System.out.println (obj.DisplayString());
+        #   System.out.println (obj.Display"");
             nd = mapNodes.get(obj.bus)
-        #   System.out.println (nd.DisplayString());
+        #   System.out.println (nd.Display"");
             if nd is not None:
                 obj.FindSimObject(nd.loadname, nd.phases, nd.bStorageInverters, nd.bSolarInverters, nd.bSyncMachines)
                 if not obj.LinkedToSimulatorObject():

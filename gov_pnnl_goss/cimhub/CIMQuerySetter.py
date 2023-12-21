@@ -962,7 +962,7 @@
 #         for (String ln : lines) {
 #             if (wantThisLine (ln)) buf.append (ln);
 #         }
-#         return buf.toString();
+#         return buf.to"";
 #     }
 #
 #     public void setQueriesFromXMLFile (String fname) {

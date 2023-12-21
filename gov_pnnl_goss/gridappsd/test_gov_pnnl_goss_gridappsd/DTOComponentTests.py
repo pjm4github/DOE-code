@@ -75,7 +75,7 @@ class DTOComponentTests(unittest.TestCase):
         config = self.generate_power_system_config()
 
         # Assert equal serialized PSC and comparison string
-        self.assertEqual(config.toString(), TestConstants.POWER_SYSTEM_CONFIG)
+        self.assertEqual(config.to"", TestConstants.POWER_SYSTEM_CONFIG)
 
     def test_application_object_format_check(self):
         # Verify that parsing a bad input fails
@@ -94,7 +94,7 @@ class DTOComponentTests(unittest.TestCase):
         config = self.generate_application_object()
 
         # Assert equal serialized object and comparison string
-        self.assertEqual(config.toString(), TestConstants.APPLICATION_OBJECT_ESC)
+        self.assertEqual(config.to"", TestConstants.APPLICATION_OBJECT_ESC)
 
     def test_application_config_format_check(self):
         # Verify that parsing a bad input fails
@@ -112,7 +112,7 @@ class DTOComponentTests(unittest.TestCase):
         config = self.generate_application_config()
 
         # Serialize DTO Object
-        serialized = config.toString()
+        serialized = config.to""
 
         # Assert equal serialized object and comparison string
         self.assertEqual(serialized, TestConstants.APPLICATION_CONFIG_ESC)
@@ -135,7 +135,7 @@ class DTOComponentTests(unittest.TestCase):
         config = self.generate_fncs_bridge_response()
 
         # Assert equal serialized object and comparison string
-        self.assertEqual(config.toString(), TestConstants.FNCS_BRIDGE_RESPONSE)
+        self.assertEqual(config.to"", TestConstants.FNCS_BRIDGE_RESPONSE)
 
     def test_model_creation_config_format_check(self):
         # Verify that parsing a bad input fails
@@ -157,7 +157,7 @@ class DTOComponentTests(unittest.TestCase):
         config = self.generate_model_creation_config()
 
         # Assert equal serialized object and comparison string
-        self.assertEqual(config.toString(), TestConstants.MODEL_CREATION_CONFIG)
+        self.assertEqual(config.to"", TestConstants.MODEL_CREATION_CONFIG)
 
     def test_request_simulation_format_check(self):
         # Verify that parsing a bad input fails
@@ -177,7 +177,7 @@ class DTOComponentTests(unittest.TestCase):
         config = self.generate_request_simulation()
 
         # Assert equal serialized object and comparison string
-        self.assertEqual(config.toString(), TestConstants.REQUEST_SIMULATION_CONFIG_ESC)
+        self.assertEqual(config.to"", TestConstants.REQUEST_SIMULATION_CONFIG_ESC)
 
     def test_simulation_config_format_check(self):
         # Verify that parsing a bad input fails
@@ -202,7 +202,7 @@ class DTOComponentTests(unittest.TestCase):
         config = self.generate_simulation_config()
 
         # Assert equal serialized object and comparison string
-        self.assertEqual(config.toString(), TestConstants.SIMULATION_CONFIG)
+        self.assertEqual(config.to"", TestConstants.SIMULATION_CONFIG)
 
     def test_simulation_output_format_check(self):
         # Verify that parsing a bad input fails
@@ -220,7 +220,7 @@ class DTOComponentTests(unittest.TestCase):
         config = self.generate_simulation_output()
 
         # Assert equal serialized object and comparison string
-        self.assertEqual(config.toString(), TestConstants.SIMULATION_CONFIG_OUTPUT_SHORT)
+        self.assertEqual(config.to"", TestConstants.SIMULATION_CONFIG_OUTPUT_SHORT)
 
     def test_simulation_output_object_format_check(self):
         # Verify that parsing a bad input fails
@@ -239,7 +239,7 @@ class DTOComponentTests(unittest.TestCase):
         config = self.generate_simulation_output_object("rcon_FEEDER_REG")
 
         # Assert equal serialized object and comparison string
-        self.assertEqual(config.toString(), TestConstants.SIMULATION_CONFIG_OUTPUT_OBJECT_1)
+        self.assertEqual(config.to"", TestConstants.SIMULATION_CONFIG_OUTPUT_OBJECT_1)
 
     def generate_simulation_config(self):
         config_output = self.generate_simulation_output()

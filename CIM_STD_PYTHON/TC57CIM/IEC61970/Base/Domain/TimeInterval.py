@@ -9,13 +9,13 @@ class TimeInterval:
     """Interval between two times.
     """
 
-    def __init__(self) -> None:
+    def __init__(self):
         """
         Start time of this interval.
         """
-        self.start: Optional[Time] = Time()
+        self.start: Time = Time()
 
         """
         End time of this interval.
         """
-        self.end: Optional[Time] = Time()
+        self.end: Time = Time()

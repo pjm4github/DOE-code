@@ -26,30 +26,30 @@ class DistPhaseMatrix(DistComponent):
 
         if results.has_next():
             soln = results.next()
-            row = int(soln.get("?row").to_string())
-            col = int(soln.get("?col").to_string())
+            row = int(soln.get("?row").to_"")
+            col = int(soln.get("?col").to_"")
             if self.size == 0:
-                self.name = self.safe_name(soln.get("?name").to_string())
-                self.id = soln.get("?voltage_id").to_string()
-                self.cnt = int(soln.get("?cnt").to_string())
+                self.name = self.safe_name(soln.get("?name").to_"")
+                self.id = soln.get("?voltage_id").to_""
+                self.cnt = int(soln.get("?cnt").to_"")
                 self.set_mat_size()
                 self.r = [0.0] * self.size
                 self.x = [0.0] * self.size
                 self.b = [0.0] * self.size
 
             seq = self.get_mat_seq(row, col)
-            self.r[seq] = float(soln.get("?r").to_string())
-            self.x[seq] = float(soln.get("?x").to_string())
-            self.b[seq] = float(soln.get("?b").to_string())
+            self.r[seq] = float(soln.get("?r").to_"")
+            self.x[seq] = float(soln.get("?x").to_"")
+            self.b[seq] = float(soln.get("?b").to_"")
 
             while seq < self.size - 1:
                 soln = results.next()
-                row = int(soln.get("?row").to_string())
-                col = int(soln.get("?col").to_string())
+                row = int(soln.get("?row").to_"")
+                col = int(soln.get("?col").to_"")
                 seq = self.get_mat_seq(row, col)
-                self.r[seq] = float(soln.get("?r").to_string())
-                self.x[seq] = float(soln.get("?x").to_string())
-                self.b[seq] = float(soln.get("?b").to_string())
+                self.r[seq] = float(soln.get("?r").to_"")
+                self.x[seq] = float(soln.get("?x").to_"")
+                self.b[seq] = float(soln.get("?b").to_"")
 
     def get_json_entry(self):
         buf = f'{{"name":"{self.name}"}}'

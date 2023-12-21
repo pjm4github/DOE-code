@@ -14,6 +14,6 @@ class Substation(EquipmentContainer):
     def __init__(self):
         super().__init__()
         self.voltage_levels = VoltageLevel()  # The voltage levels within this substation.
-        self.bays = Bay()  # Bays contained in the substation.
+        self.bays = [Bay()]  # Bays contained in the substation.
         self.dc_converter_unit = DCConverterUnit()  # The DC converter unit belonging to the substation.
         self.normal_energized_feeder = Feeder()  # The normal energized feeders of the substation. Also used for naming purposes.

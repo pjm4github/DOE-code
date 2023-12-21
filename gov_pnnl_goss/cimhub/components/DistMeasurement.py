@@ -9,18 +9,18 @@ class DistMeasurement(DistComponent):
         self.sim_object = None
         if results.hasNext():
             soln = results.next()
-            self.name = self.safe_name(soln.get("?name").toString())
-            self.eq_name = self.safe_name(soln.get("?eqname").toString())
-            self.eq_type = self.safe_name(soln.get("?eqtype").toString())
-            self.meas_type = self.safe_name(soln.get("?type").toString())
-            self.meas_class = self.safe_name(soln.get("?class").toString())
-            self.id = soln.get("?voltage_id").toString()
-            self.eq_id = soln.get("?eqid").toString()
-            self.trm_id = soln.get("?trmid").toString()
-            self.bus = self.safe_name(soln.get("?bus").toString())
+            self.name = self.safe_name(soln.get("?name").to"")
+            self.eq_name = self.safe_name(soln.get("?eqname").to"")
+            self.eq_type = self.safe_name(soln.get("?eqtype").to"")
+            self.meas_type = self.safe_name(soln.get("?type").to"")
+            self.meas_class = self.safe_name(soln.get("?class").to"")
+            self.id = soln.get("?voltage_id").to""
+            self.eq_id = soln.get("?eqid").to""
+            self.trm_id = soln.get("?trmid").to""
+            self.bus = self.safe_name(soln.get("?bus").to"")
             self.phases = self.optional_string(soln, "?phases", "ABC")
         self.use_houses = use_houses
-        # print(self.display_string())
+        # print(self.display_"")
 
     def find_sim_object(self, load_name, bus_phases, is_storage, is_solar, is_sync_machines):
         if self.eq_type == "LinearShuntCompensator":

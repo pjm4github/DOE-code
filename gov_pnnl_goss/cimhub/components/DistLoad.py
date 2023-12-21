@@ -17,22 +17,22 @@ class DistLoad(DistComponent):
 
         if results.hasNext():
             soln = results.next()
-            self.name = self.safe_name(soln.get("?name").toString())
-            self.id = soln.get("?voltage_id").toString()
-            self.bus = self.safe_name(soln.get("?bus").toString())
-            self.basev = float(soln.get("?basev").toString())
+            self.name = self.safe_name(soln.get("?name").to"")
+            self.id = soln.get("?voltage_id").to""
+            self.bus = self.safe_name(soln.get("?bus").to"")
+            self.basev = float(soln.get("?basev").to"")
             self.phases = self.optional_string(soln, "?phases", "ABC").replace('\n', ':')
-            self.conn = soln.get("?conn").toString()
-            self.p = 0.001 * float(soln.get("?precisions").toString())
-            self.q = 0.001 * float(soln.get("?q").toString())
-            self.pz = float(soln.get("?pz").toString())
-            self.qz = float(soln.get("?qz").toString())
-            self.pi = float(soln.get("?pi").toString())
-            self.qi = float(soln.get("?qi").toString())
-            self.pp = float(soln.get("?pp").toString())
-            self.qp = float(soln.get("?qp").toString())
-            self.pe = float(soln.get("?pe").toString())
-            self.qe = float(soln.get("?qe").toString())
+            self.conn = soln.get("?conn").to""
+            self.p = 0.001 * float(soln.get("?precisions").to"")
+            self.q = 0.001 * float(soln.get("?q").to"")
+            self.pz = float(soln.get("?pz").to"")
+            self.qz = float(soln.get("?qz").to"")
+            self.pi = float(soln.get("?pi").to"")
+            self.qi = float(soln.get("?qi").to"")
+            self.pp = float(soln.get("?pp").to"")
+            self.qp = float(soln.get("?qp").to"")
+            self.pe = float(soln.get("?pe").to"")
+            self.qe = float(soln.get("?qe").to"")
             self.cnt = self.optional_int(soln, "?cnt", 1)
 
         self.dss_load_model = 8

@@ -55,17 +55,17 @@ class DistSubstation(DistComponent):
         if results:
             if results.hasNext():
                 soln = results.next()
-                self.name = self.safe_name(soln["name"].toString())
-                self.id = soln["voltage_id"].toString()
-                self.bus = self.safe_name(soln["bus"].toString())
-                self.basev = float(soln["basev"].toString())
-                self.nomv = float(soln["nomv"].toString())
-                self.vmag = float(soln["vmag"].toString())
-                self.vang = float(soln["vang"].toString())
-                self.r1 = float(soln["r1"].toString())
-                self.x1 = float(soln["x1"].toString())
-                self.r0 = float(soln["r0"].toString())
-                self.x0 = float(soln["x0"].toString())
+                self.name = self.safe_name(soln["name"].to"")
+                self.id = soln["voltage_id"].to""
+                self.bus = self.safe_name(soln["bus"].to"")
+                self.basev = float(soln["basev"].to"")
+                self.nomv = float(soln["nomv"].to"")
+                self.vmag = float(soln["vmag"].to"")
+                self.vang = float(soln["vang"].to"")
+                self.r1 = float(soln["r1"].to"")
+                self.x1 = float(soln["x1"].to"")
+                self.r0 = float(soln["r0"].to"")
+                self.x0 = float(soln["x0"].to"")
 
     def get_json_entry(self):
         return json.dumps({

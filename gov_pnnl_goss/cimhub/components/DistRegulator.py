@@ -52,47 +52,47 @@ class DistRegulator(DistComponent):
         self.pxfid = ""
         if results:
             soln = next(results)
-            self.pname = self.safe_name(soln['?pname'].toString())
-            self.pxfid = soln['?pxfid'].toString()
+            self.pname = self.safe_name(soln['?pname'].to"")
+            self.pxfid = soln['?pxfid'].to""
             self.set_size(query_handler)
             self.hasTanks = False
             if self.size > 0:
                 self.hasTanks = True
-            self.phs = [soln['?phs'].toString()] * self.size
-            self.rname = [self.safe_name(soln['?rname'].toString())] * self.size
-            self.tname = [self.safe_name(soln['?tname'].toString()) if self.hasTanks else ""] * self.size
-            self.id = [soln['?voltage_id'].toString()] * self.size
-            self.monphs = [soln['?monphs'].toString()] * self.size
-            self.mode = [soln['?mode'].toString()] * self.size
-            self.ctlmode = [soln['?ctlmode'].toString()] * self.size
-            self.wnum = [int(soln['?wnum'].toString())] * self.size
-            self.highStep = [int(soln['?highStep'].toString())] * self.size
-            self.lowStep = [int(soln['?lowStep'].toString())] * self.size
-            self.neutralStep = [int(soln['?neutralStep'].toString())] * self.size
-            self.normalStep = [int(soln['?normalStep'].toString())] * self.size
-            self.enabled = [bool(soln['?enabled'].toString())] * self.size
-            self.ldc = [bool(soln['?ldc'].toString())] * self.size
-            self.ltc = [bool(soln['?ltc'].toString())] * self.size
-            self.discrete = [bool(soln['?discrete'].toString())] * self.size
-            self.ctl_enabled = [bool(soln['?ctl_enabled'].toString())] * self.size
-            self.incr = [float(soln['?incr'].toString())] * self.size
-            self.neutralU = [float(soln['?neutralU'].toString())] * self.size
-            self.step = [int(soln['?step'].toString())] * self.size
-            self.initDelay = [float(soln['?initDelay'].toString())] * self.size
-            self.subDelay = [float(soln['?subDelay'].toString())] * self.size
-            self.vlim = [float(soln['?vlim'].toString())] * self.size
-            self.vset = [float(soln['?vset'].toString())] * self.size
-            self.vbw = [float(soln['?vbw'].toString())] * self.size
-            self.fwdR = [float(soln['?fwdR'].toString())] * self.size
-            self.fwdX = [float(soln['?fwdX'].toString())] * self.size
-            self.revR = [float(soln['?revR'].toString())] * self.size
-            self.revX = [float(soln['?revX'].toString())] * self.size
-            self.ctRating = [float(soln['?ctRating'].toString())] * self.size
-            self.ctRatio = [float(soln['?ctRatio'].toString())] * self.size
-            self.ptRatio = [float(soln['?ptRatio'].toString())] * self.size
+            self.phs = [soln['?phs'].to""] * self.size
+            self.rname = [self.safe_name(soln['?rname'].to"")] * self.size
+            self.tname = [self.safe_name(soln['?tname'].to"") if self.hasTanks else ""] * self.size
+            self.id = [soln['?voltage_id'].to""] * self.size
+            self.monphs = [soln['?monphs'].to""] * self.size
+            self.mode = [soln['?mode'].to""] * self.size
+            self.ctlmode = [soln['?ctlmode'].to""] * self.size
+            self.wnum = [int(soln['?wnum'].to"")] * self.size
+            self.highStep = [int(soln['?highStep'].to"")] * self.size
+            self.lowStep = [int(soln['?lowStep'].to"")] * self.size
+            self.neutralStep = [int(soln['?neutralStep'].to"")] * self.size
+            self.normalStep = [int(soln['?normalStep'].to"")] * self.size
+            self.enabled = [bool(soln['?enabled'].to"")] * self.size
+            self.ldc = [bool(soln['?ldc'].to"")] * self.size
+            self.ltc = [bool(soln['?ltc'].to"")] * self.size
+            self.discrete = [bool(soln['?discrete'].to"")] * self.size
+            self.ctl_enabled = [bool(soln['?ctl_enabled'].to"")] * self.size
+            self.incr = [float(soln['?incr'].to"")] * self.size
+            self.neutralU = [float(soln['?neutralU'].to"")] * self.size
+            self.step = [int(soln['?step'].to"")] * self.size
+            self.initDelay = [float(soln['?initDelay'].to"")] * self.size
+            self.subDelay = [float(soln['?subDelay'].to"")] * self.size
+            self.vlim = [float(soln['?vlim'].to"")] * self.size
+            self.vset = [float(soln['?vset'].to"")] * self.size
+            self.vbw = [float(soln['?vbw'].to"")] * self.size
+            self.fwdR = [float(soln['?fwdR'].to"")] * self.size
+            self.fwdX = [float(soln['?fwdX'].to"")] * self.size
+            self.revR = [float(soln['?revR'].to"")] * self.size
+            self.revX = [float(soln['?revX'].to"")] * self.size
+            self.ctRating = [float(soln['?ctRating'].to"")] * self.size
+            self.ctRatio = [float(soln['?ctRatio'].to"")] * self.size
+            self.ptRatio = [float(soln['?ptRatio'].to"")] * self.size
             self.bankphases = "".join(self.phs)
 
-        # print(self.display_string())
+        # print(self.display_"")
 
     def add_json_double_array(self, buf, tag, vals):
         buf.append(f",\"{tag}\":[")
@@ -224,7 +224,7 @@ class DistRegulator(DistComponent):
     #         "?eq c:IdentifiedObject.name ?case. }", "Regulator symbols")
     #     for soln in results:
     #         if soln is not None:
-    #             symbol = soln['?symbol'].toString()
+    #             symbol = soln['?symbol'].to""
     #             safe_symbol = self.safe_symbol_name(symbol)
     #             symbol_data.append(self.get_json_entry(safe_symbol, soln))
     #

@@ -17,18 +17,18 @@ class DistLinesSpacingZ(DistLineSegment):
         self.glm_config = ""
         if results:
             soln = next(results)
-            self.name = self.safe_name(soln.get("?name").toString())
-            self.id = soln.get("?voltage_id").toString()
-            self.bus1 = self.safe_name(soln.get("?bus1").toString())
-            self.bus2 = self.safe_name(soln.get("?bus2").toString())
-            self.len = float(soln.get("?len").toString())
-            self.basev = float(soln.get("?basev").toString())
-            self.spacing = soln.get("?spacing").toString()
-            self.spcid = soln.get("?spcid").toString()
+            self.name = self.safe_name(soln.get("?name").to"")
+            self.id = soln.get("?voltage_id").to""
+            self.bus1 = self.safe_name(soln.get("?bus1").to"")
+            self.bus2 = self.safe_name(soln.get("?bus2").to"")
+            self.len = float(soln.get("?len").to"")
+            self.basev = float(soln.get("?basev").to"")
+            self.spacing = soln.get("?spacing").to""
+            self.spcid = soln.get("?spcid").to""
             self.nwires = mapper[self.name]
-            self.wire_phases = [soln.get("?phs").toString() for _ in range(self.nwires)]
-            self.wire_names = [soln.get("?phname").toString() for _ in range(self.nwires)]
-            self.wire_classes = [soln.get("?phclass").toString() for _ in range(self.nwires)]
+            self.wire_phases = [soln.get("?phs").to"" for _ in range(self.nwires)]
+            self.wire_names = [soln.get("?phname").to"" for _ in range(self.nwires)]
+            self.wire_classes = [soln.get("?phclass").to"" for _ in range(self.nwires)]
             buf = []
 
             for i in range(self.nwires):

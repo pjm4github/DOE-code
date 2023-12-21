@@ -1153,7 +1153,7 @@ class Climate:
                         self.record.low = self.tmy[hoy].temp
                         self.record.low_day = doy
                 else:
-                    gl_error("%status(%d): day %d, hour %d is out of allowed range 0-8759 hours", self.tmyfile.get_string(), line,
+                    gl_error("%status(%d): day %d, hour %d is out of allowed range 0-8759 hours", self.tmyfile.get_"", line,
                              day, hour)
 
                 line += 1
@@ -1165,7 +1165,7 @@ class Climate:
         # #if 0
         # 	if ( strcmp(forecast_spec,"")!=0 && gl_forecast_create(my(),forecast_spec)==NULL )
         # 	{
-        # 		gl_error("%status: forecast '%status' is not valid", get_name(), forecast_spec.get_string());
+        # 		gl_error("%status: forecast '%status' is not valid", get_name(), forecast_spec.get_"");
         # 		return 0;
         # 	}
         # 	else if (get_forecast()!=NULL)

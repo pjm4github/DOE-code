@@ -152,7 +152,7 @@
 # //		processManager.start();
 # //		client.publish("goss.gridappsd.process.start", "some message");
 # //
-# //		Mockito.verify(client).subscribe(Mockito.anyString(), gossResponseEventArgCaptor.capture());
+# //		Mockito.verify(client).subscribe(Mockito.any"", gossResponseEventArgCaptor.capture());
 # //
 # //
 # //
@@ -201,7 +201,7 @@
 # 											 log_manager, app_manager, new_simulation_process, test_manager, field_bus_manager);
 # 		processManager.start();
 #
-# 		Mockito.verify(client).subscribe(Mockito.anyString(), gossResponseEventArgCaptor.capture());
+# 		Mockito.verify(client).subscribe(Mockito.any"", gossResponseEventArgCaptor.capture());
 #
 #
 # 		DataResponse dr = new DataResponse(REQUEST_SIMULATION_CONFIG);
@@ -213,7 +213,7 @@
 # 		//listen for client publish
 # 		Mockito.verify(client).publish(Mockito.any(Destination.class), argCaptorSerializable.capture());
 #
-# 		new Long(argCaptorSerializable.getValue().toString());
+# 		new Long(argCaptorSerializable.getValue().to"");
 #
 # 	}
 #
@@ -241,7 +241,7 @@
 # //											statusReporter, log_manager, app_manager, new_simulation_process);
 # //		processManager.start();
 # //
-# //		Mockito.verify(client).subscribe(Mockito.anyString(), gossResponseEventArgCaptor.capture());
+# //		Mockito.verify(client).subscribe(Mockito.any"", gossResponseEventArgCaptor.capture());
 # //
 # //
 # //		DataResponse dr = new DataResponse(REQUEST_SIMULATION_CONFIG);
@@ -289,7 +289,7 @@
 # 											 log_manager, app_manager, new_simulation_process, test_manager,field_bus_manager);
 # 		processManager.start();
 #
-# 		Mockito.verify(client).subscribe(Mockito.anyString(), gossResponseEventArgCaptor.capture());
+# 		Mockito.verify(client).subscribe(Mockito.any"", gossResponseEventArgCaptor.capture());
 #
 #
 # 		DataResponse dr = new DataResponse(REQUEST_SIMULATION_CONFIG);
@@ -299,8 +299,8 @@
 # 		ArgumentCaptor<Serializable> argCaptorSerializable= ArgumentCaptor.forClass(Serializable.class) ;
 #
 # 		Mockito.verify(new_simulation_process).process(Mockito.any(), Mockito.any(),
-# 				Mockito.anyString(),Mockito.any(),Mockito.any(), Mockito.any(),Mockito.any(), Mockito.any(),Mockito.any(),Mockito.any());
-# 		String messageString = argCaptorSerializable.getValue().toString();
+# 				Mockito.any"",Mockito.any(),Mockito.any(), Mockito.any(),Mockito.any(), Mockito.any(),Mockito.any(),Mockito.any());
+# 		String messageString = argCaptorSerializable.getValue().to"";
 #
 # 		assertNotNull(RequestSimulation.parse(messageString));
 #
@@ -324,7 +324,7 @@
 # //											statusReporter, log_manager, new_simulation_process);
 # //		processManager.start();
 # //
-# //		Mockito.verify(client).subscribe(Mockito.anyString(), gossResponseEventArgCaptor.capture());
+# //		Mockito.verify(client).subscribe(Mockito.any"", gossResponseEventArgCaptor.capture());
 # //
 # //
 # //		DataResponse dr = new DataResponse("BADFORMAT"+REQUEST_SIMULATION_CONFIG);
@@ -355,7 +355,7 @@
 # //											statusReporter, log_manager, app_manager, new_simulation_process);
 # //		processManager.start();
 # //
-# //		Mockito.verify(client).subscribe(Mockito.anyString(), gossResponseEventArgCaptor.capture());
+# //		Mockito.verify(client).subscribe(Mockito.any"", gossResponseEventArgCaptor.capture());
 # //		String logMessage = "My Test Log Message";
 # //
 # //		DataResponse dr = new DataResponse(logMessage);
@@ -458,7 +458,7 @@ class ProcessManagerComponentTests(unittest.TestCase):
                                             self.fieldBusManager)
         processManager.start()
 
-        Mockito.verify(self.client).subscribe(Mockito.anyString(), Mockito.any())
+        Mockito.verify(self.client).subscribe(Mockito.any"", Mockito.any())
 
         dr = DataResponse(self.REQUEST_SIMULATION_CONFIG)
         dr.set_destination("")
@@ -469,7 +469,7 @@ class ProcessManagerComponentTests(unittest.TestCase):
 
         Mockito.verify(self.client).publish(Mockito.any(), argCaptorSerializable.capture())
 
-        #long(argCaptorSerializable.toString())
+        #long(argCaptorSerializable.to"")
 
     def test_loggedStatusWhen_startExecuted(self):
         # TODO the client_factory doesn't return a satisfactory client so that there is a null pointer exception that is thrown in start of manager.
@@ -488,7 +488,7 @@ class ProcessManagerComponentTests(unittest.TestCase):
                                             self.fieldBusManager)
         processManager.start()
 
-        Mockito.verify(self.client).subscribe(Mockito.anyString(), Mockito.any())
+        Mockito.verify(self.client).subscribe(Mockito.any"", Mockito.any())
 
         dr = DataResponse(self.REQUEST_SIMULATION_CONFIG)
         dr.set_destination(GridAppsDConstants.topic_requestSimulation)
@@ -497,10 +497,10 @@ class ProcessManagerComponentTests(unittest.TestCase):
 
         argCaptorSerializable = Serializable()
         Mockito.verify(self.newSimulationProcess).process(Mockito.any(), Mockito.any(),
-                                                     Mockito.anyString(), Mockito.any(), Mockito.any(),
+                                                     Mockito.any"", Mockito.any(), Mockito.any(),
                                                      Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
                                                      Mockito.any())
-        message_string = argCaptorSerializable.toString()
+        message_string = argCaptorSerializable.to""
 
         self.assertIsNotNone(RequestSimulation.parse(message_string))
 

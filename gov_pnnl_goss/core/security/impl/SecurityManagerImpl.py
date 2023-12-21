@@ -54,7 +54,7 @@ class SecurityManagerImpl(DefaultActiveMqSecurityManager, GossSecurityManager):
     def get_property(self, key, default_value):
         ret_value = default_value
         if key is not None and key and self.properties.get(key):
-            value = self.properties.get(key).toString()
+            value = self.properties.get(key).to""
             if not value.startswith("${"):
                 ret_value = value
 

@@ -2,12 +2,13 @@
 from datetime import datetime
 from typing import Optional
 
+from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Core.ConductingEquipment import ConductingEquipment
 from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Domain.CurrentFlow import CurrentFlow
 from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Wires.SwitchPhase import SwitchPhase
 from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Wires.SwitchSchedule import SwitchSchedule
 
 
-class Switch:
+class Switch(ConductingEquipment):
     """
     A generic device designed to close, or open, or both, one or more electric
     circuits.  All switches are two terminal devices including grounding switches.
@@ -16,6 +17,7 @@ class Switch:
     """
 
     def __init__(self) -> None:
+        super().__init__()
         self.normal_open: bool = False  # The attribute is used in cases when no Measurement for the status value is present...
         self.open: bool = False  # The attribute tells if the switch is considered open when used as input to topology processing.
         self.rated_current: Optional[CurrentFlow] = CurrentFlow()  # The maximum continuous current carrying capacity in amps governed by the device material and construction.

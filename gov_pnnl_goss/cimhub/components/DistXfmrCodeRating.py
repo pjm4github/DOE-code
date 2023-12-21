@@ -25,21 +25,21 @@ class DistXfmrCodeRating(DistComponent):
 
         if results.hasNext():
             soln = results.next()
-            p = soln.get("?pname").toString()
-            t = soln.get("?tname").toString()
+            p = soln.get("?pname").to""
+            t = soln.get("?tname").to""
             self.pname = self.safe_name(p)
             self.tname = self.safe_name(t)
-            self.id = soln.get("?voltage_id").toString()
+            self.id = soln.get("?voltage_id").to""
             self.set_size(mapper.get(self.tname))
             for i in range(self.size):
-                self.eid.append(soln.get("?eid").toString())
-                self.ename.append(self.safe_name(soln.get("?ename").toString()))
-                self.wdg.append(int(soln.get("?enum").toString()))
-                self.conn.append(soln.get("?conn").toString())
-                self.ang.append(int(soln.get("?ang").toString()))
-                self.ratedS.append(float(soln.get("?ratedS").toString()))
-                self.ratedU.append(float(soln.get("?ratedU").toString()))
-                self.r.append(float(soln.get("?res").toString()))
+                self.eid.append(soln.get("?eid").to"")
+                self.ename.append(self.safe_name(soln.get("?ename").to""))
+                self.wdg.append(int(soln.get("?enum").to""))
+                self.conn.append(soln.get("?conn").to"")
+                self.ang.append(int(soln.get("?ang").to""))
+                self.ratedS.append(float(soln.get("?ratedS").to""))
+                self.ratedU.append(float(soln.get("?ratedU").to""))
+                self.r.append(float(soln.get("?res").to""))
                 if i + 1 < self.size:
                     soln = results.next()
 

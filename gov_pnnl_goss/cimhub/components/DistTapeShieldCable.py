@@ -15,10 +15,10 @@ class DistTapeShieldCable(DistCable):
         if results:
             if results.hasNext():
                 soln = results.next()
-                self.name = self.safe_name(soln["name"].toString())
-                self.id = soln["voltage_id"].toString()
-                self.rad = float(soln["rad"].toString())
-                self.gmr = float(soln["gmr"].toString())
+                self.name = self.safe_name(soln["name"].to"")
+                self.id = soln["voltage_id"].to""
+                self.rad = float(soln["rad"].to"")
+                self.gmr = float(soln["gmr"].to"")
                 self.rdc = self.optional_double(soln, "?rdc", 0.0)
                 self.r25 = self.optional_double(soln, "?r25", 0.0)
                 self.r50 = self.optional_double(soln, "?r50", 0.0)

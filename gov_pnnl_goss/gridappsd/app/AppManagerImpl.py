@@ -380,7 +380,7 @@ class AppManagerImpl(AppManager):
         conf_file = os.path.join(app_config_directory, app_info.get_id() + self.CONFIG_FILE_EXT)
         try:
             with open(conf_file, "w") as file:
-                file.write(app_info.to_string())
+                file.write(app_info.to_"")
         except IOError as e:
             self.logger.error(ProcessStatus.ERROR, None, f"Error while writing app config file: {e}")
 

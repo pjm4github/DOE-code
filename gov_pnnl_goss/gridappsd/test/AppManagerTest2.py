@@ -219,7 +219,7 @@ class AppManagerTest2(unittest.TestCase, ConnectionListener):
         # 		client.publish(GridAppsDConstants.topic_requestSimulation, appRegister);
         self.send_message(GridAppsDConstants.topic_app_register, app_register)
 
-        # 	String response = client.getResponse(request,GridAppsDConstants.topic_app_register, RESPONSE_FORMAT.JSON).toString();
+        # 	String response = client.getResponse(request,GridAppsDConstants.topic_app_register, RESPONSE_FORMAT.JSON).to"";
 
         # Sleep for 3 seconds
         time.sleep(3)

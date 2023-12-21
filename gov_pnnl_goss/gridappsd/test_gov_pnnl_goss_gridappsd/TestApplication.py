@@ -66,7 +66,7 @@
 # 			String request = gson.toJson(requestSimulation);
 # 			request = "{\"power_system_config\":{\"GeographicalRegion_name\":\"ieee13nodecktassets_Region\",\"SubGeographicalRegion_name\":\"ieee13nodecktassets_SubRegion\",\"Line_name\":\"ieee13nodecktassets\"}, "+
 # 					    "\"simulation_config\":{\"start_time\":\"03/07/2017 00:00:00\",\"duration\":\"60\",\"simulator\":\"GridLAB-D\",\"simulation_name\":\"my test simulation\",\"power_flow_solver_method\":\"FBS\"}}";
-# 			String simulation_id = client.getResponse(request, GridAppsDConstants.topic_requestSimulation, RESPONSE_FORMAT.JSON).toString();
+# 			String simulation_id = client.getResponse(request, GridAppsDConstants.topic_requestSimulation, RESPONSE_FORMAT.JSON).to"";
 # 			assertNotNull(simulation_id);
 # 			log.debug("REceived simulation id  = "+simulation_id);
 #

@@ -79,7 +79,7 @@ class OperationalLimits:
     def load_voltage_map(self, map_coordinates):
         res_temp = self.query_handler.query("bus-equipment mapper", self.szBUSEQ)
         for soln in res_temp:
-            cnid = soln.get("?cnid").toString()
+            cnid = soln.get("?cnid").to""
             key = f"{soln.get('?eqtype')}:{soln.get('?eqname')}:{soln.get('?tseq')}"
             self.map_bus_equipment[cnid].append(key)
 
@@ -91,7 +91,7 @@ class OperationalLimits:
         x = y = 0.0
 
         for soln in results:
-            soln_id = soln.get("?voltage_id").toString()
+            soln_id = soln.get("?voltage_id").to""
             if soln_id != last_id and soln_id in self.map_bus_equipment:
                 keys = self.map_bus_equipment[soln_id]
                 for key in keys:
@@ -176,7 +176,7 @@ class OperationalLimits:
         Norm = 1.0e9
         Emer = 0.0
         for soln in results:
-            v_id = soln.get("?voltage_id").toString()
+            v_id = soln.get("?voltage_id").to""
             if v_id != last_id:
                 if last_id:
                     self.map_current_limits[last_id] = [Norm, Emer]

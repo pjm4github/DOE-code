@@ -6,10 +6,12 @@
 # Created on:      17-Dec-2023 7:19:26 PM
 # 
 #######################################################
+from enum import Enum
 
-
-class RemoteUnitType:
+class RemoteUnitType(Enum):
     """Type of remote unit.
     """
-    def __init__(self):
-        pass
+    RTU = 0
+    SUBSTATION_CONTROL_SYSTEM = 1
+    CONTROL_CENTER = 2
+    IED = 3

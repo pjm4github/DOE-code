@@ -67,20 +67,20 @@ class DistHouse(DistComponent):
         self.thermal_integrity = None
 
     def init_from_query_solution(self, soln):
-        self.name = self.safe_name(soln.get("?name").toString())
-        self.id = soln.get("?voltage_id").toString()
-        self.parent = self.safe_name(soln.get("?parent").toString())
+        self.name = self.safe_name(soln.get("?name").to"")
+        self.id = soln.get("?voltage_id").to""
+        self.parent = self.safe_name(soln.get("?parent").to"")
         self.cooling_setpoint = float(self.optional_string(soln, "?coolingSetpoint", "200.0"))
-        self.cooling_system = self.HouseCooling(soln.get("?coolingSystem").toString())
-        self.floor_area = float(soln.get("?floorArea").toString())
+        self.cooling_system = self.HouseCooling(soln.get("?coolingSystem").to"")
+        self.floor_area = float(soln.get("?floorArea").to"")
         self.heating_setpoint = float(self.optional_string(soln, "?heatingSetpoint", "-100.0"))
-        self.heating_system = self.HouseHeating(soln.get("?heatingSystem").toString())
+        self.heating_system = self.HouseHeating(soln.get("?heatingSystem").to"")
         self.hvac_power_factor = float(self.optional_string(soln, "?hvacPowerFactor", "1.0"))
         try:
-            self.number_of_stories = int(soln.get("?numberOfStories").toString())
+            self.number_of_stories = int(soln.get("?numberOfStories").to"")
         except ValueError:
-            self.number_of_stories = int(float(soln.get("?numberOfStories").toString()))
-        self.thermal_integrity = self.HouseThermalIntegrity(soln.get("?thermalIntegrity").toString())
+            self.number_of_stories = int(float(soln.get("?numberOfStories").to""))
+        self.thermal_integrity = self.HouseThermalIntegrity(soln.get("?thermalIntegrity").to"")
 
     def display_string(self):
         buf = []

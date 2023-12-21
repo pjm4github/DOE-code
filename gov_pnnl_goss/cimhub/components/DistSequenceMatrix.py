@@ -25,14 +25,14 @@ class DistSequenceMatrix(DistComponent):
 
         if results:
             for soln in results:
-                self.name = self.safe_name(soln["name"].toString())
-                self.id = soln["voltage_id"].toString()
-                self.r1 = float(soln["r1"].toString())
-                self.x1 = float(soln["x1"].toString())
-                self.b1 = float(soln["b1"].toString())
-                self.r0 = float(soln["r0"].toString())
-                self.x0 = float(soln["x0"].toString())
-                self.b0 = float(soln["b0"].toString())
+                self.name = self.safe_name(soln["name"].to"")
+                self.id = soln["voltage_id"].to""
+                self.r1 = float(soln["r1"].to"")
+                self.x1 = float(soln["x1"].to"")
+                self.b1 = float(soln["b1"].to"")
+                self.r0 = float(soln["r0"].to"")
+                self.x0 = float(soln["x0"].to"")
+                self.b0 = float(soln["b0"].to"")
 
                 self.seqZs = self.c_format(complex(self.g_m_per_mile * (self.r0 + 2.0 * self.r1) / 3.0,
                                                    self.g_m_per_mile * (self.x0 + 2.0 * self.x1) / 3.0))

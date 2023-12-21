@@ -57,7 +57,7 @@ def convert_code(code_snippet):
             messages=[
                 {
                     "role": "system",
-                    "content": "Given the Java class, convert that code to python, using snake_case methods and local imports. Keep the class name CamelCase,"
+                    "content": "Given the Java class, convert that code to python keeping the comments, using snake_case methods and local imports. Keep the class name CamelCase,"
                 },
                 {
                     "role": "user",
@@ -84,7 +84,7 @@ MAX_TOKENS = 10000  # Maximum number of tokens that can be used with the OPENAI 
 
 if __name__ == "__main__":
     # directory_path = f"{os.path.expanduser('~')}/Documents/Git/GitHub/GOSS-GridAPPS-D-PYTHON/gov_pnnl_goss/gridappsd/dto/field/"
-    subdir = """/Documents/Git/GitHub/GOSS-GridAPPS-D-PYTHON/CIM_STD_PYTHON/TC57CIM/IEC61968/InfIEC61968/InfERPSupport/"""
+    subdir = """/Documents/Git/GitHub/GOSS-GridAPPS-D-PYTHON/CIM_STD_PYTHON/TC57CIM/IEC61968/Common/"""
     directory_path = f"{os.path.expanduser('~')}{subdir}"
     directory_path += '/' if not directory_path.endswith('/') else ""
     try:

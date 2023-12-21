@@ -33,25 +33,25 @@ class DistXfmrTank(DistComponent):
         # Parse the ResultSet to initialize object attributes
         if results.hasNext():
             soln = results.next()
-            self.pname = self.safe_name(soln.get("?pname").toString())
-            self.id = soln.get("?voltage_id").toString()
-            self.infoid = soln.get("?infoid").toString()
-            self.vgrp = soln.get("?vgrp").toString()
-            self.tname = self.safe_name(soln.get("?tname").toString())
-            self.tankinfo = self.safe_name(soln.get("?xfmrcode").toString())
+            self.pname = self.safe_name(soln.get("?pname").to"")
+            self.id = soln.get("?voltage_id").to""
+            self.infoid = soln.get("?infoid").to""
+            self.vgrp = soln.get("?vgrp").to""
+            self.tname = self.safe_name(soln.get("?tname").to"")
+            self.tankinfo = self.safe_name(soln.get("?xfmrcode").to"")
             self.set_size(mapper.get(self.tname))
             self.glmUsed = True
 
             for i in range(self.size):
-                self.eid.append(soln.get("?eid").toString())
-                self.ename.append(self.safe_name(soln.get("?ename").toString()))
-                self.bus.append(self.safe_name(soln.get("?bus").toString()))
-                self.basev.append(float(soln.get("?basev").toString()))
-                self.phs.append(soln.get("?phs").toString())
+                self.eid.append(soln.get("?eid").to"")
+                self.ename.append(self.safe_name(soln.get("?ename").to""))
+                self.bus.append(self.safe_name(soln.get("?bus").to""))
+                self.basev.append(float(soln.get("?basev").to""))
+                self.phs.append(soln.get("?phs").to"")
                 self.rg.append(self.optional_double(soln, "?rground", 0.0))
                 self.xg.append(self.optional_double(soln, "?xground", 0.0))
-                self.wdg.append(int(soln.get("?enum").toString()))
-                self.grounded.append(bool(soln.get("?grounded").toString()))
+                self.wdg.append(int(soln.get("?enum").to""))
+                self.grounded.append(bool(soln.get("?grounded").to""))
 
                 if i + 1 < self.size:
                     soln = results.next()

@@ -1464,7 +1464,7 @@ def GL_ATOMIC(T, X):
             self.X = p
 
         def get_string(self):
-            return self.get_property().get_string()
+            return self.get_property().get_""
 
         def set_string(self, str):
             self.get_property().from_string(str)
@@ -1495,7 +1495,7 @@ def GL_STRUCT(T, X):
             self.X = p
 
         def get_string(self):
-            return self.get_property().get_string()
+            return self.get_property().get_""
 
         def set_string(self, str):
             self.get_property().from_string(str)
@@ -1511,13 +1511,13 @@ def GL_STRING(T, X):
             return getattr(self, X).offset
 
         def get(self):
-            return self.X.get_string()
+            return self.X.get_""
 
         def get_property(self):
             return GldProperty(self, X)
 
         def get_with_lock(self, lock):
-            return self.X.get_string()
+            return self.X.get_""
 
         def set(self, p):
             self.X.set_string(p)
@@ -1610,7 +1610,7 @@ def GL_BITFLAGS(T, X):
             self.X = p
 
         def get_string(self):
-            return self.get_property().get_string()
+            return self.get_property().get_""
 
         def set_string(self, str):
             self.get_property().from_string(str)
@@ -1673,7 +1673,7 @@ class GldObject:
         return self.previous.id
 
     def get_groupid(self):
-        return self.previous.groupid.get_string()
+        return self.previous.groupid.get_""
 
     def get_oclass(self):
         return GldClass(self.previous.oclass)
@@ -1933,10 +1933,10 @@ class GldProperty:
         return Callback().convert.property_to_string(self.pstruct.prop, self.get_addr(), buffer, size) if self.pstruct.prop else -1
 
     def get_string(self, sz=1024):
-        res = GldString()
+        res = Gld""
         buf = bytearray(1024)
         if len(buf) < sz:
-            raise Exception("get_string() over size limit")
+            raise Exception("get_"" over size limit")
         if self.to_string(buf, sz) >= 0:
             res.value = buf.decode("utf-8")
         return res
@@ -2179,10 +2179,10 @@ class GldGlobal:
         return p.to_string(bp, sz)
 
     def get_string(self, sz=1024):
-        res = GldString()
+        res = Gld""
         buf = bytearray(1024)
         if len(buf) < sz:
-            raise Exception("get_string() over size limit")
+            raise Exception("get_"" over size limit")
         if self.to_string(buf, sz) >= 0:
             res.value = buf.decode("utf-8")
         return res

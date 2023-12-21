@@ -122,7 +122,7 @@ class GldZiploadScheduleConfigurationHandler(BaseConfigurationHandler, Configura
         else:
             load_schedule_file = File(directory + File.separator + schedule_name + ".player")
             fout = FileOutputStream(load_schedule_file)
-            fout.write(resp.getData().toString().getBytes())
+            fout.write(resp.getData().to"".getBytes())
             fout.flush()
             fout.close()
 

@@ -251,7 +251,7 @@
 	# 			@Override
 	# 			public Object answer(InvocationOnMock invocation) throws Throwable {
 	# 				Object[] args = invocation.getArguments();
-	# 				String dsName = args[0].toString();
+	# 				String dsName = args[0].to"";
 	# 				datasource_registry.add(dsName, datasourceObject);
 	# 				return null;
 	# 			}

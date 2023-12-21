@@ -204,10 +204,10 @@ class CIMWriter:
         results = self.query_handler.query(self.szXFINF, "xf info")
         last_name = ""
         for soln in results:
-            tname = DistComponent.safe_name(soln.get("?tname").toString())
-            tid = self.shorten_uuid(soln.get("?tid").toString())
-            ename = DistComponent.safe_name(soln.get("?ename").toString())
-            eid = self.shorten_uuid(soln.get("?eid").toString())
+            tname = DistComponent.safe_name(soln.get("?tname").to"")
+            tid = self.shorten_uuid(soln.get("?tid").to"")
+            ename = DistComponent.safe_name(soln.get("?ename").to"")
+            eid = self.shorten_uuid(soln.get("?eid").to"")
             if tname != last_name:
                 self.start_instance("TransformerInfo", tid, out)
                 self.string_node("IdentifiedObject.mRID", tid, out)
@@ -221,8 +221,8 @@ class CIMWriter:
     def load_connectivity_nodes(self, out):
         results = self.query_handler.query(self.szCN, "CN")
         for soln in results:
-            name = DistComponent.safe_name(soln.get("?name").toString())
-            id = self.shorten_uuid(soln.get("?voltage_id").toString())
+            name = DistComponent.safe_name(soln.get("?name").to"")
+            id = self.shorten_uuid(soln.get("?voltage_id").to"")
             self.start_instance("ConnectivityNode", id, out)
             self.string_node("IdentifiedObject.mRID", id, out)
             self.string_node("IdentifiedObject.name", name, out)
@@ -234,20 +234,20 @@ class CIMWriter:
         res_ends = self.query_handler.query(self.szEND, "ends")
         while res_ends.has_next():
             soln = res_ends.next()
-            end_id = self.shorten_uuid(soln.get("?endid").to_string())
-            tid = self.shorten_uuid(soln.get("?tid").to_string())
+            end_id = self.shorten_uuid(soln.get("?endid").to_"")
+            tid = self.shorten_uuid(soln.get("?tid").to_"")
             map_ends[tid] = end_id
         res_ends.close()
 
         results = self.query_handler.query(self.szTRM, "TRM")
         while results.has_next():
             soln = results.next()
-            name = DistComponent.safe_name(soln.get("?name").to_string())
-            tid = self.shorten_uuid(soln.get("?tid").to_string())
-            eq_id = self.shorten_uuid(soln.get("?eqid").to_string())
-            cn_id = self.shorten_uuid(soln.get("?cnid").to_string())
-            eq_class = soln.get("?eqclass").to_string()
-            seq = int(soln.get("?seq").to_string())
+            name = DistComponent.safe_name(soln.get("?name").to_"")
+            tid = self.shorten_uuid(soln.get("?tid").to_"")
+            eq_id = self.shorten_uuid(soln.get("?eqid").to_"")
+            cn_id = self.shorten_uuid(soln.get("?cnid").to_"")
+            eq_class = soln.get("?eqclass").to_""
+            seq = int(soln.get("?seq").to_"")
             self.start_instance("Terminal", tid, out)
             self.string_node("IdentifiedObject.mRID", tid, out)
             self.string_node("IdentifiedObject.name", name, out)
@@ -266,9 +266,9 @@ class CIMWriter:
         results = self.query_handler.query(self.szLOC, "LOC")
         while results.has_next():
             soln = results.next()
-            name = DistComponent.safe_name(soln.get("?name").to_string())
-            loc_id = self.shorten_uuid(soln.get("?locid").to_string())
-            eq_id = self.shorten_uuid(soln.get("?eqid").to_string())
+            name = DistComponent.safe_name(soln.get("?name").to_"")
+            loc_id = self.shorten_uuid(soln.get("?locid").to_"")
+            eq_id = self.shorten_uuid(soln.get("?eqid").to_"")
             if loc_id not in self.set_locations:
                 self.start_instance("GeoLocation", loc_id, out)
                 self.string_node("IdentifiedObject.mRID", loc_id, out)
@@ -281,11 +281,11 @@ class CIMWriter:
     # def load_locations(self, out):
     #     results = self.query_handler.query(self.szLOC, "Load Locations")
     #     for soln in results:
-    #         name = DistComponent.safe_name(soln.get("?name").toString())
-    #         voltage_id = self.shorten_uuid(soln.get("?voltage_id").toString())
-    #         lat = soln.get("?lat").toString()
-    #         lon = soln.get("?lon").toString()
-    #         altitude = soln.get("?altitude").toString()
+    #         name = DistComponent.safe_name(soln.get("?name").to"")
+    #         voltage_id = self.shorten_uuid(soln.get("?voltage_id").to"")
+    #         lat = soln.get("?lat").to""
+    #         lon = soln.get("?lon").to""
+    #         altitude = soln.get("?altitude").to""
     #
     #         self.start_instance("Location", voltage_id, out)
     #         self.string_node("IdentifiedObject.mRID", voltage_id, out)
@@ -300,10 +300,10 @@ class CIMWriter:
     # def load_energy_consumers(self, out):
     #     results = self.query_handler.query(self.szEC, "EC")
     #     for soln in results:
-    #         name = DistComponent.safe_name(soln.get("?name").toString())
-    #         voltage_id = self.shorten_uuid(soln.get("?voltage_id").toString())
-    #         precisions = soln.get("?precisions").toString()
-    #         q = soln.get("?q").toString()
+    #         name = DistComponent.safe_name(soln.get("?name").to"")
+    #         voltage_id = self.shorten_uuid(soln.get("?voltage_id").to"")
+    #         precisions = soln.get("?precisions").to""
+    #         q = soln.get("?q").to""
     #         self.start_instance("EnergyConsumer", voltage_id, out)
     #         self.string_node("IdentifiedObject.mRID", voltage_id, out)
     #         self.string_node("IdentifiedObject.name", name, out)
@@ -316,11 +316,11 @@ class CIMWriter:
         results = self.query_handler.query(self.szPOS, "POS PTS")
         while results.has_next():
             soln = results.next()
-            id = self.shorten_uuid(soln.get("?voltage_id").to_string())
-            loc_id = self.shorten_uuid(soln.get("?locid").to_string())
-            seq = int(soln.get("?seq").to_string())
-            x = float(soln.get("?x").to_string())
-            y = float(soln.get("?y").to_string())
+            id = self.shorten_uuid(soln.get("?voltage_id").to_"")
+            loc_id = self.shorten_uuid(soln.get("?locid").to_"")
+            seq = int(soln.get("?seq").to_"")
+            x = float(soln.get("?x").to_"")
+            y = float(soln.get("?y").to_"")
             self.start_instance("PositionPoint", id, out)
             self.ref_node("PositionPoint.Location", loc_id, out)
             self.integer_node("PositionPoint.sequenceNumber", seq, out)
@@ -332,11 +332,11 @@ class CIMWriter:
     # def load_position_points(self, out):
     #     results = self.query_handler.query(self.szPOC, "Load Position Points")
     #     for soln in results:
-    #         voltage_id = self.shorten_uuid(soln.get("?voltage_id").toString())
-    #         sequence_number = soln.get("?sequenceNumber").toString()
-    #         x = soln.get("?x").toString()
-    #         y = soln.get("?y").toString()
-    #         z = soln.get("?z").toString()
+    #         voltage_id = self.shorten_uuid(soln.get("?voltage_id").to"")
+    #         sequence_number = soln.get("?sequenceNumber").to""
+    #         x = soln.get("?x").to""
+    #         y = soln.get("?y").to""
+    #         z = soln.get("?z").to""
     #
     #         self.start_instance("PositionPoint", voltage_id, out)
     #         self.string_node("IdentifiedObject.mRID", voltage_id, out)
@@ -364,9 +364,9 @@ class CIMWriter:
     #     results = self.query_handler.query(self.szT, "Distribution Line Segment")
     #
     #     for soln in results:
-    #         voltage_id = self.shorten_uuid(soln.get("?voltage_id").toString())
-    #         name = soln.get("?name").toString()
-    #         description = soln.get("?description").toString()
+    #         voltage_id = self.shorten_uuid(soln.get("?voltage_id").to"")
+    #         name = soln.get("?name").to""
+    #         description = soln.get("?description").to""
     #
     #         self.start_instance("DistributionLineSegment", voltage_id, out)
     #         self.string_node("IdentifiedObject.mRID", voltage_id, out)
@@ -391,9 +391,9 @@ class CIMWriter:
     #     results = self.query_handler.query(voltage_id, "Start Switch")
     #
     #     for soln in results:
-    #         voltage_id = self.shorten_uuid(soln.get("?voltage_id").toString())
-    #         name = soln.get("?name").toString()
-    #         description = soln.get("?description").toString()
+    #         voltage_id = self.shorten_uuid(soln.get("?voltage_id").to"")
+    #         name = soln.get("?name").to""
+    #         description = soln.get("?description").to""
     #
     #         self.start_instance("StartSwitch", voltage_id, out)
     #         self.string_node("IdentifiedObject.mRID", voltage_id, out)
@@ -648,8 +648,8 @@ class CIMWriter:
     # def load_transformers(self, out):
     #     results = self.query_handler.query(self.szXFMER, "xfmer")
     #     for soln in results:
-    #         name = DistComponent.safe_name(soln.get("?name").toString())
-    #         voltage_id = self.shorten_uuid(soln.get("?voltage_id").toString())
+    #         name = DistComponent.safe_name(soln.get("?name").to"")
+    #         voltage_id = self.shorten_uuid(soln.get("?voltage_id").to"")
     #         self.start_instance("PowerTransformer", voltage_id, out)
     #         self.string_node("IdentifiedObject.mRID", voltage_id, out)
     #         self.string_node("IdentifiedObject.name", name, out)
@@ -659,10 +659,10 @@ class CIMWriter:
     # def load_ders(self, out):
     #     results = self.query_handler.query(self.szDER, "DER")
     #     for soln in results:
-    #         name = DistComponent.safe_name(soln.get("?name").toString())
-    #         voltage_id = self.shorten_uuid(soln.get("?voltage_id").toString())
-    #         precisions = soln.get("?precisions").toString()
-    #         q = soln.get("?q").toString()
+    #         name = DistComponent.safe_name(soln.get("?name").to"")
+    #         voltage_id = self.shorten_uuid(soln.get("?voltage_id").to"")
+    #         precisions = soln.get("?precisions").to""
+    #         q = soln.get("?q").to""
     #         self.start_instance("DistributedEnergyResource", voltage_id, out)
     #         self.string_node("IdentifiedObject.mRID", voltage_id, out)
     #         self.string_node("IdentifiedObject.name", name, out)
@@ -674,10 +674,10 @@ class CIMWriter:
     # def load_solar_inverters(self, out):
     #     results = self.query_handler.query(self.szINV, "INV")
     #     for soln in results:
-    #         name = DistComponent.safe_name(soln.get("?name").toString())
-    #         voltage_id = self.shorten_uuid(soln.get("?voltage_id").toString())
-    #         precisions = soln.get("?precisions").toString()
-    #         q = soln.get("?q").toString()
+    #         name = DistComponent.safe_name(soln.get("?name").to"")
+    #         voltage_id = self.shorten_uuid(soln.get("?voltage_id").to"")
+    #         precisions = soln.get("?precisions").to""
+    #         q = soln.get("?q").to""
     #         self.start_instance("SolarInverter", voltage_id, out)
     #         self.string_node("IdentifiedObject.mRID", voltage_id, out)
     #         self.string_node("IdentifiedObject.name", name, out)
@@ -689,10 +689,10 @@ class CIMWriter:
     # def load_battery_inverters(self, out):
     #     results = self.query_handler.query(self.szBINV, "BINV")
     #     for soln in results:
-    #         name = DistComponent.safe_name(soln.get("?name").toString())
-    #         voltage_id = self.shorten_uuid(soln.get("?voltage_id").toString())
-    #         precisions = soln.get("?precisions").toString()
-    #         q = soln.get("?q").toString()
+    #         name = DistComponent.safe_name(soln.get("?name").to"")
+    #         voltage_id = self.shorten_uuid(soln.get("?voltage_id").to"")
+    #         precisions = soln.get("?precisions").to""
+    #         q = soln.get("?q").to""
     #         self.start_instance("BatteryInverter", voltage_id, out)
     #         self.string_node("IdentifiedObject.mRID", voltage_id, out)
     #         self.string_node("IdentifiedObject.name", name, out)
@@ -704,10 +704,10 @@ class CIMWriter:
     # def load_synchronous_machines(self, out):
     #     results = self.query_handler.query(self.szGEN, "GEN")
     #     for soln in results:
-    #         name = DistComponent.safe_name(soln.get("?name").toString())
-    #         voltage_id = self.shorten_uuid(soln.get("?voltage_id").toString())
-    #         precisions = soln.get("?precisions").toString()
-    #         q = soln.get("?q").toString()
+    #         name = DistComponent.safe_name(soln.get("?name").to"")
+    #         voltage_id = self.shorten_uuid(soln.get("?voltage_id").to"")
+    #         precisions = soln.get("?precisions").to""
+    #         q = soln.get("?q").to""
     #         self.start_instance("SynchronousMachine", voltage_id, out)
     #         self.string_node("IdentifiedObject.mRID", voltage_id, out)
     #         self.string_node("IdentifiedObject.name", name, out)
@@ -719,8 +719,8 @@ class CIMWriter:
     # def load_voltage_levels(self, out):
     #     results = self.query_handler.query(self.szVL, "VL")
     #     for soln in results:
-    #         name = DistComponent.safe_name(soln.get("?name").toString())
-    #         voltage_id = self.shorten_uuid(soln.get("?voltage_id").toString())
+    #         name = DistComponent.safe_name(soln.get("?name").to"")
+    #         voltage_id = self.shorten_uuid(soln.get("?voltage_id").to"")
     #         self.start_instance("VoltageLevel", voltage_id, out)
     #         self.string_node("IdentifiedObject.mRID", voltage_id, out)
     #         self.string_node("IdentifiedObject.name", name, out)
@@ -739,9 +739,9 @@ class CIMWriter:
     # def load_xf_info_windings(self, out):
     #     results = self.query_handler.query(self.szXFWIND, "xf winding info")
     #     for soln in results:
-    #         tid = self.shorten_uuid(soln.get("?tid").toString())
-    #         wnd = self.shorten_uuid(soln.get("?wnd").toString())
-    #         pht = soln.get("?pht").toString()
+    #         tid = self.shorten_uuid(soln.get("?tid").to"")
+    #         wnd = self.shorten_uuid(soln.get("?wnd").to"")
+    #         pht = soln.get("?pht").to""
     #         self.start_instance("TransformerWinding", wnd, out)
     #         self.string_node("IdentifiedObject.mRID", wnd, out)
     #         self.integer_node("TransformerWinding.phaseTapChangerCount", 0, out)

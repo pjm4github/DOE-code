@@ -35,9 +35,9 @@ class LoggedInFilter(Filter):
                         body.append(char_buffer, 0, bytes_read)
                 except IOException as e1:
                     e1.printStackTrace()
-                if not body.toString().isEmpty():
+                if not body.to"".isEmpty():
                     try:
-                        json_obj = json.loads(body.toString(), JsonObject)
+                        json_obj = json.loads(body.to"", JsonObject)
                         token = json_obj.get("AuthToken")
                         if token.isEmpty():
                             token = None

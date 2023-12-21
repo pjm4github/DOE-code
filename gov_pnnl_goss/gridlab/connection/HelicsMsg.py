@@ -401,7 +401,7 @@ class HelicsMsg:
         buf = ctypes.create_string_buffer(1024)
         sim_name = gl_name(obj, buf, 1023).decode()
         json_message = Json::Value()
-        parse_err = Json::String()
+        parse_err = Json::""
         json_builder = Json::CharReaderBuilder()
         value = ""
         object_name = ""
@@ -437,14 +437,14 @@ class HelicsMsg:
                             sub.p_object_property.setp(double_temp)
                     else:
                         gl_verbose(f"helics_msg: Calling getString on subscription {sub.target}")
-                        value_buffer = sub.HelicsSubscription.getString()
+                        value_buffer = sub.HelicsSubscription.get""
                         if value_buffer:
                             value_buf = value_buffer.encode('utf-8')
                             sub.p_object_property.from_string(value_buf)
                 except Exception:
                     value_buffer = ""
                     gl_verbose(f"helics_msg: Calling getString on subscription {sub.target}")
-                    value_buffer = sub.HelicsSubscription.getString()
+                    value_buffer = sub.HelicsSubscription.get""
                     if value_buffer:
                         value_buf = value_buffer.encode('utf-8')
                         sub.p_object_property.from_string(value_buf)
@@ -467,7 +467,7 @@ class HelicsMsg:
         for sub in self.json_helics_value_subscriptions:
             if sub.HelicsSubscription.isUpdated():
                 gl_verbose(f"JSON subscription {sub.target} updated.")
-                value = sub.HelicsSubscription.getString()
+                value = sub.HelicsSubscription.get""
                 value_length = len(value)
                 jReader = json_builder.newCharReader()
                 if jReader.parse(value, value + value_length, json_message, parse_err):
@@ -494,7 +494,7 @@ class HelicsMsg:
                                     dtmp = json_message[object_name][property_name].asDouble()
                                     gld_property.setp(dtmp)
                                 else:
-                                    stmp = json_message[object_name][property_name].asString()
+                                    stmp = json_message[object_name][property_name].as""
                                     sbuf = stmp.encode('utf-8')
                                     gld_property.from_string(sbuf)
                             else:
@@ -537,7 +537,7 @@ class HelicsMsg:
                                     dtmp = json_message[object_name][property_name].asDouble()
                                     gld_property.setp(dtmp)
                                 else:
-                                    stmp = json_message[object_name][property_name].asString()
+                                    stmp = json_message[object_name][property_name].as""
                                     sbuf = stmp.encode('utf-8')
                                     gld_property.from_string(sbuf)
                             else:
@@ -642,7 +642,7 @@ class HelicsMsg:
         if HAVE_HELICS:
             for sub in self.json_helics_value_subscriptions:
                 if sub.HelicsSubscription.isUpdated():
-                    value = sub.HelicsSubscription.getString()
+                    value = sub.HelicsSubscription.get""
                     value_length = len(value)
                     j_reader = json_reader_builder.newCharReader()
     
@@ -678,7 +678,7 @@ class HelicsMsg:
                                             dtmp = json_data[object_name][property_name].asDouble()
                                             gld_property.setp(dtmp)
                                         else:
-                                            stmp = json_data[object_name][property_name].asString()
+                                            stmp = json_data[object_name][property_name].as""
                                             sbuf = stmp[:1023]
                                             gld_property.from_string(sbuf)
     
@@ -714,7 +714,7 @@ class HelicsMsg:
                                             dtmp = json_data[object_name][property_name].asDouble()
                                             gld_property.setp(dtmp)
                                         else:
-                                            stmp = json_data[object_name][property_name].asString()
+                                            stmp = json_data[object_name][property_name].as""
                                             sbuf = stmp[:1023]
                                             gld_property.from_string(sbuf)
     
@@ -767,7 +767,7 @@ class HelicsMsg:
                                             dtmp = json_data[object_name][property_name].asDouble()
                                             gld_property.setp(dtmp)
                                         else:
-                                            stmp = json_data[object_name][property_name].asString()
+                                            stmp = json_data[object_name][property_name].as""
                                             sbuf = stmp[:1023]
                                             gld_property.from_string(sbuf)
     
@@ -803,7 +803,7 @@ class HelicsMsg:
                                             dtmp = json_data[object_name][property_name].asDouble()
                                             gld_property.setp(dtmp)
                                         else:
-                                            stmp = json_data[object_name][property_name].asString()
+                                            stmp = json_data[object_name][property_name].as""
                                             sbuf = stmp[:1023]
                                             gld_property.from_string(sbuf)
     

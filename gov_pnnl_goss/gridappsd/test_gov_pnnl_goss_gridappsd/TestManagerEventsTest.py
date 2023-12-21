@@ -144,7 +144,7 @@ class TestManagerEventsTest(unittest.TestCase):
 		}
 
 		reqTest1 = RequestTestUpdate.parse(json.dumps(request_update))
-		print(reqTest1.to_string())
+		print(reqTest1.to_"")
 		print(reqTest1.get_command())
 		self.assertEqual(reqTest1.get_command(), "update_events")
 
@@ -182,7 +182,7 @@ class TestManagerEventsTest(unittest.TestCase):
 		self.process_event.add_events(tc.get_events())
 		status = self.process_event.get_status_json()
 		dataArray0 = status.get("data").getAsJsonArray()
-		faultMRID = dataArray0.get(0).getAsJsonObject().get("faultMRID").getAsString()
+		faultMRID = dataArray0.get(0).getAsJsonObject().get("faultMRID").getAs""
 		occuredDateTime = dataArray0.get(0).getAsJsonObject().get("occuredDateTime").getAsLong()
 		stopDateTime = dataArray0.get(0).getAsJsonObject().get("stopDateTime").getAsLong()
 		occuredDateTime -= 6
@@ -199,14 +199,14 @@ class TestManagerEventsTest(unittest.TestCase):
 		}
 		reqTest1 = RequestTestUpdate.parse(json.dumps(request_update))
 		print("Update event")
-		print(reqTest1.to_string())
+		print(reqTest1.to_"")
 		self.assertEqual(reqTest1.get_command(), "update_events")
 
 		self.process_event.update_event_times(reqTest1.get_events())
 
 		status1 = self.process_event.get_status_json()
 		dataArray1 = status1.get("data").getAsJsonArray()
-		faultMRID1 = dataArray1.get(0).getAsJsonObject().get("faultMRID").getAsString()
+		faultMRID1 = dataArray1.get(0).getAsJsonObject().get("faultMRID").getAs""
 		occuredDateTime1 = dataArray1.get(0).getAsJsonObject().get("occuredDateTime").getAsLong()
 		stopDateTime1 = dataArray1.get(0).getAsJsonObject().get("stopDateTime").getAsLong()
 		self.assertEqual(faultMRID, faultMRID1)
@@ -223,8 +223,8 @@ class TestManagerEventsTest(unittest.TestCase):
 			status = self.process_event.get_status_json()
 			print(status)
 			dataArray = status.get("data").getAsJsonArray()
-		self.assertEqual(dataArray.get(0).getAsJsonObject().get("status").getAsString(), "CLEARED")
-		self.assertEqual(dataArray.get(1).getAsJsonObject().get("status").getAsString(), "CLEARED")
+		self.assertEqual(dataArray.get(0).getAsJsonObject().get("status").getAs"", "CLEARED")
+		self.assertEqual(dataArray.get(1).getAsJsonObject().get("status").getAs"", "CLEARED")
 
 		rt = RequestTestUpdate.parse(json.dumps(test_cfg1))
 		print(tc.get_events())

@@ -7,7 +7,7 @@
 # 
 #######################################################
 # from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Domain.Float import Float
-# from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Domain.Seconds import Seconds
+from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Domain.Seconds import Seconds
 from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.SCADA.RemotePoint import RemotePoint
 
 class RemoteSource(RemotePoint):
@@ -16,4 +16,8 @@ class RemoteSource(RemotePoint):
     """
     def __init__(self):
         super().__init__()
+        self.deadband = 0.0
+        self.scan_interval = Seconds()
+        self.sensor_maximum = 1.0
+        self.sensor_minimum = 0.0
 

@@ -12,10 +12,10 @@ class PotentialTransformer(Sensor):
 	def __init__(self):
 		# PT accuracy classification.
 		super().__init__()
-		self.accuracyClass = ""
+		self.accuracy_class = ""
 		# Nominal ratio between the primary and secondary voltage.
-		self.nominalRatio = 1.0
+		self.nominal_ratio = 1.0
 		# Potential transformer (PT) classification covering burden.
-		self.ptClass = ""
+		self.pt_class = ""
 		# Potential transformer construction type.
 		self.type = PotentialTransformerKind.INDUCTIVE

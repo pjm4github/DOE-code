@@ -15,10 +15,10 @@ class DistXfmrCodeOCTest(DistComponent):
 
         if results.hasNext():
             soln = results.next()
-            self.pname = self.safe_name(soln.get("?pname").toString())
-            self.tname = self.safe_name(soln.get("?tname").toString())
-            self.nll = float(soln.get("?nll").toString())
-            self.iexc = float(soln.get("?iexc").toString())
+            self.pname = self.safe_name(soln.get("?pname").to"")
+            self.tname = self.safe_name(soln.get("?tname").to"")
+            self.nll = float(soln.get("?nll").to"")
+            self.iexc = float(soln.get("?iexc").to"")
 
     def display_string(self):
         return f"{self.pname}:{self.tname} NLL={self.nll:.4f} iexc={self.iexc:.4f}"

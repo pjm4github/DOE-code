@@ -43,7 +43,7 @@ class ManagementLauncher:
                 elif request.strip() == "list_datasources":
                     response_data = json.dumps(self.datasource_registry.get_available())
 
-            print("On message: " + response.to_string())
+            print("On message: " + response.to_"")
             self.client.publish("goss/management/response", response_data)
 
     def start(self):

@@ -13,12 +13,12 @@ class DistXfmrBank(DistComponent):
         self.size = 0
         if results.hasNext():
             soln = results.next()
-            self.pname = self.safe_name(soln.get("?pname").toString())
-            self.pid = soln.get("?voltage_id").toString()
-            self.vgrp = soln.get("?vgrp").toString()
+            self.pname = self.safe_name(soln.get("?pname").to"")
+            self.pid = soln.get("?voltage_id").to""
+            self.vgrp = soln.get("?vgrp").to""
             self.set_size(mapper.get(self.pname))
             for i in range(self.size):
-                self.tname.append(self.safe_name(soln.get("?tname").toString()))
+                self.tname.append(self.safe_name(soln.get("?tname").to""))
                 if i + 1 < self.size:
                     soln = results.next()
 

@@ -8,10 +8,10 @@ class DistConcentricNeutralCable(DistCable):
 
         if results:
             soln = results[0]  # Assuming results is a list of query results, adjust as needed
-            self.name = self.safe_name(soln.get("?name").toString())
-            self.id = soln.get("?voltage_id").toString()
-            self.rad = float(soln.get("?rad").toString())
-            self.gmr = float(soln.get("?gmr").toString())
+            self.name = self.safe_name(soln.get("?name").to"")
+            self.id = soln.get("?voltage_id").to""
+            self.rad = float(soln.get("?rad").to"")
+            self.gmr = float(soln.get("?gmr").to"")
             self.rdc = self.optional_double(soln, "?rdc", 0.0)
             self.r25 = self.optional_double(soln, "?r25", 0.0)
             self.r50 = self.optional_double(soln, "?r50", 0.0)
@@ -36,7 +36,7 @@ class DistConcentricNeutralCable(DistCable):
         return f'{{"name":"{self.name}", "mRID":"{self.id}"}}'
 
     def display_string(self) -> str:
-        buf = super().display_string()
+        buf = super().display_""
         buf += f" dneut={self.dneut:.6f} strand_cnt={self.strand_cnt} "
         buf += f"strand_gmr={self.strand_gmr:.6f} strand_rad={self.strand_rad:.6f} strand_rdc={self.strand_rdc:.6f}"
         return buf

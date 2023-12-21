@@ -154,7 +154,7 @@ if __name__ == "__main__":
         # record.setIrradanceDiffuseHorizontal(0);
         # record.setIrradanceDirectNormal(0);
         #
-        # String provenInput = record.toString();
+        # String provenInput = record.to"";
 
         proven_input =  """
             {

@@ -55,7 +55,7 @@
 # //		commFault.value.stopDateTime = 1248156008L;
 #
 #
-# //		System.out.println(new String (commFault.toString()));
+# //		System.out.println(new String (commFault.to""));
 # //		String tempStr = "{\"inputList\":[{\"objectMRID\":\"UU123214\",\"attribute\":\"RegulatingControl.mode\"}],\"outputList\":[\"UU12323\"],\"filterAllInputs\":false,\"filterAllOutputs\":false,\"timeInitiated\":1248156005,\"timeCleared\":1248156008}";
 # //		CommunicationFaultData tempComm = CommunicationFaultData.parse(tempStr);
 # //		System.out.println(gson.toJson(tempComm));
@@ -103,13 +103,13 @@
 # //		dm.forward_differences.clear();
 # //		dm.reverse_differences = null;
 # //		dm.forward_differences.add(commFault);
-# //		System.out.println(dm.toString());
+# //		System.out.println(dm.to"");
 # //
 # //		dm = new DifferenceMessage ();
 # //		dm.difference_mrid="_"+UUID.randomUUID();
 # //		dm.forward_differences.add(commFault);
 # ////		dm.reverse_differences.add();
-# //		System.out.println(dm.toString());
+# //		System.out.println(dm.to"");
 #
 # 		JsonObject input = new JsonObject();
 # 		input.addProperty("simulation_id", 1231234567);
@@ -118,17 +118,17 @@
 # 		JsonObject command = new JsonObject();
 # 		command.addProperty("command", "CommEvent");
 # 		command.add("input", input);
-# 		System.out.println(command.toString());
+# 		System.out.println(command.to"");
 # 		System.out.println(gson.toJson(command));
 #
-# 		Assert.assertEquals(command.get("command").getAsString(), "CommEvent");
+# 		Assert.assertEquals(command.get("command").getAs"", "CommEvent");
 # 		JsonObject inputObject = command.getAsJsonObject().get("input").getAsJsonObject();
 #
 # 		Assert.assertEquals(inputObject.get("simulation_id").getAsInt(), 1231234567);
 # 		JsonObject firstForwardObject = inputObject.get("message").getAsJsonObject().get("forward_differences").getAsJsonArray().get(0).getAsJsonObject();
-# 		Assert.assertEquals(firstForwardObject.get("attribute").getAsString(), "FilterObject");
+# 		Assert.assertEquals(firstForwardObject.get("attribute").getAs"", "FilterObject");
 #
-# 		Assert.assertEquals(firstForwardObject.get("value").getAsJsonObject().get("inputList").getAsJsonArray().get(0).getAsJsonObject().get("attribute").getAsString(), "RegulatingControl.mode");
+# 		Assert.assertEquals(firstForwardObject.get("value").getAsJsonObject().get("inputList").getAsJsonArray().get(0).getAsJsonObject().get("attribute").getAs"", "RegulatingControl.mode");
 #
 #
 # //		HashMap<Integer, ProcessEvents> processEventsMap = new HashMap<Integer, ProcessEvents>(10);

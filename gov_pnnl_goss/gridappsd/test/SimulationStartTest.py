@@ -18,7 +18,7 @@ class TestSimulationStart(unittest.TestCase):
         credentials = UsernamePasswordCredentials("system", "manager")
         when(self.client_factory.create(Protocol.STOMP, credentials)).thenReturn(self.client)
         
-        simulation_id = self.client.getResponse(TestConstants.REQUEST_SIMULATION_CONFIG_ESC, "goss.gridappasd.process.request.simulation", None).toString()
+        simulation_id = self.client.getResponse(TestConstants.REQUEST_SIMULATION_CONFIG_ESC, "goss.gridappasd.process.request.simulation", None).to""
 
         self.assertIsNotNone(simulation_id)
 

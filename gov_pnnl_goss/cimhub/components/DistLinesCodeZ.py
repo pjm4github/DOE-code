@@ -9,20 +9,20 @@ class DistLinesCodeZ(DistLineSegment):
         super().__init__()
         if results:
             soln = next(results)
-            self.name = self.safe_name(soln.get("?name").toString())
-            self.id = soln.get("?voltage_id").toString()
-            self.bus1 = self.safe_name(soln.get("?bus1").toString())
-            self.bus2 = self.safe_name(soln.get("?bus2").toString())
-            self.basev = float(soln.get("?basev").toString())
-            self.len = float(soln.get("?len").toString())
-            self.lname = soln.get("?lname").toString()
-            self.codeid = soln.get("?codeid").toString()
+            self.name = self.safe_name(soln.get("?name").to"")
+            self.id = soln.get("?voltage_id").to""
+            self.bus1 = self.safe_name(soln.get("?bus1").to"")
+            self.bus2 = self.safe_name(soln.get("?bus2").to"")
+            self.basev = float(soln.get("?basev").to"")
+            self.len = float(soln.get("?len").to"")
+            self.lname = soln.get("?lname").to""
+            self.codeid = soln.get("?codeid").to""
             nphs = mapper.get(self.name)
             if nphs > 0:
-                buf = [soln.get("?phs").toString()]
+                buf = [soln.get("?phs").to""]
                 for _ in range(1, nphs):
                     soln = next(results)
-                    buf.append(soln.get("?phs").toString())
+                    buf.append(soln.get("?phs").to"")
                 self.phases = "".join(buf)
             else:
                 self.phases = "ABC"

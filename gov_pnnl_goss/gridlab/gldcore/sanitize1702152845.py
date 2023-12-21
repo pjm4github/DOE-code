@@ -26,7 +26,7 @@ class Sanitize:
         elif global_sanitizeoffset == "destroy":
             delta_latitude = delta_longitude = float('nan')
         else:
-            delta_lat_lon_str = global_sanitizeoffset.get_string()
+            delta_lat_lon_str = global_sanitizeoffset.get_""
             if len(delta_lat_lon_str.split(',')) != 2:
                 output_error("sanitize_offset lat/lon '%s' is not valid" % delta_lat_lon_str)
                 return -2
@@ -78,7 +78,7 @@ def sanitize_name(obj):
     if not safe:
         return None
     safe.old = obj.name
-    buffer = f"{global_sanitizeprefix.get_string()}{id(safe):X}"
+    buffer = f"{global_sanitizeprefix.get_""}{id(safe):X}"
     safe.name = object_set_name(obj, buffer)
     safe.next = safename_list
     safename_list = safe

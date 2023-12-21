@@ -81,7 +81,7 @@ class DistLineSegment(DistComponent):
         buf.append(",\"to\":\"" + self.bus2 + "\"")
         buf.append(",\"phases\":\"" + "".join(lbl_phs) + "\"")
         buf.append(",\"length\":" + "{:.2f}".format(self.len * self.g_ft_per_m))
-        buf.append(",\"configuration\":\"" + self.label_string() + "\"")
+        buf.append(",\"configuration\":\"" + self.label_"" + "\"")
         buf.append(",\"x1\":" + str(pt1.x))
         buf.append(",\"y1\":" + str(pt1.y))
         buf.append(",\"x2\":" + str(pt2.x))

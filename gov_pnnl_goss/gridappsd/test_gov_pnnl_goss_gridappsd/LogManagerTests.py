@@ -101,7 +101,7 @@
 # 	}
 #
 # 	@Test
-# 	public void storeCalledWhen_logStoreToDBTrueInString() throws ParseException{
+# 	public void storeCalledWhen_logStoreToDBTrueIn"" throws ParseException{
 #
 #
 # 		LogManager log_manager = new LogManagerImpl(logDataManager);
@@ -156,7 +156,7 @@
 # 	}
 #
 # 	@Test
-# 	public void queryCalledWhen_getLogCalledWithString() throws ParseException{
+# 	public void queryCalledWhen_getLogCalledWith"" throws ParseException{
 #
 #
 # 		LogManager log_manager = new LogManagerImpl(logDataManager);

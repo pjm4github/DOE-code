@@ -11,9 +11,16 @@
 from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.SCADA.RemotePoint import RemotePoint
 from CIM_STD_PYTHON.TC57CIM.IEC61970.Base.Meas.Control import Control
 
+
 class RemoteControl(RemotePoint):
     """Remote controls are ouputs that are sent by the remote unit to actuators in the
     process.
     """
     # The Control for the RemoteControl point.
-    Control= Control()
+    Control = Control()
+
+    def __init__(self):
+        super().__init__()
+        self.actuator_maximum = 1.0
+        self.actuator_minimum = 0.0
+        self.remote_controlled = False

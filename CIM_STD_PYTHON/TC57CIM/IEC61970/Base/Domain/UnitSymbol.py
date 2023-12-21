@@ -237,3 +237,4 @@ class UnitSymbol:
     PaPers = 59  # Pressure change rate in Pascal per second.
     ohmPerm = 300  # Ohm per meter
     VPerVAr = 159
+    onePerHz = 160  # 1/Hz

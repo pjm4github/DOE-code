@@ -45,7 +45,7 @@
 # 			String request = gson.toJson(powerSystemConfig);
 # //			DataRequest request = new DataRequest();
 # //			request.setRequestContent(powerSystemConfig);
-# 			String response = client.getResponse(request,GridAppsDConstants.topic_requestData, null).toString();
+# 			String response = client.getResponse(request,GridAppsDConstants.topic_requestData, null).to"";
 #
 # 			//TODO subscribe to response
 # 			client.subscribe(GridAppsDConstants.topic_simulationOutput+response, new GossResponseEvent() {

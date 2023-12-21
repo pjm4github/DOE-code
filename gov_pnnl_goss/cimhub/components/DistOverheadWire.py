@@ -8,10 +8,10 @@ class DistOverheadWire(DistWire):
         super().__init__()
         if results.has_next():
             soln = results.next()
-            self.name = self.safe_name(soln.get("?name").to_string())
-            self.id = soln.get("?voltage_id").to_string()
-            self.rad = float(soln.get("?rad").to_string())
-            self.gmr = float(soln.get("?gmr").to_string())
+            self.name = self.safe_name(soln.get("?name").to_"")
+            self.id = soln.get("?voltage_id").to_""
+            self.rad = float(soln.get("?rad").to_"")
+            self.gmr = float(soln.get("?gmr").to_"")
             self.rdc = self.optional_double(soln, "?rdc", 0.0)
             self.r25 = self.optional_double(soln, "?r25", 0.0)
             self.r50 = self.optional_double(soln, "?r50", 0.0)

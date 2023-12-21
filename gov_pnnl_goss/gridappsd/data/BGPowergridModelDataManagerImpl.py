@@ -184,10 +184,10 @@ class BGPowergridModelDataManagerImpl:
                 value = ""
                 if qs.get(self.OBJECT).isLiteral():
                     literal = qs.getLiteral(self.OBJECT)
-                    value = literal.toString()
+                    value = literal.to""
                 else:
                     resource = qs.getResource(self.OBJECT)
-                    value = resource.toString()
+                    value = resource.to""
                     if value not in already_seen and value not in new_ids and value.startswith(
                             base_url) and property_name != self.feederProperty:
                         new_ids.append(value)
@@ -289,7 +289,7 @@ class BGPowergridModelDataManagerImpl:
         modelNameRS = self.query_result_set(None, modelNameQuery, process_id, username)
         while modelNameRS.hasNext():
             qs = modelNameRS.nextSolution()
-            models.append(qs.get("fid").toString())
+            models.append(qs.get("fid").to"")
 
         return models
 
@@ -313,7 +313,7 @@ class BGPowergridModelDataManagerImpl:
 
         while rs.hasNext():
             qs = rs.nextSolution()
-            value = qs.get("status").toString()
+            value = qs.get("status").to""
 
             if value.startswith(baseUrl + "#"):
                 value = value[len(baseUrl) + 1:]
@@ -376,16 +376,16 @@ class BGPowergridModelDataManagerImpl:
             while rs.hasNext():
                 qs = rs.nextSolution()
                 obj = {
-                    "measid": qs.getLiteral("measid").getString(),
-                    "type": qs.getLiteral("type").getString(),
-                    "class": qs.getLiteral("class").getString(),
-                    "name": qs.getLiteral("name").getString(),
-                    "bus": qs.getLiteral("bus").getString(),
-                    "phases": qs.getLiteral("phases").getString(),
-                    "eqtype": qs.getLiteral("eqtype").getString(),
-                    "eqname": qs.getLiteral("eqname").getString(),
-                    "eqid": qs.getLiteral("eqid").getString(),
-                    "trmid": qs.getLiteral("trmid").getString(),
+                    "measid": qs.getLiteral("measid").get"",
+                    "type": qs.getLiteral("type").get"",
+                    "class": qs.getLiteral("class").get"",
+                    "name": qs.getLiteral("name").get"",
+                    "bus": qs.getLiteral("bus").get"",
+                    "phases": qs.getLiteral("phases").get"",
+                    "eqtype": qs.getLiteral("eqtype").get"",
+                    "eqname": qs.getLiteral("eqname").get"",
+                    "eqid": qs.getLiteral("eqid").get"",
+                    "trmid": qs.getLiteral("trmid").get"",
                 }
                 result_arr.append(obj)
 
@@ -552,7 +552,7 @@ class BGPowergridModelDataManagerImpl:
     #
     # 	    StringWriter resultWriter = new StringWriter();
     # 	    transformer.transform(new DOMSource(rootDoc), new StreamResult(resultWriter));
-    # 		return resultWriter.toString();
+    # 		return resultWriter.to"";
     # 	}
 
 
@@ -622,11 +622,11 @@ class BGPowergridModelDataManagerImpl:
 
                 if obj.is_literal():
                     literal = obj.get_literal()
-                    value = literal.to_string()
+                    value = literal.to_""
                     tmp.text = value
                 else:
                     resource = obj.get_resource()
-                    value = resource.to_string()
+                    value = resource.to_""
 
                     if value.startswith(base_url + "#"):
                         value = value[len(base_url):]
@@ -707,14 +707,14 @@ class BGPowergridModelDataManagerImpl:
             result_list = []
             while rs.has_next():
                 qs = rs.next_solution()
-                feeder_name = qs.get_literal(self.FEEDER_NAME).get_string()
-                feeder_id = qs.get_literal(self.FEEDER_ID).get_string()
-                station_name = qs.get_literal(self.STATION_NAME).get_string()
-                station_id = qs.get_literal(self.STATION_ID).get_string()
-                subregion_name = qs.get_literal(self.SUBREGION_NAME).get_string()
-                subregion_id = qs.get_literal(self.SUBREGION_ID).get_string()
-                region_name = qs.get_literal(self.REGION_NAME).get_string()
-                region_id = qs.get_literal(self.REGION_ID).get_string()
+                feeder_name = qs.get_literal(self.FEEDER_NAME).get_""
+                feeder_id = qs.get_literal(self.FEEDER_ID).get_""
+                station_name = qs.get_literal(self.STATION_NAME).get_""
+                station_id = qs.get_literal(self.STATION_ID).get_""
+                subregion_name = qs.get_literal(self.SUBREGION_NAME).get_""
+                subregion_id = qs.get_literal(self.SUBREGION_ID).get_""
+                region_name = qs.get_literal(self.REGION_NAME).get_""
+                region_id = qs.get_literal(self.REGION_ID).get_""
 
                 feeder_obj = {
                     self.FEEDER_NAME: feeder_name,
@@ -737,14 +737,14 @@ class BGPowergridModelDataManagerImpl:
                     qs = rs.next_solution()
                     model_element = ET.Element("model")
 
-                    feeder_name = qs.get_literal(self.FEEDER_NAME).get_string()
-                    feeder_id = qs.get_literal(self.FEEDER_ID).get_string()
-                    station_name = qs.get_literal(self.STATION_NAME).get_string()
-                    station_id = qs.get_literal(self.STATION_ID).get_string()
-                    subregion_name = qs.get_literal(self.SUBREGION_NAME).get_string()
-                    subregion_id = qs.get_literal(self.SUBREGION_ID).get_string()
-                    region_name = qs.get_literal(self.REGION_NAME).get_string()
-                    region_id = qs.get_literal(self.REGION_ID).get_string()
+                    feeder_name = qs.get_literal(self.FEEDER_NAME).get_""
+                    feeder_id = qs.get_literal(self.FEEDER_ID).get_""
+                    station_name = qs.get_literal(self.STATION_NAME).get_""
+                    station_id = qs.get_literal(self.STATION_ID).get_""
+                    subregion_name = qs.get_literal(self.SUBREGION_NAME).get_""
+                    subregion_id = qs.get_literal(self.SUBREGION_ID).get_""
+                    region_name = qs.get_literal(self.REGION_NAME).get_""
+                    region_id = qs.get_literal(self.REGION_ID).get_""
 
                     model_element.set(self.FEEDER_NAME, feeder_name)
                     model_element.set(self.FEEDER_ID, feeder_id)
@@ -767,14 +767,14 @@ class BGPowergridModelDataManagerImpl:
             values = []
             while rs.has_next():
                 qs = rs.next_solution()
-                feeder_name = qs.get_literal(self.FEEDER_NAME).get_string()
-                feeder_id = qs.get_literal(self.FEEDER_ID).get_string()
-                station_name = qs.get_literal(self.STATION_NAME).get_string()
-                station_id = qs.get_literal(self.STATION_ID).get_string()
-                subregion_name = qs.get_literal(self.SUBREGION_NAME).get_string()
-                subregion_id = qs.get_literal(self.SUBREGION_ID).get_string()
-                region_name = qs.get_literal(self.REGION_NAME).get_string()
-                region_id = qs.get_literal(self.REGION_ID).get_string()
+                feeder_name = qs.get_literal(self.FEEDER_NAME).get_""
+                feeder_id = qs.get_literal(self.FEEDER_ID).get_""
+                station_name = qs.get_literal(self.STATION_NAME).get_""
+                station_id = qs.get_literal(self.STATION_ID).get_""
+                subregion_name = qs.get_literal(self.SUBREGION_NAME).get_""
+                subregion_id = qs.get_literal(self.SUBREGION_ID).get_""
+                region_name = qs.get_literal(self.REGION_NAME).get_""
+                region_id = qs.get_literal(self.REGION_ID).get_""
 
                 value = f"{feeder_name}|{feeder_id}|{station_name}|{station_id}|{subregion_name}|{subregion_id}|{region_name}|{region_id}"
                 values.append(value)

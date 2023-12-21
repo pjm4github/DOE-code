@@ -17,16 +17,16 @@ class DistXfmrCodeSCTest(DistComponent):
 
         if results.hasNext():
             soln = results.next()
-            p = soln.get("?pname").toString()
-            t = soln.get("?tname").toString()
+            p = soln.get("?pname").to""
+            t = soln.get("?tname").to""
             self.pname = self.safe_name(p)
             self.tname = self.safe_name(t)
             self.set_size(mapper.get(self.tname))
             for i in range(self.size):
-                self.fwdg.append(int(soln.get("?enum").toString()))
-                self.twdg.append(int(soln.get("?gnum").toString()))
-                self.z.append(float(soln.get("?z").toString()))
-                self.ll.append(float(soln.get("?ll").toString()))
+                self.fwdg.append(int(soln.get("?enum").to""))
+                self.twdg.append(int(soln.get("?gnum").to""))
+                self.z.append(float(soln.get("?z").to""))
+                self.ll.append(float(soln.get("?ll").to""))
                 if i + 1 < self.size:
                     soln = results.next()
 

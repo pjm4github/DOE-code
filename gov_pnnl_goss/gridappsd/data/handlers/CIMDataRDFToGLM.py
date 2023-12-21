@@ -935,7 +935,7 @@ class CIMDataRDFToGLM:
         ptEndXn = mdl.getProperty(self.ns_cim, "TransformerEnd.xground")
         ptEndN = mdl.getProperty(self.ns_cim, "TransformerEnd.endNumber")
 
-        xfName = mdl.getProperty(rXf, ptName).getString()
+        xfName = mdl.getProperty(rXf, ptName).get""
 
         it = mdl.listResourcesWithProperty(ptXfmr, rXf)
         nwdg = sum(1 for _ in it)
@@ -958,7 +958,7 @@ class CIMDataRDFToGLM:
             phs[i] = self.phase_string(self.safe_phases_x(trm, ptPhs))
             CN = trm.getProperty(ptNode).getResource()
             if CN.hasProperty(ptName):
-                bus[i] = self.gld_name(CN.getProperty(ptName).getString(), True)
+                bus[i] = self.gld_name(CN.getProperty(ptName).get"", True)
             else:
                 bus[i] = self.gld_name(CN.getLocalName(), True)
 
@@ -1177,7 +1177,7 @@ class CIMDataRDFToGLM:
         pt_rtc_end = mdl.getProperty(self.ns_cim, "RatioTapChanger.TransformerEnd")
 
         xf_name = self.safe_res_name(rXf, pt_name)
-        xf_group = mdl.getProperty(rXf, pt_group).getString()
+        xf_group = mdl.getProperty(rXf, pt_group).get""
         xf_code = ""
         xf_phase = ""
         bus = ["", ""]
@@ -1195,7 +1195,7 @@ class CIMDataRDFToGLM:
                     trm = wdg.getProperty(pt_term).getResource()
                     CN = trm.getProperty(pt_node).getResource()
                     if CN.hasProperty(pt_name):
-                        bus[i] = self.gld_name(CN.getProperty(pt_name).getString(), True)
+                        bus[i] = self.gld_name(CN.getProperty(pt_name).get"", True)
                     else:
                         bus[i] = self.gld_name(CN.getLocalName(), True)
                 it_rtc = mdl.listResourcesWithProperty(pt_rtc_end, wdg)
@@ -1207,7 +1207,7 @@ class CIMDataRDFToGLM:
                 r_asset = it.nextResource()
                 if r_asset.hasProperty(pt_asset_inf):
                     r_DS = r_asset.getProperty(pt_asset_inf).getResource()
-                    xf_code = mdl.getProperty(r_DS, pt_name).getString()
+                    xf_code = mdl.getProperty(r_DS, pt_name).get""
 
         if "status" in phs[0]:
             phs[0] = phs[1] + "S"
@@ -1264,7 +1264,7 @@ class CIMDataRDFToGLM:
             r_asset = it_asset.nextResource()
             if r_asset.hasProperty(pt_asset_inf):
                 r_ds = r_asset.getProperty(pt_asset_inf).getResource()
-                # status = r_ds.as(OntResource.class).getRDFType().toString()
+                # status = r_ds.as(OntResource.class).getRDFType().to""
                 s = str(r_ds.getRDFType())
                 hash = s.lastIndexOf("#")
                 t = s.substring(hash + 1)
@@ -1292,14 +1292,14 @@ class CIMDataRDFToGLM:
             while it.hasNext():
                 r_p = it.nextResource()
                 if r_p.hasProperty(pt_phase):
-                    s_phase = self.phase_kind_string(r_p.getProperty(pt_phase).getObject().toString())
+                    s_phase = self.phase_kind_string(r_p.getProperty(pt_phase).getObject().to"")
                     it_asset = mdl.listResourcesWithProperty(pt_asset_psr, r_p)
 
                     while it_asset.hasNext():
                         r_asset = it_asset.nextResource()
                         if r_asset.hasProperty(pt_asset_inf):
                             r_ds = r_asset.getProperty(pt_asset_inf).getResource()
-                            # status = r_ds.as(OntResource.class).getRDFType().toString()
+                            # status = r_ds.as(OntResource.class).getRDFType().to""
                             s = str(r_ds.getRDFType())
                             hash = s.lastIndexOf("#")
                             t = s.substring(hash + 1)
@@ -1654,9 +1654,9 @@ class CIMDataRDFToGLM:
             while iter.has_next():
                 pos = iter.next_resource()
                 if pos.has_property(pt_pos_seq, trm_seq):
-                    return pos.get_property(pt_x).get_string() + ", " + pos.get_property(pt_y).get_string()
+                    return pos.get_property(pt_x).get_"" + ", " + pos.get_property(pt_y).get_""
             if pos is not None:
-                return pos.get_property(pt_x).get_string() + ", " + pos.get_property(pt_y).get_string()
+                return pos.get_property(pt_x).get_"" + ", " + pos.get_property(pt_y).get_""
         else:
             # print("NO GEO FOUND")
             pass
@@ -1995,7 +1995,7 @@ class CIMDataRDFToGLM:
             while results.hasNext():
                 soln = results.next()
 
-                id = soln.get("?status").toString()
+                id = soln.get("?status").to""
 
                 res = model.getResource(id)
                 # TODO - generators need phase modeling as well
@@ -2040,7 +2040,7 @@ class CIMDataRDFToGLM:
             while results.hasNext():
                 soln = results.next()
 
-                id = soln.get("?status").toString()
+                id = soln.get("?status").to""
 
                 res = model.getResource(id)
                 phs = self.wire_phases(model, res, ptPhsLoad1, ptPhsLoad2)
@@ -2097,8 +2097,8 @@ class CIMDataRDFToGLM:
             while results.hasNext():
                 soln = results.next()
 
-                id = soln.get("?status").toString()
-                name = self.gld_name(soln.get("?name").toString(), False)
+                id = soln.get("?status").to""
+                name = self.gld_name(soln.get("?name").to"", False)
                 res = model.getResource(id)
                 phs = self.wire_phases(model, res, ptPhsShunt1, ptPhsShunt2)
                 phs_delta = self.shunt_delta(res, ptConnShunt)
@@ -2156,8 +2156,8 @@ class CIMDataRDFToGLM:
             while results.hasNext():
                 soln = results.next()
 
-                id = soln.get("?status").toString()
-                name = self.gld_name(soln.get("?name").toString(), False)
+                id = soln.get("?status").to""
+                name = self.gld_name(soln.get("?name").to"", False)
                 s = self.get_xfmr_code(model, id, smult, vmult, bWantSec)
                 if len(s) > 0:
                     out.write(s + "\n")
@@ -2172,8 +2172,8 @@ class CIMDataRDFToGLM:
             while results.hasNext():
                 soln = results.next()
 
-                id = soln.get("?status").toString()
-                name = self.gld_name(soln.get("?name").toString(), False)
+                id = soln.get("?status").to""
+                name = self.gld_name(soln.get("?name").to"", False)
                 res = model.getResource(id)
 
                 ptTank = model.getProperty(self.ns_cim, "TransformerTank.PowerTransformer")
@@ -2193,7 +2193,7 @@ class CIMDataRDFToGLM:
             while results.hasNext():
                 soln = results.next()
 
-                id = soln.get("?status").toString()
+                id = soln.get("?status").to""
                 res = model.getResource(id)
                 name = self.safe_res_name(res, ptName)
 
@@ -2209,7 +2209,7 @@ class CIMDataRDFToGLM:
 
             while results.hasNext():
                 soln = results.next()
-                id = soln.get("?status").toString()
+                id = soln.get("?status").to""
                 res = model.getResource(id)
                 name = self.safe_res_name(res, ptName)
 
@@ -2233,7 +2233,7 @@ class CIMDataRDFToGLM:
 
             while results.hasNext():
                 soln = results.next()
-                id = soln.get("?status").toString()
+                id = soln.get("?status").to""
                 res = model.getResource(id)
                 name = self.safe_res_name(res, ptName)
 
@@ -2260,8 +2260,8 @@ class CIMDataRDFToGLM:
 
             while results.hasNext():
                 soln = results.next()
-                id = soln.get("?status").toString()
-                name = self.gld_name(soln.get("?name").toString(), False)
+                id = soln.get("?status").to""
+                name = self.gld_name(soln.get("?name").to"", False)
                 res = model.getResource(id)
 
                 nconds = 0
@@ -2289,7 +2289,7 @@ class CIMDataRDFToGLM:
                 while wIter.hasNext():
                     wa = wIter.nextResource()
                     nconds += 1
-                    phs = self.Phase_Kind_String(wa.getProperty(ptWireP).getObject().toString())  # TODO - protect
+                    phs = self.Phase_Kind_String(wa.getProperty(ptWireP).getObject().to"")  # TODO - protect
                     if phs == "A":
                         wireXa = self.safe_double(wa, ptWireX, 0)
                         wireYa = self.safe_double(wa, ptWireY, 0)
@@ -2365,8 +2365,8 @@ class CIMDataRDFToGLM:
                 soln = results.next()
                 NumLineCodes += 1
 
-                id = soln.get("?status").toString()
-                name = self.gld_name(soln.get("?name").toString(), False)
+                id = soln.get("?status").to""
+                name = self.gld_name(soln.get("?name").to"", False)
                 res = model.getResource(id)
                 ptCount = model.getProperty(self.ns_cim, "PerLengthPhaseImpedance.conductorCount")
 
@@ -2389,8 +2389,8 @@ class CIMDataRDFToGLM:
                 soln = results.next()
                 NumLineCodes += 1
 
-                id = soln.get("?status").toString()
-                name = self.gld_name(soln.get("?name").toString(), False)
+                id = soln.get("?status").to""
+                name = self.gld_name(soln.get("?name").to"", False)
                 res = model.getResource(id)
 
                 len = 1609.344  # want ohms/mile and nF/mile
@@ -2426,13 +2426,13 @@ class CIMDataRDFToGLM:
             while results.hasNext():
                 soln = results.next()
 
-                id = soln.get("?status").toString()
+                id = soln.get("?status").to""
                 if fNameSeq > 0:
                     name = self.gld_id(id)
                 else:
-                    name = self.gld_name(soln.get("?name").toString(), False)
+                    name = self.gld_name(soln.get("?name").to"", False)
                 res = model.getResource(id)
-                len = soln.get("?len").toString()
+                len = soln.get("?len").to""
                 phs = self.wire_phases(model, res, ptPhsLine1, ptPhsLine2)
                 bus1 = self.get_bus_name(model, id, 1)
                 bus2 = self.get_bus_name(model, id, 2)
@@ -2491,8 +2491,8 @@ class CIMDataRDFToGLM:
                 soln = results.next()
                 NumLineCodes += 1
 
-                id = soln.get("?status").toString()
-                name = self.gld_name(soln.get("?name").toString(), False)
+                id = soln.get("?status").to""
+                name = self.gld_name(soln.get("?name").to"", False)
                 res = model.getResource(id)
                 ptCount = model.getProperty(self.ns_cim, "PerLengthPhaseImpedance.conductorCount")
 
@@ -2516,8 +2516,8 @@ class CIMDataRDFToGLM:
                 soln = results.next()
                 NumLineCodes += 1
 
-                id = soln.get("?status").toString()
-                name = self.gld_name(soln.get("?name").toString(), False)
+                id = soln.get("?status").to""
+                name = self.gld_name(soln.get("?name").to"", False)
                 res = model.getResource(id)
 
                 len = 1609.344  # want ohms/mile and nF/mile
@@ -2553,13 +2553,13 @@ class CIMDataRDFToGLM:
             while results.hasNext():
                 soln = results.next()
 
-                id = soln.get("?status").toString()
+                id = soln.get("?status").to""
                 if fNameSeq > 0:
                     name = self.gld_id(id)
                 else:
-                    name = self.gld_name(soln.get("?name").toString(), False)
+                    name = self.gld_name(soln.get("?name").to"", False)
                 res = model.getResource(id)
-                len = soln.get("?len").toString()
+                len = soln.get("?len").to""
                 phs = self.wire_phases(model, res, ptPhsLine1, ptPhsLine2)
                 bus1 = self.get_bus_name(model, id, 1)
                 bus2 = self.get_bus_name(model, id, 2)
@@ -2626,11 +2626,11 @@ class CIMDataRDFToGLM:
             while results.hasNext():
                 soln = results.next()
 
-                id = soln.get("?status").toString()
-                name = self.gld_name(soln.get("?name").toString(), False)
+                id = soln.get("?status").to""
+                name = self.gld_name(soln.get("?name").to"", False)
                 res = model.getResource(id)
                 phs = self.wire_phases(model, res, pt_phs_swt1, pt_phs_swt2)
-                open = soln.get("?open").toString()
+                open = soln.get("?open").to""
 
                 bus1 = self.get_bus_name(model, id, 1)
                 bus2 = self.get_bus_name(model, id, 2)
@@ -2665,11 +2665,11 @@ class CIMDataRDFToGLM:
             while results.hasNext():
                 soln = results.next()
 
-                id = soln.get("?status").toString()
-                name = self.gld_name(soln.get("?name").toString(), False)
+                id = soln.get("?status").to""
+                name = self.gld_name(soln.get("?name").to"", False)
                 res = model.getResource(id)
                 phs = self.wire_phases(model, res, pt_phs_swt1, pt_phs_swt2)
-                open = soln.get("?open").toString()
+                open = soln.get("?open").to""
 
                 bus1 = self.get_bus_name(model, id, 1)
                 bus2 = self.get_bus_name(model, id, 2)
@@ -2693,8 +2693,8 @@ class CIMDataRDFToGLM:
             while results.hasNext():
                 soln = results.next()
 
-                id = soln.get("?status").toString()
-                name = self.gld_name(soln.get("?name").toString(), False)
+                id = soln.get("?status").to""
+                name = self.gld_name(soln.get("?name").to"", False)
                 res = model.getResource(id)
                 phs = self.wire_phases(model, res, pt_phs_swt1, pt_phs_swt2)
                 open = self.safe_property(res, self.pt_open, "false")
@@ -2721,8 +2721,8 @@ class CIMDataRDFToGLM:
             while results.hasNext():
                 soln = results.next()
 
-                id = soln.get("?status").toString()
-                name = self.gld_name(soln.get("?name").toString(), False)
+                id = soln.get("?status").to""
+                name = self.gld_name(soln.get("?name").to"", False)
                 res = model.getResource(id)
                 phs = self.wire_phases(model, res, pt_phs_swt1, pt_phs_swt2)
                 open = self.safe_property(res, self.pt_open, "false")
@@ -2745,7 +2745,7 @@ class CIMDataRDFToGLM:
             results = qexec.execSelect()
             while results.hasNext():
                 soln = results.next()
-                id = soln.get("?status").toString()
+                id = soln.get("?status").to""
                 res = model.getResource(id)
                 name = self.safe_res_name(res, self.pt_name)
 
@@ -2754,7 +2754,7 @@ class CIMDataRDFToGLM:
             results = qexec.execSelect()
             while results.hasNext():
                 soln = results.next()
-                id = soln.get("?status").toString()
+                id = soln.get("?status").to""
                 res = model.getResource(id)
                 name = self.safe_res_name(res, self.pt_name)
 
@@ -2763,7 +2763,7 @@ class CIMDataRDFToGLM:
             results = qexec.execSelect()
             while results.hasNext():
                 soln = results.next()
-                id = soln.get("?status").toString()
+                id = soln.get("?status").to""
                 res = model.getResource(id)
                 name = self.safe_res_name(res, self.pt_name)
 

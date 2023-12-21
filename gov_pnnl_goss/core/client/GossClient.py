@@ -261,7 +261,7 @@ class GossClient(ConnectionListener):
             elif isinstance(response_message, StompJmsBytesMessage):
                 stomp_message = response_message
                 buffer = stomp_message.getContent()
-                response = buffer.toString().substring(buffer.toString().indexOf(":") + 1)
+                response = buffer.to"".substring(buffer.to"".indexOf(":") + 1)
         except JMSException as e:
             SystemException.wrap(e).set("topic", topic).set("message", message)
         finally:
@@ -328,10 +328,10 @@ class GossClient(ConnectionListener):
                         if isinstance(msg, StompJmsBytesMessage):
                             stomp_message = msg
                             buffer = stomp_message.get_content()
-                            message = buffer.tostring().split(":")[1]
+                            message = buffer.to"".split(":")[1]
 
                             data_response = DataResponse(message)
-                            data_response.set_destination(msg.get_jms_destination().tostring())
+                            data_response.set_destination(msg.get_jms_destination().to"")
 
                             if msg.get_jms_reply_to() is not None:
                                 data_response.set_reply_destination(msg.get_jms_reply_to())
@@ -346,7 +346,7 @@ class GossClient(ConnectionListener):
                         elif isinstance(msg, StompJmsTextMessage):
                             stomp_message = msg
                             buffer = stomp_message.get_content()
-                            message = buffer.tostring().split(":")[1]
+                            message = buffer.to"".split(":")[1]
 
                             try:
                                 try:
@@ -355,7 +355,7 @@ class GossClient(ConnectionListener):
                                     data_response = DataResponse()
                                     data_response.set_data(message)
 
-                                data_response.set_destination(stomp_message.get_stomp_jms_destination().tostring())
+                                data_response.set_destination(stomp_message.get_stomp_jms_destination().to"")
 
                                 if msg.get_jms_reply_to() is not None:
                                     data_response.set_reply_destination(msg.get_jms_reply_to())
@@ -369,7 +369,7 @@ class GossClient(ConnectionListener):
                                 event.on_message(data_response)
                             except JsonSyntaxException:
                                 data_response = DataResponse(message)
-                                data_response.set_destination(stomp_message.get_stomp_jms_destination().tostring())
+                                data_response.set_destination(stomp_message.get_stomp_jms_destination().to"")
 
                                 if msg.get_jms_reply_to() is not None:
                                     data_response.set_reply_destination(msg.get_jms_reply_to())
@@ -520,7 +520,7 @@ class GossClient(ConnectionListener):
                     object_message = response_message
                     if isinstance(object_message.getObject(), Response):
                         obj_response = object_message.getObject()
-                        response = object_message.toString()
+                        response = object_message.to""
                 else:
                     response = response_message.getText()
                 self.log.info("GossClient received token:" + response + " for user " + credentials.getUserPrincipal().getName())

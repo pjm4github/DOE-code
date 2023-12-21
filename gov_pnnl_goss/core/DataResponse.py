@@ -78,10 +78,10 @@ class InterfaceAdapter:
             return json_element
         else:
             json_object = json_element
-            class_name = json_object.get(self.CLASSNAME).getAsString()
+            class_name = json_object.get(self.CLASSNAME).getAs""
 
             if "java.lang.String" == class_name:
-                return json_object.get(self.DATA).getAsString()
+                return json_object.get(self.DATA).getAs""
             else:
                 klass = self.get_object_class(class_name)
                 return json_deserialization_context.deserialize(json_object.get(self.DATA), klass)

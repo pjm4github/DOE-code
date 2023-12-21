@@ -8,15 +8,15 @@ class DistLinesInstanceZ(DistLineSegment):
         super().__init__()
         if results.hasNext():
             soln = results.next()
-            self.name = self.safe_name(soln.get("?name").toString())
-            self.id = soln.get("?voltage_id").toString()
-            self.bus1 = self.safe_name(soln.get("?bus1").toString())
-            self.bus2 = self.safe_name(soln.get("?bus2").toString())
+            self.name = self.safe_name(soln.get("?name").to"")
+            self.id = soln.get("?voltage_id").to""
+            self.bus1 = self.safe_name(soln.get("?bus1").to"")
+            self.bus2 = self.safe_name(soln.get("?bus2").to"")
             self.phases = "ABC"
-            self.len = float(soln.get("?len").toString())
-            self.basev = float(soln.get("?basev").toString())
-            self.r1 = float(soln.get("?r").toString())
-            self.x1 = float(soln.get("?x").toString())
+            self.len = float(soln.get("?len").to"")
+            self.basev = float(soln.get("?basev").to"")
+            self.r1 = float(soln.get("?r").to"")
+            self.x1 = float(soln.get("?x").to"")
             self.b1 = self.optional_double(soln, "?b", 0.0)
             self.r0 = self.optional_double(soln, "?r0", 0.0)
             self.x0 = self.optional_double(soln, "?x0", 0.0)
