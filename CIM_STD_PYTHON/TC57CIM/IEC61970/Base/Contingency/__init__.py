@@ -1,4 +1,0 @@
-"""
-Contingencies to be studied.
-
-"""

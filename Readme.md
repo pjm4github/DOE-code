@@ -24,3 +24,9 @@ The main event loop is explained here:
 
 `%USERPROFILE%\Documents\GitHubGit\GitHub\gridlab-d-5.2\gldcore\exec.cpp`
 
+
+Note that the CIM standard library as referenced in CIMHub can be referenced from here:
+
+https://github.com/pjm4github/TC57CIM
+
+This is the library that CIMHuib will reference to validate the functional SIM model. 
