@@ -14,5 +14,3 @@ class DistBreaker(DistSwitch):
         buf = super().get_dss()
         buf += f"  new Relay.{self.name} MonitoredObj=Line.{self.name} Type=Current Delay=0.1 PhaseTrip=20000.0 GroundTrip=10000.0\n"
         return buf
-
-

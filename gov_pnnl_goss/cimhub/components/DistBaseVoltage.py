@@ -4,8 +4,8 @@ class DistBaseVoltage:
     def __init__(self, results):
         if results.has_next():
             soln = results.next()
-            self.name = soln.get("?vnom").to_""
-            self.vnom = float(soln.get("?vnom").to_"")
+            self.name = soln.get("?vnom").to_
+            self.vnom = float(soln.get("?vnom").to_)
 
     def get_json_entry(self):
         return f'{{"name":"{self.name}"}}'

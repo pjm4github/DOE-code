@@ -2,6 +2,8 @@
 from base64 import encode
 from errno import ENOENT, E2BIG, EINVAL, ENOMEM
 from enum import Enum
+from typing import Union, List
+
 from gov_pnnl_goss.gridlab.gldcore.Convert import unit_find
 #  PROPERTYACCESS.PA_PUBLIC, PROPERTYACCESS.PA_PROTECTED, PROPERTYACCESS.PA_PRIVATE, PROPERTYACCESS.PA_REFERENCE, PROPERTYACCESS.PA_HIDDEN,
 from gov_pnnl_goss.gridlab.gldcore.Globals import \
@@ -12,17 +14,22 @@ from gov_pnnl_goss.gridlab.gldcore.Property import \
     FUNCTIONADDR, PROPERTY, PROPERTYTYPE, PROPERTYFLAGS, DELEGATEDTYPE
 
 
+global_ms_per_second = 1000  # Assuming this value
+
+
+
 class PASSCONFIG(Enum):
     PC_NOSYNC = 0x00               # < used when the class requires no synchronization */
     PC_PRETOPDOWN = 0x01           # < used when the class requires synchronization on the first top-down pass */
     PC_BOTTOMUP = 0x02             # < used when the class requires synchronization on the bottom-up pass */
     PC_POSTTOPDOWN = 0x04          # < used when the class requires synchronization on the second top-down pass */
-    PC_FORCE_NAME = 0x20           # < used to indicate the this class must define names for all its objects */
+    PC_FORCE_NAME = 0x20           # < used to indicate the class must define names for all its objects */
     PC_PARENT_OVERRIDE_OMIT = 0x40 # < used to ignore parent's use of PC_UNSAFE_OVERRIDE_OMIT */
     PC_UNSAFE_OVERRIDE_OMIT = 0x80 # < used to flag that omitting overrides is unsafe */
     PC_ABSTRACTONLY = 0x100        # < used to flag that the class should never be instantiated itself, only inherited classes should */
     PC_AUTOLOCK = 0x200            # < used to flag that sync operations should not be automatically write locked */
     PC_OBSERVER = 0x400            # < used to flag whether commit process needs to be delayed with respect to ordinary "in-the-loop" objects */
+
 
 # Notification message types
 class NOTIFYMODULE(Enum):
@@ -30,38 +37,27 @@ class NOTIFYMODULE(Enum):
     NM_POSTUPDATE = 1
     NM_RESET = 2
 
-# # Technology readiness levels
-# TRL_UNKNOWN = 0
-# TRL_PRINCIPLE = 1
-# TRL_CONCEPT = 2
-# TRL_PROOF = 3
-# TRL_STANDALONE = 4
-# TRL_INTEGRATED = 5
-# TRL_DEMONSTRATED = 6
-# TRL_PROTOTYPE = 7
-# TRL_QUALIFIED = 8
-# TRL_PROVEN = 9
 
-
-
-# class TECHNOLOGYREADINESSLEVEL(enum):
-#     TRL_UNKNOWN = 0
-#     TRL_PRINCIPLE = 1
-#     TRL_CONCEPT = 2
-#     TRL_PROOF = 3
-#     TRL_STANDALONE = 4
-#     TRL_INTEGRATED = 5
-#     TRL_DEMONSTRATED = 6
-#     TRL_PROTOTYPE = 7
-#     TRL_QUALIFIED = 8
-#     TRL_PROVEN = 9
+class TECHNOLOGYREADINESSLEVEL(Enum):
+    TRL_UNKNOWN = 0
+    TRL_PRINCIPLE = 1
+    TRL_CONCEPT = 2
+    TRL_PROOF = 3
+    TRL_STANDALONE = 4
+    TRL_INTEGRATED = 5
+    TRL_DEMONSTRATED = 6
+    TRL_PROTOTYPE = 7
+    TRL_QUALIFIED = 8
+    TRL_PROVEN = 9
 
 
 class CLASSNAME:
     pass
 
+
 class PROPERTYNAME:
     pass
+
 
 class FUNCTION:
     def __init__(self):
@@ -70,11 +66,13 @@ class FUNCTION:
         self.addr = None
         self.next = None
 
+
 class LOADDATA:
     def __init__(self):
         self.name = None
         self.call = None
         self.next = None
+
 
 class KEYWORD:
     def __init__(self):
@@ -83,48 +81,30 @@ class KEYWORD:
         self.next = None
 
 
-class CLASS:
-    def __init__(self):
-        self.magic = CLASSMAGIC.CLASSVALID
-        self.id = None
-        self.name = None
-        self.size = None
-        self.threadsafe = None
-        self.module = None
-        self.pmap = None
-        self.fmap = None
-        self.create = None
-        self.init = None
-        self.precommit = None
-        self.sync = None
-        self.commit = None
-        self.finalize = None
-        self.notify = None
-        self.isa = None
-        self.plc = None
-        self.passconfig = None
-        self.recalc = None
-        self.update = None
-        self.heartbeat = None
-        self.loadmethods = None
-        self.parent = None
-        self.trl = None
-        self.has_runtime = None
-        self.runtime = None
-        self.profiler = {
-            'numobjs': 0,
-            'count': 0,
-            'clocks': 0
-        }
-        self.next = None
+class PROPERTY:
+    def __init__(self) -> None:
+        pass
 
+class MODULE:
+    def __init__(self) -> None:
+        pass
+
+class FUNCTION:
+    def __init__(self) -> None:
+        self.oclass: CLASS
+        self.name: FUNCTIONNAME
+        self.addr: FUNCTIONADDR
+        self.next: FUNCTION
 
 class LOADMETHOD:
-    pass
-
+    def __init__(self) -> None:
+        self.name: str
+        self.call: Any
+        self.next: LOADMETHOD
 
 # Set operations
 SET_MASK = 0xffff
+
 
 def SET_ADD(set_value, value):
     return set_value | value
@@ -139,18 +119,45 @@ def SET_HAS(set_value, value):
     return set_value & value
 
 
-from enum import Enum
-
-
 class CLASSMAGIC(Enum):
     CLASSVALID = 0xc44d822e
 
 
-
-global_ms_per_second = 1000  # Assuming this value
-
-
-class Class:
+class CLASS:
+    def __init__(self):
+        self.commit: FUNCTIONADDR = None
+        self.create: FUNCTIONADDR = None
+        self.finalize: FUNCTIONADDR = None
+        self.first_class = []
+        self.fmap: List[FUNCTION] = None
+        self.has_runtime: bool = None
+        self.heartbeat: FUNCTIONADDR = None
+        self.id: int = None
+        self.init: FUNCTIONADDR = None
+        self.isa: FUNCTIONADDR = None
+        self.loadmethods: List[LOADMETHOD] = None
+        self.magic: CLASSMAGIC = CLASSMAGIC.CLASSVALID
+        self.module: MODULE = None
+        self.name: str = None
+        self.next: CLASS = None
+        self.notify: FUNCTIONADDR = None
+        self.parent: CLASS = None
+        self.passconfig: PASSCONFIG = None
+        self.plc: FUNCTIONADDR = None
+        self.pmap: List[PROPERTY] = None
+        self.precommit: FUNCTIONADDR = None
+        self.profiler: dict[str, Union[int, bool]] = {
+            'numobjs': 0,
+            'count': 0,
+            'clocks': 0
+        }
+        self.recalc: FUNCTIONADDR = None
+        self.runtime: str = None
+        self.size: int = None
+        self.sync: FUNCTIONADDR = None
+        self.threadsafe: bool = None
+        self.trl: TECHNOLOGYREADINESSLEVEL = None
+        self.update: FUNCTIONADDR = None
 
     def buffer_write(self, buffer, len, format, *args):
         count = 0
@@ -171,26 +178,26 @@ class Class:
             check = 0
             return 0
 
-    def class_get_first_property(self, oclass):
+    def get_first_property(self, oclass):
         if oclass is None:
-            raise Exception("class_get_first_property(CLASS *oclass=None): oclass is None")
+            raise Exception("get_first_property(CLASS *oclass=None): oclass is None")
         return oclass.pmap
 
-    def class_get_next_property(self, prop):
+    def get_next_property(self, prop):
         if prop.next and prop.oclass == prop.next.oclass:
             return prop.next
         else:
             return None
 
-    def class_prop_in_class(self, oclass, prop):
+    def prop_in_class(self, oclass, prop):
         if oclass == prop.oclass:
             return prop
         elif oclass.parent is not None:
-            return self.class_prop_in_class(self, oclass.parent, prop)
+            return self.prop_in_class(self, oclass.parent, prop)
         else:
             return None
 
-    def class_find_property_rec(self, oclass, name, pclass):
+    def find_property_rec(self, oclass, name, pclass):
         prop = oclass.pmap
         while prop and prop.oclass == oclass:
             if prop.name == name.encode('utf-8'):
@@ -199,7 +206,7 @@ class Class:
 
         if oclass.parent == pclass:
             gl_error(
-                f"class_find_property_rec(CLASS *oclass='{oclass.name}', PROPERTYNAME name='{name}', CLASS *pclass='{pclass.name}') causes an infinite class inheritance loop")
+                f"find_property_rec(CLASS *oclass='{oclass.name}', PROPERTYNAME name='{name}', CLASS *pclass='{pclass.name}') causes an infinite class inheritance loop")
             """
             TROUBLESHOOT
             A class has somehow specified itself as a parent class, either directly or indirectly.
@@ -207,18 +214,18 @@ class Class:
             """
             return None
         elif oclass.parent:
-            return self.class_find_property_rec(oclass.parent, name, pclass)
+            return self.find_property_rec(oclass.parent, name, pclass)
         else:
             return None
 
-    def class_find_property(self, oclass, name):
+    def find_property(self, oclass, name):
+        if not oclass:
+            return None
+
         prop = oclass.get(name, None)
 
         if prop:
             return prop
-
-        if not oclass:
-            return None
 
         for prop in oclass.pmap:
             if prop.oclass == oclass:
@@ -226,7 +233,7 @@ class Class:
                     if prop.flags & PROPERTYFLAGS.PF_DEPRECATED and not (
                             prop.flags & PROPERTYFLAGS.PF_DEPRECATED_NONOTICE) and not global_suppress_deprecated_messages:
                         gl_warning(
-                            f"class_find_property(CLASS *oclass='{oclass.name}', PROPERTYNAME name='{name}': property is deprecated")
+                            f"find_property(CLASS *oclass='{oclass.name}', PROPERTYNAME name='{name}': property is deprecated")
                         """
                         TROUBLESHOOT
                         You have done a search on a property that has been flagged as deprecated and will most likely not be supported soon.
@@ -238,7 +245,7 @@ class Class:
 
         if oclass.parent == oclass:
             gl_error(
-                f"class_find_property(oclass='{oclass.name}', name='{name}') causes an infinite class inheritance loop")
+                f"find_property(oclass='{oclass.name}', name='{name}') causes an infinite class inheritance loop")
             """
             TROUBLESHOOT
             A class has somehow specified itself as a parent class, either directly or indirectly.
@@ -246,11 +253,11 @@ class Class:
             """
             return None
         elif oclass.parent:
-            return self.class_find_property_rec(oclass.parent, name, oclass)
+            return self.find_property_rec(oclass.parent, name, oclass)
         else:
             return None
 
-    def class_add_property(self, oclass, prop):
+    def add_property(self, oclass, prop):
         last = oclass.pmap
         while last is not None and last.next is not None:
             last = last.next
@@ -259,7 +266,7 @@ class Class:
         else:
             last.next = prop
 
-    def class_add_extended_property(self, oclass, name, ptype, unit):
+    def add_extended_property(self, oclass, name, ptype, unit):
         prop = PROPERTY()
         pUnit = None
 
@@ -272,17 +279,17 @@ class Class:
 
         if prop is None:
             raise Exception(
-                f"class_add_extended_property(oclass='{oclass.name}', name='{name}', ...): memory allocation failed")
+                f"add_extended_property(oclass='{oclass.name}', name='{name}', ...): memory allocation failed")
             # TROUBLESHOOT: The system has run out of memory. Try making the model smaller and trying again.
 
         if ptype <= PROPERTYTYPE.PT_FIRST or ptype >= PROPERTYTYPE.PT_LAST:
             raise Exception(
-                f"class_add_extended_property(oclass='{oclass.name}', name='{name}', ...): property type is invalid")
+                f"add_extended_property(oclass='{oclass.name}', name='{name}', ...): property type is invalid")
             # TROUBLESHOOT: The function was called with a property type that is not recognized. This is a bug that should be reported.
 
         if unit is not None and pUnit is None:
             raise Exception(
-                f"class_add_extended_property(oclass='{oclass.name}', name='{name}', ...): unit '{unit}' is not found")
+                f"add_extended_property(oclass='{oclass.name}', name='{name}', ...): unit '{unit}' is not found")
             # TROUBLESHOOT: The function was called with a unit that is not defined in the units file. Try using a defined unit or adding the desired unit to the units file and try again.
 
         prop.access = PROPERTYACCESS.PA_PUBLIC
@@ -301,46 +308,46 @@ class Class:
 
         oclass.size += self.property_type[ptype].size
 
-        self.class_add_property(oclass, prop)
+        self.add_property(oclass, prop)
         return prop
 
-    def class_get_last_class(self,):
+    def get_last_class(self,):
         return self.last_class
 
-    def class_get_count(self,):
-        return self.class_count
+    def get_count(self,):
+        return self.count
 
-    def class_get_property_typename(self, type):
+    def get_property_typename(self, type):
         if type <= PROPERTYTYPE.PT_FIRST or type >= PROPERTYTYPE.PT_LAST:
             return "//UNDEF//"
         else:
             return self.property_type[type].name
 
-    def class_get_property_typexsdname(self, type):
+    def get_property_typexsdname(self, type):
         if type <= PROPERTYTYPE.PT_FIRST or type >= PROPERTYTYPE.PT_LAST:
             return "//UNDEF//"
         else:
             return self.property_type[type].xsdname
 
-    def class_get_propertytype_from_typename(self, name):
+    def get_propertytype_from_typename(self, name):
         for i, prop_type in enumerate(self.property_type):
             if prop_type.name == name:
                 return PROPERTYTYPE(i)
         return PROPERTYTYPE.PT_void
 
-    def class_string_to_propertytype(self, type, addr, value):
+    def string_to_propertytype(self, type, addr, value):
         if type > PROPERTYTYPE.PT_void and type < PROPERTYTYPE.PT_last:
             return self.property_type[type.value].string_to_data(value, addr, None)
         else:
             return 0
 
-    def class_string_to_property(self, prop, addr, value):
+    def string_to_property(self, prop, addr, value):
         if prop.ptype > PROPERTYTYPE.PT_void and prop.ptype < PROPERTYTYPE.PT_last:
             return self.property_type[prop.ptype.value].string_to_data(value, addr, prop)
         else:
             return 0
 
-    def class_property_to_string(self, prop, addr, value, size):
+    def property_to_string(self, prop, addr, value, size):
         if prop.ptype == PROPERTYTYPE.PT_delegated:
             print("unable to convert from delegated property value")
             # TROUBLESHOOT: Property delegation is not yet fully implemented, so you should never get this error.
@@ -354,8 +361,8 @@ class Class:
         else:
             return 0
 
-    def class_register(self, module, name, size, passconfig):
-        oclass = self.class_get_class_from_classname(name)
+    def register(self, module, name, size, passconfig):
+        oclass = self.get_from_classname(name)
 
         if oclass is not None:
             if oclass.module.name == module.name:
@@ -373,7 +380,7 @@ class Class:
             return 0
 
         oclass.magic = CLASSMAGIC.CLASSVALID
-        oclass.id = self.class_count
+        oclass.id = self.count
         oclass.module = module
         oclass.name = name
         oclass.size = size
@@ -393,13 +400,13 @@ class Class:
         print(f"class {name} registered ok")
         return oclass
 
-    def class_get_first_class(self,):
+    def get_first_class(self,):
         return self.first_class
 
-    def class_get_next_classes(self,):
+    def get_next_classes(self,):
         return self.next_class
 
-    def class_get_class_from_classname_in_module(self, name, mod):
+    def get_from_classname_in_module(self, name, mod):
         if name is None or mod is None:
             return None
 
@@ -409,20 +416,20 @@ class Class:
 
         return None
 
-    def class_get_runtimecount(self,):
+    def get_runtimecount(self,):
         count = 0
         for oclass in self.first_class:
             if oclass.has_runtime:
                 count += 1
         return count
 
-    def class_get_first_runtime(self,):
+    def get_first_runtime(self,):
         for oclass in self.first_class:
             if oclass.has_runtime:
                 return oclass
         return None
 
-    def class_get_next_runtime(self, oclass):
+    def get_next_runtime(self, oclass):
         oclass = oclass.next
         while oclass is not None:
             if oclass.has_runtime:
@@ -430,7 +437,7 @@ class Class:
             oclass = oclass.next
         return None
 
-    def class_get_extended_count(self, oclass):
+    def get_extended_count(self, oclass):
         count = 0
         prop = oclass.pmap
         while prop is not None:
@@ -439,7 +446,7 @@ class Class:
             prop = prop.next
         return count
 
-    def class_get_class_from_classname(self, name):
+    def get_from_classname(self, name):
         oclass = None
         mod = None
         temp = name
@@ -459,7 +466,7 @@ class Class:
                 return oclass
         return None
 
-    def class_define_map(self, oclass, *args):
+    def define_map(self, oclass, *args):
         va_list = list(args)
         count = 0
         prop = None
@@ -476,7 +483,7 @@ class Class:
                     if oclass.parent is not None:
                         errno = EINVAL
                         gl_error(
-                            f"class_define_map(oclass='{oclass.name}',...): PT_INHERIT unexpected; class already inherits properties from class {oclass.parent.name}")
+                            f"define_map(oclass='{oclass.name}',...): PT_INHERIT unexpected; class already inherits properties from class {oclass.parent.name}")
 
                     else:
                         classname = va_list[va_start]
@@ -488,7 +495,7 @@ class Class:
                                 and no_override & PASSCONFIG.PC_PRETOPDOWN
                         ):
                             gl_warning(
-                                f"class_define_map(oclass='{oclass.name}',...): class '{oclass.name}' suppresses parent class '{oclass.parent.name}' PRETOPDOWN sync behavior by omitting override"
+                                f"define_map(oclass='{oclass.name}',...): class '{oclass.name}' suppresses parent class '{oclass.parent.name}' PRETOPDOWN sync behavior by omitting override"
                             )
                         if (
                                 oclass.parent.passconfig & PASSCONFIG.PC_UNSAFE_OVERRIDE_OMIT
@@ -496,7 +503,7 @@ class Class:
                                 and no_override & PASSCONFIG.PC_BOTTOMUP
                         ):
                             gl_warning(
-                                f"class_define_map(oclass='{oclass.name}',...): class '{oclass.name}' suppresses parent class '{oclass.parent.name}' BOTTOMUP sync behavior by omitting override"
+                                f"define_map(oclass='{oclass.name}',...): class '{oclass.name}' suppresses parent class '{oclass.parent.name}' BOTTOMUP sync behavior by omitting override"
                             )
                         if (
                                 oclass.parent.passconfig & PASSCONFIG.PC_UNSAFE_OVERRIDE_OMIT
@@ -504,7 +511,7 @@ class Class:
                                 and no_override & PASSCONFIG.PC_POSTTOPDOWN
                         ):
                             gl_warning(
-                                f"class_define_map(oclass='{oclass.name}',...): class '{oclass.name}' suppresses parent class '{oclass.parent.name}' POSTTOPDOWN sync behavior by omitting override"
+                                f"define_map(oclass='{oclass.name}',...): class '{oclass.name}' suppresses parent class '{oclass.parent.name}' POSTTOPDOWN sync behavior by omitting override"
                             )
                         if (
                                 oclass.parent.passconfig & PASSCONFIG.PC_UNSAFE_OVERRIDE_OMIT
@@ -512,7 +519,7 @@ class Class:
                                 and no_override & PASSCONFIG.PC_UNSAFE_OVERRIDE_OMIT
                         ):
                             gl_warning(
-                                f"class_define_map(oclass='{oclass.name}',...): class '{oclass.name}' does not assert UNSAFE_OVERRIDE_OMIT when parent class '{oclass.parent.name}' does"
+                                f"define_map(oclass='{oclass.name}',...): class '{oclass.name}' does not assert UNSAFE_OVERRIDE_OMIT when parent class '{oclass.parent.name}' does"
                             )
                         count += 1
                 elif proptype == PROPERTYTYPE.PT_KEYWORD and prop.ptype == PROPERTYTYPE.PT_enumeration:
@@ -520,10 +527,10 @@ class Class:
                     va_start += 1
                     keyvalue = va_list[va_start]
                     va_start += 1
-                    if not self.class_define_enumeration_member(oclass, prop.name, keyword, keyvalue):
+                    if not self.define_enumeration_member(oclass, prop.name, keyword, keyvalue):
                         errno = EINVAL
                         gl_error(
-                            f"class_define_map(oclass='{oclass.name}',...): property keyword '{keyword}' could not be defined as value {keyvalue}"
+                            f"define_map(oclass='{oclass.name}',...): property keyword '{keyword}' could not be defined as value {keyvalue}"
                         )
 
                 elif proptype == PROPERTYTYPE.PT_KEYWORD and prop.ptype == PROPERTYTYPE.PT_set:
@@ -531,10 +538,10 @@ class Class:
                     va_start += 1
                     keyvalue = va_list[va_start]
                     va_start += 1
-                    if not self.class_define_set_member(oclass, prop.name, keyword, keyvalue):
+                    if not self.define_set_member(oclass, prop.name, keyword, keyvalue):
                         errno = EINVAL
                         gl_error(
-                            f"class_define_map(oclass='{oclass.name}',...): property keyword '{keyword}' could not be defined as value {keyvalue}"
+                            f"define_map(oclass='{oclass.name}',...): property keyword '{keyword}' could not be defined as value {keyvalue}"
                         )
 
                 elif proptype == PROPERTYTYPE.PT_ACCESS:
@@ -546,7 +553,7 @@ class Class:
                     else:
                         errno = EINVAL
                         gl_error(
-                            f"class_define_map(oclass='{oclass.name}',...): unrecognized property access code (value={pa} is not valid)"
+                            f"define_map(oclass='{oclass.name}',...): unrecognized property access code (value={pa} is not valid)"
                         )
 
                 elif proptype == PROPERTYTYPE.PT_SIZE:
@@ -554,7 +561,7 @@ class Class:
                     va_start += 1
                     if prop.size < 1:
                         errno = EINVAL
-                        gl_error(f"class_define_map(oclass='{oclass.name}',...): property size must be greater than 0")
+                        gl_error(f"define_map(oclass='{oclass.name}',...): property size must be greater than 0")
 
                 elif proptype == PROPERTYTYPE.PT_EXTEND:
                     oclass.size += self.property_type[prop.ptype].size
@@ -575,7 +582,7 @@ class Class:
                             gl_error(f"unable to define unit '{unitspec}'")
                     except Exception as msg:
                         gl_error(
-                            f"class_define_map(oclass='{oclass.name}',...): property {prop.name} unit '{unitspec}' is not recognized: {msg}"
+                            f"define_map(oclass='{oclass.name}',...): property {prop.name} unit '{unitspec}' is not recognized: {msg}"
                         )
 
                 elif proptype == PROPERTYTYPE.PT_DESCRIPTION:
@@ -594,12 +601,12 @@ class Class:
                         prop.notify_override = False
                 else:
                     tcode = str(proptype)
-                    ptypestr = self.class_get_property_typename(proptype)
+                    ptypestr = self.get_property_typename(proptype)
                     if ptypestr == "//UNDEF//":
                         ptypestr = tcode
                     errno = EINVAL
                     gl_error(
-                        f"class_define_map(oclass='{oclass.name}',...): unrecognized extended property (PROPERTYTYPE={ptypestr if ptypestr else tcode})")
+                        f"define_map(oclass='{oclass.name}',...): unrecognized extended property (PROPERTYTYPE={ptypestr if ptypestr else tcode})")
 
             elif proptype == PROPERTYTYPE.PT_enduse:
                 name = va_list[va_start]
@@ -608,7 +615,7 @@ class Class:
                 va_start += 1
                 if self.enduse_publish(oclass, addr, name) <= 0:
                     gl_error(
-                        f"class_define_map(oclass='{oclass.name}',...): substructure of property '{prop.name}' substructure could not be published"
+                        f"define_map(oclass='{oclass.name}',...): substructure of property '{prop.name}' substructure could not be published"
                     )
                     errno = E2BIG
 
@@ -619,48 +626,48 @@ class Class:
                 addr = va_list[va_start]
                 va_start += 1
                 if prop != None and len(name) >= len(prop.name):
-                    gl_error(f"class_define_map(oclass='{oclass.name}',...): property name '{name}' is too big")
+                    gl_error(f"define_map(oclass='{oclass.name}',...): property name '{name}' is too big")
                     errno = E2BIG
 
                 if name == "parent":
                     gl_error(
-                        f"class_define_map(oclass='{oclass.name}',...): property name '{name}' conflicts with built-in property")
+                        f"define_map(oclass='{oclass.name}',...): property name '{name}' conflicts with built-in property")
 
                 elif name == "rank":
                     gl_error(
-                        f"class_define_map(oclass='{oclass.name}',...): property name '{name}' conflicts with built-in property")
+                        f"define_map(oclass='{oclass.name}',...): property name '{name}' conflicts with built-in property")
 
                 elif name == "clock":
                     gl_error(
-                        f"class_define_map(oclass='{oclass.name}',...): property name '{name}' conflicts with built-in property")
+                        f"define_map(oclass='{oclass.name}',...): property name '{name}' conflicts with built-in property")
 
                 elif name == "valid_to":
                     gl_error(
-                        f"class_define_map(oclass='{oclass.name}',...): property name '{name}' conflicts with built-in property")
+                        f"define_map(oclass='{oclass.name}',...): property name '{name}' conflicts with built-in property")
 
                 elif name == "latitude":
                     gl_error(
-                        f"class_define_map(oclass='{oclass.name}',...): property name '{name}' conflicts with built-in property")
+                        f"define_map(oclass='{oclass.name}',...): property name '{name}' conflicts with built-in property")
 
                 elif name == "longitude":
                     gl_error(
-                        f"class_define_map(oclass='{oclass.name}',...): property name '{name}' conflicts with built-in property")
+                        f"define_map(oclass='{oclass.name}',...): property name '{name}' conflicts with built-in property")
 
                 elif name == "in_svc":
                     gl_error(
-                        f"class_define_map(oclass='{oclass.name}',...): property name '{name}' conflicts with built-in property")
+                        f"define_map(oclass='{oclass.name}',...): property name '{name}' conflicts with built-in property")
 
                 elif name == "out_svc":
                     gl_error(
-                        f"class_define_map(oclass='{oclass.name}',...): property name '{name}' conflicts with built-in property")
+                        f"define_map(oclass='{oclass.name}',...): property name '{name}' conflicts with built-in property")
 
                 elif name == "name":
                     gl_error(
-                        f"class_define_map(oclass='{oclass.name}',...): property name '{name}' conflicts with built-in property")
+                        f"define_map(oclass='{oclass.name}',...): property name '{name}' conflicts with built-in property")
 
                 elif name == "flags":
                     gl_error(
-                        f"class_define_map(oclass='{oclass.name}',...): property name '{name}' conflicts with built-in property")
+                        f"define_map(oclass='{oclass.name}',...): property name '{name}' conflicts with built-in property")
 
                 prop = PROPERTY(proptype, oclass, name, addr, delegation)
                 if prop == None:
@@ -668,14 +675,14 @@ class Class:
                 if proptype == PROPERTYTYPE.PT_method:
                     prop.addr = 0
                     prop.method = None
-                self.class_add_property(oclass, prop)
+                self.add_property(oclass, prop)
                 count += 1
                 if prop.ptype > PROPERTYTYPE.PT_last:
                     prop = None
         return count
 
-    def class_define_enumeration_member(self, oclass, property_name, member, value):
-        prop = self.class_find_property(oclass, property_name)
+    def define_enumeration_member(self, oclass, property_name, member, value):
+        prop = self.find_property(oclass, property_name)
         key = KEYWORD()
         if prop == None or key == None:
             return 0
@@ -685,8 +692,8 @@ class Class:
         prop.keywords = key
         return 1
 
-    def class_define_set_member(self, oclass, property_name, member, value):
-        prop = self.class_find_property(oclass, property_name)
+    def define_set_member(self, oclass, property_name, member, value):
+        prop = self.find_property(oclass, property_name)
         key = KEYWORD()
         if not prop or not key:
             return 0
@@ -698,10 +705,10 @@ class Class:
         prop.keywords = key
         return 1
 
-    def class_define_function(self, oclass, functionname, call):
-        if self.class_get_function(oclass.name, functionname) is not None:
+    def define_function(self, oclass, functionname, call):
+        if self.get_function(oclass.name, functionname) is not None:
             gl_error(
-                f"class_define_function(CLASS *class={{name='{oclass.name}',...}}, FUNCTIONNAME functionname='{functionname}', ...) the function name has already been defined")
+                f"define_function(CLASS *class={{name='{oclass.name}',...}}, FUNCTIONNAME functionname='{functionname}', ...) the function name has already been defined")
             errno = 1
             return None
 
@@ -725,8 +732,8 @@ class Class:
 
         return func
 
-    def class_get_function(self, classname, functionname):
-        oclass = self.class_get_class_from_classname(classname)
+    def get_function(self, classname, functionname):
+        oclass = self.get_from_classname(classname)
         func = oclass.fmap
         while func and func.oclass == oclass:
             if func.name.decode('utf-8') == functionname:
@@ -735,11 +742,11 @@ class Class:
         self.errno = ENOENT
         return None
 
-    def class_saveall(self, fp):
+    def saveall(self, fp):
         count = 0
         fp.write("\n////////////////////////////////////////////////////////\n")
         fp.write("// classes\n")
-        oclass = self.class_get_first_class()
+        oclass = self.get_first_class()
         while oclass:
             prop = oclass.pmap
             fp.write("class {} {{\n".format(oclass.name.decode('utf-8')))
@@ -752,7 +759,7 @@ class Class:
                     func.name.decode('utf-8')))
                 func = func.next
             while prop and prop.oclass == oclass:
-                ptype = self.class_get_property_typename(prop.ptype)
+                ptype = self.get_property_typename(prop.ptype)
                 if ptype:
                     if b'.' not in prop.name:
                         fp.write("\t{} {};\n".format(ptype, prop.name.decode('utf-8')))
@@ -764,10 +771,10 @@ class Class:
             oclass = oclass.next
         return count
 
-    def class_saveall_xml(self, fp):
+    def saveall_xml(self, fp):
         count = 0
         fp.write("\t<classes>\n")
-        oclass = self.class_get_first_class()
+        oclass = self.get_first_class()
         while oclass:
             prop = oclass.pmap
             fp.write("\t\t<class name=\"{}\">\n".format(oclass.name))
@@ -778,7 +785,7 @@ class Class:
                 fp.write("\t\t<function>{}</function>\n".format(func.name.decode('utf-8')))
                 func = func.next
             while prop and prop.oclass == oclass:
-                propname = self.class_get_property_typename(prop.ptype)
+                propname = self.get_property_typename(prop.ptype)
                 if propname:
                     fp.write("\t\t\t<property type=\"{}\">{}</property>\n".format(
                         propname, prop.name.decode('utf-8')))
@@ -788,7 +795,7 @@ class Class:
         fp.write("\t</classes>\n")
         return count
 
-    def class_profiles(self,):
+    def profiles(self,):
         total = 0
         count = 0
         i = 0
@@ -838,7 +845,7 @@ class Class:
                                                                     1000 * float(
                                                                         total) / global_ms_per_second / self.object_get_count()))
 
-    def class_register_type(self, oclass, ptype, from_string, to_string):
+    def register_type(self, oclass, ptype, from_string, to_string):
         dt = DELEGATEDTYPE()
         if dt:
             dt.oclass = oclass
@@ -852,7 +859,7 @@ class Class:
             # This is most likely caused by a lack of memory or an unstable system.
         return dt
 
-    def class_add_loadmethod(self, oclass, name, call):
+    def add_loadmethod(self, oclass, name, call):
         method = LOADDATA()
         method.name = name.encode('utf-8')
         method.call = call
@@ -860,7 +867,7 @@ class Class:
         oclass.loadmethods = method
         return 1
 
-    def class_get_loadmethod(self, oclass, name):
+    def get_loadmethod(self, oclass, name):
         method = oclass.loadmethods
         while method:
             if method.name.decode('utf-8') == name:
@@ -868,15 +875,15 @@ class Class:
             method = method.next
         return None
 
-    def class_define_type(self, oclass, delegation, *args):
-        gl_error("delegated types not supported using class_define_type (use class_define_map instead)")
+    def define_type(self, oclass, delegation, *args):
+        gl_error("delegated types not supported using define_type (use define_map instead)")
         # TROUBLESHOOT
         # Property delegation is not supported yet, so this should never happen.
         # This is most likely caused by a lack of memory or an unstable system.
         return 0
 
 
-    def class_get_xsd(self, oclass, buffer, len_):
+    def get_xsd(self, oclass, buffer, len_):
         n = 0
         prop = None
         i = 0
@@ -925,7 +932,7 @@ class Class:
         while oc is not None:
             for prop in oc.pmap:
                 if prop.oclass == oc:
-                    proptype = self.class_get_property_typexsdname(prop.ptype)
+                    proptype = self.get_property_typexsdname(prop.ptype)
 
                     if prop.unit is not None:
                         n += self.buffer_write(buffer + n, len_ - n,
@@ -957,7 +964,7 @@ class Class:
         buffer[n] = 0
 
         if check == 0:
-            print("class_get_xsd() overflowed.\n")
+            print("get_xsd() overflowed.\n")
             buffer[0] = 0
             return 0
 

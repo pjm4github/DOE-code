@@ -36,26 +36,26 @@ class DistCapacitor(DistComponent):
         if results:
             if results.has_next():
                 soln = results.next()
-                self.name = self.safe_name(soln.get("?name").to"")
-                self.id = soln.get("?voltage_id").to""
-                self.bus = self.safe_name(soln.get("?bus").to"")
-                self.basev = float(soln.get("?basev").to"")
+                self.name = self.safe_name(soln.get("?name"))
+                self.id = soln.get("?voltage_id")
+                self.bus = self.safe_name(soln.get("?bus"))
+                self.basev = float(soln.get("?basev"))
                 self.phs = self.optional_string(soln, "?phs", "ABC")
-                self.conn = soln.get("?conn").to""
-                self.grnd = soln.get("?grnd").to""
+                self.conn = soln.get("?conn")
+                self.grnd = soln.get("?grnd")
                 self.ctrl = self.optional_string(soln, "?ctrlenabled", "false")
-                self.nomu = float(soln.get("?nomu").to"")
-                bsection = float(soln.get("?bsection").to"")
+                self.nomu = float(soln.get("?nomu"))
+                bsection = float(soln.get("?bsection"))
                 self.kvar = self.nomu * self.nomu * bsection / 1000.0
                 if self.ctrl == "true":
-                    self.mode = soln.get("?mode").to""
-                    self.setpoint = float(soln.get("?setpoint").to"")
-                    self.deadband = float(soln.get("?deadband").to"")
-                    self.delay = float(soln.get("?delay").to"")
-                    self.moneq = soln.get("?moneq").to""
-                    self.monclass = soln.get("?monclass").to""
-                    self.monbus = soln.get("?monbus").to""
-                    self.monphs = soln.get("?monphs").to""
+                    self.mode = soln.get("?mode")
+                    self.setpoint = float(soln.get("?setpoint"))
+                    self.deadband = float(soln.get("?deadband"))
+                    self.delay = float(soln.get("?delay"))
+                    self.moneq = soln.get("?moneq")
+                    self.monclass = soln.get("?monclass")
+                    self.monbus = soln.get("?monbus")
+                    self.monphs = soln.get("?monphs")
                 self.set_derived_parameters()
 
     def get_json_entry(self):

@@ -4,7 +4,7 @@ This package is refactored Java code from
 https://github.com/GRIDAPPSD/GOSS-GridAPPS-D.git on November 2023
 
 from this subdirectory:
-`%USERPROFILE%\Documents\Git\GitHub\GOSS-GridAPPS-D\gov.pnnl.goss.gridappsd\src\gov\pnnl\goss\gridappsd`
+see source_location from the __init__.py file
 
 This is a mirror of src.gov.pnnl.gos.gridappsd which is copied and converted to this directory.
 

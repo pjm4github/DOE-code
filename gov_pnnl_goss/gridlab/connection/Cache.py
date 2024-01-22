@@ -110,7 +110,7 @@ def init_cache_item(index, index_size):
         index = [None] * index_size
     return index 
 
-Here's the converted Python function using snake_case function names:
+#Here's the converted Python function using snake_case function names:
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
 def convert_to_snake_case_function_name(first, newindex):

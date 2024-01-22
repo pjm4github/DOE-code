@@ -4,6 +4,8 @@ import codecs
 import os
 import sys
 import time
+from pathlib import Path
+
 from openai import OpenAI
 
 # Replace 'YOUR_API_KEY' (as an ENV variable) with your actual GPT-3 API key
@@ -142,7 +144,11 @@ class CCodeParser:
                     s += f'({g["Arguments"]})\n{{{g["Body"]}}}\n'
                 print(s)
 
-    def snarf_classes(self):
+    def scan_classes(self):
+        """
+        All classes are captured and stored in a data structure.
+        :return:
+        """
         print("SCANNING for CLASSES...")
         test = self.c_code
 
@@ -236,7 +242,11 @@ class CCodeParser:
                 self.blanked_code = self.blanked_code[:start_pos] + ' ' * (end_pos - start_pos) + self.blanked_code[
 
                                                                                               end_pos:]
-    def snarf_function(self):
+    def scan_all_function(self):
+        """
+        Scans all functions in the code and store them in a list of functions.
+        :return:
+        """
         print("SCANNING for FUNCTIONS ... ")
 
         test = self.c_code
@@ -283,9 +293,9 @@ class CCodeParser:
 
     def parse(self):
         print("Snarfing classes")
-        self.snarf_classes()
+        self.scan_classes()
         print("Snarfing functions")
-        self.snarf_function()
+        self.scan_all_function()
 
 
 def parse_and_convert(parser, directory_path, filename, current_time):
@@ -362,89 +372,89 @@ def parse_and_convert(parser, directory_path, filename, current_time):
     file_extension = '.py'
     base_filename = filename.split(".")[0]
     # Create a unique filename by appending the timestamp to a base filename and file extension
-    output_filename = f"{directory_path}{base_filename}{current_time}{file_extension}"
-
+    output_path = f"{directory_path}/Converted/"
+    Path(output_path).mkdir(parents=True, exist_ok=True)
+    output_filename = f"{output_path}/{base_filename}{file_extension}"
     with open(output_filename, 'w') as f:
         f.write(python_code)
     print(f"{output_filename} written")
 
 
-def main(path, filename=None):
+def main(path):
+    """
+    Convert the c-code the directory pointed to by the path given by the
+    "native_file_path" variable which is defined in the  __init__.py file within the given path.
+
+
+    :param path:
+    :return:
+    """
     # Get the current timestamp (seconds since the epoch)
     current_time = int(time.time())
-    if filename:
-        parser = CCodeParser(path + filename)
-        parser.load_file()
-        parser.parse()
-        print("CLASSES-------------")
-        parser.dump_classes()
-        print("FUNCTIONS-----------")
-        parser.dump_functions()
-        print("\n")
-        parse_and_convert(parser, path, filename, current_time)
-        print(f"converted {len(parser.classes)}: classes and {len(parser.functions)}: functions")
-        print("Done")
+    parser = CCodeParser()
+    source_location = None
+    source_path = path
+    # Get the pointer to the source code from the __init__.py file.
+    # The variable must be called "native_file_path" when the module (the directory that has the __init__.py file
+    # is loaded using importlib then it sees
+    try:
+        clean_path = path.replace('\\', '/')
+        clean_path = clean_path[:-1] if clean_path[-1] == '/' else clean_path
+        parts = clean_path.split('/')
+        # package_name = parts[-2]
+        module_name = parts[-1]
+        ppath = "/".join(parts[0:-1])
+        if ppath not in sys.path:
+            sys.path.append(ppath)
+        g = importlib.import_module(module_name)
 
-        # filename = "network.cpp"  # Replace with your C code file
-    else:
-        parser = CCodeParser()
-        source_location = None
-        source_path = path
-        try:
-            clean_path = path.replace('\\', '/')
-            clean_path = clean_path[:-1] if clean_path[-1] == '/' else clean_path
-            parts = clean_path.split('/')
-            package_name = parts[-2]
-            module_name = parts[-1]
-            ppath = "/".join(parts[0:-1])
-            if ppath not in sys.path:
-                sys.path.append(ppath)
-            g = importlib.import_module(module_name)
-            if g.native_file_path:
-                source_path = g.native_file_path.replace('\\', '/')
-        except ImportError as e:
-            print(e)
+        # The
+        if g.native_file_path:
+            source_path = g.native_file_path.replace('\\', '/')
+    except ImportError as e:
+        print(e)
 
-        for filename in os.listdir(source_path):
-            if filename.endswith(".cpp"):
-                file_path = os.path.join(source_path, filename)
-                if os.path.isfile(file_path):
-                    print(f"#################################################\nOpening {filename} for conversion")
-                    file_size = os.path.getsize(file_path)
-                    parser.load_file(file_path)  # path + filename)
-                    # remove all imports here
-                    REMOVE_IMPORTS = True
-                    if REMOVE_IMPORTS:
-                        clean_code = []
-                        for line in parser.c_code.split('\n'):
-                            if not line.find('#include') == 0:
-                                clean_code.append(line)
-                    else:
-                        clean_code = parser.c_code.split('\n')
-                    # create a blob of code
-                    code_string = '\n'.join(clean_code)
-                    # remove comments
-                    if file_size > GptCodeConverter.MAX_TOKENS:
-                        code_string = remove_single_line_comments(code_string)
-                        code_string = remove_multiline_comments(code_string)
-                    print(f"File: {filename}, Orig size: {file_size}, cleaned size: {len(code_string)} (bytes)")
-                    # URL-encode the text
-                    # try:
-                    #     code_string.encode('ascii')
-                    # except UnicodeDecodeError:
-                    #     raise ValueError('code is not ASCII')
-                    parser.c_code = code_string
-                    parser.blanked_code = code_string
-                    parser.parse()
-                    print("\n")
-                    print("CLASSES-------------")
-                    parser.dump_classes()
-                    print("\n")
-                    print("FUNCTIONS-----------")
-                    parser.dump_functions()
-                    parse_and_convert(parser, path, filename, current_time)
-                    print(f"converted {len(parser.classes)}: classes and {len(parser.functions)}: functions")
-                    parser.un_load_file()
+    # If the variable did not get loaded then the files will be loaded from the local directory.
+    for filename in os.listdir(source_path):
+        if filename.endswith(".cpp"):
+            file_path = os.path.join(source_path, filename)
+            if os.path.isfile(file_path):
+                print(f"#################################################\nOpening {filename} for conversion")
+                file_size = os.path.getsize(file_path)
+                parser.load_file(file_path)  # path + filename)
+                # remove all imports here
+                REMOVE_IMPORTS = True
+                if REMOVE_IMPORTS:
+                    clean_code = []
+                    for line in parser.c_code.split('\n'):
+                        if not line.find('#include') == 0:
+                            clean_code.append(line)
+                else:
+                    clean_code = parser.c_code.split('\n')
+                # create a blob of code
+                code_string = '\n'.join(clean_code)
+                # remove comments
+                if file_size > GptCodeConverter.MAX_TOKENS:
+                    code_string = remove_single_line_comments(code_string)
+                    code_string = remove_multiline_comments(code_string)
+                print(f"File: {filename}, Orig size: {file_size}, cleaned size: {len(code_string)} (bytes)")
+                # URL-encode the text
+                # try:
+                #     code_string.encode('ascii')
+                # except UnicodeDecodeError:
+                #     raise ValueError('code is not ASCII')
+                parser.c_code = code_string
+                parser.blanked_code = code_string
+                parser.parse()
+                print("\n")
+                print("CLASSES-------------")
+                parser.dump_classes()
+                print("\n")
+                print("FUNCTIONS-----------")
+                parser.dump_functions()
+                parse_and_convert(parser, path, filename, current_time)
+                print(f"converted {len(parser.classes)}: classes and {len(parser.functions)}: functions")
+                parser.un_load_file()
         print("Done")
 
 if __name__ == "__main__":
