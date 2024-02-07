@@ -55,8 +55,8 @@ class RequestTimeseriesDataAdvanced(RequestTimeseriesData):
             error = str(e)
         if not obj:
             raise JSONDecodeError("Request time series data request could not be parsed: " + error, "")
-        # if(obj!=null && obj.queryMeasurement.equals("simulation")){
-        #   if(obj.queryFilter==null || !obj.queryFilter.containsKey("simulation_id"))
+        # if(self!=null && self.queryMeasurement.equals("simulation")){
+        #   if(self.queryFilter==null || !self.queryFilter.containsKey("simulation_id"))
         #      #throw new JsonSyntaxException("Expected filter simulation_id not found.");
         # 	   TODO iterate through and look for key = simulation_id
         return obj

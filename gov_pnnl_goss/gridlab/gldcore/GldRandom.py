@@ -1,4 +1,4 @@
-# random_module.py
+
 
 class RandomType:
     RT_INVALID = -1
@@ -34,18 +34,41 @@ def randunit(state):
 
 # Define the remaining functions in a similar way
 
-class RandomVariable:
-    def __init__(self, type, a, b, low, high, update_rate, flags):
-        self.value = 0.0
-        self.state = 0
-        self.type = type
-        self.a = a
-        self.b = b
-        self.low = low
-        self.high = high
-        self.update_rate = update_rate
-        self.flags = flags
-        self.next = None
+
+class RandomVar:
+    def __init__(self, value=0.0, state=0, rng_type=None, a=0.0, b=0.0, low=0.0, high=0.0, update_rate=0, flags=0):
+        self.value = value              # current value
+        self.state = state              # RNG state
+        self.type = rng_type if rng_type else RandomType.RT_INVALID # RNG distribution
+        self.a = a                      # RNG distribution parameter a
+        self.b = b                      # RNG distribution parameter b
+        self.low = low                  # RNG truncation lower limit
+        self.high = high                # RNG truncation upper limit
+        self.update_rate = update_rate  # RNG refresh rate in seconds
+        self.flags = flags              # RNG flags
+        self.next = None                # link to the next RandomVar (if needed)
+
+# Example of creating an instance of RandomVar
+# random_var = RandomVar()
+
+#
+# class randomvar_struct:
+#     def __init__(self):
+#         self.type = RandomType.RT_INVALID  # RNG distribution
+#         self.value = None  # current value
+#         self.low = None  # RNG truncations limits
+#         self.high = None  # RNG truncations limits
+#         self.a = None  # RNG distribution parameters
+#         self.b = None  # RNG distribution parameters
+#         self.update_rate = None  # RNG refresh rate in seconds
+#         self.state = None  # RNG state
+#         self.flags = None  # RNG flags
+#         self.next = None
+
+
+class RandomVariable(RandomVar):
+    def __init__(self, value=0.0, state=0, rng_type=None, a=0.0, b=0.0, low=0.0, high=0.0, update_rate=0, flags=0):
+        super().__init__(value, state, rng_type, a, b, low, high, update_rate, flags)
 
     def update(self):
         # Implement the update method in Python

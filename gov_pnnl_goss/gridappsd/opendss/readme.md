@@ -4,7 +4,7 @@ The **OpenDSS** [source code](http://svn.code.sf.net/p/electricdss/code/trunk/
 ) for this executable has been downloaded and into another repository and then copied to this location:
 ../../opendss
 
-It is checked in as source code here as PYTHON (**converted from Pasca**l)
+It is checked in as source code here as PYTHON (**converted from Pascal**)
 
 ----------- cut here ------------
 

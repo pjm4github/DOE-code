@@ -348,7 +348,7 @@ def create_network(obj, parent):
         try:
             my.create()
         except Exception as msg:
-            gl_error("%s::%s.create(OBJECT *obj={name='%s', id=%d},...): %s" % (obj.oclass.module.name, obj.oclass.name, obj.name, obj.id, msg))
+            gl_error("%s::%s.create(OBJECT *self={name='%s', id=%d},...): %s" % (obj.oclass.module.name, obj.oclass.name, obj.name, obj.id, msg))
             return 0, obj
         return 1, obj
     return 0, obj
@@ -359,7 +359,7 @@ def init_network(obj):
     try:
         return my.init(obj.parent)
     except Exception as msg:
-        gl_error("%s::%s.init(OBJECT *obj={name='%s', id=%d}): %s" % (obj.oclass.module.name, obj.oclass.name, obj.name, obj.id, msg))
+        gl_error("%s::%s.init(OBJECT *self={name='%s', id=%d}): %s" % (obj.oclass.module.name, obj.oclass.name, obj.name, obj.id, msg))
         return 0
 
 
@@ -383,7 +383,7 @@ def sync_network(obj, t1):
     except Exception as msg:
         dt = global_time(t1)
         ts = str_time(dt)
-        gl_error("%s::%s.init(OBJECT *obj={name='%s', id=%d},TIMESTAMP t1='%s'): %s" % (obj.oclass.module.name, obj.oclass.name, obj.name, obj.id, ts, msg))
+        gl_error("%s::%s.init(OBJECT *self={name='%s', id=%d},TIMESTAMP t1='%s'): %s" % (obj.oclass.module.name, obj.oclass.name, obj.name, obj.id, ts, msg))
         return 0
 
 

@@ -884,7 +884,7 @@ class Climate:
 
     def init(self, parent):
         dot = None
-        # obj = self
+        # self = self
         t0 = self.clock
         meter_to_feet = 1.0
         tz_num_offset = 0.0

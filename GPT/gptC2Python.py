@@ -157,7 +157,7 @@ class CCodeParser:
             brace_count = 1  # We start with 1 since that's already included in the span
             method_end = span[1]
             #############################
-            # CLASS SCANNER
+            # Class SCANNER
             while brace_count:
                 if method_end >= max_len:
                     print(f"something went wrong with the class scanner, skipping {m.group('class_name')}::{m.group('method_name')},")
@@ -196,7 +196,7 @@ class CCodeParser:
         #     # of the code that will be sent to Open.AI for conversion into python.
         #     # The trick is to find the body closest to the point after the class declaration because some class bodies
         #     # will match everything (e.g. and empty class body)
-        #     print(f"len={len(self.c_code)}, {match.span()}, CLASS: {match.group('class_name')}::{match.group('method_name')}")
+        #     print(f"len={len(self.c_code)}, {match.span()}, Class: {match.group('class_name')}::{match.group('method_name')}")
         #     capture_span = None
         #
         #     sb = re.finditer(re.escape(match.group('method_body').strip()), self.c_code, re.MULTILINE)

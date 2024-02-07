@@ -41,7 +41,7 @@ HVAC_PF = (0.85, 0.95)
 TYPEHUQ_REV = {v:k for k, v in TYPEHUQ.items()}
 
 #******************************************************************************
-# CLASS DEFINITION: createHouses
+# Class DEFINITION: createHouses
 #******************************************************************************
 class CreateHouses():
     """GClass which uses data derived from EIA RECS to generate houses.
@@ -788,7 +788,7 @@ if __name__ == '__main__':
     houseGuess = obj.estimateTotalHouses(6e6)
     '''
     for _ in range(20):
-        housingType, sqftArray = obj.typeAndSQFTForLoad(magS=12000)
+        housingType, sqftArray = self.typeAndSQFTForLoad(magS=12000)
         print(housingType, sqftArray)
     pass
     '''

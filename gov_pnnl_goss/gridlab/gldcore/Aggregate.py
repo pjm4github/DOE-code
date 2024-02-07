@@ -3,9 +3,7 @@ import re
 from enum import Enum
 from math import sqrt, log, atan, pi
 
-# fromo C:\Users\pmora\Documents\Git\GitHub\gridlab-d\gldcore\aggregate.cpp
 
-# Constants and global variables would be defined elsewhere
 AF_ABS = 0x01
 global_clock = 0  # Placeholder for the actual global clock variable
 
@@ -22,7 +20,7 @@ class FindProgram:
     @staticmethod
     def matches_criteria(obj):
         # Placeholder for matching logic
-        # Example: return all(getattr(obj, key) == value for key, value in self.criteria.items())
+        # Example: return all(getattr(self, key) == value for key, value in self.criteria.items())
         pass
 
 # The SimulationEnvironment should eb defined elsewhere
@@ -53,7 +51,7 @@ def create_find_program(parsed_expression):
 
 
 def class_find_property(obj, aggrval):
-    # Assuming obj is a dictionary-like object with properties
+    # Assuming self is a dictionary-like object with properties
     # Find property info (pinfo) in the object's class based on aggrval
     pinfo = obj.get('oclass', {}).get(aggrval, None)
     if pinfo is None:
@@ -92,15 +90,15 @@ class AGGRPART(Enum):
     AP_ARG = 5
 
 
-class Aggregation:
+class Aggregate:
     """
     $Id: aggregate.c 4738 2014-07-03 00:55:39Z dchassin $
     Copyright (C) 2008 Battelle Memorial Institute
     @file aggregate.c
-    @addtogroup aggregate Aggregation of object properties
+    @addtogroup aggregate Aggregate of object properties
     @ingroup core
 
-    Aggregation functions support calculations over properties of multiple objects.
+    Aggregate functions support calculations over properties of multiple objects.
     This is used primarily by the collector object in the tape module to define groups
     (see the \p group property in aggregate_mkgroupthe collector object). The \p group can defined
     by specifying a boolean series are relationship of object properties, e.g.,
@@ -123,13 +121,24 @@ class Aggregation:
     an aggregation that isn't invariant will cause the simulation to fail. (ticket #112)
 
     Example usage:
-        aggr = Aggregation('sum(cost)', 'class=node and parent=root')
+        aggr = Aggregate('sum(cost)', 'class=node and parent=root')
         result = aggr.aggregate_value()
     """
     # Define aggregate flags constants
     AF_ABS = 0x01
     CF_CONSTANT = 0x01
     CF_CLASS = 0x02
+
+
+    # Constants representing different parts of a complex number (example values)
+    AP_NONE = 0x00  # No part specified
+    AP_REAL = 0x01  # Real part
+    AP_IMAG = 0x02  # Imaginary part
+    AP_MAG = 0x04   # Magnitude
+    AP_ANG = 0x08   # Angle in radians
+    AP_ARG = 0x10   # Argument (angle in radians)
+
+
     def __init__(self, aggregator, group_expression):
         self.aggregator = aggregator
         self.group_expression = group_expression
@@ -265,7 +274,7 @@ class Aggregation:
         # This method checks if an object matches the search criteria defined in pgm.
         # It's a placeholder for the actual implementation.
         # Example implementation could be:
-        # return all(getattr(obj, key) == value for key, value in pgm.items())
+        # return all(getattr(self, key) == value for key, value in pgm.items())
         pass
 
     # Assume __init__ and other methods are defined above
@@ -333,7 +342,7 @@ class Aggregation:
             self.last = self.find_runpgm(self.group)
         for obj in self.last:  # Assuming self.last is a list of objects to aggregate
 
-            # Assuming obj is a dictionary-like object with properties
+            # Assuming self is a dictionary-like object with properties
             if obj['in_svc'] >= global_clock or obj['out_svc'] <= global_clock:
                 continue
 
@@ -444,14 +453,6 @@ class Aggregation:
         # Handle other property types if necessary
         return None
 
-    # Constants representing different parts of a complex number (example values)
-    AP_NONE = 0x00  # No part specified
-    AP_REAL = 0x01  # Real part
-    AP_IMAG = 0x02  # Imaginary part
-    AP_MAG = 0x04   # Magnitude
-    AP_ANG = 0x08   # Angle in radians
-    AP_ARG = 0x10   # Argument (angle in radians)
-
     def determine_part(self, aggrval):
         # This method determines the part of the property to be aggregated.
         if 'complex' in self.pinfo['ptype'] or 'enduse' in self.pinfo['ptype']:
@@ -483,7 +484,7 @@ class Aggregation:
 
 if __name__ == "__main__":
     # Test the AGGREGATOR class
-    aggregator = Aggregation("sum(cost)", "class=node and parent=root")
+    aggregator = Aggregate("sum(cost)", "class=node and parent=root")
     if aggregator:
-        result = Aggregation.aggregate_value(aggregator)
+        result = Aggregate.aggregate_value(aggregator)
         print("Aggregate Result:", result)

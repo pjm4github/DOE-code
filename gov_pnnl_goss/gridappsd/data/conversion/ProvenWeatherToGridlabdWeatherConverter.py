@@ -113,16 +113,16 @@ class ProvenWeatherToGridlabdWeatherConverter(DataFormatConverter):
             # print solar_diffuse
             # print solar_diffuse convert from watts/multiplicities^2 to watts/functions^status
             # //			double solar_diffuse_m = record.getIrradanceDiffuseHorizontal();
-            # //			double solar_diffuse_m = readDouble(map, SOLAR_DIFFUSE, 0);
+            # //			double solar_diffuse_m = readDouble(global_map, SOLAR_DIFFUSE, 0);
             # //			double solar_diffuse_f = solar_diffuse_m*(1/10.764);
-            # 			double solar_diffuse_f = readDouble(map, SOLAR_DIFFUSE, 0);
+            # 			double solar_diffuse_f = readDouble(global_map, SOLAR_DIFFUSE, 0);
             # 			outputContent.print(solar_diffuse_f+",");
             solar_diffuse_f = self.read_double(mp, self.SOLAR_DIFFUSE, 0)
             output_content.write(f"{solar_diffuse_f},")
 
             # print solar_global
             # rint solar_global convert from watts/multiplicities^2 to watts/functions^status
-            # //			double solar_global_m = readDouble(map, SOLAR_GLOBAL, 0);
+            # //			double solar_global_m = readDouble(global_map, SOLAR_GLOBAL, 0);
             # //			double solar_global_f = solar_global_m*(1/10.764);
             solar_global_f = self.read_double(mp, self.SOLAR_GLOBAL, 0)
             output_content.write(f"{solar_global_f}\n")

@@ -1,7 +1,9 @@
 from enum import Enum
 import numpy as np
 
-from gov_pnnl_goss.gridlab.gldcore.object1702152845 import object_name
+from gov_pnnl_goss.gridlab.gldcore.Object import object_name, Object
+from gov_pnnl_goss.gridlab.gldcore.Output import output_error, output_debug
+from gridlab.gldcore.Module import Module
 
 
 class LINEARTRANSFORMDATA:
@@ -54,6 +56,7 @@ class PROPERTYTYPE(Enum):
 class UNIT:
     # Define your UNIT structure here
     pass
+
 
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
@@ -133,7 +136,7 @@ class GlbVar:
     # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
     def gldvar_get_string(self, var, n, buffer, size):
         if self.gldvar_isset(var, n):
-            pspec = property_get_spec(var[n].prop.ptype)
+            pspec = PropertyType.property_get_spec(var[n].prop.ptype)
             pspec.data_to_string(buffer, size, var[n].addr, var[n].prop)
             return buffer
         else:
@@ -149,21 +152,70 @@ class GlbVar:
 
 GLDVAR = GlbVar
 
+# class Schedule:
+#     pass  # Placeholder for SCHEDULE structure
+#
+# class TransformFunction:
+#     pass  # Placeholder for TRANSFORMFUNCTION structure
+#
+# class TransferFunction:
+#     pass  # Placeholder for TRANSFERFUNCTION structure
+#
+# class GLDVar:
+#     pass  # Placeholder for GLDVAR structure
+#
+# class TransformSource:
+#     pass  # Placeholder for TRANSFORMSOURCE enumeration
+#
+# class TransformFunctionType:
+#     pass  # Placeholder for TRANSFORMFUNCTIONTYPE enumeration
+#
+# class ObjectList:
+#     pass  # Placeholder for s_object_list structure
+#
+# class PropertyMap:
+#     pass  # Placeholder for s_property_map structure
+
 
 class Transform:
     def __init__(self):
-        self.source = None
-        self.source_type = 0
-        self.target_obj = None
-        self.target_prop = None
-        self.function_type = 0
         self.linear_data = None
         self.external_data = None
         self.filter_data = None
-        self.next = None
+
+        self.source = None  # Initially None, can be set to reference an array of doubles
+        self.source_type = None  # Instance of TransformSource
+        self.target_obj = None  # Instance of ObjectList
+        self.target_prop = None  # Instance of PropertyMap
+        self.function_type = None  # Instance of TransformFunctionType
+
+        # Attributes for linear transforms
+        self.source_addr = None  # Can be any type, depending on usage
+        self.source_schedule = None  # Instance of Schedule
+        self.target = None  # Initially None, can be set to reference an array of doubles
+        self.scale = None  # double
+        self.bias = None  # double
+
+        # Attributes for external transforms
+        self.function = None  # Instance of TransformFunction
+        self.retval = None  # int
+        self.nlhs = None  # int
+        self.plhs = None  # List of GLDVar
+        self.nrhs = None  # int
+        self.prhs = None  # List of GLDVar
+
+        # Attributes for filter transforms
+        self.tf = None  # Instance of TransferFunction
+        self.u = None  # vector u
+        self.y = None  # vector y
+        self.x = None  # vector x
+        self.t2 = None  # TIMESTAMP, assuming a placeholder for datetime or int
+        self.t2_dbl = None  # double
+
+        self.next = None  # Reference to next Transform object in the list
 
     def getnext(self, xform):
-        pass
+        return self.next
 
     def transform_add_external(self, target_obj, target_prop, function, source_obj, source_prop):
         pass
@@ -172,6 +224,7 @@ class Transform:
         pass
 
     def transform_get_next(self, xform):
+        global schedule_xformlist
         return xform.next if xform else schedule_xformlist
 
     def transform_syncall(self, t, source, t1_dbl):
@@ -185,7 +238,7 @@ class Transform:
 
     def transform_saveall(self, fp):
         count = 0
-        xform = schedule_xformlist
+        xform = Transform()
         while xform is not None:
             obj = xform.target_obj
             prop = xform.target_prop
@@ -211,6 +264,7 @@ class TransferFunction:
         self.m = 0  # numerator order
         self.b = None  # numerator coefficients (list or array)
         self.next = None
+
     def write_term(self, buffer, a, x, n, first):
         pass
 
@@ -224,7 +278,7 @@ class TransferFunction:
         pass
 
 TRANSFERFUNCTION = TransferFunction
-
+tflist = []  # transfer function list
 
 class PropertyType:
     def get_source_type(self, prop):
@@ -270,23 +324,24 @@ def find_filter(name):
 def get_source_type(prop):
     source_type = 0
     if prop.ptype == PROPERTYTYPE.PT_double:
-        source_type = XS_DOUBLE
+        source_type = TRANSFORMSOURCE.XS_DOUBLE
     elif prop.ptype == PROPERTYTYPE.PT_complex:
-        source_type = XS_COMPLEX
+        source_type = TRANSFORMSOURCE.XS_COMPLEX
     elif prop.ptype == PROPERTYTYPE.PT_loadshape:
-        source_type = XS_LOADSHAPE
+        source_type = TRANSFORMSOURCE.XS_LOADSHAPE
     elif prop.ptype == PROPERTYTYPE.PT_enduse:
-        source_type = XS_ENDUSE
+        source_type = TRANSFORMSOURCE.XS_ENDUSE
     elif prop.ptype == PROPERTYTYPE.PT_random:
-        source_type = XS_RANDOMVAR
+        source_type = TRANSFORMSOURCE.XS_RANDOMVAR
     else:
         output_error("tranform/get_source_type(PROPERTY *prop='%s'): unsupported source property type '%s'",
-                      prop.name,property_getspec(prop.ptype).name)
+                      prop.name, PropertyType.property_getspec(prop.ptype).name)
     return source_type
 
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
 def transform_add_filter(target_obj, target_prop, filter_str, source_obj, source_prop):
+    global global_start_time, global_debug_output
     buffer1 = [1024]
     buffer2 = [1024]
     xform = None
@@ -310,15 +365,16 @@ def transform_add_filter(target_obj, target_prop, filter_str, source_obj, source
 
     xform.x = [0] * (tf.n - 1)
 
-    xform.source = static_cast(object_get_addr(source_obj, source_prop.name), double)
-    xform.source_type = static_cast(get_source_type(source_prop), TRANSFORMSOURCE)
+    xform.source = Object.object_get_addr(source_obj, source_prop.name)
+    xform.source_type = Transform.get_source_type(source_prop)
     xform.target_obj = target_obj
     xform.target_prop = target_prop
-    xform.function_type = XT_FILTER
+    xform.function_type = TRANSFORMFUNCTIONTYPE.XT_FILTER
     xform.tf = tf
-    xform.y = static_cast(object_get_addr(target_obj, target_prop.name), double)
-    xform.t2 = int64(global_starttime / tf.timestep) * tf.timestep + tf.timeskew
-    xform.t2_dbl = floor(double(global_starttime / tf.timestep)) * tf.timestep + tf.timeskew
+    xform.y = Transform.object_get_addr(target_obj, target_prop.name)
+    xform.t2 = int(global_start_time / tf.timestep) * tf.timestep + tf.timeskew
+    xform.t2_dbl = int(float(global_start_time / tf.timestep)) * tf.timestep + tf.timeskew
+    schedule_xformlist = Transform()
     xform.next = schedule_xformlist
     schedule_xformlist = xform
 
@@ -332,27 +388,27 @@ def transform_add_filter(target_obj, target_prop, filter_str, source_obj, source
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
 def transform_add_external(target_obj, target_prop, function, source_obj, source_prop):
+    global schedule_xformlist
     buffer1 = [1024]
     buffer2 = [1024]
     xform = TRANSFORM()
     if xform is None:
         return 0
-    xform.function = module_get_transform_function(function)
+    xform.function = Module.module_get_transform_function(function)
     if xform.function is None:
         output_error("transform_add_external(source='%s:%s',function='%s',target='%s:%s'): function is not defined (probably a missing or invalid extern directive)" 
             % (object_name(target_obj, buffer1, buffer1.size), target_prop.name, function, object_name(source_obj, buffer2, buffer2.size), source_prop.name))
-        free(xform)
         return 0
-    xform.function_type = XT_EXTERNAL
+    xform.function_type = TRANSFORMFUNCTIONTYPE.XT_EXTERNAL
     xform.source_type = get_source_type(source_prop)
     xform.nlhs = 1
-    xform.plhs = gldvar_create(xform.nlhs)
-    gldvar_set(xform.plhs, 0, object_get_addr(target_obj, target_prop.name), target_prop)
+    xform.plhs = GlbVar.gldvar_create(xform.nlhs)
+    GlbVar.gldvar_set(xform.plhs, 0, Transform.object_get_addr(target_obj, target_prop.name), target_prop)
     xform.target_obj = target_obj
     xform.target_prop = target_prop
     xform.nrhs = 1
-    xform.prhs = gldvar_create(xform.nrhs)
-    gldvar_set(xform.prhs, 0, object_get_addr(source_obj, source_prop.name), source_prop)
+    xform.prhs = GlbVar.gldvar_create(xform.nrhs)
+    GlbVar.gldvar_set(xform.prhs, 0, Transform.object_get_addr(source_obj, source_prop.name))
     xform.next = schedule_xformlist
     schedule_xformlist = xform
     output_debug("added external transform %s:%s <- %s(%s:%s)" % (object_name(target_obj, buffer1, buffer1.size), target_prop.name, function, object_name(source_obj, buffer2, buffer2.size), source_prop.name))
@@ -361,6 +417,7 @@ def transform_add_external(target_obj, target_prop, function, source_obj, source
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
 def transform_add_linear(stype, source, target, scale, bias, obj, prop, sched):
+    global schedule_xformlist
     buffer = [0] * 1024
     xform = TRANSFORM()
     if xform is None:
@@ -376,7 +433,7 @@ def transform_add_linear(stype, source, target, scale, bias, obj, prop, sched):
     xform.target = target
     xform.scale = scale
     xform.bias = bias
-    xform.function_type = XT_LINEAR
+    xform.function_type = TRANSFORMFUNCTIONTYPE.XT_LINEAR
     xform.next = schedule_xformlist
     schedule_xformlist = xform
     output_debug("added linear transform %s:%s <- scale=%.3g, bias=%.3g" % (object_name(obj, buffer, 1024), prop.name, scale, bias))

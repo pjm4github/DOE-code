@@ -9,7 +9,7 @@ from gov_pnnl_goss.gridlab.gldcore.GridLabD import TS_ZERO
 from gov_pnnl_goss.gridlab.gldcore.Output import output_verbose
 from gov_pnnl_goss.gridlab.gldcore.Property import QNAN, PROPERTYTYPE, PROPERTY, PROPERTYACCESS
 from enum import Enum, auto
-
+from ctypes import memset
 
 EUC_IS110 = 0x0000
 EUC_IS220 = 0x0001
@@ -20,6 +20,368 @@ n_enduses = 0
 enduse_magic = 0x8c3d7762
 run = 0
 enduse_synctime = 0
+
+
+class Enduse:
+    """
+    This class defines the enduse and its related operations.
+    """
+    def __init__(self):
+
+        self.cronos = 0
+
+        # meter values
+        self.total = complex()  # total power in kW
+        self.energy = complex()  # total energy in kWh
+        self.demand = complex()  # maximum power in kW (can be reset)
+
+        # circuit configuration
+        self.config = set()  # end-use configuration
+        self.breaker_amps = 0.0  # breaker limit (if any)
+
+        # zip values
+        self.admittance = complex()  # constant impedance option of load in kW
+        self.current = complex()  # constant current portion of load in kW
+        self.power = complex()  # constant power portion of load in kW
+
+        # composite load data
+        self.motor = [EUMOTOR() for _ in range(EUMOTORTYPE._EUMT_COUNT.value)]  # motor loads (A-D)
+        self.electronic = [EUELECTRONIC() for _ in range(EUELECTRONICTYPE._EUET_COUNT.value)]  # electronic loads (S/D)
+
+        # loading
+        self.impedance_fraction = 0.0  # constant impedance fraction (pu load)
+        self.current_fraction = 0.0  # constant current fraction (pu load)
+        self.power_fraction = 0.0  # constant power fraction (pu load)
+        self.power_factor = 0.0  # power factor
+        self.voltage_factor = 0.0  # voltage factor (pu nominal)
+
+        # heat
+        self.heatgain = 0.0  # internal heat from load (Btu/h)
+        self.cumulative_heatgain = 0.0  # internal cumulative heat gain from load (Btu)
+        self.heatgain_fraction = 0.0  # fraction of power that goes to internal heat (pu Btu/h)
+
+        # misc info
+        self.name = ""
+        self.shape = None
+        self.t_last = 0.0  # last time of update
+
+        # added for backward compatibility with res ENDUSELOAD
+        # @todo these are obsolete and must be retrofitted with the above values
+        self.end_obj = None
+
+        self.next = None
+
+    def enduse_get_part(self, x, name):
+        """
+        Get part of the enduse data.
+        """
+        e = x
+        if name == "total.real":
+            return e.total.Re()
+        if name == "total.imag":
+            return e.total.Im()
+        if name == "total.mag":
+            return e.total.Mag()
+        if name == "total.arg":
+            return e.total.Arg()
+        if name == "total.ang":
+            return e.total.Arg() * 180 / PI
+
+        if name == "energy.real":
+            return e.energy.Re()
+        if name == "energy.imag":
+            return e.energy.Im()
+        if name == "energy.mag":
+            return e.energy.Mag()
+        if name == "energy.arg":
+            return e.energy.Arg()
+        if name == "energy.ang":
+            return e.energy.Arg() * 180 / PI
+
+        if name == "demand.real":
+            return e.demand.Re()
+        if name == "demand.imag":
+            return e.demand.Im()
+        if name == "demand.mag":
+            return e.demand.Mag()
+        if name == "demand.arg":
+            return e.demand.Arg()
+        if name == "demand.ang":
+            return e.demand.Arg() * 180 / PI
+
+        if name == "breaker_amps":
+            return e.breaker_amps
+
+        if name == "admittance.real":
+            return e.admittance.Re()
+        if name == "admittance.imag":
+            return e.admittance.Im()
+        if name == "admittance.mag":
+            return e.admittance.Mag()
+        if name == "admittance.arg":
+            return e.admittance.Arg()
+        if name == "admittance.ang":
+            return e.admittance.Arg() * 180 / PI
+
+        if name == "current.real":
+            return e.current.Re()
+        if name == "current.imag":
+            return e.current.Im()
+        if name == "current.mag":
+            return e.current.Mag()
+        if name == "current.arg":
+            return e.current.Arg()
+        if name == "current.ang":
+            return e.current.Arg() * 180 / PI
+
+        if name == "power.real":
+            return e.power.Re()
+        if name == "power.imag":
+            return e.power.Im()
+        if name == "power.mag":
+            return e.power.Mag()
+        if name == "power.arg":
+            return e.power.Arg()
+        if name == "power.ang":
+            return e.power.Arg() * 180 / PI
+
+        if name == "impedance_fraction":
+            return e.impedance_fraction
+
+        if name == "current_fraction":
+            return e.current_fraction
+
+        if name == "power_fraction":
+            return e.power_fraction
+
+        if name == "power_factor":
+            return e.power_factor
+
+        if name == "voltage_factor":
+            return e.voltage_factor
+
+        if name == "heatgain":
+            return e.heatgain
+
+        if name == "heatgain_fraction":
+            return e.heatgain_fraction
+
+        if name == "motorA.power":
+            return e.motor[EUMT_MOTOR_A].power
+        if name == "motorA.impedance":
+            return e.motor[EUMT_MOTOR_A].impedance
+        if name == "motorA.inertia":
+            return e.motor[EUMT_MOTOR_A].inertia
+        if name == "motorA.v_stall":
+            return e.motor[EUMT_MOTOR_A].v_stall
+        if name == "motorA.v_start":
+            return e.motor[EUMT_MOTOR_A].v_start
+        if name == "motorA.v_trip":
+            return e.motor[EUMT_MOTOR_A].v_trip
+        if name == "motorA.t_trip":
+            return e.motor[EUMT_MOTOR_A].t_trip
+
+        if name == "motorB.power":
+            return e.motor[EUMT_MOTOR_B].power
+        if name == "motorB.impedance":
+            return e.motor[EUMT_MOTOR_B].impedance
+        if name == "motorB.inertia":
+            return e.motor[EUMT_MOTOR_B].inertia
+        if name == "motorB.v_stall":
+            return e.motor[EUMT_MOTOR_B].v_stall
+        if name == "motorB.v_start":
+            return e.motor[EUMT_MOTOR_B].v_start
+        if name == "motorB.v_trip":
+            return e.motor[EUMT_MOTOR_B].v_trip
+        if name == "motorB.t_trip":
+            return e.motor[EUMT_MOTOR_B].t_trip
+
+        if name == "motorC.power":
+            return e.motor[EUMT_MOTOR_C].power
+        if name == "motorC.impedance":
+            return e.motor[EUMT_MOTOR_C].impedance
+        if name == "motorC.inertia":
+            return e.motor[EUMT_MOTOR_C].inertia
+        if name == "motorC.v_stall":
+            return e.motor[EUMT_MOTOR_C].v_stall
+        if name == "motorC.v_start":
+            return e.motor[EUMT_MOTOR_C].v_start
+        if name == "motorC.v_trip":
+            return e.motor[EUMT_MOTOR_C].v_trip
+        if name == "motorC.t_trip":
+            return e.motor[EUMT_MOTOR_C].t_trip
+
+        if name == "motorD.power":
+            return e.motor[EUMT_MOTOR_D].power
+        if name == "motorD.impedance":
+            return e.motor[EUMT_MOTOR_D].impedance
+        if name == "motorD.inertia":
+            return e.motor[EUMT_MOTOR_D].inertia
+        if name == "motorD.v_stall":
+            return e.motor[EUMT_MOTOR_D].v_stall
+        if name == "motorD.v_start":
+            return e.motor[EUMT_MOTOR_D].v_start
+        if name == "motorD.v_trip":
+            return e.motor[EUMT_MOTOR_D].v_trip
+        if name == "motorD.t_trip":
+            return e.motor[EUMT_MOTOR_D].t_trip
+
+        if name == "electronicA.power":
+            return e.electronic[EUMT_MOTOR_A].power
+        if name == "electronicA.inertia":
+            return e.electronic[EUMT_MOTOR_A].inertia
+        if name == "electronicA.v_trip":
+            return e.electronic[EUMT_MOTOR_A].v_trip
+        if name == "electronicA.v_start":
+            return e.electronic[EUMT_MOTOR_A].v_start
+
+        if name == "electronicB.power":
+            return e.electronic[EUMT_MOTOR_B].power
+        if name == "electronicB.inertia":
+            return e.electronic[EUMT_MOTOR_B].inertia
+        if name == "electronicB.v_trip":
+            return e.electronic[EUMT_MOTOR_B].v_trip
+        if name == "electronicB.v_start":
+            return e.electronic[EUMT_MOTOR_B].v_start
+
+        return QNAN
+
+
+    def enduse_create(self, data):
+        """
+        Create an enduse for debugging.
+        """
+
+
+        memset(data, 0, sizeof(enduse))
+        data.next = enduse_list
+        enduse_list = data
+        n_enduses += 1
+
+        data.power_factor = 1.0
+        data.heatgain_fraction = 1.0
+
+        # Enable debugging
+        if _DEBUG:
+            data.magic = enduse_magic
+
+        return 1
+
+    def enduse_init(self, e):
+        """
+        Initialize the enduse for debugging.
+        """
+
+        if hasattr(e, 'magic') and e.magic != enduse_magic:
+            raise Exception("enduse '%s' magic number bad" % e.name)
+
+        e.t_last = TS_ZERO
+
+        return 0
+
+
+    def enduse_init_all(self):
+        """
+        Initialize all enduses for debugging.
+        """
+
+        e = enduse_list
+        while e is not None:
+            if enduse_init(e) == 1:
+                return FAILED
+            e = e.next
+        return SUCCESS
+
+    def enduse_sync(self, e, passconfig, t1):
+        """
+        Synchronize the enduse with the given configuration and timestamp.
+        """
+        pass
+
+    def enduse_sync_all(self, t1):
+        """
+        Synchronize all enduses with the given timestamp.
+        """
+        pass
+
+    def convert_from_enduse(self, string, size, data, prop):
+        """
+        Convert the properties of an enduse from a string.
+        """
+
+        e = data
+        len = 0
+
+        def OUTPUT_NZ(X):
+            nonlocal len
+            if getattr(e, X) != 0:
+                len += len + sprintf(string + len, "%s%s: %f", "" if len > 0 else "; ", X, getattr(e, X))
+
+        def OUTPUT(X):
+            nonlocal len
+            len += sprintf(string + len, "%s%s: %f", "" if len > 0 else "; ", X, getattr(e, X))
+
+        OUTPUT_NZ("impedance_fraction")
+        OUTPUT_NZ("current_fraction")
+        OUTPUT_NZ("power_fraction")
+        OUTPUT("power_factor")
+        OUTPUT("power.Re()")
+        OUTPUT_NZ("power.Im()")
+
+        return len
+
+    def enduse_publish(self, oclass, struct_address, prefix):
+        """
+        Publish the enduse properties for a specific oclass and prefix.
+        """
+        pass
+
+    def convert_to_enduse(self, string, data, prop):
+        """
+        Convert the properties of an enduse to a string.
+        """
+        pass
+
+    def enduse_test(self):
+        """
+        Test the enduse functionality.
+        """
+
+        failed = 0
+        ok = 0
+        errorcount = 0
+
+        class Test:
+            def __init__(self, name):
+                self.name = name
+
+        test = [Test("TODO")]
+
+        output_test("\nBEGIN: enduse tests")
+
+        for p in test:
+            pass
+
+        if failed:
+            output_error("endusetest: %d enduse tests failed--see test.txt for more information" % failed)
+            output_test("!!! %d enduse tests failed, %d errors found" % (failed, errorcount))
+        else:
+            output_verbose("%d enduse tests completed with no errors--see test.txt for details" % ok)
+            output_test("endusetest: %d schedule tests completed, %d errors found" % (ok, errorcount))
+        output_test("END: enduse tests")
+        return failed
+
+    def enduse_syncproc(self, ptr):
+        """
+        Synchronize the enduse data.
+        """
+        pass
+
+    def exec_clock(self):
+        """
+        Execute the enduse clock function.
+        """
+        pass
 
 class EnduseSyncData:
     def __init__(self):
@@ -70,55 +432,6 @@ class EUELECTRONIC:
         self.inertia = 0.0  # load "inertia"
         self.v_trip = 0.0  # load "trip" voltage (pu)
         self.v_start = 0.0  # load "start" voltage (pu)
-
-
-class Enduse:
-
-    def __init__(self):
-
-        self.cronos = 0
-
-        # meter values
-        self.total = complex()  # total power in kW
-        self.energy = complex()  # total energy in kWh
-        self.demand = complex()  # maximum power in kW (can be reset)
-
-        # circuit configuration
-        self.config = set()  # end-use configuration
-        self.breaker_amps = 0.0  # breaker limit (if any)
-
-        # zip values
-        self.admittance = complex()  # constant impedance option of load in kW
-        self.current = complex()  # constant current portion of load in kW
-        self.power = complex()  # constant power portion of load in kW
-
-        # composite load data
-        self.motor = [EUMOTOR() for _ in range(EUMOTORTYPE._EUMT_COUNT.value)]  # motor loads (A-D)
-        self.electronic = [EUELECTRONIC() for _ in range(EUELECTRONICTYPE._EUET_COUNT.value)]  # electronic loads (S/D)
-
-        # loading
-        self.impedance_fraction = 0.0  # constant impedance fraction (pu load)
-        self.current_fraction = 0.0  # constant current fraction (pu load)
-        self.power_fraction = 0.0  # constant power fraction (pu load)
-        self.power_factor = 0.0  # power factor
-        self.voltage_factor = 0.0  # voltage factor (pu nominal)
-
-        # heat
-        self.heatgain = 0.0  # internal heat from load (Btu/h)
-        self.cumulative_heatgain = 0.0  # internal cumulative heat gain from load (Btu)
-        self.heatgain_fraction = 0.0  # fraction of power that goes to internal heat (pu Btu/h)
-
-        # misc info
-        self.name = ""
-        self.shape = None
-        self.t_last = 0.0  # last time of update
-
-        # added for backward compatibility with res ENDUSELOAD
-        # @todo these are obsolete and must be retrofitted with the above values
-        self.end_obj = None
-
-        self.next = None
-
 
     def create(self, data):
         data.fill(0)
@@ -187,7 +500,7 @@ class Enduse:
         Publish properties of an enduse class.
 
         Args:
-            oclass (CLASS): The class to which properties are published.
+            oclass (Class): The class to which properties are published.
             struct_address: The struct address.
             prefix (str): The prefix for property names.
 

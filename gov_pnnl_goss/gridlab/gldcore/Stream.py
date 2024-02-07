@@ -1,7 +1,9 @@
 # stream.py
 from gov_pnnl_goss.gridlab.gldcore.Class import Class, PROPERTYNAME
-from gov_pnnl_goss.gridlab.gldcore.Globals import global_getnext
+from gov_pnnl_goss.gridlab.gldcore.Globals import global_getnext, global_get_count, global_get_var, global_set_var
 from gov_pnnl_goss.gridlab.gldcore.Output import output_debug, output_error
+from gridlab.gldcore.Module import Module
+from gridlab.gldcore.Object import Object
 
 SF_IN = 0x0001
 SF_OUT = 0x0002
@@ -23,15 +25,39 @@ flags = 0x00
 class TOKEN(str):
     pass
 
+
 class PROPERTY:
     pass
 
 
-class SStream:
-    stream_list = None
 
-    def __init__(self):
+
+class Streamer:
+    stream_list = None
+    SF_OUT = 0x01  # Flag for output (writing to stream)
+    SF_IN = 0x02   # Flag for input (reading from stream)
+
+    def __init__(self, file_ptr=None, flags=0x00):
+        self.stream_pos = 0
+        self.file_ptr = file_ptr
+        self.flags = flags
         self.stream_list = None
+        self.stream_callback = None
+        self.stream_name = "STREAM_NAME"
+        self.stream_version = "STREAM_VERSION"
+        self.stream_wordsize = 8  # Assuming 64-bit system
+        self.stream_pos = 0
+        self.flags = 0x00
+        self.file_ptr = None
+
+
+    def register_stream_callback(self, callback):
+        """
+        Register a callback function for the stream.
+        The callback function should take four arguments:
+        buffer, size, is_write, user_data
+        """
+        self.stream_callback = callback
 
     def stream_register(self, call):
         pass
@@ -45,90 +71,135 @@ class SStream:
         except:
             return -1
 
-    def stream(self, s, max=0):
-        t = s[:1024]
-        self.stream(t, max if max else len(s), True, s)
 
-    
-    def stream(self, v):
-        self.stream(v, len(v))
+    def stream_string(self, s, max_length=0):
+        # Handle string streaming
+        pass
 
-    def stream(self, ptr, len_, is_str, match):
-        if flags & SF_OUT:
-            if is_str:
-                len_ = len(ptr)
-            fp =f"{len_:d}"
-            a = len(fp)
-            if a < 0:
-                pass
-            for i in range(len_):
-                b = 0
-                c = ptr[i]
-                if not is_str or c < 32 or c > 126 or c == '\\':
-                    fp = f"{c:02x}"
-                    b = len(fp)
-                a += b
-            fp += "\n"
-            b = len(fp)
-            if b < 0:
-                pass
-            a += b
-            self.stream_pos += a
-            return a
-        if flags & SF_IN:
-            a = 0
-            a = fscanf(fp, "%d", a)
-            if a < 1:
-                raise
-            if a > len:
-                raise
-            if fgetc(fp) != ' ':
-                raise "FMT"
-            (c_char * len).from_buffer(ptr).value = 0
-            for i in range(a):
-                b = fgetc(fp)
-                if b == '\\' and fscanf(fp, "%02x", b) < 1:
-                    raise
-                cast(ptr, POINTER(c_char))[i] = c_char(b)
-            while fgetc(fp) != '\n':
-                pass
-            if match is not None and memcmp(ptr, match, a):
-                raise 0
-            b = (log(float(a)) + 2) + a * 3
-            stream_pos += b
-            return b
-        raise
+    def stream_module(self, mod):
+        self.stream("MOD")
 
-    
-    def stream(self, oclass):
-        self.stream("RTC")
-
-        count = class_get_runtime_count()
+        count = Module().module_get_count()
         self.stream(count)
         for n in range(count):
-            name = oclass.name if oclass else ""
-            self.stream(name, sizeof(name))
-
-            size = oclass.size if oclass else 0
-            self.stream(size)
-
-            passconfig = oclass.passconfig if oclass else None
-            self.stream(passconfig)
-
-            if flags & SF_IN:
-                oclass = class_register(None, name, size, passconfig)
-
-            self.stream(oclass, oclass.pmap)
+            name = [0] * 1024
+            if mod:
+                name = mod.name
+            self.stream(name)
 
             if flags & SF_OUT:
-                oclass = class_get_next_runtime(oclass)
+                mod = mod.next
             if flags & SF_IN:
-                module_load(oclass.name, 0, None)
-        self.stream("/RTC")
+                Module().module_load(name, 0, None)
 
-    def stream_type(self, T):
-        def stream_T(ptr, len, prop):
-            return self.stream(cast(ptr, POINTER(T)), len)
+        self.stream("/MOD")
+
+    def stream_property(self, oclass, prop):
+        # Handle property streaming
+        pass
+
+    def stream_class(self, oclass):
+        # Handle class streaming
+        pass
+
+    def stream_object(self, obj):
+        # Handle object streaming
+        pass
+
+    def stream_global(self, var):
+        # Handle global variable streaming
+        pass
+
+    # Additional methods to support streaming of various types (MODULE, CLASS, OBJECT, GLOBALVAR)
+    # ...
+
+
+    # Implement other specific methods as needed based on the C++ code
+
+    # def stream(self, s, max=0):
+    #     t = s[:1024]
+    #     self.stream(t, max if max else len(s), True, s)
+    #
+    #
+    # def stream(self, v):
+    #     self.stream(v, len(v))
+    #
+    # def stream(self, ptr, len_, is_str, match):
+    #     if flags & SF_OUT:
+    #         if is_str:
+    #             len_ = len(ptr)
+    #         fp =f"{len_:d}"
+    #         a = len(fp)
+    #         if a < 0:
+    #             pass
+    #         for i in range(len_):
+    #             b = 0
+    #             c = ptr[i]
+    #             if not is_str or c < 32 or c > 126 or c == '\\':
+    #                 fp = f"{c:02x}"
+    #                 b = len(fp)
+    #             a += b
+    #         fp += "\n"
+    #         b = len(fp)
+    #         if b < 0:
+    #             pass
+    #         a += b
+    #         self.stream_pos += a
+    #         return a
+    #     if flags & SF_IN:
+    #         a = 0
+    #         a = fscanf(fp, "%d", a)
+    #         if a < 1:
+    #             raise
+    #         if a > len:
+    #             raise
+    #         if fgetc(fp) != ' ':
+    #             raise "FMT"
+    #         (c_char * len).from_buffer(ptr).value = 0
+    #         for i in range(a):
+    #             b = fgetc(fp)
+    #             if b == '\\' and fscanf(fp, "%02x", b) < 1:
+    #                 raise
+    #             cast(ptr, POINTER(c_char))[i] = c_char(b)
+    #         while fgetc(fp) != '\n':
+    #             pass
+    #         if match is not None and memcmp(ptr, match, a):
+    #             raise 0
+    #         b = (log(float(a)) + 2) + a * 3
+    #         stream_pos += b
+    #         return b
+    #     raise
+    #
+    #
+    # def stream(self, oclass):
+    #     self.stream("RTC")
+    #
+    #     count = Class.class_get_runtime_count()
+    #     self.stream(count)
+    #     for n in range(count):
+    #         name = oclass.name if oclass else ""
+    #         self.stream(name, len(name))
+    #
+    #         size = oclass.size if oclass else 0
+    #         self.stream(size)
+    #
+    #         passconfig = oclass.passconfig if oclass else None
+    #         self.stream(passconfig)
+    #
+    #         if flags & SF_IN:
+    #             oclass = Class.register(None, name, size, passconfig)
+    #
+    #         self.stream(oclass, oclass.pmap)
+    #
+    #         if flags & SF_OUT:
+    #             oclass = Class.get_next_runtime(oclass)
+    #         if flags & SF_IN:
+    #             Module.module_load(oclass.name, 0, None)
+    #     self.stream("/RTC")
+
+    # def stream_type(self, T):
+    #     def stream_T(ptr, len, prop):
+    #         return self.stream(cast(ptr, POINTER(T)), len)
 
     def stream_type(self, T):
         def stream_type_impl(data, size, property):
@@ -152,7 +223,6 @@ class SStream:
         # Your implementation for str type
         pass
 
-    
     def stream_context(self, ):
         buffer = bytearray(64)
 
@@ -336,28 +406,28 @@ class SStream:
     
     def stream_oc(self, oclass, prop):
         pass
-    
-    
+
     def stream_o(self, oclass):
         pass
         
     def stream_obj(self, obj):
         self.stream("OBJ")
-        count = object_get_count()
+        count = Object.object_get_count()
         self.stream(count)
         for n in range(count):
             pass
         self.stream("/OBJ")
-    
-    
+
     def stream_gvar(self, var):
         pass
-    
-    def stream_file(self, fileptr, opts):
+
+    def stream_file(self, file_ptr, opts):
+        self.file_ptr = file_ptr
+        self.flags = opts
         stream_pos = 0
-        fp = fileptr
+        fp = self.file_ptr
         flags = opts
-        output_debug("starting stream on file %d with options %x", fileno(fp), flags)
+        output_debug("starting stream on file %d with options %x", fp, flags)
         try:
             self.stream("GLD30")
             try:
@@ -365,11 +435,11 @@ class SStream:
             except:
                 pass
             try:
-                self.stream(module_get_first())
+                self.stream(Module.module_get_first())
             except:
                 pass
             try:
-                self.stream(object_get_first())
+                self.stream(Object.object_get_first(None))
             except:
                 pass
             try:
@@ -379,34 +449,17 @@ class SStream:
             s = self.stream_list
             while s != None:
                 pass
-            output_debug("done processing stream on file %d with options %x", fileno(fp), flags)
+            output_debug("done processing stream on file %d with options %x", fp, flags)
             return stream_pos
         except Exception as e:
             if isinstance(e, str):
                 pass
             else:
-                output_error("stream() failed as offset %lld", int64(stream_pos))
+                output_error("stream() failed as offset %lld", int(stream_pos))
                 return -1
     
-    def stream_module(self, mod):
-        self.stream("MOD")
-    
-        count = module_get_count()
-        self.stream(count)
-        for n in range(count):
-            name = [0] * 1024
-            if mod:
-                name = mod.name
-            self.stream(name, sizeof(name))
-    
-            if flags & SF_OUT:
-                mod = mod.next
-            if flags & SF_IN:
-                module_load(name, 0, None)
-        
-        self.stream("/MOD")
-    
-    
+
+
     def stream_values(self, oclass, prop):
         self.stream("RTC")
     
@@ -455,13 +508,110 @@ class SStream:
     
         self.stream("/VAR")
 
+    # def stream(self, ptr, length, is_str, match=None):
+    #     # This method needs to be implemented based on the specific requirements of streaming
+    #     pass
+
+    def stream_runtime_count(self, data, is_str=False, match=None):
+        oclass: OClass = data
+        self.stream("RTC")
+
+        count = Class.class_get_runtime_count()
+        self.stream(count)
+        for n in range(count):
+            name = oclass.name if oclass else ""
+            self.stream(name, len(name))
+
+            size = oclass.size if oclass else 0
+            self.stream(size)
+
+            passconfig = oclass.passconfig if oclass else None
+            self.stream(passconfig)
+
+            if flags & SF_IN:
+                oclass = Class.register(None, name, size, passconfig)
+
+            self.stream(oclass, oclass.pmap)
+
+            if flags & SF_OUT:
+                oclass = Class.get_next_runtime(oclass)
+            if flags & SF_IN:
+                Module.module_load(oclass.name, 0, None)
+        self.stream("/RTC")
+
+    def stream(self, data, is_str=False, match=None):
+        """
+        Stream data to/from a file.
+        - data: Data to be written or buffer for data to be read.
+        - is_str: Flag indicating if the data is a string.
+        - match: Optional match when reading (mismatch causes an exception).
+        """
+        if self.flags & self.SF_OUT:
+            return self._write_to_stream(data, is_str)
+        elif self.flags & self.SF_IN:
+            return self._read_from_stream(data, is_str, match)
+        else:
+            raise ValueError("Invalid stream flag.")
+
+    def _write_to_stream(self, data, is_str):
+        if is_str:
+            if not isinstance(data, str):
+                raise ValueError("Data must be a string.")
+            data = data.encode()  # Convert string to bytes
+        self.file_ptr.write(data)
+        self.stream_pos += len(data)
+        return len(data)
+
+    def _read_from_stream(self, buffer, is_str, match):
+        if is_str and not isinstance(buffer, bytes):
+            raise ValueError("Buffer must be a byte array for string data.")
+        length = len(buffer)
+        read_data = self.file_ptr.read(length)
+        if match and read_data != match:
+            raise ValueError("Data does not match.")
+        if is_str:
+            read_data = read_data.decode()  # Convert bytes to string
+        self.stream_pos += len(read_data)
+        return read_data
 
     
 # Example usage:
 if __name__ == "__main__":
-    SStream.register_stream_functions()
-    # Call the stream function with appropriate parameters
-    # self.stream(SF_IN | SF_OUT, stream_callback)
+    # # Example usage
+    # def example_stream_callback(buffer, size, is_write, user_data):
+    #     # Implement the callback functionality here
+    #     print(f"Buffer: {buffer}, Size: {size}, Is Write: {is_write}, User Data: {user_data}")
+    #     return size
+    #
+    #
+    # # Create a Streamer object and use it
+    # stream_module = Streamer()
+    # stream_module.register_stream_callback(example_stream_callback)
+    #
+    # # Example file stream operation
+    # with open('example.txt', 'r') as file:
+    #     stream_size = stream_module.stream(file, flags=0)
+    #     print(f"Streamed {stream_size} bytes")
+    #
+    # Streamer.register_stream_functions()
+    # # Call the stream function with appropriate parameters
+    # # self.stream(SF_IN | SF_OUT, stream_callback)
+
+    # Example usage
+    # streamer = Streamer()
+    # with open('example.txt', 'wb') as file_ptr:
+    #     streamer.stream_file(file_ptr, opts=0x00)
 
 
+    # Example usage
+    streamer = Streamer()
+    with open('example.txt', 'wb') as file_ptr:
+        streamer = Streamer(file_ptr, Streamer.SF_OUT)
+        streamer.stream(b"Example binary data")
+
+    with open('example.txt', 'rb') as file_ptr:
+        streamer = Streamer(file_ptr, Streamer.SF_IN)
+        buffer = bytearray(20)  # Buffer size of 20 bytes
+        data_read = streamer.stream(buffer)
+        print(data_read)
 

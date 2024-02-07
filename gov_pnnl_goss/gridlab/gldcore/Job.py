@@ -170,7 +170,7 @@ def job(argc, argv):
     #     print("no models found to process job in workdir '{}'".format(global_workdir))
     #     exit(XC_RUNERR)
     #
-    # n_procs = global_threadcount
+    # n_procs = global_thread_count
     # if n_procs == 0:
     #     n_procs = os.cpu_count()
     # pid = []

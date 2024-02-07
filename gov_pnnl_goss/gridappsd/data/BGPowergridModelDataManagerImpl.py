@@ -830,7 +830,7 @@ class BGPowergridModelDataManagerImpl:
     #             result_objects[subject] = objs
     #
     #         property_name = result.property_name
-    #         obj_value = result.obj
+    #         obj_value = result.self
     #
     #         if property_name == RDF_TYPE:
     #             result_types[subject] = obj_value

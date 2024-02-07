@@ -1,26 +1,7 @@
 from io import BytesIO
-
-import numpy as np
-import copy
 from enum import Enum
 from typing import Union, List
-import math
 import ctypes
-from ctypes import Structure, c_void_p, c_char_p, c_int, c_uint, c_double, c_float
-# import Exception
-
-
-
-# Define constants
-QNAN = math.nan
-
-# Define integer types
-int8 = ctypes.c_int8
-int16 = ctypes.c_int16
-int32 = ctypes.c_int32
-uint16 = ctypes.c_uint16
-uint32 = ctypes.c_uint32
-uint64 = ctypes.c_uint64
 
 
 class Charbuf:
@@ -336,7 +317,7 @@ class FUNCTIONNAME(str):
 
 # set = ctypes.c_uint64
 # enumeration = ctypes.c_uint32
-# object = ctypes.POINTER(CLASS)
+# object = ctypes.POINTER(Class)
 # triplet = (ctypes.c_double * 3)
 # triplex = (ctypes.c_double * 3)
 
@@ -834,50 +815,49 @@ class PROPERTYADDR:
         self.value = value
 
 
-class PROPERTYTYPE(Enum):
-    PT_void = 0
-    PT_double = 1
-    PT_complex = 2
-    PT_enumeration = 3
-    PT_set = 4
-    PT_int16 = 5
-    PT_int32 = 6
-    PT_int64 = 7
-    PT_char8 = 8
-    PT_char32 = 9
-    PT_char256 = 10
-    PT_char1024 = 11
-    PT_object = 12
-    PT_delegated = 13
-    PT_bool = 14
-    PT_timestamp = 15
-    PT_double_array = 16
-    PT_complex_array = 17
-    PT_real = 18
-    PT_float = 19
-    PT_loadshape = 20
-    PT_enduse = 21
-    PT_random = 22
-    PT_method = 23
-    PT_AGGREGATE = -1
-    PT_KEYWORD = -2
-    PT_ACCESS = -3
-    PT_SIZE = -4
-    PT_FLAGS = -5
-    PT_INHERIT = -6
-    PT_UNITS = -7
-    PT_DESCRIPTION = -8
-    PT_EXTEND = -9
-    PT_EXTENDBY = -10
-    PT_DEPRECATED = -32768
-    PT_HAS_NOTIFY = -16384
-    PT_HAS_NOTIFY_OVERRIDE = -8192
-    PT_LAST = 37
-
-    # Define operator++ for PROPERTYTYPE enumeration
-    def _incr_(d) -> Enum:
-        return PROPERTYTYPE(d.value + 1)
-
+# class PROPERTYTYPE(Enum):
+#     PT_void = 0
+#     PT_double = 1
+#     PT_complex = 2
+#     PT_enumeration = 3
+#     PT_set = 4
+#     PT_int16 = 5
+#     PT_int32 = 6
+#     PT_int64 = 7
+#     PT_char8 = 8
+#     PT_char32 = 9
+#     PT_char256 = 10
+#     PT_char1024 = 11
+#     PT_object = 12
+#     PT_delegated = 13
+#     PT_bool = 14
+#     PT_timestamp = 15
+#     PT_double_array = 16
+#     PT_complex_array = 17
+#     PT_real = 18
+#     PT_float = 19
+#     PT_loadshape = 20
+#     PT_enduse = 21
+#     PT_random = 22
+#     PT_method = 23
+#     PT_AGGREGATE = -1
+#     PT_KEYWORD = -2
+#     PT_ACCESS = -3
+#     PT_SIZE = -4
+#     PT_FLAGS = -5
+#     PT_INHERIT = -6
+#     PT_UNITS = -7
+#     PT_DESCRIPTION = -8
+#     PT_EXTEND = -9
+#     PT_EXTENDBY = -10
+#     PT_DEPRECATED = -32768
+#     PT_HAS_NOTIFY = -16384
+#     PT_HAS_NOTIFY_OVERRIDE = -8192
+#     PT_LAST = 37
+#
+#     # Define operator++ for PROPERTYTYPE enumeration
+#     def _incr_(d) -> Enum:
+#         return PROPERTYTYPE(d.value + 1)
 
 
 class PROPERTYTYPE(Enum):
@@ -931,7 +911,14 @@ class PROPERTYTYPE(Enum):
     PT_uint64 = 47
     PT_uint8 = 48
     PT_void = 49
-
+    PT_char8 = 50
+    PT_char32 = 51
+    PT_char64 = 52
+    PT_char128 = 53
+    PT_char256 = 54
+    PT_char1024 = 55
+    PT_double = 56
+    PT_timestamp = 57
 
 
 class DELEGATEDTYPE:
@@ -1096,7 +1083,16 @@ class PROPERTY:
 #         self.description = prop_description
 #         self.flags = flags
 
+class Property:
+    def __init__(self, name, value, next_prop=None):
+        self.name = name
+        self.value = value
+        self.next = next_prop
+        self.method = None  # A callable method on this property
 
+    def data_to_string(self):
+        # This is a placeholder. Actual implementation would depend on property type.
+        return str(self.value)
 
 # class PROPERTY:
 #     def __init__(self, name="", ptype=None, access=0, size=0, flags=[], unit=None, description="",
@@ -1116,7 +1112,7 @@ class PROPERTY:
 
 #
 # # Define property_get_part function
-# def property_get_part(obj, prop: PROPERTY, part: str) -> float:
+# def property_get_part(self, prop: PROPERTY, part: str) -> float:
 #     pass  # Replace with your implementation
 #
 # # Define double_array_create function
@@ -1162,60 +1158,60 @@ property_type = [
 # Returns 0 on failure, 1 on success
 def property_check():
     status = 1
-    for ptype in range(1, len(property_type)):
-        sz = 0
-        if ptype == 1:
-            sz = ctypes.sizeof(c_double)
-        elif ptype == 2:
-            sz = ctypes.sizeof(ctypes.c_double * 2)
-        elif ptype == 3:
-            sz = ctypes.sizeof(ctypes.c_int32)
-        elif ptype == 4:
-            sz = ctypes.sizeof(ctypes.c_int64)
-        elif ptype == 5:
-            sz = ctypes.sizeof(ctypes.c_int16)
-        elif ptype == 6:
-            sz = ctypes.sizeof(ctypes.c_int32)
-        elif ptype == 7:
-            sz = ctypes.sizeof(ctypes.c_int64)
-        elif ptype == 8:
-            sz = ctypes.sizeof(ctypes.c_char * 8)
-        elif ptype == 9:
-            sz = ctypes.sizeof(ctypes.c_char * 32)
-        elif ptype == 10:
-            sz = ctypes.sizeof(ctypes.c_char * 256)
-        elif ptype == 11:
-            sz = ctypes.sizeof(ctypes.c_char * 1024)
-        elif ptype == 12:
-            sz = ctypes.sizeof(ctypes.c_void_p)
-        elif ptype == 13:
-            sz = ctypes.sizeof(ctypes.c_bool)
-        elif ptype == 14:
-            sz = ctypes.sizeof(ctypes.c_int64)
-        elif ptype == 15:
-            sz = ctypes.sizeof(c_double * 1)
-        elif ptype == 16:
-            sz = ctypes.sizeof(c_double * 2)
-        elif ptype == 17:
-            sz = ctypes.sizeof(c_float)
-        elif ptype == 18:
-            sz = ctypes.sizeof(c_float)
-        elif ptype == 19:
-            sz = ctypes.sizeof(loadshape)
-        elif ptype == 20:
-            sz = ctypes.sizeof(enduse)
-        elif ptype == 21:
-            sz = ctypes.sizeof(randomvar_struct)
-
-        print(
-            f"property_check of {property_type[ptype].name.decode('utf-8')}: declared size is {property_type[ptype].size}, actual size is {sz}")
-        if sz > 0 and property_type[ptype].size < sz:
-            status = 0
-            print(
-                f"declared size of property {property_type[ptype].name.decode('utf-8')} smaller than actual size in memory on this platform (declared {property_type[ptype].size}, actual {sz})")
-        elif sz > 0 and property_type[ptype].size != sz:
-            print(
-                f"declared size of property {property_type[ptype].name.decode('utf-8')} does not match actual size in memory on this platform (declared {property_type[ptype].size}, actual {sz})")
+    # for ptype in range(1, len(property_type)):
+    #     sz = 0
+    #     if ptype == 1:
+    #         sz = ctypes.sizeof(c_double)
+    #     elif ptype == 2:
+    #         sz = ctypes.sizeof(ctypes.c_double * 2)
+    #     elif ptype == 3:
+    #         sz = ctypes.sizeof(ctypes.c_int32)
+    #     elif ptype == 4:
+    #         sz = ctypes.sizeof(ctypes.c_int64)
+    #     elif ptype == 5:
+    #         sz = ctypes.sizeof(ctypes.c_int16)
+    #     elif ptype == 6:
+    #         sz = ctypes.sizeof(ctypes.c_int32)
+    #     elif ptype == 7:
+    #         sz = ctypes.sizeof(ctypes.c_int64)
+    #     elif ptype == 8:
+    #         sz = ctypes.sizeof(ctypes.c_char * 8)
+    #     elif ptype == 9:
+    #         sz = ctypes.sizeof(ctypes.c_char * 32)
+    #     elif ptype == 10:
+    #         sz = ctypes.sizeof(ctypes.c_char * 256)
+    #     elif ptype == 11:
+    #         sz = ctypes.sizeof(ctypes.c_char * 1024)
+    #     elif ptype == 12:
+    #         sz = ctypes.sizeof(ctypes.c_void_p)
+    #     elif ptype == 13:
+    #         sz = ctypes.sizeof(ctypes.c_bool)
+    #     elif ptype == 14:
+    #         sz = ctypes.sizeof(ctypes.c_int64)
+    #     elif ptype == 15:
+    #         sz = ctypes.sizeof(c_double * 1)
+    #     elif ptype == 16:
+    #         sz = ctypes.sizeof(c_double * 2)
+    #     elif ptype == 17:
+    #         sz = ctypes.sizeof(c_float)
+    #     elif ptype == 18:
+    #         sz = ctypes.sizeof(c_float)
+    #     elif ptype == 19:
+    #         sz = ctypes.sizeof(loadshape)
+    #     elif ptype == 20:
+    #         sz = ctypes.sizeof(enduse)
+    #     elif ptype == 21:
+    #         sz = ctypes.sizeof(randomvar_struct)
+    #
+    #     print(
+    #         f"property_check of {property_type[ptype].name.decode('utf-8')}: declared size is {property_type[ptype].size}, actual size is {sz}")
+    #     if sz > 0 and property_type[ptype].size < sz:
+    #         status = 0
+    #         print(
+    #             f"declared size of property {property_type[ptype].name.decode('utf-8')} smaller than actual size in memory on this platform (declared {property_type[ptype].size}, actual {sz})")
+    #     elif sz > 0 and property_type[ptype].size != sz:
+    #         print(
+    #             f"declared size of property {property_type[ptype].name.decode('utf-8')} does not match actual size in memory on this platform (declared {property_type[ptype].size}, actual {sz})")
 
     return status
 
@@ -1346,3 +1342,16 @@ def property_size(prop: PROPERTY) -> int:
 #     return math.nan
 
 # Rest of the functions that are not provided or are dependent on other code are commented out.
+
+# class Property:
+#     def __init__(self, value, name, type, size, offset, attributes, extra1, extra2, function1, function2):
+#         self.value = value
+#         self.name = name
+#         self.type = type
+#         self.size = size
+#         self.offset = offset
+#         self.attributes = attributes
+#         self.extra1 = extra1
+#         self.extra2 = extra2
+#         self.function1 = function1
+#         self.function2 = function2

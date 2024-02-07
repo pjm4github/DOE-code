@@ -1,12 +1,19 @@
+
+
 import os
+from time import time
 from enum import Enum
 import sys
 import ctypes
 from gov_pnnl_goss.gridlab.gldcore.Class import Class
 from gov_pnnl_goss.gridlab.gldcore.Cmex import object_set_value_by_name
-from gov_pnnl_goss.gridlab.gldcore.Convert import output_error
-from gov_pnnl_goss.gridlab.gldcore.Globals import global_setvar, FAILED, global_find
+from gov_pnnl_goss.gridlab.gldcore.Convert import output_error, convert_from_timestamp, object_find_name
+from gov_pnnl_goss.gridlab.gldcore.Globals import FAILED, global_find, SUCCESS
 from gov_pnnl_goss.gridlab.gldcore.Output import output_verbose, output_warning, output_error_raw
+from gov_pnnl_goss.gridlab.gldcore.GridLabD import global_getvar, global_setvar
+from gov_pnnl_goss.gridlab.gldcore.Object import convert_from_latitude, convert_from_longitude, Object, object_name
+from gridlab.gldcore.Environment import server_startup
+from gridlab.gldcore.Find import Find
 
 
 class GUIENTITYTYPE(Enum):
@@ -34,6 +41,36 @@ class GUIENTITYTYPE(Enum):
     _GUI_ACTION_END = 21
 
 
+class GUIENTITY:
+    def __init__(self):
+        self.type = None  # Instance of GUIENTITYTYPE
+        self.srcref = ""
+        self.value = ""
+        self.globalname = ""
+        self.objectname = ""
+        self.propertyname = ""
+        self.action = ""
+        self.span = 0
+        self.size = 0
+        self.height = 0
+        self.width = 0
+        self.action_status = None  # Instance of GUIACTIONSTATUS
+        self.wait_for = ""
+        self.source = ""
+        self.options = ""
+        self.gnuplot = ""
+        self.hold = 0
+        self.next = None  # Could be another instance of GUIENTITY or None
+        self.parent = None  # Could be another instance of GUIENTITY or None
+        # Internal variables
+        self.var = None  # Instance of GLOBALVAR or None
+        self.env = None  # Environmental variables, represented as a string or None
+        self.obj = None  # Instance of OBJECT or None
+        self.prop = None  # Instance of PROPERTY or None
+        self.data = None  # Can be any type, depending on the usage context
+        self.unit = None  # Instance of UNIT or None
+
+
 class GUIACTIONSTATUS(Enum):
     GUIACT_NONE = 0
     GUIACT_WAITING = 1
@@ -46,12 +83,25 @@ class GUIStreamFn:
         pass
 
 
+MAX_TABLES = 16
+table=-1
+row = ["" * MAX_TABLES]
+col= ["" * MAX_TABLES]
+span= ["" * MAX_TABLES]
+TABLEOPTIONS = " border=0 CELLPADDING=0 CELLSPACING=0"
 
 
-class GUIEntity:
+class GuiEntity:
+    """
+    This class represents a GUI entity and provides methods to manipulate GUI entities and generate HTML output.
+    """
     gui_root = None
     gui_last = None
     def __init__(self):
+        self._gui_root = None
+        self._gui_last = None
+        self._fp = None
+        self._wait_status = "GUIACT_NONE"
         self.action = ""
         self.action_status = GUIACTIONSTATUS.GUIACT_NONE
         self.data = None
@@ -80,6 +130,7 @@ class GUIEntity:
         self.wait_status = GUIACTIONSTATUS.GUIACT_NONE
         self.width = 0
 
+
     def gui_default_stream(self, ref, format, *args):
         if ref is None:
             ref = sys.stdout
@@ -91,8 +142,11 @@ class GUIEntity:
         return len
 
     def gui_set_html_stream(self, ref, stream):
-        gui_html_output = stream
-        fp = ref
+        self.gui_html_output = stream
+        self.fp = ref
+
+    def gui_html_output(self, fp, content):
+        print(content, file=fp)  # Assuming a simple print to a file or stdout for demonstration
 
     def gui_get_root(self):
         return self.gui_root
@@ -101,18 +155,17 @@ class GUIEntity:
         return self.gui_last
 
     def gui_create_entity(self):
-        entity = gui_last
+        entity = self.gui_last
         if entity is None or entity.type != GUIENTITYTYPE.GUI_UNKNOWN:
             entity = GUIENTITY()
         if entity is None:
             return None
-        entity = GUIENTITY()
-        memset(entity, 0, sizeof(GUIENTITY))
-        if gui_root is None:
-            gui_root = entity
-        if gui_last is not None:
-            gui_last.next = entity
-        gui_last = entity
+        # entity = GUIENTITY()
+        if self.gui_root is None:
+            self.gui_root = entity
+        if self.gui_last is not None:
+            self.gui_last.next = entity
+        self.gui_last = entity
         return entity
 
     def gui_get_type(self, entity):
@@ -264,38 +317,38 @@ class GUIEntity:
         return entity.next
 
     def gui_get_value(self, entity):
-        obj = gui_get_object(entity)
-        buffer = [64]
+        obj = self.gui_get_object(entity)
+        buffer = ""
         if obj:
-            if entity.property_name == "name":
+            if entity.propertyname == "name":
                 entity.value = object_name(obj, buffer, 63)
-            elif entity.property_name == "class":
+            elif entity.propertyname == "class":
                 entity.value = obj.oclass.name
-            elif entity.property_name == "parent":
+            elif entity.propertyname == "parent":
                 entity.value = object_name(obj.parent, buffer, 63) if obj.parent else ""
-            elif entity.property_name == "rank":
+            elif entity.propertyname == "rank":
                 entity.value = str(obj.rank)
-            elif entity.property_name == "clock":
-                convert_from_timestamp(obj.clock, entity.value, len(entity.value))
-            elif entity.property_name == "valid_to":
-                convert_from_timestamp(obj.valid_to, entity.value, len(entity.value))
-            elif entity.property_name == "in_svc":
-                convert_from_timestamp(obj.in_svc, entity.value, len(entity.value))
-            elif entity.property_name == "out_svc":
-                convert_from_timestamp(obj.out_svc, entity.value, len(entity.value))
-            elif entity.property_name == "latitude":
-                convert_from_latitude(obj.latitude, entity.value, len(entity.value))
-            elif entity.property_name == "longitude":
-                convert_from_longitude(obj.longitude, entity.value, len(entity.value))
-            elif not object_get_value_by_name(obj, entity.property_name, entity.value, len(entity.value)):
-                output_error_raw("%s: ERROR: %s refers to a non-existent property '%s'", entity.srcref,
-                                 gui_get_typename(entity), entity.property_name)
-        elif gui_get_variable(entity):
-            entity.var = global_find(entity.global_name)
-            global_getvar(entity.global_name, entity.value, len(entity.value))
-        elif gui_get_environment(entity):
+            elif entity.propertyname == "clock":
+                entity.value = convert_from_timestamp(obj.clock)
+            elif entity.propertyname == "valid_to":
+                entity.value = convert_from_timestamp(obj.valid_to)
+            elif entity.propertyname == "in_svc":
+                entity.value = convert_from_timestamp(obj.in_svc)
+            elif entity.propertyname == "out_svc":
+                entity.value = convert_from_timestamp(obj.out_svc)
+            elif entity.propertyname == "latitude":
+                entity.value = convert_from_latitude(obj.latitude)
+            elif entity.propertyname == "longitude":
+                entity.value = convert_from_longitude(obj.longitude)
+            elif not Object().object_get_value_by_name(obj, entity.propertyname, entity.value):
+                output_error_raw("{}: ERROR: {} refers to a non-existent property '{}'".format(entity.srcref, self.gui_get_typename(entity), entity.propertyname))
+        elif self.gui_get_variable(entity):
+            entity.var = global_find(entity.globalname)
+            entity.value = global_getvar(entity.globalname)
+        elif self.gui_get_environment(entity):
             entity.value = entity.env
         return entity.value
+
 
     def gui_get_object(self, entity):
         if not entity.obj:
@@ -306,7 +359,7 @@ class GUIEntity:
         if entity.prop == None:
             if self.gui_get_object(entity):
                 entity.prop = Class.class_find_property(entity.obj.oclass, entity.propertyname)
-            elif gui_get_variable(entity):
+            elif self.gui_get_variable(entity):
                 entity.prop = entity.var.prop
         return entity.prop
 
@@ -314,7 +367,7 @@ class GUIEntity:
         if self.gui_get_object(entity):
             buffer = "{}.{}".format(entity.objectname, entity.propertyname)
             return buffer
-        elif gui_get_variable(entity):
+        elif self.gui_get_variable(entity):
             return entity.var.prop.name
         else:
             return ""
@@ -322,7 +375,7 @@ class GUIEntity:
     def gui_get_data(self, entity):
         if entity.data is None:
             if self.gui_get_object(entity):
-                entity.data = object_get_addr(entity.obj, entity.propertyname)
+                entity.data = Object.object_get_addr(entity.obj, entity.propertyname)
             elif self.gui_get_variable(entity):
                 entity.data = entity.var.prop.addr
             else:
@@ -356,40 +409,38 @@ class GUIEntity:
         return 0
 
     def gui_cmd_entity(self, item, entity):
-        gui_type = entity.type
-        if gui_type == GUIENTITYTYPE.GUI_TITLE:
-            print(self.gui_get_value(entity), end=' ')
-        elif gui_type == GUIENTITYTYPE.GUI_STATUS:
+        self.gui_type = entity.type
+        if self.gui_type == GUIENTITYTYPE.GUI_TITLE:
+            print("%s " % self.gui_get_value(entity))
+        elif self.gui_type == GUIENTITYTYPE.GUI_STATUS:
             pass
-        elif gui_type == GUIENTITYTYPE.GUI_ROW:
+        elif self.gui_type == GUIENTITYTYPE.GUI_ROW:
             if item > 0:
-                print("\n%2d. " % item, end='')
+                print("\n%2d. " % item)
             return 1
-        elif gui_type == GUIENTITYTYPE.GUI_TAB:
+        elif self.gui_type == GUIENTITYTYPE.GUI_TAB:
             pass
-        elif gui_type == GUIENTITYTYPE.GUI_PAGE:
+        elif self.gui_type == GUIENTITYTYPE.GUI_PAGE:
             pass
-        elif gui_type == GUIENTITYTYPE.GUI_GROUP:
+        elif self.gui_type == GUIENTITYTYPE.GUI_GROUP:
             pass
-        elif gui_type == GUIENTITYTYPE.GUI_SPAN:
+        elif self.gui_type == GUIENTITYTYPE.GUI_SPAN:
             pass
-        elif gui_type == GUIENTITYTYPE.GUI_TEXT:
-            print(self.gui_get_value(entity), end=' ')
-        elif gui_type == GUIENTITYTYPE.GUI_INPUT:
-            print("[%s] " % self.gui_get_value(entity), end='')
-        elif gui_type == GUIENTITYTYPE.GUI_CHECK:
-            print("[%s] " % self.gui_get_value(entity), end='')
-        elif gui_type == GUIENTITYTYPE.GUI_RADIO:
-            print("[%s] " % self.gui_get_value(entity), end='')
-        elif gui_type == GUIENTITYTYPE.GUI_SELECT:
-            print("[%s] " % self.gui_get_value(entity), end='')
-        elif gui_type == GUIENTITYTYPE.GUI_ACTION:
+        elif self.gui_type == GUIENTITYTYPE.GUI_TEXT:
+            print("%s " % self.gui_get_value(entity))
+        elif self.gui_type == GUIENTITYTYPE.GUI_INPUT:
+            print("[%s] " % self.gui_get_value(entity))
+        elif self.gui_type == GUIENTITYTYPE.GUI_CHECK:
+            print("[%s] " % self.gui_get_value(entity))
+        elif self.gui_type == GUIENTITYTYPE.GUI_RADIO:
+            print("[%s] " % self.gui_get_value(entity))
+        elif self.gui_type == GUIENTITYTYPE.GUI_SELECT:
+            print("[%s] " % self.gui_get_value(entity))
+        elif self.gui_type == GUIENTITYTYPE.GUI_ACTION:
             pass
         else:
             pass
         return 0
-
-        pass
 
     def gui_cmd_prompt(self, parent):
         buffer = [1024]
@@ -469,109 +520,112 @@ class GUIEntity:
     def newrow(self, entity):
         global table, row, col
         if table < 0:
-            self.new_table(entity)
+            self.entity.newtable()
         if row[table] == 0:
-            self.gui_html_output(fp,
+            self.gui_html_output(self.fp,
                             "\t<table" + TABLEOPTIONS + "> <!-- table %d %s -->\n" % (table, self.gui_get_typename(entity)))
         if col[table] > 0:
-            self.gui_html_output(fp, "\t</td> <!-- table %d col %d -->\n" % (table, col[table]))
+            self.gui_html_output(self.fp, "\t</td> <!-- table %d col %d -->\n" % (table, col[table]))
         col[table] = 0
         if row[table] > 0:
-            self.gui_html_output(fp, "\t</tr> <!--  table %d row %d -->\n" % (table, row[table]))
+            self.gui_html_output(self.fp, "\t</tr> <!--  table %d row %d -->\n" % (table, row[table]))
         row[table] += 1
-        self.gui_html_output(fp, "\t<tr> <!-- row %d -->\n" % row[table])
+        self.gui_html_output(self.fp, "\t<tr> <!-- row %d -->\n" % row[table])
 
     def newcol(self, entity):
         if self.span[table] > 0:
             return
         if table < 0 or row[table] == 0:
-            self.new_row(entity)
+            entity.newrow()
         if col[table] > 0:
-            self.gui_html_output(fp, f"\t</td> <!-- table {table} col {col[table]} -->\n")
+            self.gui_html_output(self.fp, f"\t</td> <!-- table {table} col {col[table]} -->\n")
         col[table] += 1
         if entity.type == GUIENTITYTYPE.GUI_SPAN:
-            self.gui_html_output(fp, f"\t<td colspan=\"{entity.size}\"> <!-- table {table} col {col[table]} -->\n")
+            self.gui_html_output(self.fp, f"\t<td colspan=\"{entity.size}\"> <!-- table {table} col {col[table]} -->\n")
             if entity.size == 0:
                 output_warning(
                     f"{entity.srcref}: not all browsers accept span size 0 (meaning to end), span size may not work as expected")
         else:
-            self.gui_html_output(fp, f"\t<td> <!-- table {table} col {col[table]} -->\n")
+            self.gui_html_output(self.fp, f"\t<td> <!-- table {table} col {col[table]} -->\n")
 
     def end_table(self, fp, table, col, row):
         if table < 0:
             return
         if col[table] > 0:
-            self.gui_html_output(fp, "\t</td> <!-- table %d col %d -->\n" % (table, col[table]))
+            self.gui_html_output(self.fp, "\t</td> <!-- table %d col %d -->\n" % (table, col[table]))
         if row[table] > 0:
-            self.gui_html_output(fp, "\t</tr> <!-- table %d row %d -->\n" % (table, row[table]))
-        self.gui_html_output(fp, "\t</table> <!-- table %d -->\n" % (table,))
+            self.gui_html_output(self.fp, "\t</tr> <!-- table %d row %d -->\n" % (table, row[table]))
+        self.gui_html_output(self.fp, "\t</table> <!-- table %d -->\n" % (table,))
         table -= 1
+
 
     def gui_output_html_textarea(self, entity):
         src = open(entity.source, "r")
-        buffer = bytearray(65536)
-        len = 0
+
         rows = ""
         cols = ""
         if entity.height > 0:
             rows = " rows=\"{}\"".format(entity.height)
         if entity.width > 0:
             cols = " cols=\"{}\"".format(entity.width)
-        self.gui_html_output(fp, "<textarea class=\"browse\"{}{} >\n".format(rows, cols))
-        if src is None:
-            self.gui_html_output(fp, "***'{}' is not found: {}***".format(entity.source, strerror(errno)))
+
+        self.gui_html_output(self.fp, "<textarea class=\"browse\"%s%s >\n" % (rows, cols))
+
+        if src == None:
+            self.gui_html_output(self.fp, "***'%s' is not found: %s***" % (entity.source, "Source Not Found" ))
             return
         buffer = src.read(65536)
-        if len < 0:
-            self.gui_html_output(fp, "***'{}' read failed: {}***".format(entity.source, strerror(errno)))
-        elif len < 65536:
-            buffer[len] = '\0'
-            self.gui_html_output(fp, "{}".format(buffer))
-        if len >= 65536:
-            self.gui_html_output(fp, "\n***file truncated***")
-        self.gui_html_output(fp, "</textarea>\n")
+
+        if len(buffer) == 0:
+            self.gui_html_output(self.fp, "***'{}' read failed: {}***".format(entity.source, "File Size"))
+        elif len(buffer) < 65536:
+            self.gui_html_output(self.fp, "{}".format(buffer))
+        if len(buffer) >= 65536:
+            self.gui_html_output(self.fp, "{}\n***file truncated***".format(buffer[0:65536]))
+        self.gui_html_output(self.fp, "</textarea>\n")
 
     def gui_output_html_table(self, entity):
         src = open(entity.source, "r")
-        line = [65536]
+        line = ' ' * 65536
         row = 0
         col = 0
-        header = [1024]
-        self.gui_html_output(fp, "<table class=\"%s\">\n" % entity.options)
+        header = ' ' * 1024
+        self.gui_html_output(self.fp, "<table class=\"%s\">\n" % entity.options)
         if src == None:
-            self.gui_html_output(fp, "***'%s' is not found: %s***", entity.source, strerror(errno))
-            self.gui_html_output(fp, "</table>\n")
+            self.gui_html_output(self.fp, "***'%s' is not found: %s***", entity.source, "File Not Opened")
+            self.gui_html_output(self.fp, "</table>\n")
             return
         while line := src.readline() is not None:
-            if eol := line.find('\n'):
-                line[eol] = '\0'
-            if line[0] == '#':
-                pass
-            else:
-                p = None
+            try:
+                if eol := line.find('\n'):
+                    line[eol] = '\0'
+                if line[0] == '#':
+                    pass
+                else:
+                    p = None
 
-                if row == 0:
-                    pass
-                row += 1
-                if entity.height == 0 || row <= entity.height:
-                    pass
-            if ferror(src):
-                self.gui_html_output(fp, "<tr><td>ERROR: %s</td></tr>\n" % strerror(errno))
-        self.gui_html_output(fp, "</table>\n")
+                    if row == 0:
+                        pass
+                    row += 1
+                    if entity.height == 0 or row <= entity.height:
+                        pass
+            except ValueError as e:
+                self.gui_html_output(self.fp, "<tr><td>ERROR: %s</td></tr>\n" % e)
+        self.gui_html_output(self.fp, "</table>\n")
 
     def gui_output_html_graph(self, entity):
         script = f"{entity.source}.plt"
         command = f"gnuplot {script}"
         image = f"{entity.source}.png"
-        height = ""
-        width = ""
+        height = f" height=\"{entity.height}\"" if entity.height > 0 else ""
+        width = f" width=\"{entity.width}\"" if entity.width > 0 else ""
         if entity.width > 0:
             width = f" width=\"{entity.width}\""
         if entity.height > 0:
             height = f" height=\"{entity.height}\""
         with open(script, "w") as plot:
             if not plot:
-                self.gui_html_output(fp, "<span class=\"error\">Unable to run gnuplot</span>\n")
+                self.gui_html_output(self.fp, "<span class=\"error\">Unable to run gnuplot</span>\n")
                 return
             if entity.gnuplot == "":
                 if entity.width > 0 and entity.height > 0:
@@ -582,21 +636,23 @@ class GUIEntity:
                 plot.write("set key off\n")
                 plot.write("set datafile separator \",\"\n")
                 plot.write("set xdata time\n")
-                plot.write("set timefmt '%%Y-%%m-%%d %%H:%%M:%%S'\n")
-                plot.write("set format x '%%H:%%M'\n")
-                plot.write("set xlabel 'Time'\n")
+                plot.write("set timefmt \"%%Y-%%m-%%d %%H:%%M:%%S\"\n")
+                plot.write("set format x \"%%H:%%M\"\n")
+                plot.write("set xlabel \"Time\"\n")
                 if entity.unit:
                     plot.write(f"set ylabel '{entity.unit.name}'\n")
                 plot.write(f"plot '{entity.source}' using 1:2\n")
             else:
                 plot.write(entity.gnuplot)
+
         if os.system(command) == 0:
-            self.gui_html_output(fp, f"<img src=\"/output/{image}\" alt=\"{entity.source}\"{height}{width}/>\n")
+            self.gui_html_output(self.fp, f"<img src=\"/output/{image}\" alt=\"{entity.source}\"{height}{width}/>\n")
         else:
-            self.gui_html_output(fp, "<span class=\"error\">Unable to run gnuplot</span>\n")
+            self.gui_html_output(self.fp, "<span class=\"error\">Unable to run gnuplot</span>\n")
+
 
     def gui_html_source_page(self, source):
-        buffer = bytearray(65536)
+        buffer = ""
         src = open(source, 'rt')
         if src is None:
             return 0
@@ -604,60 +660,109 @@ class GUIEntity:
             data = src.readinto(buffer)
             if data == 0:
                 break
-            buffer[data] = 0
-            self.gui_html_output(fp, "%s", buffer)
+            buffer = ""
+            self.gui_html_output(self.fp, "%s", buffer)
         src.close()
         return 1
 
     def gui_entity_html_content(self, entity):
-        ptype = Class.class_get_property_typename(entity.prop.ptype) if entity.prop else ""
-        if entity.type == GUIENTITYTYPE.GUI_PAGE:
+        ptype = self.gui_get_property(entity).class_get_property_typename() if self.gui_get_property(entity) else ""
+
+        if entity.type ==  GUIENTITYTYPE.GUI_PAGE:
             if entity.source and not self.gui_html_source_page(entity.source):
-                self.gui_html_output(fp, "ERROR: page '%s' not found: %s", entity.source,
-                                strerror(errno))
+                self.gui_html_output(self.fp, f"ERROR: page '{entity.source}' not found")
+
         elif entity.type == GUIENTITYTYPE.GUI_TITLE:
-            if entity.parent == None:
-                self.gui_html_output(fp, "<title>%s</title>\n" % self.gui_get_value(entity))
+            if entity.parent is None:
+                self.gui_html_output(self.fp, f"<title>{entity.value}</title>\n")
             elif entity.parent.type == GUIENTITYTYPE.GUI_GROUP:
-                self.gui_html_output(fp, "<legend>%s</legend>\n" % self.gui_get_value(entity))
+                self.gui_html_output(self.fp, f"<legend>{entity.value}</legend>\n")
             else:
-                self.gui_html_output(fp, "<h%d>%s</h%d>\n" % (table + 1, self.gui_get_value(entity), table + 1))
+                # Assuming 'table' is defined elsewhere, and handling it accordingly
+                self.gui_html_output(self.fp, f"<h{table + 1}>{entity.value}</h{table + 1}>\n")
+
         elif entity.type == GUIENTITYTYPE.GUI_STATUS:
-            self.gui_html_output(fp, "<script lang=\"jscript\"> window.status=\"%s\";</script>\n" % self.gui_get_value(entity))
+            self.gui_html_output(self.fp, f'<script lang="jscript"> window.status="{entity.value}";</script>\n')
+
         elif entity.type == GUIENTITYTYPE.GUI_TEXT:
-            if entity.parent == None or self.gui_get_type(entity.parent) != GUIENTITYTYPE.GUI_SPAN:
-                self.newcol(entity)
-            self.gui_html_output(fp, "<span class=\"text\">%s</span>\n" % self.gui_get_value(entity))
+            if not entity.parent or self.gui_get_type(entity.parent) != "GUI_SPAN":
+                entity.newcol()
+            self.gui_html_output(self.fp, f'<span class="text">{entity.value}</span>\n')
+
         elif entity.type == GUIENTITYTYPE.GUI_INPUT:
-            if entity.parent == None or self.gui_get_type(entity.parent) != GUIENTITYTYPE.GUI_SPAN:
-                self.newcol(entity);
-            self.gui_html_output(fp,
-                            "<input class=\"%s\" type=\"text\" name=\"%s\" value=\"%s\" onchange=\"update_%s(this)\"/>\n" % (
-                            ptype, self.gui_get_name(entity), self.gui_get_value(entity), ptype))
+            if not entity.parent or self.gui_get_type(entity.parent) != "GUI_SPAN":
+                entity.newcol()
+            self.gui_html_output(self.fp,
+                            f'<input class="{ptype}" type="text" name="{self.gui_get_name(entity)}" value="{self.gui_get_value(entity)}" onchange="update_{ptype}(this)" />\n')
+
         elif entity.type == GUIENTITYTYPE.GUI_CHECK:
             prop = self.gui_get_property(entity)
-            key = None
-            if entity.parent == None or self.gui_get_type(entity.parent) != GUIENTITYTYPE.GUI_SPAN:
-                self.newcol(entity);
-            key = prop.keywords
-            if entity.var and global_setvar(entity.globalname, buffer) == FAILED:
-                self.gui_html_output(fp, "Invalid input, try again.\n")
-                # goto(Retry)
-            else:
-                entity.env
-        else:
-            pass
+            if not entity.parent or self.gui_get_type(entity.parent) != "GUI_SPAN":
+                entity.newcol()
+            for key in prop.keywords:
+                value = self.gui_get_data(entity)
+                checked = "checked" if value == key.value else ""
+                label = key.name.replace('_', ' ').capitalize()
+                self.gui_html_output(self.fp,
+                                f'<nobr><input class="{ptype}" type="checkbox" name="{self.gui_get_name(entity)}" value="{key.value}" {checked} onchange="update_{ptype}(this)" />{label}</nobr>\n')
+
+        elif entity.type == GUIENTITYTYPE.GUI_RADIO:
+            prop = self.gui_get_property(entity)
+            if not entity.parent or self.gui_get_type(entity.parent) != "GUI_SPAN":
+                entity.newcol()
+            for key in prop.keywords:
+                value = self.gui_get_data(entity)
+                checked = "checked" if value == key.value else ""
+                label = key.name.replace('_', ' ').capitalize()
+                self.gui_html_output(self.fp,
+                                f'<nobr><input class="{ptype}" type="radio" name="{self.gui_get_name(entity)}" value="{key.value}" {checked} onchange="update_{ptype}(this)" />{label}</nobr>\n')
+
+        elif entity.type == GUIENTITYTYPE.GUI_SELECT:
+            prop = self.gui_get_property(entity)
+            multiple = "multiple" if prop.ptype == "PT_set" else ""
+            size = f'size="{entity.size}"' if entity.size > 0 else ""
+            if not entity.parent or self.gui_get_type(entity.parent) != "GUI_SPAN":
+                entity.newcol()
+            self.gui_html_output(self.fp,
+                            f'<select class="{ptype}" name="{self.gui_get_name(entity)}" {multiple} {size} onchange="update_{ptype}(this)">\n')
+            for key in prop.keywords:
+                value = self.gui_get_data(entity)
+                selected = "selected" if value == key.value else ""
+                label = key.name.replace('_', ' ').capitalize()
+                self.gui_html_output(self.fp, f'<option value="{key.value}" {selected}>{label}</option>\n')
+            self.gui_html_output(self.fp, '</select>\n')
+
+        elif entity.type == GUIENTITYTYPE.GUI_BROWSE:
+            if not entity.parent or self.gui_get_type(entity.parent) != "GUI_SPAN":
+                entity.newcol()
+            self.gui_output_html_textarea(entity)
+
+        elif entity.type == GUIENTITYTYPE.GUI_TABLE:
+            if not entity.parent or self.gui_get_type(entity.parent) != "GUI_SPAN":
+                entity.newcol()
+            self.gui_output_html_table(entity)
+
+        elif entity.type == GUIENTITYTYPE.GUI_GRAPH:
+            if not entity.parent or self.gui_get_type(entity.parent) != "GUI_SPAN":
+                entity.newcol()
+            self.gui_output_html_graph(entity)
+
+        elif entity.type == GUIENTITYTYPE.GUI_ACTION:
+            if not entity.parent or self.gui_get_type(entity.parent) != "GUI_SPAN":
+                entity.newcol()
+            self.gui_html_output(self.fp,
+                            f'<input class="action" type="submit" name="action" value="{entity.action}" onclick="click(this)" />\n')
 
     def gui_entity_html_open(self, entity):
         if entity.type == GUIENTITYTYPE.GUI_TAB:
             pass
         elif entity.type == GUIENTITYTYPE.GUI_GROUP:
-            new_col(entity)
-            self.gui_html_output(fp, "<fieldset>\n")
-            new_table(entity)
+            entity.newcol()
+            self.gui_html_output(self.fp, "<fieldset>\n")
+            entity.newtable()
         elif entity.type == GUIENTITYTYPE.GUI_SPAN:
-            new_col(entity)
-            start_span()
+            entity.newcol()
+            entity.start_span()
         else:
             pass
         self.gui_entity_html_content(entity)
@@ -665,14 +770,14 @@ class GUIEntity:
     def gui_entity_html_close(self, entity):
         entity_type = entity.type
         if entity_type == GUIENTITYTYPE.GUI_ROW:
-            new_row(entity)
+            entity.newrow()
         elif entity_type == GUIENTITYTYPE.GUI_TAB:
             pass
         elif entity_type == GUIENTITYTYPE.GUI_GROUP:
             self.end_table()
-            self.gui_html_output(fp, "</fieldset>\n")
+            self.gui_html_output(self.fp, "</fieldset>\n")
         elif entity_type == GUIENTITYTYPE.GUI_SPAN:
-            self.end_span()
+            entity.end_span()
         else:
             pass
 
@@ -687,17 +792,18 @@ class GUIEntity:
         if entity is not None:
             self.gui_entity_html_close(entity)
 
-    def gui_include_element(self, tag, options, file):
-        path = [1024]
-        if not find_file(file, None, R_OK, path, sizeof(path)):
+
+    def gui_include_element(self, file):
+        path = ""
+        if not Find.find_file(file, None, path):
             output_error("unable to find '%s'", file)
         else:
             fin = open(path, "r")
             if not fin:
                 output_error("unable to open '%s'", path[0])
             else:
-                buffer = [65536]
-                len_ = fin.read(buffer, sizeof(buffer))
+                buffer = fin.read(65536)
+                len_= len(buffer)
                 if len_ >= 0:
                     pass
                 else:
@@ -710,45 +816,77 @@ class GUIEntity:
             for entity in self.gui_get_root():
                 if entity is not None and page == entity.value:
                     return self.gui_html_source_page(entity.source)
-        len_output += self.gui_html_output(fp, "<html>\n<head>\n")
+        len_output += self.gui_html_output(self.fp, "<html>\n<head>\n")
         for entity in self.gui_get_root():
             if entity is not None and self.gui_is_header(entity):
                 self.gui_entity_html_content(entity)
-        len_output += self.gui_html_output(fp, "</head>\n")
+        len_output += self.gui_html_output(self.fp, "</head>\n")
         self.gui_include_element("script", "lang=\"jscript\"", "gridlabd.js")
         self.gui_include_element("style", None, "gridlabd.css")
-        len_output += self.gui_html_output(fp, "<body>\n")
+        len_output += self.gui_html_output(self.fp, "<body>\n")
         self.gui_html_output_children(None)
         self.endtable()
-        len_output += self.gui_html_output(fp, "</body>\n</html>\n")
+        len_output += self.gui_html_output(self.fp, "</body>\n</html>\n")
         return len_output
 
     def gui_html_output_all(self):
-        count = 0
-        entity = None
-        if self.gui_root == None:
-            return 0
-        self.gui_html_output(fp, "gui {\n")
-        for entity in self.gui_get_root():
-            if entity.parent == None:
-                count += self.gui_glm_write(fp, entity, 1)
-        count += self.gui_html_output(fp, "}\n")
-        return count
+        entity = self.gui_get_root()
 
-    def gui_startup(self, argc, argv):
-        started = 0
-        cmd = ""
+        self.gui_html_output(self.fp,"<html>\n<head>\n")
+        while entity is not None:
+            if self.gui_is_header(entity):
+                self.gui_entity_html_content(entity)
+            entity = entity.next
+
+        self.gui_html_output(self.fp,"</head>\n")
+
+        self.gui_include_element("script","lang=\"jscript\"","gridlabd.js")
+        self.gui_include_element("style",None,"gridlabd.css")
+
+        self.gui_html_output(self.fp,"<body>\n")
+        self.gui_html_output_children(None)
+        self.endtable()
+        self.gui_html_output(self.fp,"</body>\n</html>\n")
+        return SUCCESS
+
+
+    # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
+    def gui_glm_typename(type):
+        type_name = [
+            None, "row", "tab", "page", "group", "span", None,
+            "title", "status", "text", None,
+            "input", "check", "radio", "select", "action", None,
+            "browse", "table", "graph", None,
+            None,
+        ]
+        if type >= 0 or type < len(type_name):
+            return type_name[type]
+        else:
+            return None
+
+
+    # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
+    import os
+
+    started = 0
+
+    def gui_startup(self):
+        global started
         if started:
             return "SUCCESS"
+
+        if os.name == "nt":
+            cmd = f"start {os.environ['BROWSER']} http://"
         else:
-            cmd = "%s http:" % ("start" if sys.platform.system() == "Windows" else "")
-            if os.system(cmd) != 0:
-                output_error("unable to start interface")
-                return "FAILED"
-            else:
-                output_verbose("starting interface")
-                started = 1
-                return "SUCCESS"
+            cmd = f"{os.environ['BROWSER']} http:"
+
+        if os.system(cmd) != 0:
+            output_error("unable to start interface")
+            return "FAILED"
+        else:
+            output_verbose("starting interface")
+            started = 1
+            return "SUCCESS"
 
     def gui_wait(self):
         if server_startup(0, None) == FAILED:
@@ -761,7 +899,7 @@ class GUIEntity:
             return 1
         wait_status = GUIACTIONSTATUS.GUIACT_WAITING
         while wait_status == GUIACTIONSTATUS.GUIACT_WAITING:
-            exec_sleep(250000)
+            time.sleep(250000)
         if wait_status == GUIACTIONSTATUS.GUIACT_HALT:
             return 0
         wait_status = GUIACTIONSTATUS.GUIACT_NONE

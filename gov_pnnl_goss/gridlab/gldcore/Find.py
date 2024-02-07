@@ -42,6 +42,13 @@ class FindType(Enum):
     FT_GROUPID = 15
     FT_ISA = 16
 
+def FL_NEW(fl_new):
+    return fl_new(0)
+
+def FL_GROUP(lg_grp):
+    return lg_grp(-1)
+
+
 class FindValue:
     def __init__(self, value: Union[int, float, str]):
         self.value = value
@@ -61,22 +68,23 @@ class FoundAction:
         pass
 
 class PgmConstFlags(Enum):
-    CF_SIZE = 0x0001
-    CF_ID = 0x0002
-    CF_CLASS = 0x0004
-    CF_RANK = 0x0008
-    CF_CLOCK = 0x0010
-    CF_PARENT = 0x0020
-    CF_PROPERTY = 0x0040
-    CF_NAME = 0x0080
-    CF_LAT = 0x0100
-    CF_LONG = 0x0200
-    CF_INSVC = 0x0400
-    CF_OUTSVC = 0x0800
-    CF_FLAGS = 0x1000
-    CF_MODULE = 0x2000
-    CF_GROUPID = 0x4000
-    CF_CONSTANT = 0x8000
+    CF_SIZE = 0x0001  # size criteria is invariant
+    CF_ID = 0x0002  # id criteria is invariant
+    CF_CLASS = 0x0004  # class criteria is invariant
+    CF_RANK = 0x0008  # rank criteria is invariant
+    CF_CLOCK = 0x0010  # clock criteria is variant
+    CF_PARENT = 0x0020  # parent criteria is invariant
+    CF_PROPERTY = 0x0040  # property criteria is variant
+    CF_NAME = 0x0080  # name criteria is invariant
+    CF_LAT = 0x0100  # latitude criteria is invariant
+    CF_LONG = 0x0200  # longitude criteria is invariant
+    CF_INSVC = 0x0400  # in-service criteria is invariant
+    CF_OUTSVC = 0x0800  # out-service criteria is invariant
+    CF_FLAGS = 0x1000  # flags criteria is variant
+    CF_MODULE = 0x2000  # module criteria is invariant
+    CF_GROUPID = 0x4000  # groupid criteria is invariant
+    CF_CONSTANT = 0x8000  # entire criteria is invariant
+
 
 class FindPgm:
     def __init__(self, constflags: PgmConstFlags, op: CompareFunc, target: int, value: FindValue,
@@ -87,7 +95,7 @@ class FindPgm:
         self.value = value
         self.pos = pos
         self.neg = neg
-        self.next_pgm = next_pgm
+        self.next = next_pgm
 
 class Find:
     def __init__(self):

@@ -4,17 +4,9 @@ import math
 
 from gov_pnnl_goss.gridlab.gldcore.Globals import SUCCESS, DT_INFINITY, DT_INVALID, DT_SECOND, SIMULATIONMODE, FAILED
 from gov_pnnl_goss.gridlab.gldcore.GridLabD import gl_error
-
-
-# Data Structures
-class OBJECT:
-    pass
-
-
-class MODULE:
-    def __init__(self, name, deltadesired):
-        self.name = name
-        self.deltadesired = deltadesired
+from gridlab.gldcore.Exec import object_get_first
+from gridlab.gldcore.Module import Module
+from gridlab.gldcore.Object import Object, OF_DELTAMODE
 
 
 class DELTAPROFILE:
@@ -31,34 +23,26 @@ class DELTAPROFILE:
         self.t_min = 0  # minimum delta (ns)
         self.module_list = [''] * 1024  # list of active modules
 
-def delta_getprofile():
-    return DELTAPROFILE()
-
 
 class DELTAMODEFLAGS:
     pass
+
+class MODFOUNDSTRUCT:
+    tape_mod = Module()
+    connection_mod = Module()
+    reliability_mod = Module()
+    residential_mod = Module()
+    powerflow_mod = Module()
 
 
 class STATUS:
     pass
 
 
-# Global Variables
-global_deltamode_force_preferred_order = False
-global_deltamode_timestep_pub = 0
-global_deltamode_forced_extra_timesteps = 0
-global_deltamode_maximumtime_pub = 0
-global_deltamode_forced_always = False
-global_stoptime = 0
-global_clock = 0
-global_deltaclock = 0
-global_delta_curr_clock = 0
-global_federation_reiteration = False
-
 # Static Variables
-delta_objectlist: Optional[List[OBJECT]] = None
+delta_objectlist: Optional[List[Object]] = None
 delta_objectcount = 0
-delta_modulelist: Optional[List[MODULE]] = None
+delta_modulelist: Optional[List[Module]] = None
 delta_modulecount = 0
 profile = DELTAPROFILE()
 
@@ -72,6 +56,28 @@ def delta_init() -> STATUS:
     global delta_objectlist, delta_objectcount, delta_modulelist, delta_modulecount, \
         profile, global_deltamode_force_preferred_order
     global global_deltamode_forced_extra_timesteps, ordered_module
+
+    # 	OBJECT *obj, **pObj;
+    obj = Object()
+
+    toprank = 0
+    rankList: List[Object] = []
+    rankcount = 0
+    module = Module()
+    modules_found = MODFOUNDSTRUCT()
+    ordered_module = False
+    t = time.clock()
+    mod_count = module_getcount()
+    #
+    # 	Ordered module initialization - just because */
+    modules_found.tape_mod = None
+    modules_found.connection_mod = None
+    modules_found.reliability_mod = None
+    modules_found.residential_mod = None
+    modules_found.powerflow_mod = None
+    ordered_module = None
+
+
 
     delta_objectlist = None
     delta_objectcount = 0
@@ -95,7 +101,7 @@ def delta_init() -> STATUS:
 
     if delta_objectcount == 0:
         if ordered_module is not None:
-            free(ordered_module)
+            del ordered_module
         return SUCCESS
 
     delta_objectlist = [None] * delta_objectcount
@@ -148,7 +154,8 @@ def module_getcount():
 
 
 def delta_update() -> float:
-    global global_deltaclock, global_deltamode_maximumtime, global_deltamode_forced_preferred_order
+    global global_deltaclock, global_deltamode_maximumtime, global_deltamode_forced_preferred_order, \
+        global_deltamode_forced_extra_timesteps
     global delta_forced_iteration, delta_modulelist, delta_modulecount, delta_objectlist, delta_objectcount, profile
     global toprank
 
@@ -278,6 +285,7 @@ def delta_interupdate() -> float:
 
 
 def delta_clockupdate(timestep, interupdate_result):
+    global global_delta_curr_clock
     t = time.clock()
     nextTime = 0
     exitDeltaTimestep = 0

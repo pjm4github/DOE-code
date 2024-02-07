@@ -28,7 +28,7 @@ class RequestTimeseriesDataBasic(RequestTimeseriesData):
             obj = json.loads(json_string)
         except JSONDecodeError as e:
             raise ValueError("Request time series data request could not be parsed: " + e)
-        # if(obj!=null && obj.queryMeasurement.equals("simulation"))
-        # 	if(obj.queryFilter==null || !obj.queryFilter.containsKey("simulation_id"))
+        # if(self!=null && self.queryMeasurement.equals("simulation"))
+        # 	if(self.queryFilter==null || !self.queryFilter.containsKey("simulation_id"))
         # 		throw new JsonSyntaxException("Expected filter simulation_id not found.");
         return obj

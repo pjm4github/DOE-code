@@ -1362,7 +1362,7 @@ class CIMImporter(QueryHandler, CIMQuerySetter, OperationalLimits):
         measurements_not_linked = 0
         for pair in self.map_measurements:
             obj = pair.getValue()
-        #   System.out.println (obj.Display"");
+        #   System.out.println (self.Display"");
             nd = mapNodes.get(obj.bus)
         #   System.out.println (nd.Display"");
             if nd is not None:

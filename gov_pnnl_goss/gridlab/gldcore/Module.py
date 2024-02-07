@@ -1,15 +1,21 @@
+import io
 import threading
 import subprocess
-import ctypes
-from errno import ENOENT, ENOMEM
+from errno import ENOENT, ENOMEM, ENOEXEC
 import os
 from typing import Any
 
 from gov_pnnl_goss.gridlab.gldcore import Property
 from gov_pnnl_goss.gridlab.gldcore.Class import Class
-from gov_pnnl_goss.gridlab.gldcore.Globals import global_setvar, SUCCESS
+from gov_pnnl_goss.gridlab.gldcore.Globals import SUCCESS, SIGINT, global_start_time, global_stop_time
 from gov_pnnl_goss.gridlab.gldcore.Output import output_debug, output_message, output_error, output_verbose, \
-    output_fatal
+    output_fatal, output_warning
+
+from gridlab.gldcore import Load, Globals
+from gridlab.gldcore.Find import Find
+from gridlab.gldcore.GridLabD import global_setvar, DLSYM
+from gridlab.gldcore.Transform import Transform
+from gridlab.gldcore.Version import Version
 
 MAGIC = 0x012BB0B9
 lock_count = 0
@@ -22,6 +28,89 @@ cc_verbose = 0
 cc_debug = 0
 cc_clean = 0
 cc_keepwork = 0
+#
+# class MODULE:
+#     def __init__(self, hLib, id, name, oclass, major, minor, getvar, setvar, import_file, export_file, check,
+#                  deltadesired, preupdate, interupdate, deltaClockUpdate, postupdate, clockupdate, cmdargs,
+#                  kmldump, test, subload, globals, term, stream, next):
+#         self.hLib = hLib
+#         self.id = id
+#         self.name = name
+#         self.oclass = oclass
+#         self.major = major
+#         self.minor = minor
+#         self.getvar = getvar
+#         self.setvar = setvar
+#         self.import_file = import_file
+#         self.export_file = export_file
+#         self.check = check
+#         self.deltadesired = deltadesired
+#         self.preupdate = preupdate
+#         self.interupdate = interupdate
+#         self.deltaClockUpdate = deltaClockUpdate
+#         self.postupdate = postupdate
+#         self.clockupdate = clockupdate
+#         self.cmdargs = cmdargs
+#         self.kmldump = kmldump
+#         self.test = test
+#         self.subload = subload
+#         self.globals = globals
+#         self.term = term
+#         self.stream = stream
+#         self.next = next
+
+# # Function prototypes can be represented as standalone functions in Python.
+# def module_get_exe_path(buf, len):
+#     pass  # Implement functionality
+#
+# def module_get_path(buf, len, mod):
+#     pass  # Implement functionality
+#
+# def module_find(module_name):
+#     pass  # Implement functionality
+#
+# # ... and so on for other function prototypes
+#
+# # For simplicity, I've represented function pointers as callable attributes in the class.
+# # In a real implementation, you would provide the actual callable functions.
+
+
+#
+procs = []  # processor map
+n_procs = 0  # number of processors in map
+
+MAPNAME = "gridlabd-pmap-3" # TODO: change the pmap number each time the structure changes */
+
+class GLDPROCINFO:
+    lock = None		# field lock */
+    pid = None			# process id */
+    progress = None		# current simtime */
+    starttime = None		# sim starttime */
+    stoptime = None		# sim stoptime */
+    status = None		# current status */
+    model = None			# model name */
+    start = None			# wall time of start */
+
+
+process_map = GLDPROCINFO() # global process map */
+
+class MYPROCINFO:
+    n_procs= 0  # number of processors used by this process */
+    list = []  # list of processors assigned to this process */
+
+my_proc = MYPROCINFO() # processors assigned to this process */
+PROCERR = -1
+
+
+class ExternalFunction:
+    def __init__(self):
+        self.fname = ""
+        self.libname=""
+        self.lib = None
+        self.call = None
+        self.next = None
+
+external_function_list = ExternalFunction()
 
 
 def get_exe_path(buf, length, mod):
@@ -79,338 +168,56 @@ def execf(format_str, *args):
     return rc
 
 
-class Module(ctypes.Structure):
+def DLLOAD(tpath):
+    pass
+
+
+def LIBINIT(param):
+    pass
+
+
+class Module:
     def __init__(self, *args: Any, **kw: Any):
         super().__init__(*args, **kw)
-        self.hLib = ctypes.c_void_p()
-        self.id = ctypes.c_uint()
-        self.name = ctypes.c_char * 1024
-        self.oclass = ctypes.POINTER(Class)
-        self.major = ctypes.c_ushort()
-        self.minor = ctypes.c_ushort()
-        self.getvar = ctypes.CFUNCTYPE(ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_uint)
-        self.setvar = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p, ctypes.c_char_p)
-        self.import_file = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p)
-        self.export_file = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p)
-        self.check = ctypes.CFUNCTYPE(ctypes.c_int)
-        self.deltadesired = ctypes.CFUNCTYPE(ctypes.c_ulong, ctypes.POINTER(ctypes.c_uint))
-        self.preupdate = ctypes.CFUNCTYPE(ctypes.c_ulong, ctypes.c_void_p, ctypes.c_int64, ctypes.c_uint64)
-        self.interupdate = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_void_p, ctypes.c_int64, ctypes.c_uint64, ctypes.c_ulong, ctypes.c_uint)
-        self.deltaClockUpdate = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_void_p, ctypes.c_double, ctypes.c_ulong, ctypes.c_int)
-        self.postupdate = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_void_p, ctypes.c_int64, ctypes.c_uint64)
-        self.clockupdate = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(ctypes.c_int64))
-        self.cmdargs = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.POINTER(ctypes.c_char)))
-        self.kmldump = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p), ctypes.POINTER(OBJECT))
-        self.test = ctypes.CFUNCTYPE(None, ctypes.c_int, ctypes.POINTER(ctypes.c_char_p))
-        self.subload = ctypes.CFUNCTYPE(ctypes.POINTER(Module), ctypes.c_char_p, ctypes.POINTER(ctypes.POINTER(MODULE)), ctypes.POINTER(ctypes.POINTER(CLASS)), ctypes.c_int, ctypes.POINTER(ctypes.POINTER(ctypes.c_char)))
-        self.globals = ctypes.POINTER(Property)
-        self.term = ctypes.CFUNCTYPE(None)
-        self.stream = Streamcall
-        self.next = ctypes.POINTER(Module)
-        self.callbacks - SCallbacks()
+        self.hLib = None
+        self.id: int = 0
+        self.name: str = ""
+        self.oclass: Class = Class()
+        self.major: int = 0
+        self.minor: int = 0
+        self.getvar = None
+        self.setvar = None
+        self.import_file = None
+        self.export_file = None
+        self.check = None
+        self.deltadesired = None
+        self.preupdate = None
+        self.interupdate = None
+        self.deltaClockUpdate = None
+        self.deltadesired = None # a parameter deltadesired
+        self.postupdate = None
+        self.clockupdate = None
+        self.cmdargs = None
+        self.kmldump = None
+        self.test = None
+        self.subload = None
+        self.globals = None
+        self.term = None
+        self.stream = io.BytesIO()
+        self.next = None
+        self.callbacks = SCallbacks()
         self.module_count = 0
         self.first_module: Module = None
         self.last_module: Module = None
         self.errno = 0
 
-    def get_transform_function(self, function):
-        item = external_function_list
-        while item is not None:
-            if item.fname == function:
-                return ctypes.cast(item.call, TRANSFORMFUNCTION())
-            item = item.next
-        self.errno = ENOENT
-        return None
-
-    def module_get_exe_path(self, buf, length):
-        return get_exe_path(buf, length, None)
-
-    def module_get_path(self, buf, length, mod):
-        return get_exe_path(buf, length, mod.h_lib)
-
-    def module_malloc(self, size):
-        malloc_lock.acquire()
-        ptr = ctypes.c_void_p(ctypes.windll.kernel32.LocalAlloc(0x40, size))
-        malloc_lock.release()
-        return ptr
-
-    def module_free(self, ptr):
-        malloc_lock.acquire()
-        del ptr
-        malloc_lock.release()
-
     def module_callbacks(self, ):
         return self.callbacks
 
-    def module_getcount(self, ):
-        return self.module_count
-
-    def module_load(self, file, argc, argv):
-        mod = self.module_find(file)
-        buffer = ctypes.create_string_buffer(FILENAME_MAX + 1)
-        # fmod = None
-        isforeign = False
-        pathname = ctypes.create_string_buffer(1024)
-        tpath = ctypes.create_string_buffer(1024)
-        from_char, to_char = '\\', '/'
-        # p = None
-        # hLib = None
-        # init = None
-        # pMajor = None
-        # pMinor = None
-        # previous = None
-        # c = None
-
-        if self.callbacks.magic != MAGIC:
-            output_fatal("callback function table alignment error (magic number position mismatch)")
-            return None
-
-        if mod is not None:
-            output_verbose(f"{__file__}({__line__}): module '{file}' already loaded")
-            return mod
-        else:
-            output_verbose(f"{__file__}({__line__}): module '{file}' not yet loaded")
-
-        buffer.value = file.encode('utf-8')
-        fmod = strtok(buffer.value, b"::")
-        if fmod is not None and fmod != file.encode('utf-8'):
-            modname = strtok(None, b"::")
-            parent_mod = self.module_find(fmod)
-            if parent_mod is None:
-                parent_mod = self.module_load(fmod, 0, None)
-            previous = Class.class_get_last_class()
-            if parent_mod is not None and parent_mod.subload is not None:
-                if self.module_find(fmod) is None:
-                    self.module_load(fmod, 0, None)
-                child_mod = parent_mod.subload(modname, mod, ctypes.byref(previous) if previous else None, argc, argv)
-                if child_mod is None:
-                    output_error(f"module_load(file='{fmod}::{modname}'): subload failed")
-                    return None
-                if mod is not None:
-                    self.last_module.next = mod
-                    self.last_module = mod
-                    mod.oclass = previous.next if previous else Class.class_get_first_class()
-                return self.last_module
-            else:
-                fmap = [
-                    {"name": b"matlab", "loader": None},
-                    {"name": b"java", "loader": load_java_module},
-                    {"name": b"python", "loader": load_python_module},
-                    {"name": None, "loader": None},
-                ]
-                p = None
-                for p in fmap:
-                    if p["name"] == fmod:
-                        isforeign = True
-                        if p["loader"] is not None:
-                            return p["loader"](modname, argc, argv)
-                        args = [modname]
-                        argv = args
-                        argc = 1
-                        file = buffer.value
-                        break
-                if p is None:
-                    output_error(
-                        f"module_load(file='{file}',...): foreign module type {fmod.decode('utf-8')} not recognized or supported")
-                    return None
-
-        mod = Module()
-        if mod is None:
-            output_verbose(f"{__file__}({__line__}): module '{file}' memory allocation failed")
-            self.errno = ENOMEM
-            return None
-        else:
-            output_verbose(f"{__file__}({__line__}): module '{file}' memory allocated")
-
-        pathname.value = f"{file.decode('utf-8')}{DLEXT}".encode('utf-8')
-
-        if self.find_file(pathname.value, None, X_OK | R_OK, tpath, sizeof(tpath)) is None:
-            output_verbose(f"unable to locate {pathname.value.decode('utf-8')} in GLPATH, using library loader instead")
-            tpath.value = pathname.value
-        else:
-            if tpath.value[0] != b'/'[0]:
-                buf = os.stat(tpath.value)
-                if buf is not None:
-                    buffer.value = f"./{tpath.value.decode('utf-8')}".encode('utf-8')
-                    tpath.value = buffer.value
-            output_verbose(f"full path to library '{file.decode('utf-8')}' is '{tpath.value.decode('utf-8')}'")
-
-        for i in range(len(tpath.value)):
-            if tpath.value[i] == from_char:
-                tpath[i] = to_char
-
-        hLib = DLLOAD(tpath.value)
-        if hLib is None:
-            output_error(f"{__file__}({__line__}): module '{file}' load failed - {dlerror().decode('utf-8')}")
-            output_debug(f"{__file__}({__line__}): path to module is '{tpath.value.decode('utf-8')}'")
-            dlload_error(pathname.value)
-            errno = ENOENT
-            free(mod)
-            mod = None
-            return None
-        else:
-            output_verbose(f"{__file__}({__line__}): module '{file}' loaded ok")
-
-        init = LIBINIT(DLSYM(hLib, b"init"))
-        if init is None:
-            output_error(f"{__file__}({__line__}): module '{file}' does not export init()")
-            dlload_error(pathname.value)
-            errno = ENOEXEC
-            free(mod)
-            mod = None
-            return None
-        else:
-            output_verbose(f"{__file__}({__line__}): module '{file}' exports init()")
-
-        mod.hLib = hLib
-        pMajor = ctypes.cast(DLSYM(hLib, b"gld_major"), ctypes.POINTER(ctypes.c_int))
-        pMinor = ctypes.cast(DLSYM(hLib, b"gld_minor"), ctypes.POINTER(ctypes.c_int))
-        mod.major = pMajor.contents.value if pMajor is not None else 0
-        mod.minor = pMinor.contents.value if pMinor is not None else 0
-        mod.import_file = ctypes.cast(DLSYM(hLib, b"import_file"), ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p))
-        mod.export_file = ctypes.cast(DLSYM(hLib, b"export_file"), ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p))
-        mod.setvar = ctypes.cast(DLSYM(hLib, b"setvar"),
-                                 ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p, ctypes.c_char_p))
-        mod.getvar = ctypes.cast(DLSYM(hLib, b"getvar"),
-                                 ctypes.CFUNCTYPE(ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p, ctypes.c_uint))
-        mod.check = ctypes.cast(DLSYM(hLib, b"check"), ctypes.CFUNCTYPE(ctypes.c_int))
-        mod.deltadesired = ctypes.cast(DLSYM(hLib, b"deltamode_desired"),
-                                       ctypes.CFUNCTYPE(ctypes.c_ulong, ctypes.POINTER(DELTAMODEFLAGS)))
-        mod.preupdate = ctypes.cast(DLSYM(hLib, b"preupdate"),
-                                    ctypes.CFUNCTYPE(ctypes.c_ulong, ctypes.c_void_p, ctypes.c_int64, ctypes.c_uint64))
-        mod.interupdate = ctypes.cast(DLSYM(hLib, b"interupdate"),
-                                      ctypes.CFUNCTYPE(SIMULATIONMODE, ctypes.c_void_p, ctypes.c_int64, ctypes.c_uint64,
-                                                       ctypes.c_ulong, ctypes.c_uint))
-        mod.deltaClockUpdate = ctypes.cast(DLSYM(hLib, b"deltaClockUpdate"),
-                                           ctypes.CFUNCTYPE(SIMULATIONMODE, ctypes.c_void_p, ctypes.c_double,
-                                                            ctypes.c_ulong, SIMULATIONMODE))
-        mod.postupdate = ctypes.cast(DLSYM(hLib, b"postupdate"),
-                                     ctypes.CFUNCTYPE(STATUS, ctypes.c_void_p, ctypes.c_int64, ctypes.c_uint64))
-        mod.clockupdate = ctypes.cast(DLSYM(hLib, b"clock_update"),
-                                      ctypes.CFUNCTYPE(TIMESTAMP, ctypes.POINTER(TIMESTAMP)))
-        mod.cmdargs = ctypes.cast(DLSYM(hLib, b"cmdargs"),
-                                  ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_char_p)))
-        mod.kmldump = ctypes.cast(DLSYM(hLib, b"kmldump"),
-                                  ctypes.CFUNCTYPE(ctypes.c_int, ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p),
-                                                   ctypes.POINTER(OBJECT)))
-        mod.subload = ctypes.cast(DLSYM(hLib, b"subload"), ctypes.CFUNCTYPE(ctypes.POINTER(MODULE), ctypes.c_char_p,
-                                                                            ctypes.POINTER(ctypes.POINTER(MODULE)),
-                                                                            ctypes.POINTER(ctypes.POINTER(CLASS)),
-                                                                            ctypes.c_int, ctypes.POINTER(
-                ctypes.POINTER(ctypes.c_char_p))))
-        mod.test = ctypes.cast(DLSYM(hLib, b"test"),
-                               ctypes.CFUNCTYPE(None, ctypes.c_int, ctypes.POINTER(ctypes.c_char_p)))
-        mod.stream = ctypes.cast(DLSYM(hLib, b"stream"), STREAMCALL)
-        mod.globals = None
-        mod.term = ctypes.cast(DLSYM(hLib, b"term"), ctypes.CFUNCTYPE(None))
-
-        mod.name = file.encode('utf-8')
-        mod.next = None
-
-        if mod.major != REV_MAJOR or mod.minor != REV_MINOR:
-            output_error(f"Module version {mod.major}.{mod.minor} mismatch from core version {REV_MAJOR}.{REV_MINOR}")
-            return None
-
-        errno = 0
-        mod.oclass = init(self.callbacks, ctypes.byref(mod), argc, argv)
-        if mod.oclass is None and errno != 0:
-            return None
-
-        for c in mod.oclass:
-            fname = ctypes.create_string_buffer(1024)
-            map = [
-                (ctypes.byref(c.create), b"create", False),
-                (ctypes.byref(c.init), b"init", True),
-                (ctypes.byref(c.precommit), b"precommit", True),
-                (ctypes.byref(c.sync), b"sync", True),
-                (ctypes.byref(c.commit), b"commit", True),
-                (ctypes.byref(c.finalize), b"finalize", True),
-                (ctypes.byref(c.notify), b"notify", True),
-                (ctypes.byref(c.isa), b"isa", True),
-                (ctypes.byref(c.plc), b"plc", True),
-                (ctypes.byref(c.recalc), b"recalc", True),
-                (ctypes.byref(c.update), b"update", True),
-                (ctypes.byref(c.heartbeat), b"heartbeat", True),
-            ]
-            for m in map:
-                fname.value = f"{m[1]}_{fmod.decode('utf-8') if isforeign else c.name.decode('utf-8')}".encode('utf-8')
-                m[0] = ctypes.cast(DLSYM(hLib, fname.value), ctypes.CFUNCTYPE(None))
-                if m[0] is None and not m[2]:
-                    output_fatal(
-                        f"intrinsic {fname.value.decode('utf-8')} is not defined in class {file.decode('utf-8')}")
-                    errno = EINVAL
-                    return None
-                elif not m[2]:
-                    output_verbose(
-                        f"{__file__}({__line__}): module '{file}' intrinsic {fname.value.decode('utf-8')} found")
-
-        if self.first_module is None:
-            mod.id = 0
-            first_module = mod
-        else:
-            self.last_module.next = mod
-            mod.id = self.last_module.id + 1
-        last_module = mod
-        self.module_count += 1
-
-        if mod.stream is not None:
-            self.stream_register(mod.stream)
-
-        return last_module
-
-    def _module_list(self):
-        pass
-
-    def module_list(self):
-        pass
-
-
-    def module_setvar(self, mod, var_name, value):
-        mod_var_name = "{}::{}".format(mod.name, var_name)
-        return global_setvar(mod_var_name, value) == SUCCESS
-
-
-    def module_get_first(self, ):
-        return self.first_module
-
-
-    def module_find(self, modname):
-        mod = None
-        mod = self.first_module
-        while mod is not None:
-            if mod.name == modname:
-                break
-            mod = mod.next
-        return mod
-
-
-    def module_import(self, mod, filename):
-        if mod.import_file is None:
-            errno = ENOENT
+    def module_check(self, mod):
+        if mod.check is None:
             return 0
-        return mod.import_file(filename)
-
-
-    def module_export(self, mod, filename):
-        if mod.export_file is None:
-            self.errno = ENOENT
-            return 0
-        return mod.export_file(filename)
-
-    def module_save(self, mod, filename):
-        if mod.export_file is None:
-            self.errno = ENOENT
-            return 0
-        return mod.export_file(filename)
-
-    def module_dumpall(self, ):
-        mod = self.first_module
-        count = 0
-        while mod is not None:
-            if mod.export_file is not None:
-                count += self.module_save(mod, None)
-            mod = mod.next
-        return count
+        return mod.check() if callable(mod.check) else 0
 
     def module_check_all(self, ):
         mod = self.first_module
@@ -419,11 +226,6 @@ class Module(ctypes.Structure):
             count += self.module_check(mod)
             mod = mod.next
         return count
-
-    def module_check(self, mod):
-        if mod.check is None:
-            return 0
-        return mod.check() if callable(mod.check) else 0
 
     def module_cmdargs(self, argc, argv):
         mod = self.first_module
@@ -447,17 +249,32 @@ class Module(ctypes.Structure):
             mod = mod.next
         return self.module_load(self, name, 0, None) is not None
 
-    def module_get_next(self, module):
-        return module.next
+    def module_dumpall(self, ):
+        mod = self.first_module
+        count = 0
+        while mod is not None:
+            if mod.export_file is not None:
+                count += self.module_save(mod, None)
+            mod = mod.next
+        return count
 
-    def module_term_all(self, ):
+    def module_export(self, mod, filename):
+        if mod.export_file is None:
+            self.errno = ENOENT
+            return 0
+        return mod.export_file(filename)
+
+    def module_find(self, modname):
+        mod = None
         mod = self.first_module
         while mod is not None:
-            if mod.term:
-                mod.term()
+            if mod.name == modname:
+                break
             mod = mod.next
+        return mod
 
     def module_find_transform_function(self, transform_function):
+        global external_function_list
         item = external_function_list
         while item is not None:
             if item.call == self.function:
@@ -466,50 +283,338 @@ class Module(ctypes.Structure):
         errno = ENOENT
         return None
 
+    def module_free(self, ptr):
+        malloc_lock.acquire()
+        del ptr
+        malloc_lock.release()
 
-class SCallbacks(ctypes.Structure):
+    def module_get_exe_path(self, buf, length):
+        return get_exe_path(buf, length, None)
+
+    def module_get_first(self, ):
+        return self.first_module
+
+    def module_get_next(self, module):
+        return module.next
+
+    def module_get_path(self, buf, length, mod):
+        return get_exe_path(buf, length, mod.h_lib)
+
+    def module_get_transform_function(self, function):
+        global external_function_list
+        item = external_function_list
+        while item is not None:
+            if item.fname == function:
+                item.call = Transform.TRANSFORMFUNCTION()
+                return item.call
+            item = item.next
+        self.errno = ENOENT
+        return None
+
+    def module_getcount(self, ):
+        return self.module_count
+
+    def module_import(self, mod, filename):
+        if mod.import_file is None:
+            errno = ENOENT
+            return 0
+        return mod.import_file(filename)
+
+    def module_list(self):
+        pass
+
+    def module_load(self, file, argc, argv):
+        mod = self.module_find(file)
+        buffer = ""
+        isforeign = False
+        pathname = ""
+        from_char, to_char = '\\', '/'
+
+        if self.callbacks.magic != MAGIC:
+            output_fatal("callback function table alignment error (magic number position mismatch)")
+            return None
+
+        if mod is not None:
+            output_verbose(f"{__file__}(): module '{file}' already loaded")
+            return mod
+        else:
+            output_verbose(f"{__file__}(): module '{file}' not yet loaded")
+
+        buffer = file.encode('utf-8')
+        fmod, modname = buffer.split("::")  # This splits the buffer by "::" and assigns the first result to fmod
+        if fmod is not None and fmod != file.encode('utf-8'):
+            parent_mod = self.module_find(fmod)
+            if parent_mod is None:
+                parent_mod = self.module_load(fmod, 0, None)
+            previous = Class.class_get_last_class()
+            if parent_mod is not None and parent_mod.subload is not None:
+                if self.module_find(fmod) is None:
+                    self.module_load(fmod, 0, None)
+                child_mod = parent_mod.subload(modname, mod, self.previous if self.previous else None, argc, argv)
+                if child_mod is None:
+                    # Failure
+                    output_error(f"module_load(file='{fmod}::{modname}'): subload failed")
+                    # TROUBLESHOOT
+                    # A module is unable to load a submodule require for operation.
+                    # Check that the indicated submodule is installed and try again.
+                    #
+                    return None
+                if mod is not None:
+                    # if we want to register another module
+                    self.last_module.next = mod
+                    self.last_module = mod
+                    mod.oclass = previous.next if previous else Class.class_get_first_class()
+                return self.last_module
+            else:
+                fmap = [
+                    {"name": b"matlab", "loader": None},
+                    {"name": b"java", "loader": Load.load_java_module},
+                    {"name": b"python", "loader": Load.load_python_module},
+                    {"name": None, "loader": None},
+                ]
+                p = None
+                for p in fmap:
+                    if p["name"] == fmod:
+                        isforeign = True
+                        if p["loader"] is not None:
+                            return p["loader"](modname, argc, argv)
+                        args = [modname]
+                        argv = args
+                        argc = 1
+                        file = buffer
+                        break
+                if p is None:
+                    output_error(
+                        f"module_load(file='{file}',...): foreign module type {fmod.decode('utf-8')} not recognized or supported")
+                    return None
+        #  create a new module entry
+        mod = Module()
+        if mod is None:
+            output_verbose(f"{__file__}(): module '{file}' memory allocation failed")
+            self.errno = ENOMEM
+            return None
+        else:
+            output_verbose(f"{__file__}(): module '{file}' memory allocated")
+        DLEXT = ".dll"
+        pathname.value = f"{file.decode('utf-8')}{DLEXT}".encode('utf-8')
+        tpath = ""
+        if Find.find_file(pathname.value, None, os.X_OK | os.R_OK, tpath, 0) is None:
+            output_verbose(f"unable to locate {pathname.value.decode('utf-8')} in GLPATH, using library loader instead")
+            tpath.value = pathname.value
+        else:
+            if tpath.value[0] != b'/'[0]:
+                buf = os.stat(tpath.value)
+                if buf is not None:
+                    buffer.value = f"./{tpath.value.decode('utf-8')}".encode('utf-8')
+                    tpath.value = buffer.value
+            output_verbose(f"full path to library '{file.decode('utf-8')}' is '{tpath.value.decode('utf-8')}'")
+
+        for i in range(len(tpath.value)):
+            if tpath.value[i] == from_char:
+                tpath[i] = to_char
+
+        hLib = DLLOAD(tpath)
+        if hLib is None:
+            output_error(f"{__file__}(): module '{file}' load failed - ")
+            output_debug(f"{__file__}(): path to module is '{tpath.value.decode('utf-8')}'")
+            dlload_error(pathname.value)
+            errno = ENOENT
+            mod = None
+            return None
+        else:
+            output_verbose(f"{__file__}(): module '{file}' loaded ok")
+
+        init = LIBINIT(DLSYM(hLib, b"init"))
+        if init is None:
+            output_error(f"{__file__}(): module '{file}' does not export init()")
+            dlload_error(pathname.value)
+            errno = ENOEXEC
+            mod = None
+            return None
+        else:
+            output_verbose(f"{__file__}(): module '{file}' exports init()")
+
+        mod.hLib = hLib
+        pMajor = DLSYM(hLib, b"gld_major")
+        pMinor = DLSYM(hLib, b"gld_minor")
+        mod.major = pMajor.contents.value if pMajor is not None else 0
+        mod.minor = pMinor.contents.value if pMinor is not None else 0
+        mod.import_file = DLSYM(hLib, b"import_file")
+        mod.export_file = DLSYM(hLib, b"export_file")
+        mod.setvar = DLSYM(hLib, b"setvar")
+        mod.getvar = DLSYM(hLib, b"getvar")
+        mod.check = DLSYM(hLib, b"check")
+        mod.deltadesired = DLSYM(hLib, b"deltamode_desired")
+
+        mod.preupdate = DLSYM(hLib, b"preupdate")
+        mod.interupdate = DLSYM(hLib, b"interupdate")
+        mod.deltaClockUpdate = DLSYM(hLib, b"deltaClockUpdate")
+        mod.postupdate = DLSYM(hLib, b"postupdate")
+        mod.clockupdate = DLSYM(hLib, b"clock_update")
+        mod.cmdargs = DLSYM(hLib, b"cmdargs")
+        mod.kmldump = DLSYM(hLib, b"kmldump")
+        mod.subload = DLSYM(hLib, b"subload")
+        mod.test = DLSYM(hLib, b"test")
+        mod.stream = DLSYM(hLib, b"stream")
+        mod.globals = None
+        mod.term = DLSYM(hLib, b"term")
+
+        mod.name = file.encode('utf-8')
+        mod.next = None
+
+        if mod.major != Version.REV_MAJOR or mod.minor != Version.REV_MINOR:
+            output_error(f"Module version {mod.major}.{mod.minor} mismatch from core version {Version.REV_MAJOR}.{Version.REV_MINOR}")
+            return None
+
+        errno = 0
+        mod.oclass = init(self.callbacks, mod, argc, argv)
+        if mod.oclass is None and errno != 0:
+            return None
+
+        for c in mod.oclass:
+            fname = ""
+
+            map = [
+                {"func": c.create, "name": "create", "optional": False},
+                {"func": c.init, "name": "init", "optional": True},
+                {"func": c.precommit, "name": "precommit", "optional": True},
+                {"func": c.sync, "name": "sync", "optional": True},
+                {"func": c.commit, "name": "commit", "optional": True},
+                {"func": c.finalize, "name": "finalize", "optional": True},
+                {"func": c.notify, "name": "notify", "optional": True},
+                {"func": c.isa, "name": "isa", "optional": True},
+                {"func": c.plc, "name": "plc", "optional": True},
+                {"func": c.recalc, "name": "recalc", "optional": True},
+                {"func": c.update, "name": "update", "optional": True},
+                {"func": c.heartbeat, "name": "heartbeat", "optional": True},
+            ]
+
+            lib_name = Find.find_library("your_library_name")  # Replace "your_library_name" with the actual library
+            if lib_name:
+                hLib = lib_name
+            else:
+                raise Exception("Library not found.")
+
+            for item in map:
+                fname = f"{item['name']}_{fmod if isforeign else c.name}"
+                try:
+                    func_addr = getattr(hLib, fname)
+                    item['func'] = func_addr
+                    if not item['optional']:
+                        output_verbose(f"{__file__}(): module '{file}' intrinsic {fname} found")
+                except AttributeError:
+                    if not item['optional']:
+                        output_fatal("intrinsic %s is not defined in class %s", fname, file)
+                        return None
+
+            for m in map:
+                fname = f"{m[1]}_{fmod.decode('utf-8') if isforeign else c.name.decode('utf-8')}".encode('utf-8')
+                m[0] = DLSYM(hLib, fname)
+                if m[0] is None and not m[2]:
+                    output_fatal(
+                        f"intrinsic {fname.decode('utf-8')} is not defined in class {file.decode('utf-8')}")
+                    errno = Globals.EINVAL
+                    return None
+                elif not m[2]:
+                    output_verbose(
+                        f"{__file__}(): module '{file}' intrinsic {fname.decode('utf-8')} found")
+
+        if self.first_module is None:
+            mod.id = 0
+            first_module = mod
+        else:
+            self.last_module.next = mod
+            mod.id = self.last_module.id + 1
+        last_module = mod
+        self.module_count += 1
+
+        if mod.stream is not None:
+            self.stream_register(mod.stream)
+
+        return last_module
+
+    def module_malloc(self, size):
+        malloc_lock.acquire()
+        ptr = None
+        malloc_lock.release()
+        return ptr
+
+    def module_save(self, mod, filename):
+        if mod.export_file is None:
+            self.errno = ENOENT
+            return 0
+        return mod.export_file(filename)
+
+    def module_setvar(self, mod, var_name, value):
+        mod_var_name = "{}::{}".format(mod.name, var_name)
+        return global_setvar(mod_var_name, value) == SUCCESS
+
+    def module_term_all(self, ):
+        mod = self.first_module
+        while mod is not None:
+            if mod.term:
+                mod.term()
+            mod = mod.next
+
+
+class SCallbacks:
     def __init__(self):
-        self.global_clock = ctypes.POINTER(ctypes.c_int64)
-        self.global_delta_curr_clock = ctypes.POINTER(ctypes.c_int64)
-        self.global_exit_code = ctypes.POINTER(ctypes.c_int)
-        self.global_stoptime = ctypes.POINTER(TIMESTAMP)
-        self.output_verbose = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p)
-        self.output_message = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p)
-        self.output_warning = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p)
-        self.output_error = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p)
-        self.output_fatal = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p)
-        self.output_debug = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p)
-        self.output_test = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_char_p)
-        self.register_class = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(CLASS))
-        self.create_single = ctypes.CFUNCTYPE(ctypes.POINTER(OBJECT), ctypes.POINTER(CLASS), ctypes.POINTER(ctypes.c_char_p))
-        self.create_array = ctypes.CFUNCTYPE(ctypes.POINTER(OBJECT), ctypes.POINTER(CLASS), ctypes.c_uint)
-        self.create_foreign = ctypes.CFUNCTYPE(ctypes.POINTER(OBJECT), ctypes.POINTER(CLASS), ctypes.POINTER(ctypes.c_char_p))
-        self.define_map = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(CLASS), ctypes.c_char_p)
-        self.loadmethod = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(CLASS), ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(OBJECT)))
-        self.class_getfirst = ctypes.CFUNCTYPE(ctypes.POINTER(CLASS))
-        self.class_getname = ctypes.CFUNCTYPE(ctypes.POINTER(CLASS), ctypes.c_char_p)
-        self.class_add_extended_property = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(CLASS), ctypes.c_char_p, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_char_p)
-        self.function_define = ctypes.CFUNCTYPE(ctypes.POINTER(FUNCTION), ctypes.POINTER(CLASS), ctypes.c_char_p, ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_char_p))
-        self.function_get = ctypes.CFUNCTYPE(ctypes.POINTER(FUNCTION), ctypes.POINTER(CLASS), ctypes.c_char_p, ctypes.c_int, ctypes.POINTER(ctypes.POINTER(ctypes.c_char_p)))
-        self.define_enumeration_member = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(CLASS), ctypes.c_char_p, ctypes.c_int, ctypes.c_int, ctypes.c_int)
-        self.define_set_member = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(CLASS), ctypes.c_char_p, ctypes.c_int, ctypes.c_int, ctypes.c_int)
-        self.object_get_first = ctypes.CFUNCTYPE(ctypes.POINTER(OBJECT))
-        self.object_set_dependent = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(OBJECT), ctypes.POINTER(OBJECT))
-        self.object_set_parent = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(OBJECT), ctypes.POINTER(OBJECT))
-        self.object_set_rank = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(OBJECT), ctypes.c_int)
-        self.object_get_property = ctypes.CFUNCTYPE(ctypes.POINTER(PROPERTY), ctypes.POINTER(OBJECT), ctypes.c_char_p)
-        self.object_set_value_by_addr = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(OBJECT), ctypes.POINTER(PROPERTY), ctypes.c_void_p, ctypes.c_int)
-        self.object_get_value_by_addr = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(OBJECT), ctypes.POINTER(PROPERTY), ctypes.c_void_p, ctypes.POINTER(ctypes.c_int))
-        self.object_set_value_by_name = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(OBJECT), ctypes.POINTER(PROPERTY), ctypes.c_char_p, ctypes.c_int)
-        self.object_get_value_by_name = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(OBJECT), ctypes.POINTER(PROPERTY), ctypes.c_char_p, ctypes.POINTER(ctypes.c_int))
-        self.object_get_reference = ctypes.CFUNCTYPE(ctypes.POINTER(OBJECT), ctypes.POINTER(OBJECT), ctypes.POINTER(OBJECT), ctypes.c_char_p, ctypes.POINTER(ctypes.POINTER(OBJECT)))
-        self.object_get_unit = ctypes.CFUNCTYPE(ctypes.POINTER(UNIT), ctypes.POINTER(OBJECT), ctypes.c_char_p)
-        self.object_get_addr = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.POINTER(OBJECT), ctypes.POINTER(ctypes.c_void_p
+        self.global_clock = None
+        self.global_delta_curr_clock = None
+        self.global_exit_code = None
+        self.global_stoptime = None
+        self.output_verbose = None
+        self.output_message = None
+        self.output_warning = None
+        self.output_error = None
+        self.output_fatal = None
+        self.output_debug = None
+        self.output_test = None
+        self.register_class = None
+        self.create_single = None
+        self.create_array = None
+        self.create_foreign = None
+        self.define_map = None
+        self.loadmethod = None
+        self.class_getfirst = None
+        self.class_getname = None
+        self.class_add_extended_property = None
+        self.function_define = None
+        self.function_get = None
+        self.define_enumeration_member = None
+        self.define_set_member = None
+        self.object_get_first = None
+        self.object_set_dependent = None
+        self.object_set_parent = None
+        self.object_set_rank = None
+        self.object_get_property = None
+        self.object_set_value_by_addr = None
+        self.object_get_value_by_addr = None
+        self.object_set_value_by_name = None
+        self.object_get_value_by_name = None
+        self.object_get_reference = None
+        self.object_get_unit = None
+        self.object_get_addr = None
 
 
 
 class Sched:
     def __init__(self):
+        pass
+
+    def sched_clear(self,void):
+        pass
+
+    def sched_finish(self, ):
+        if my_proc is None or my_proc.list is None:
+            return
+        for t in range(my_proc.n_procs):
+            n = my_proc.list[t]
+            n.sched_lock()
+            process_map[n].status = Globals.MLS_DONE
+            n.sched_unlock()
+
+    def sched_controller(self,void):
         pass
 
     def sched_get_cpuid(self, n):
@@ -518,46 +623,44 @@ class Sched:
         return my_proc.list[n]
 
     def sched_get_procid(self, ):
-        cpuid = sched_get_cpuid(0)
+        cpuid = self.sched_get_cpuid(0)
         if PROCERR == cpuid:
-            output_warning("proc_map %x, myproc not assigned", process_map, sched_get_cpuid(0))
+            output_warning("proc_map %x, myproc not assigned", process_map, self.sched_get_cpuid(0))
             return 0
-        output_debug("proc_map %x, myproc %ui", process_map, sched_get_cpuid(0))
+        output_debug("proc_map %x, myproc %ui", process_map, self.sched_get_cpuid(0))
         return process_map[cpuid].pid
+
+    def sched_init(self, readonly: int):
+        pass
 
     def sched_lock(self, proc: int) -> None:
         if process_map:
-            wlock(process_map[proc].lock)
-
-    def sched_unlock(self, proc):
-        if process_map:
-            wunlock(process_map[proc].lock)
-
-    def sched_update(self, clock, status):
-        if my_proc is None or my_proc.list is None:
-            return
-        for t in range(my_proc.n_procs):
-            n = my_proc.list[t]
-            sched_lock(n)
-            process_map[n].status = status
-            process_map[n].progress = clock
-            process_map[n].starttime = global_starttime
-            process_map[n].stoptime = global_stoptime
-            sched_unlock(n)
-
-    def sched_finish(self, ):
-        if my_proc is None or my_proc.list is None:
-            return
-        for t in range(my_proc.n_procs):
-            n = my_proc.list[t]
-            sched_lock(n)
-            process_map[n].status = MLS_DONE
-            sched_unlock(n)
+            process_map[proc].lock
 
     def sched_pkill(self, pid):
         if process_map is not None and process_map[pid].pid != 0:
-            os.kill(process_map[pid].pid, signal.SIGINT)
+            os.kill(process_map[pid].pid, SIGINT)
+
+    def sched_print(self, flags: int):
+        pass
 
     def sched_signal(self, sig):
         print("\n*** SIGINT ***\n")
         sched_stop = 1
+
+    def sched_unlock(self, proc):
+        if process_map:
+            process_map[proc].unlock
+
+    def sched_update(self, clock, status):
+
+        if my_proc is None or my_proc.list is None:
+            return
+        for t in range(my_proc.n_procs):
+            n = my_proc.list[t]
+            n.scedule_lock()
+            process_map[n].status = status
+            process_map[n].progress = clock
+            process_map[n].starttime = global_start_time
+            process_map[n].stoptime = global_stop_time
+            n.scedule_unlock()

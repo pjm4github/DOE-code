@@ -299,8 +299,8 @@
 	# 	assertEquals(datasourceName, dsKeys.toArray()[0]);
     #
 	# 	// test get data source by key
-	# 	DataSourcePooledJdbc obj = dataSources.getDataSourceByKey(datasourceName);
-	# 	assertEquals(datasourceObject, obj);
+	# 	DataSourcePooledJdbc self = dataSources.getDataSourceByKey(datasourceName);
+	# 	assertEquals(datasourceObject, self);
     #
     #
     #
@@ -342,7 +342,7 @@ class ConfigurationManagerComponentTests(unittest.TestCase):
         mock_log_manager.return_value = MagicMock(spec=LogManager)
 
         configManager = ConfigurationManagerImpl(logManager, dataManager)
-        configManager.start()
+        configManager.exec_start()
 
         FNCS_PATH_PROP = "fncs.path"
         FNCS_PATH_VAL = "fncs_broker"
@@ -380,7 +380,7 @@ class ConfigurationManagerComponentTests(unittest.TestCase):
         logger = MagicMock(spec=logging.Logger)
 
         configManager = ConfigurationManagerImpl(logger, datasourceBuilder, datasourceRegistry, datasourceProperties)
-        configManager.start()
+        configManager.exec_start()
 
         FNCS_PATH_PROP = "fncs.path"
         FNCS_PATH_VAL = "fncs_broker"
@@ -406,7 +406,7 @@ class ConfigurationManagerComponentTests(unittest.TestCase):
         configManager.updated(props)
 
         self.assertEqual(5, len(datasourceProperties))
-        configManager.start()
+        configManager.exec_start()
 
         datasourceBuilder.create.assert_called_with("pnnl.goss.sql.datasource.gridappsd", datasourceProperties)
         self.assertEqual(1, len(configManager.getRegisteredDatasources()))
@@ -424,7 +424,7 @@ class ConfigurationManagerComponentTests(unittest.TestCase):
         logger = MagicMock(spec=logging.Logger)
 
         configManager = ConfigurationManagerImpl(logger, datasourceBuilder, datasourceRegistry, datasourceProperties)
-        configManager.start()
+        configManager.exec_start()
 
         FNCS_PATH_PROP = "fncs.path"
         FNCS_PATH_VAL = "fncs_broker"
@@ -450,7 +450,7 @@ class ConfigurationManagerComponentTests(unittest.TestCase):
         configManager.updated(props)
 
         self.assertEqual(5, len(datasourceProperties))
-        configManager.start()
+        configManager.exec_start()
 
         datasourceBuilder.create.assert_called_with("pnnl.goss.sql.datasource.gridappsd", datasourceProperties)
         self.assertEqual(1, len(configManager.getRegisteredDatasources()))
@@ -473,7 +473,7 @@ class ConfigurationManagerComponentTests(unittest.TestCase):
         configManager = ConfigurationManagerImpl(logger, datasourceBuilder, datasourceRegistry, datasourceProperties)
 
         with self.assertRaises(Exception) as context:
-            configManager.start()
+            configManager.exec_start()
 
         self.assertEqual("No datasource name provided when registering data source", str(context.exception))
 
@@ -499,7 +499,7 @@ class ConfigurationManagerComponentTests(unittest.TestCase):
         with patch.object(datasourceBuilder, 'create', side_effect=answer):
             configManager = ConfigurationManagerImpl(logger, datasourceBuilder, datasourceRegistry,
                                                      datasourceProperties)
-            configManager.start()
+            configManager.exec_start()
 
             FNCS_PATH_PROP = "fncs.path"
             FNCS_PATH_VAL = "fncs_broker"
@@ -525,7 +525,7 @@ class ConfigurationManagerComponentTests(unittest.TestCase):
             configManager.updated(props)
 
             self.assertEqual(5, len(datasourceProperties))
-            configManager.start()
+            configManager.exec_start()
 
             datasourceBuilder.create.assert_called_with("pnnl.goss.sql.datasource.gridappsd", datasourceProperties)
             self.assertEqual(1, len(configManager.getRegisteredDatasources()))

@@ -25,10 +25,10 @@ class DataSourceRegistry:
         * the entire system.
         *
         * @param key
-        * @param obj
+        * @param self
         */
         :param key:
-        :param obj:
+        :param self:
         :return:
         """
         pass

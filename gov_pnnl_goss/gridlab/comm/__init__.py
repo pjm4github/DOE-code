@@ -20,7 +20,7 @@
 #
 # // default static variables here
 #
-# EXPORT CLASS *init(CALLBACKS *fntable, MODULE *module, int argc, char *argv[])
+# EXPORT Class *init(CALLBACKS *fntable, MODULE *module, int argc, char *argv[])
 # {
 # 	if (set_callback(fntable)==NULL)
 # 	{

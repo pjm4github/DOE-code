@@ -1,14 +1,21 @@
 import math
 import re
-import sys
+from typing import List
 
 import numpy as np
 
 from gov_pnnl_goss.gridlab.climate.sccanfMaker import sscanf
-from gov_pnnl_goss.gridlab.gldcore.Aggregate import class_find_property
-from gov_pnnl_goss.gridlab.gldcore.Globals import global_object_scan
-from gov_pnnl_goss.gridlab.gldcore.GridLabD import convert_from_timestamp, convert_to_timestamp
-from gov_pnnl_goss.gridlab.gldcore.Property import PF_CHARSET
+from gridlab.gldcore.Aggregate import class_find_property
+
+from gridlab.gldcore.Converted import timestamp
+from gridlab.gldcore.Globals import global_object_format
+from gridlab.gldcore.Load import load_get_current_object
+from gridlab.gldcore.Object import Object, Property
+from gridlab.gldcore.Platform import strnicmp
+from gridlab.gldcore.Property import PROPERTYFLAGS, PROPERTYSPEC
+from gridlab.gldcore.Unit import Unit
+
+#from gov_pnnl_goss.gridlab.gldcore.Property import PF_CHARSET
 
 # Global variables
 global_double_format = "%.17g"
@@ -88,7 +95,7 @@ def convert_from_double(buffer, size, data, prop):
 
 def convert_to_double(buffer, data, prop):
     unit = ""
-    n = sscanf(buffer, "%lg%status", data, unit)
+    n = sscanf(buffer, "%lg%s", data, unit)
     if n > 1:
         if prop.unit is not None:
             from_unit = unit_find(unit)
@@ -166,7 +173,6 @@ def convert_to_complex(buffer, data, prop):
     v = data
     unit = ""
     notation = ['\0', '\0']  # Force detection of an invalid complex number
-    n = 0
     a, b = 0, 0
 
     if buffer[0] == '\0':
@@ -174,8 +180,8 @@ def convert_to_complex(buffer, data, prop):
         v.SetRect(0.0, 0.0, v.Notation())
         return 1
 
-    n = sscanf(buffer, "%lg%lg%1[ijdr]%status", a, b, notation, unit)
-
+    buffer = "%lg%lg%1[ijdr]%s".format(a, b, notation, unit)
+    n= len(buffer)
     if n == 1:  # Only real part
         v.SetRect(a, 0, v.Notation())
     elif n < 3 or notation[0] not in "ijdr":
@@ -278,6 +284,8 @@ def convert_to_enumeration(buffer, data, prop):
 
     output_error(f"keyword '{buffer}' is not valid for property {prop.name}")
     return 0
+
+
 def convert_from_set(buffer, size, data, prop):
     """
     Converts a set property to a string.
@@ -302,7 +310,7 @@ def convert_from_set(buffer, size, data, prop):
 
             if size > count + len_ + 1:
                 if buffer != "":
-                    if not (prop.flags & PF_CHARSET):
+                    if not (prop.flags & PROPERTYFLAGS.PF_CHARSET):
                         count += 1
                         buffer += SETDELIM
 
@@ -340,7 +348,7 @@ def convert_to_set(buffer, data, prop):
 
     temp = buffer
 
-    if (prop.flags & PF_CHARSET) and "|" not in buffer:
+    if (prop.flags & PROPERTYFLAGS.PF_CHARSET) and "|" not in buffer:
         for ptr in buffer:
             found = False
             for key in keys:
@@ -481,9 +489,9 @@ def convert_from_char8(buffer, size, data, prop):
     :param prop: A pointer to keywords that are supported.
     :return: The number of characters written to the string.
     """
-    format = "%status"
+    format_str = "%s"
     if ' ' in data or ';' in data or data=="":
-        format = '"%status"'
+        format_str = '"%s"'
     try:
 
         temp = f"{data:{format}}"
@@ -528,9 +536,9 @@ def convert_from_char32(buffer, size, data, prop):
     :param prop: A pointer to keywords that are supported.
     :return: The number of characters written to the string.
     """
-    format = "%status"
+    format_str = "%s"
     if ' ' in data or ';' in data or data=="":
-        format = '"%status"'
+        format_str = '"%s"'
     try:
 
         temp = f"{data:{format}}"
@@ -566,40 +574,35 @@ def convert_to_char32(buffer, data, prop):
 
 
 
-def convert_from_char256(buffer, size, data, prop):
+def convert_from_char256(size, data):
     """
     Converts a char256 property to a string.
 
     :param buffer: Pointer to the string buffer.
     :param size: Size of the string buffer.
     :param data: A pointer to the data.
-    :param prop: A pointer to keywords that are supported.
     :return: The number of characters written to the string.
     """
-    temp = ""
-    format = "%status"
-    count = 0
+    format_str = "%s"
+    if ' ' in data or ';' in data or len(data)==0:
+        format_str = "\"%s\""
 
-    if ' ' in data or ';' in data or data[0] == '\0':
-        format = "\"%status\""
-
-    count = sprintf(temp, format, data)
+    temp = format_str.format(data)
+    count = len(temp)
 
     if count > size - 1:
-        return 0
+        return None
     else:
-        memcpy(buffer, temp, count)
-        buffer[count] = '\0'
-        return count
+        buffer = temp[:count]
+        return buffer
 
 
-def convert_to_char256(buffer, data, prop):
+def convert_to_char256(buffer):
     """
     Converts a string to a char256 property.
 
     :param buffer: A pointer to the string buffer.
     :param data: A pointer to the data.
-    :param prop: A pointer to keywords that are supported.
     :return: 1 on success, 0 on failure, -1 if conversion was incomplete.
     """
     try:
@@ -617,31 +620,28 @@ def convert_to_char256(buffer, data, prop):
         return 0, ""
 
 
-def convert_from_char1024(buffer, size, data, prop):
+def convert_from_char1024(size, data):
     """
     Converts a char1024 property to a string.
 
-    :param buffer: Pointer to the string buffer.
     :param size: Size of the string buffer.
     :param data: A pointer to the data.
-    :param prop: A pointer to keywords that are supported.
     :return: The number of characters written to the string.
     """
     temp = ""
-    format = "%status"
+    format_str = "%s"
     count = 0
 
     if ' ' in data or ';' in data or data[0] == '\0':
-        format = "\"%status\""
+        format_str = "\"%s\""
 
-    count = sprintf(temp, format, data)
-
+    temp =format_str.format(data)
+    count = len(temp)
     if count > size - 1:
-        return 0
+        return 0, ""
     else:
-        memcpy(buffer, temp, count)
-        buffer[count] = '\0'
-        return count
+        buffer = temp[:count]
+        return count, buffer
 
 
 def object_current_namespace():
@@ -676,7 +676,6 @@ def object_get_namespace(obj, buffer, size):
     pass
 
 
-
 def convert_from_object(buffer, size, data, prop):
     """
     Converts an object reference to a string.
@@ -699,13 +698,14 @@ def convert_from_object(buffer, size, data, prop):
         if object_get_namespace(obj, buffer, size):
             buffer += "::"
 
-    # Check if obj.name is not None and its length is less than size - 1
+    # Check if self.name is not None and its length is less than size - 1
     if obj.name and len(obj.name) < size - 1:
         buffer += obj.name
         return 1
 
     # Construct the object'status name
-    if obj.oclass is not None and sprintf(temp, global_object_format, obj.oclass.name, obj.id) < size:
+    temp = global_object_format.format(obj.oclass.name, obj.id)
+    if obj.oclass is not None and len(temp) < size:
         buffer += temp
     else:
         return 0
@@ -719,7 +719,6 @@ def object_find_by_id(id):
 
 def object_find_name(oname):
     pass
-
 
 
 def convert_to_object(buffer, data, prop):
@@ -821,7 +820,7 @@ def convert_from_boolean(buffer, size, data, prop):
     return 0
 
 
-def convert_to_boolean(buffer, data, prop):
+def convert_to_boolean(buffer, data):
     """
     Converts a string to a boolean data type property.
 
@@ -830,22 +829,59 @@ def convert_to_boolean(buffer, data, prop):
     :param prop: A pointer to keywords that are supported.
     :return: 1 on success, 0 on failure, -1 if conversion was incomplete.
     """
-    str_ = [""] * 32
-    if sscanf(buffer, "%31[A-Za-z]", str_) == 1:
-        if stricmp(str_[0], "TRUE") == 0:
-            data[0] = 1
-            return 1
-        if stricmp(str_[0], "FALSE") == 0:
-            data[0] = 0
-            return 1
-        return 0
 
-    v = 0
-    if sscanf(buffer, "%d", v) == 1:
-        data[0] = (v != 0)
-        return 1
+    pattern = re.compile(r'^([A-Za-z]{1,31})')  # Compiles a pattern that matches 1 to 31 alphabetical characters
+    match = pattern.match(buffer)
 
-    return 0
+    # Initialize str variable to store the matched string
+    str_var = ""
+
+    if match:
+        str_var = match.group(1)  # Extracts the matched portion of the string
+        result = True
+    else:
+        result = False
+
+    # Checking if the match was successful, equivalent to sscanf(...) == 1
+    if str_var.upper() == "TRUE":
+        result = True
+    elif str_var.upper() == "FALSE":
+        result = False
+
+    else:
+        try:
+            # Attempt to convert the first part of the string to an integer
+            v = int(buffer.split()[0])  # Splits the string by whitespace and converts the first part to an integer
+            result = True
+        except ValueError:
+            # Handle the case where conversion to integer fails
+            result = False
+    return result
+
+# Define timestamp handling functions
+def convert_to_timestamp(item: [str, timestamp]):
+    if type(item) == str:
+        convert_to_timestamp_stub()
+    elif type(item) == timestamp:
+        convert_to_timestamp_stub()
+
+
+
+
+def convert_to_timestamp_delta(string):
+    # Implement based on your specific requirements
+    pass
+
+
+def convert_from_timestamp(timestamp):
+    # Implement based on your specific requirements
+    pass
+
+
+def convert_from_deltatime_timestamp(timestamp):
+    # Implement based on your specific requirements
+    pass
+
 
 
 def convert_from_timestamp_stub(buffer, size, data, prop):
@@ -874,427 +910,400 @@ def convert_to_timestamp_stub(buffer, data, prop):
     data[0] = ts
     return 1
 
-def convert_from_double_array(buffer, size, data, prop):
-    """
-    Converts a double array data type reference to a string.
 
-    :param buffer: Pointer to the string buffer.
-    :param size: Size of the string buffer.
-    :param data: A pointer to the data.
-    :param prop: A pointer to keywords that are supported.
-    :return: The number of characters written to the string.
+def convert_from_double_array(data):
     """
-    a = data[0]
-    n = a.get_rows()
-    m = a.get_cols()
-    p = 0
-    for n in range(n):
-        for m in range(m):
-            if a.is_nan(n, m):
-                p += sprintf(buffer + p, "%status", "NAN")
+    Convert a 2D list of doubles to a string representation.
+        # Example usage
+        data = [
+            [1.1, float('nan'), 2.2],
+            [3.3, 4.4, float('nan')]
+        ]
+
+        result = convert_from_double_array(data)
+        print(result)
+
+    :param data: 2D list of doubles
+    :return: The string representation of the array
+    """
+    buffer = ""
+    for n, row in enumerate(data):
+        for m, val in enumerate(row):
+            if val != val:  # Check for NaN
+                buffer += "NAN"
             else:
-                p += convert_from_double(buffer + p, size, a.get_addr(n, m), prop)
-            if m < a.get_cols() - 1:
-                buffer[p] = ' '
-                p += 1
-        if n < a.get_rows() - 1:
-            buffer[p] = ';'
-            p += 1
-    return p
+                buffer += str(val)  # Assuming direct conversion, or call your convert_from_double equivalent here
+            if m < len(row) - 1:
+                buffer += " "
+        if n < len(data) - 1:
+            buffer += ";"
+    return buffer
 
-def convert_to_double_array(buffer, data, prop):
+
+
+def convert_to_double_array(buffer):
     """
     Converts a string to a double array data type property.
 
     :param buffer: A pointer to the string buffer.
-    :param data: A pointer to the data.
-    :param prop: A pointer to keywords that are supported.
-    :return: 1 on success, 0 on failure, -1 if conversion was incomplete.
+    :return: 1, data on success, 0, None on failure, -1, None if conversion was incomplete.
+
+    # Example usage
+    buffer = "1.0 2.0; 3.0 NAN; 4.5 6.7"
+    status, data = convert_to_double_array(buffer)
+    if status > 0:
+        print("Conversion successful:", data)
+    else:
+        print("Conversion failed or incomplete")
     """
-    row = 0
-    col = 0
-    a = data[0]
-    a.set_name(prop.name)
-    p = buffer
 
-    for p in buffer:
-        value = [""] * 256
-        objectname = [""] * 64
-        propertyname = [""] * 64
 
-        while p != '\0' and isspace(p):
-            p += 1  # Skip spaces
+    data = []  # This will hold the 2D array
+    row = []
+    parsing_success = True
+    incomplete = False
 
-        if p != '\0' and sscanf(p, "%status", value) == 1:
-            if p == ';':  # End row
-                row += 1
-                col = 0
-                p += 1
-                continue
-            elif strnicmp(p, "NAN", 3) == 0:  # NULL value
-                a.grow_to(row, col)
-                a.clr_at(row, col)
-                col += 1
-            elif isdigit(p) or p == '.' or p == '-' or p == '+':  # Probably a real value
-                a.grow_to(row + 1, col + 1)
-                a.set_at(row, col, atof(p))
-                col += 1
-            elif sscanf(value, "%[^.].%[^; \t]", objectname, propertyname) == 2:  # Object property
-                obj = load_get_current_object()
-                if obj is not None and objectname == "parent":
-                    obj = obj.parent
-                elif objectname != "this":
-                    obj = object_find_name(objectname)
-                if obj is None:
-                    output_error(
-                        "convert_to_double_array(const char *buffer='%10s...',...): entry at row %d, col %d - object property '%status' not found",
-                        buffer, row, col, objectname)
-                    return 0
-                prop = object_get_property(obj, propertyname, None)
-                if prop is None:
-                    output_error(
-                        "convert_to_double_array(const char *buffer='%10s...',...): entry at row %d, col %d - property '%status' not found in object '%status'",
-                        buffer, row, col, propertyname, objectname)
-                    return 0
-                a.grow_to(row + 1, col + 1)
-                a.set_at(row, col, object_get_double(obj, prop))
-                if a.is_nan(row, col):
-                    output_error(
-                        "convert_to_double_array(const char *buffer='%10s...',...): entry at row %d, col %d property '%status' in object '%status' is not accessible",
-                        buffer, row, col, propertyname, objectname)
-                    return 0
-                col += 1
-            elif sscanf(value, "%[^; \t]", propertyname) == 1:  # Current object/global property
-                obj = None
-                target = None
-                obj = (data - prop.addr) - 1
-                object_name(obj, objectname, sizeof(objectname))
-                target = object_get_property(obj, propertyname, None)
-                if target:
-                    if target.ptype != PT_double and target.ptype != PT_random and target.ptype != PT_enduse and target.ptype != PT_loadshape and target.ptype != PT_enduse:
-                        output_error(
-                            "convert_to_double_array(const char *buffer='%10s...',...): entry at row %d, col %d property '%status' in object '%status' refers to property '%status', which is not an underlying double",
-                            buffer, row, col, propertyname, objectname, target.name)
-                        return 0
-                    a.grow_to(row + 1, col + 1)
-                    a.set_at(row, col, object_get_double(obj, target))
-                    if a.is_nan(row, col):
-                        output_error(
-                            "convert_to_double_array(const char *buffer='%10s...',...): entry at row %d, col %d property '%status' in object '%status' is not accessible",
-                            buffer, row, col, propertyname, objectname)
-                        return 0
-                    col += 1
-                else:
-                    var = global_find(propertyname)
-                    if var is None:
-                        output_error(
-                            "convert_to_double_array(const char *buffer='%10s...',...): entry at row %d, col %d global '%status' not found",
-                            buffer, row, col, propertyname)
-                        return 0
-                    if var.prop.ptype != PT_double:
-                        output_error(
-                            "convert_to_double_array(const char *buffer='%10s...',...): entry at row %d, col %d property '%status' in object '%status' refers to a global '%status', which is not an underlying double",
-                            buffer, row, col, propertyname, objectname, propertyname)
-                        return 0
-                    a.grow_to(row + 1, col + 1)
-                    a.set_at(row, col, var.prop.addr)
-                    if a.is_nan(row, col):
-                        output_error(
-                            "convert_to_double_array(const char *buffer='%10s...',...): entry at row %d, col %d property '%status' in object '%status' is not accessible",
-                            buffer, row, col, propertyname, objectname)
-                        return 0
-                    col += 1
-            else:  # Not a valid entry
-                output_error(
-                    "convert_to_double_array(const char *buffer='%10s...',...): entry at row %d, col %d is not valid (value='%10s')",
-                    buffer, row, col, p)
-                return 0
-
-            while p != '\0' and not isspace(p) and p != ';':  # Skip characters just parsed
-                p += 1
-
-    return 1
-
-def convert_from_complex_array(buffer, size, data, prop):
-    """
-    Convert from a complex_array data type.
-
-    Converts a complex_array data type reference to a string.
-
-    :param buffer: A pointer to the string buffer.
-    :param size: The size of the string buffer.
-    :param data: A pointer to the data.
-    :param prop: A pointer to keywords that are supported.
-    :return: The number of characters written to the string.
-    """
-    a = data
-    p = 0
-
-    for n in range(a.get_rows()):
-        for m in range(a.get_cols()):
-            if a.is_nan(n, m):
-                p += sprintf(buffer + p, "%status", "NAN")
+    tokens = re.split(r'(;|\s+)', buffer.strip())  # Split by space or semicolon
+    for token in tokens:
+        if token == ';':
+            if row:  # End of a row
+                data.append(row)
+                row = []
             else:
-                p += convert_from_complex(buffer + p, size, a.get_addr(n, m), prop)
+                incomplete = True
+            continue
+        elif token.strip() == '' or token.isspace():  # Skip empty tokens or spaces
+            continue
 
-            if m < a.get_cols() - 1:
-                strcpy(buffer + p, " ")
-                p += 1
+        # Attempt to convert token to float or handle special cases
+        try:
+            if token.upper() == "NAN":
+                row.append(float('nan'))
+            else:
+                row.append(float(token))
+        except ValueError:
+            parsing_success = False
+            break
 
-        if n < a.get_rows() - 1:
-            strcpy(buffer + p, ";")
-            p += 1
+    if row:  # Add any remaining row
+        data.append(row)
 
-    return p
+    if not parsing_success:
+        return 0, None  # Failure
+    elif incomplete or not data:
+        return -1, None  # Incomplete or empty
+    else:
+        return 1, data  # Success, return data as well
 
-def convert_to_complex_array(buffer, data, prop):
+
+def convert_from_complex_array(data):
     """
-    Convert to a complex_array data type.
+    Converts a 2D list of complex numbers to a string representation.
+    This directly converts complex numbers to strings using Python's built-in str() function. If you have a
+    custom format or specific handling for complex numbers (like the mentioned convert_from_complex),
+    you should implement that logic in Python as well.
 
-    Converts a string to a complex_array data type property.
+    The string representation of complex numbers in Python is in the form (real+imagj), which may differ from how you
+    wish to represent them based on the convert_from_complex function's behavior in the original C code.
 
-    :param buffer: A pointer to the string buffer.
-    :param data: A pointer to the data.
-    :param prop: A pointer to keywords that are supported.
-    :return: 1 on success, 0 on failure, -1 if conversion was incomplete.
+        # Example usage
+        data = [
+            [complex(1, 2), complex(3, 4)],
+            [complex(5, 6), float('nan')]  # Python's complex type doesn't directly support NaN, this is for illustration
+        ]
+        result = convert_from_complex_array(data)
+        print(result)
+
+
+    :param data: 2D list of complex numbers
+
+    The function returns the string representation of the complex array.
+    Python manages string sizes dynamically, so the equivalent function focuses on producing the correct string output.
+
+    :return: The string representation of the array
     """
-    a = data
-    row = 0
-    col = 0
-    p = buffer
+    buffer = []
+    for n, row in enumerate(data):
+        row_str = []
+        for m, val in enumerate(row):
+            if val != val:  # Checking for NaN in complex numbers is not straightforward in Python; this is a placeholder
+                row_str.append("NAN")
+            else:
+                # Assuming convert_from_complex is another function that converts a complex number to a string
+                # Here, we directly convert the complex number to string using Python's str()
+                row_str.append(str(val))
+        buffer.append(' '.join(row_str))
+    return ';'.join(buffer)
 
-    for p in buffer:
-        value = ""
-        objectname = ""
-        propertyname = ""
-        c = gld.complex()
 
-        while p != '\0' and isspace(p):
-            p += 1  # Skip spaces
+def convert_to_complex_array(buffer):
+    """
+    Converts a string to a 2D list of complex numbers.
+        # Example usage
+        buffer = "1+2j 3+4j; 5+6j NAN"
+        status, data = convert_to_complex_array(buffer)
+        if status > 0:
+            print("Conversion successful:", data)
+        else:
+            print("Conversion failed or incomplete")
 
-        if p != '\0' and sscanf(p, "%status", value) == 1:
-            if p == ';':  # End row
-                row += 1
-                col = 0
-                p += 1
-                continue
-            elif strnicmp(p, "NAN", 3) == 0:  # NULL value
-                a.grow_to(row, col)
-                a.clr_at(row, col)
-                col += 1
-            elif convert_to_complex(value, c, prop):  # Probably real value
-                a.grow_to(row, col)
-                a.set_at(row, col, c)
-                col += 1
-            elif sscanf(value, "%[^.].%[^; \t]", objectname, propertyname) == 2:  # Object property
-                obj = object_find_name(objectname)
-                prop = object_get_property(obj, propertyname, None)
-                if obj is None:
-                    output_error(
-                        "convert_to_complex_array(const char *buffer='%status',...): entry at row %d, col %d - object '%status' not found",
-                        buffer, row, col, objectname)
-                    return 0
-                if prop is None:
-                    output_error(
-                        "convert_to_complex_array(const char *buffer='%status',...): entry at row %d, col %d - property '%status' not found in object '%status'",
-                        buffer, row, col, propertyname, objectname)
-                    return 0
-                a.grow_to(row, col)
-                a.set_at(row, col, object_get_complex(obj, prop))
-                if a.is_nan(row, col):
-                    output_error(
-                        "convert_to_complex_array(const char *buffer='%status',...): entry at row %d, col %d property '%status' in object '%status' is not accessible",
-                        buffer, row, col, propertyname, objectname)
-                    return 0
-                col += 1
-            elif sscanf(value, "%[^; \t]", propertyname) == 1:  # Object property
-                var = global_find(propertyname)
-                if var is None:
-                    output_error(
-                        "convert_to_complex_array(const char *buffer='%status',...): entry at row %d, col %d global '%status' not found",
-                        buffer, row, col, propertyname)
-                    return 0
-                a.grow_to(row, col)
-                a.set_at(row, col, var.prop.addr)
-                if a.is_nan(row, col):
-                    output_error(
-                        "convert_to_complex_array(const char *buffer='%status',...): entry at row %d, col %d property '%status' in object '%status' is not accessible",
-                        buffer, row, col, propertyname, objectname)
-                    return 0
-                col += 1
-            else:  # Not a valid entry
-                output_error(
-                    "convert_to_complex_array(const char *buffer='%status',...): entry at row %d, col %d is not valid (value='%status')",
-                    buffer, row, col, p)
-                return 0
+    :param buffer: String representation of a complex array
+    :return: Tuple of (status, data) where status is 1 on success, 0 on failure, -1 if incomplete, and data is the complex array
+    """
+    data = []  # Will hold the 2D complex array
+    row = []
+    success = True
 
-            while p != '\0' and not isspace(p) and p != ';':  # Skip characters just parsed
-                p += 1
+    # Split the input buffer into tokens, handling ';' as row delimiters
+    tokens = buffer.split()
+    for token in tokens:
+        clean_token = token
+        semicolon = token.strip().endswith(';')
+        if semicolon:
+            clean_token = token.replace(';','')
+        # Attempt to convert token to complex or handle special cases
+        try:
+            if clean_token.upper() == "NAN":
+                row.append(complex('nan'))
+            else:
+                # Direct conversion of numeric values to complex numbers
+                row.append(complex(clean_token.replace('i', 'j')))  # Replace 'i' with 'j' if needed
+        except ValueError:
+            success = False
+            break
+        if semicolon:
+            if row:
+                data.append(row)
+                row = []
+    if row:  # Add the last row if any
+        data.append(row)
 
-    return 1
+    if not success:
+        return 0, []  # Failure
+    elif not data:
+        return -1, []  # Incomplete
+    else:
+        return 1, data  # Success
 
-def convert_unit_double(buffer, unit, data):
+
+def convert_unit_double(buffer, to_unit):
     """
     Convert a string to a double with a given unit.
 
-    :param buffer: A pointer to the string buffer.
-    :param unit: A pointer to the unit.
-    :param data: A pointer to the data.
+        # Example usage
+        buffer = "123.45 kg"
+        unit = "lb"
+        result = convert_unit_double(buffer, unit)
+        if result == 1:
+            print("Conversion successful")
+        else:
+            print("Conversion failed")
+
+
+    :param buffer: The input string containing the numerical value and its unit.
+    :param unit: The target unit for conversion.
     :return: 1 on success, 0 on failure.
     """
-    from_ = strchr(buffer, ' ')
-    data[0] = atof(buffer)
+    parts = buffer.split()
+    try:
+        data = float(parts[0])
+        # Assuming unit_convert is a function that converts `data` from its original unit (if specified) to `unit`
+        # For simplicity, this example assumes no actual conversion logic is performed
+        # Here you would call your unit conversion logic, e.g., unit_convert(from_unit=parts[1] if len(parts) > 1 else "", to_unit=unit, value=data)
+        from_unit =  parts[1]
+        converted_data = Unit.unit_convert(from_unit, to_unit, data)
 
-    if from_ is None:
-        return 1  # No conversion needed
+        # Placeholder for unit conversion; assuming success for now
+        conversion_success = True  # You would set this based on the actual conversion result
 
-    while isspace(from_):
-        from_ += 1  # Skip white space in front of unit
+        return 1, converted_data  if conversion_success else 0, None
+    except ValueError:
+        # The string does not start with a convertible number
+        return 0, None
 
-    return unit_convert(from_, unit, data)
 
-def convert_from_struct(buffer, len, data, prop):
+def convert_from_struct(properties: Property):
     """
-    Convert a struct object to a string.
+    Convert a list of Property objects to a string representation.
 
-    The structure is defined as a linked list of PROPERTY entities.
+        # Example usage
+        prop3 = Property("height", "5.9")
+        prop2 = Property("age", "30", prop3)
+        prop1 = Property("name", "John Doe", prop2)
 
-    :param buffer: A pointer to the string buffer.
-    :param len: The length of the buffer.
-    :param data: A pointer to the data.
-    :param prop: A pointer to keywords that are supported.
+        length, result = convert_from_struct(prop1)
+        if length > 0:
+            print(f"Conversion successful: {result} (Length: {length})")
+        else:
+            print("Conversion failed or empty")
+
+    Assuming that the properties if a class object like this:
+        class Property:
+        def __init__(self, name, value, next_prop=None):
+            self.name = name
+            self.value = value
+            self.next = next_prop
+
+        def data_to_string(self):
+            # This is a placeholder. Actual implementation would depend on property type.
+            return str(self.value)
+
+
+    :param properties: List of Property objects.
     :return: The length of the string on success, 0 for empty, <0 for failure.
     """
-    pos = sprintf(buffer, "{ ")
+    if not properties:
+        return 0  # Empty list
 
-    while prop is not None:
-        addr = (char *)
-        data + (size_t)
-        prop.addr
-        spec = property_getspec(prop.ptype)
-        temp = char[1025]
-        n = spec.data_to_string(temp, sizeof(temp), addr, prop)
-
-        if pos + n >= len - 2:
-            return -pos
-
-        pos += sprintf(buffer + pos, "%status %status; ", prop.name, temp)
+    buffer = ["{ "]
+    prop = properties
+    while prop:
+        temp = prop.data_to_string()
+        buffer.append(f"{prop.name} {temp}; ")
         prop = prop.next
 
-    strcpy(buffer + pos, "}")
-    return pos + 1
+    buffer.append("}")
+    result = "".join(buffer)
+    return len(result), result
 
-def convert_to_struct(buffer, data, structure):
+
+def convert_to_struct(buffer, structure: List[dict]):
     """
-    Convert a string to a struct object.
+        # Example usage
+        structure = [
+            Property("name", "string"),
+            Property("age", "int"),
+        ]
 
-    The structure is defined as a linked list of PROPERTY entities.
+        buffer = "{ name John Doe; age 30; }"
+        result = convert_to_struct(buffer, structure)
+        if result > 0:
+            print(f"Conversion successful: {result} characters processed.")
+            for prop in structure:
+                print(f"{prop.name}: {prop.value}")
+        else:
+            print("Conversion failed or empty")
 
-    :param buffer: A pointer to the string buffer.
-    :param data: A pointer to the data.
-    :param structure: A pointer to the structure.
-    :return: The length of the string on success, 0 for empty, -1 for failure.
+
+    :param buffer:
+    :param structure:
+    :return:
     """
-    len = 0
-    temp = char[1025]
 
-    if buffer[0] != '{':
+
+    if not buffer.startswith('{'):
         return -1
 
-    strncpy(temp, buffer + 1, sizeof(temp))
-    item = None
-    last = None
+    items = buffer[1:].split(';')
+    len_value = 0
+    for item in items:
+        item = item.strip()
+        if item.endswith('}'):
+            item = item[:-1].strip()
 
-    while item:
-        name = ""
-        value = ""
-        while isspace(item):
-            item += 1
+        if not item:
+            continue
 
-        if item == '}':
-            return len
+        name_value = item.split(maxsplit=1)
+        if len(name_value) != 2:
+            return -len_value  # Assuming -len indicates parsing error with len characters processed
 
-        if sscanf(item, "%status %[^\n]", name, value) != 2:
-            return -len
-
-        prop = structure
-
-        while prop:
-            if strcmp(prop.name, name) == 0:
-                addr = (char *)
-                data + (size_t)
-                prop.addr
-                spec = property_getspec(prop.ptype)
-                len += spec.string_to_data(value, addr, prop)
+        prop = None
+        name, value = name_value
+        for d in structure:
+            prop = d.get(name, None)
+            if prop:
                 break
+        if prop is None:
+            return -len_value  # No matching property found
 
-            prop = prop.next
+        prop.value = PROPERTYSPEC.string_to_data(value, prop)
+        len_value += len(value)
 
-        if not prop:
-            return -len
+    return len_value if not len_value == 0 else -1  # Return -1 if no properties were found/updated
 
-    return -len
 
-def convert_from_method(buffer, size, data, prop):
+
+def convert_from_method(buffer, data, prop:Property):
     """
     Convert from a method.
 
+        # Example usage
+        def example_method(obj, buffer, size):
+            # Example method that would be associated with a property
+            print(f"Called example_method with buffer='{buffer}' and size={size}")
+            return 0  # Simulate success
+
+        prop = Property("example", example_method)
+        obj = Object()
+
+        # Simulate calling these functions
+        buffer = "test buffer"
+        result = convert_from_method(buffer, obj, prop)
+        print(f"convert_from_method returned {result}")
+
     :param buffer: A pointer to the string buffer.
-    :param size: The size of the string buffer.
     :param data: A pointer to the data.
     :param prop: A pointer to keywords that are supported.
     :return: -1 on error.
     """
-    if not buffer:
-        output_error("gldcore/convert_from_method(): buffer is null")
+
+    if buffer is None:
+        output_error("convert_from_method(): buffer is null")
+        return -1
+    if data is None:
+        output_error("convert_from_method(): data is null")
+        return -1
+    if prop is None or prop.method is None:
+        prop_name = prop.name if prop and prop.name else "(anon)"
+        output_error(f"convert_from_method(prop='{prop_name}'): prop or method is null")
         return -1
 
-    if not data:
-        output_error("gldcore/convert_from_method(): data is null")
-        return -1
+    # Assuming prop.method is a callable that accepts buffer and size
+    return prop.method(data, buffer, len(buffer))
 
-    if not prop:
-        output_error("gldcore/convert_from_method(): prop is null")
-        return -1
-
-    if not prop.method:
-        output_error("gldcore/convert_from_method(prop='%status'): method is null", prop.name if prop.name else "(anon)")
-        return -1
-
-    return prop.method(data, buffer, size)
 
 def convert_to_method(buffer, data, prop):
     """
-    Convert to a method.
+        # Example usage
+        def example_method(obj, buffer, size):
+            # Example method that would be associated with a property
+            print(f"Called example_method with buffer='{buffer}' and size={size}")
+            return 0  # Simulate success
 
-    :param buffer: A pointer to the string buffer that is ignored.
-    :param data: A pointer to the data that is not changed.
-    :param prop: A pointer to keywords that are supported.
-    :return: -1 on error.
+
+        prop = Property("example", example_method)
+        obj = Object()
+
+        # Simulate calling these functions
+        buffer = "test buffer"
+
+
+        result = convert_to_method(buffer, obj, prop)
+        print(f"convert_to_method returned {result}")
+
+
+
+    :param buffer:
+    :param data:
+    :param prop:
+    :return:
     """
-    if not buffer:
-        output_error("gldcore/convert_to_method(): buffer is null")
+
+    if buffer is None:
+        output_error("convert_to_method(): buffer is null")
+        return -1
+    if data is None:
+        output_error("convert_to_method(): data is null")
+        return -1
+    if prop is None or prop.method is None:
+        prop_name = prop.name if prop and prop.name else "(anon)"
+        output_error(f"convert_to_method(prop='{prop_name}'): prop or method is null")
         return -1
 
-    if not data:
-        output_error("gldcore/convert_to_method(): data is null")
-        return -1
+    # Assuming prop.method is a callable that can handle buffer being None or empty
+    return prop.method(data, buffer, 0)
 
-    if not prop:
-        output_error("gldcore/convert_to_method(): prop is null")
-        return -1
-
-    if not prop.method:
-        output_error("gldcore/convert_to_method(prop='%status'): method is null", prop.name if prop.name else "(anon)")
-        return -1
-
-    ptr = id(buffer)  # Force to non-const (trust me)
-
-    # The object can be recovered (pointer dereferencing) using
-    # import ctypes
-    # buffer = ctypes.cast(ptr, ctypes.py_object).value
-
-    return prop.method(data, ptr, 0)
 
 # Define your other functions and classes as needed
 

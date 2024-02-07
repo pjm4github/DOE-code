@@ -1,85 +1,49 @@
 # Static variables
+import copy
 import math
-from datetime import datetime
+import threading
+import random
+import time
+import re
+import sys
+import os
 from enum import Enum
 
-from gov_pnnl_goss.gridlab.gldcore.Class import Class
 from gov_pnnl_goss.gridlab.gldcore.Convert import output_error
 from gov_pnnl_goss.gridlab.gldcore.GridLabD import TS_ZERO, TS_NEVER, WRITELOCK, WRITEUNLOCK
 from gov_pnnl_goss.gridlab.gldcore.Output import output_warning, output_debug
 from gov_pnnl_goss.gridlab.gldcore.Property import PROPERTYTYPE, PROPERTYACCESS, KEYWORD, property_size
+from gov_pnnl_goss.gridlab.gldcore import Class
+from gov_pnnl_goss.gridlab.gldcore.Class import Class
+from gov_pnnl_goss.gridlab.gldcore.Version import version_major, version_minor, version_patch, version_build, version_branch, Version
 
-import os
-import random
-import time
-import re
-
-
-import sys
-import os
-from gov_pnnl_goss.gridlab.gldcore.Version import *
-# from gov_pnnl_goss.gridlab.gldcore.Class import *
-# from gov_pnnl_goss.gridlab.gldcore.Validate import *
-# from gov_pnnl_goss.gridlab.gldcore.Sanitize import *
-
-global_tmp = ""  # Assuming global_tmp is a global variable
-global_varlist = None  # Assuming global_varlist is a global variable
-global_guid_first = True
-global_value = ""
-global_suppress_repeat_messages = True
-global_multirun_mode = False
-
-
-lastvar = None  # Assuming lastvar is a global variable
-
+random_init = random.seed
 
 # Constants
+DT_INFINITY = math.inf
+DT_INVALID = -1
+DT_SECOND = 1.0
+EINVAL = 22  # Invalid argument
+
 HOMEVAR = "HOMEVAR"
-_TMP = "TMP"
-TEMP = "TEMP"
-USERVAR = "USERVAR"
 PATHSEP = os.path.sep
-
-
-
-SUCCESS = "SUCCESS"
-FAILED = "FAILED"
-
 SIGINT = 0x02
 SIGQUIT = 0x03
 SIGILL = 0x04
 SIGTRAP = 0x05
 
-EINVAL = 22  # Invalid argument
-
-# $Id: globals.h 4738 2014-07-03 00:55:39Z dchassin $
-# Copyright (C) 2008 Battelle Memorial Institute
-# @file globals.h
-# @addtogroup globals
-# @{
+# FAILED = "FAILED"
+# SUCCESS = "SUCCESS"
+FAILED = -1
+SUCCESS = 0
 
 
-env_delim = ":"
-env_delim_char = ':'
-env_pathsep = "/"
-
-
-class STATUS(Enum):
-    FAILED=False
-    SUCCESS=True
-
-
-class GLOBALVAR:
-    def __init__(self):
-        self.prop = None
-        self.next = None
-        self.flags = 0
-        self.callback = None  # this function will be called whenever the globalvar is set
-        self.lock = 0
+TEMP = "TEMP"
+USERVAR = "USERVAR"
 
 # Exit codes
-XC_SUCCESS = 0  # per system(3)
 XC_EXFAILED = -1  # exec/wait failure - per system(3)
+XC_SUCCESS = 0  # per system(3)
 XC_ARGERR = 1  # error processing command line arguments
 XC_ENVERR = 2  # bad environment startup
 XC_TSTERR = 3  # test failed
@@ -91,92 +55,181 @@ XC_SVRKLL = 8  # server killed
 XC_IOERR = 9  # I/O error
 XC_SHFAILED = 127  # shell failure - per system(3)
 XC_SIGNAL = 128  # signal caught - must be or'd with SIG value if known
-XC_SIGINT = XC_SIGNAL | SIGINT  # SIGINT caught
 XC_EXCEPTION = 255  # exception caught
+XC_SIGINT = XC_SIGNAL | SIGINT  # SIGINT caught
 
-def global_init():
+_TMP = "TMP"
+env_delim = ":"
+env_delim_char = ':'
+env_pathsep = "/"
+
+
+
+lastvar = None  # Assuming lastvar is a global variable
+technology_readiness_level = None  # TODO fix this
+
+
+class STATUS(Enum):
+    FAILED = False
+    SUCCESS = True
+
+
+class GLOBALVAR:
+    def __init__(self, name, prop_type, addr, access, description=None, units=None, keys=None):
+        self.prop = None
+        self.next = None
+        self.callback = None  # this function will be called whenever the globalvar is set
+        self.lock = False
+        # self.prop_type = prop_type
+        # self.prop_addr = addr
+        # self.prop_access = access
+        # self.prop_description = description
+        # self.prop_units = units
+        # self.prop_keys = keys
+
+# class GLOBALVAR:
+#     def __init__(self):
+#         self.prop = None
+#         self.next = None
+#         self.flags = 0
+#         self.callback = None  # this function will be called whenever the globalvar is set
+#         self.lock = 0
+
+def global_autoclean():
     pass
 
-def global_getnext(previous):
+def global_bigranks():
     pass
 
-def global_find(name):
+def global_check_version():
     pass
 
-def global_create(name, *args):
+def global_checkpoint_file():
     pass
 
-def global_setvar(defs):
+def global_checkpoint_interval():
     pass
 
-def global_getvar(name, buffer, size):
+def global_checkpoint_keepall():
     pass
 
-def global_isdefined(name):
+def global_checkpoint_seqnum():
     pass
 
-def global_dump():
+def global_checkpoint_type():
     pass
 
-def global_getcount():
+def global_client_allowed():
     pass
 
-global_version_major = Version.REV_MAJOR
-global_version_minor = Version.REV_MINOR
-global_version_patch = Version.REV_PATCH
-global_version_build = 0
-global_version_branch = ""
+def global_compileonly():
+    pass
 
-global_command_line = ""
-global_environment = "batch"
-global_quiet_mode = False
-global_warn_mode = True
-global_debug_mode = False
-global_test_mode = False
-global_verbose_mode = False
-global_debug_output = False
-global_keep_progress = False
-global_iteration_limit = 100
-global_federation_reiteration = False
-global_workdir = "."
-global_dumpfile = "gridlabd.xml"
-global_savefile = ""
-global_lock_enabled = True
-global_dumpall = False
-global_runchecks = False
-global_threadcount = 1
-global_profiler = 0
-global_pauseatexit = 0
-global_testoutputfile = "test.txt"
-global_xml_encoding = 8
-global_pidfile = ""
-global_no_balance = False
-global_kmlfile = ""
-global_modelname = ""
-global_execdir = ""
-global_strictnames = True
-global_xmlstrict = True
-global_relax_naming_rules = 0
-global_urlbase = "./" if os._debug else "http://www.gridlabd.org/"
-global_randomseed = 0
-global_include = ""
-global_gdb = 0
-global_trace = ""
-global_gdb_window = 0
-global_process_id = 0
-global_execname = ""
-global_tmp = "C:\\WINDOWS\\TEMP" if sys.platform == 'win32' else "/tmp"
-global_force_compile = 0
-global_nolocks = 0
-global_forbid_multiload = 0
-global_skipsafe = 0
 
-# Constants
-SUCCESS = 0
-FAILED = -1
-DT_INVALID = -1
-DT_INFINITY = math.inf
-DT_SECOND = 1.0
+def global_deltamode_iteration_limit():
+    pass
+
+
+def global_deltamode_updateorder():
+    pass
+
+def global_exit_code():
+    pass
+
+def global_hostaddr():
+    pass
+
+def global_hostname():
+    pass
+
+def global_infourl():
+    pass
+
+def global_init_max_defer():
+    pass
+
+def global_inline_block_size():
+    pass
+
+def global_mainlooppauseat():
+    pass
+
+
+def global_master():
+    pass
+
+def global_master_port():
+    pass
+
+def global_module_compiler_flags():
+    pass
+
+
+def global_multirun_connection():
+    pass
+
+def global_randomnumbergenerator():
+    pass
+
+def global_reinclude():
+    pass
+
+def global_relax_naming_rules():
+    pass
+
+def global_return_code():
+    pass
+
+def global_run_power_world():
+    pass
+
+def global_sanitize_index():
+    pass
+
+def global_sanitize_offset():
+    pass
+
+def global_sanitize_options():
+    pass
+
+def global_sanitize_prefix():
+    pass
+
+def global_server_port_num():
+    pass
+
+def global_server_quit_on_close():
+    pass
+
+def global_show_progress():
+    pass
+
+def global_signal_timeout():
+    pass
+
+def global_simulation_mode():
+    pass
+
+def global_slave_id():
+    pass
+
+def global_slave_port():
+    pass
+
+def global_streaming_io_enabled():
+    pass
+
+def global_svn_root():
+    pass
+
+def global_sync_dumpfile():
+    pass
+
+def global_validate_options():
+    pass
+
+def global_wget_options():
+    pass
 
 
 class DATEFORMAT(Enum):
@@ -184,7 +237,7 @@ class DATEFORMAT(Enum):
     DF_US=1
     DF_EURO=2
 
-global_dateformat = DATEFORMAT.DF_ISO
+
 
 class INITSEQ(Enum):
     IS_CREATION=0
@@ -210,17 +263,6 @@ class CHECKPOINTTYPE(Enum): #checkpoint type determines how checkpoint intervals
     CPT_SIM = 2   # **< checkpoints run on sim clock interval */
 
 
-global_init_sequence = INITSEQ.IS_DEFERRED
-
-
-global_clock = TS_ZERO
-global_nextTime = TS_ZERO
-global_starttime = 946684800
-global_stoptime = TS_NEVER
-
-global_double_format = "%+lg"
-global_complex_format = "%+lg%+lg%c"
-
 class COMPLEXCONVERFORMAT(Enum):
     CNF_DEFAULT = 0
     CNF_RECT = 1
@@ -239,7 +281,6 @@ class MAINLOOPSTATE(Enum): # identifies the main loop state
     MLS_PAUSED = 2  # main loop is paused (waiting)
     MLS_DONE = 3  #  main loop is done (steady)
     MLS_LOCKED = 4  #  main loop is locked (possible deadlock)
-
 
 
 class SIMULATIONMODE(Enum):  # simulation mode values, delta mode support
@@ -262,7 +303,7 @@ class MULTIRUNMODE(Enum):  # determines the type of run */
 
 
 class MULTIRUNCONNECTION(Enum):  #	/**< determines the connection mode for a slave run */
-    MULTIRUNCONNECTION = 0  # 	/**< isn't actually connected upwards */
+    MRC_NONE = 0  # 	/**< isn't actually connected upwards */
     MRC_MEM = 1  # 	/**< use shared mem or the like */
     MRC_SOCKET = 2  # **< use a socket */
 
@@ -316,43 +357,100 @@ class SANITIZEOPTIONS(Enum):
     SO_ALL			= 0x0ff0  # < option to sanitize all info
 
 
-global_complex_output_format = COMPLEXCONVERFORMAT.CNF_DEFAULT
 
+
+# Global Variables
+# Global variables (you need to define them appropriately)
+global_autostartgui = True
+global_browser = "your_browser_executable"
+global_clock = TS_ZERO
+global_command_line = ""
+global_complex_format = "%+lg%+lg%c"
+global_complex_output_format = COMPLEXCONVERFORMAT.CNF_DEFAULT
+global_dateformat = DATEFORMAT.DF_ISO
+global_debug_mode = False
+global_debug_output = False
+global_delta_curr_clock = 0
+global_deltaclock = 0
+global_deltamode_force_preferred_order = False
+global_deltamode_forced_always = False
+global_deltamode_forced_extra_timesteps = 0
+global_deltamode_maximumtime_pub = 0
+global_deltamode_timestep_pub = 0
+global_double_format = "%+lg"
+global_dumpall = False
+global_dumpfile = "gridlabd.xml"
+global_enter_realtime = TS_NEVER
+global_environment = ""
+global_execdir = ""
+global_execname = ""
+global_federation_reiteration = False
+global_forbid_multiload = 0
+global_force_compile = 0
+global_gdb = 0
+global_gdb_window = 0
+global_guid_first = True
+global_include = ""
+global_init_sequence = INITSEQ.IS_DEFERRED
+global_iteration_limit = 100
+global_keep_progress = False
+global_kmlfile = ""
+global_lock_enabled = True
+global_mainloopstate = ""
+global_maximum_synctime = 60
+global_minimum_timestep = 1
+global_modelname = ""
+global_mt_analysis = 0
+global_multirun_mode = False
+global_next_time = TS_ZERO
+global_no_balance = False
+global_nolocks = 0
+global_nondeterminism_warning = True
 global_object_format = "%s:%d"
 global_object_scan = "%[^:]:%d"
-
-global_minimum_timestep = 1
-global_maximum_synctime = 60
-
-global_platform = "WINDOWS" if sys.platform == 'win32' else "MACOSX" if os.__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ >= 1050 else "LINUX"
-
-global_suppress_repeat_messages = 1
-global_suppress_deprecated_messages = 0
-
-global_run_realtime = 0
-global_enter_realtime = TS_NEVER
+global_pauseatexit = 0
+global_pidfile = ""
+global_platform = "WINDOWS" if sys.platform == 'win32' else "MACOSX" if sys.platform ==  'darwin' else "LINUX"
+global_process_id = 0
+global_profiler = 0
+global_quiet_mode = False
+global_randomseed = 0
 global_realtime_metric = 0
+global_run_realtime = False
+global_runchecks = False
+global_savefile = ""
+global_skipsafe = 0
+global_start_time = 946684800
+global_stop_time = TS_NEVER
+global_stoptime = 0
+global_strictnames = True  # Initialize global_strictnames with the desired value
+global_suppress_deprecated_messages = False
+global_suppress_repeat_messages = True
+global_test_mode = False
+global_testoutputfile = "test.txt"
+global_thread_count = 1
+global_threadcount = 0
+global_tmp = "C:\\WINDOWS\\TEMP" if sys.platform == 'win32' else "/tmp"   # Assuming global_tmp is a global variable
+global_trace = ""
+global_urlbase = "./" if global_debug_mode else "https://www.gridlabd.org/"
+global_value = ""
+global_varlist = None  # Assuming global_varlist is a global variable
+global_verbose_mode = False
+global_version_branch = ""
+global_version_build = 0
+global_version_major = Version.REV_MAJOR
+global_version_minor = Version.REV_MINOR
+global_version_patch = Version.REV_PATCH
+global_warn_mode = True
+global_workdir = "."
+global_xml_encoding = 8
+global_xmlstrict = True
 
-if os._debug:
+
+
+if global_debug_mode:
     global_sync_dumpfile = ""
 
-#
-# class PROPERTYTYPE:
-#     def __init__(self, value):
-#         self.value = value
-
-
-class GLOBALVAR:
-    def __init__(self, name, prop_type, addr, access, description=None, units=None, keys=None):
-        self.prop = None
-        self.next = None
-        self.callback = None
-        self.prop_type = prop_type
-        self.prop_addr = addr
-        self.prop_access = access
-        self.prop_description = description
-        self.prop_units = units
-        self.prop_keys = keys
 
 # Keyword lists
 cnf_keys = []
@@ -490,6 +588,7 @@ def buildtmp():
     global_tmp = os.path.join(tmp, user if user else "", "gridlabd")
 
 
+
 # Function to register global variables
 def global_init():
     buildtmp()
@@ -506,14 +605,14 @@ def global_init():
     global_version_build = version_build()
     global_version_branch = version_branch()[:len(global_version_branch)]
 
-    for i in range(len(map)):
-        p = map[i]
+    for i in range(len(global_map)):
+        p = global_map[i]
         var = global_create(p["name"], p["type"], p["addr"], PROPERTYTYPE.PT_ACCESS, p["access"],
                             p["description"] if "description" in p else 0,
                             p["description"] if "description" in p else None,
                             PROPERTYTYPE.PT_UNITS if "units" in p else 0, p["units"] if "units" in p else None, None)
         if var is None:
-            output_error("global_init(): global variable '%s' registration failed", p["name"])
+            output_error("global_init(): global variable '%s' registration failed" % p["name"])
             # TROUBLESHOOT
             # The global variable initialization process was unable to register
             # the indicated global variable. This error usually follows a more
@@ -530,20 +629,19 @@ def global_init():
 def global_find(name):
     var = None
     if name is None:  # Get the first global in the list
-        return global_getnext(None)
-    for var in global_getnext(None):
+        return global_get_next(None)
+    for var in global_get_next(None):
         if var.prop.name == name:
             return var
     return None
 
 
 # Function to get the next global variable name
-def global_getnext(previous):
+def global_get_next(previous):
     if previous is None:
         return global_varlist
     else:
         return previous.next
-
 
 # Function to create a user-defined global variable
 def global_create(name, *args):
@@ -578,7 +676,7 @@ def global_create(name, *args):
                 access = access_arg
             else:
                 errno = EINVAL
-                output_error("global_create(): unrecognized property access code (PROPERTYACCESS=%d)", access_arg)
+                output_error("global_create(): unrecognized property access code (PROPERTYACCESS=%d)" % access_arg)
                 # TROUBLESHOOT
                 # The specific property access code is not recognized. Correct the access code and try again.
         elif prop_type_arg == PROPERTYTYPE.PT_SIZE:
@@ -596,14 +694,14 @@ def global_create(name, *args):
         elif prop_type_arg == PROPERTYTYPE.PT_DEPRECATED:
             pass  # Do nothing for deprecated properties
         else:
-            output_error("global_create(): property extension code not recognized (PROPERTYTYPE=%d)", prop_type_arg)
+            output_error("global_create(): property extension code not recognized (PROPERTYTYPE=%d)" % prop_type_arg)
             # TROUBLESHOOT
             # The property extension code used is not valid. This is probably a bug and should be reported.
 
     # Check for duplicate entries
     if global_find(name):
         errno = EINVAL
-        output_error("tried to create global variable '%s' a second time", name)
+        output_error("tried to create global variable '%s' a second time" % name)
         # TROUBLESHOOT
         # An attempt to create a global variable failed because the
         # indicated variable already exists. Find out what is attempting
@@ -625,7 +723,7 @@ def global_create(name, *args):
     var.prop = None
     var.next = None
 
-    # # Link map to oclass if not yet done
+    # # Link global_map to oclass if not yet done
     # if lastvar is not None:
     #     lastvar.next = var
     # else:
@@ -648,7 +746,7 @@ def global_create(name, *args):
     #                 int32 keyvalue = va_arg(arg, int32);
     #                 KEYWORD *key = (KEYWORD *) malloc(sizeof(KEYWORD));
     #                 if (key == NULL) {
-    #                     throw_exception("global_create(char *name='%s',...): property keyword could not be stored", name);
+    #                     throw_exception("global_create(char *name='%s',...): property keyword could not be stored" % name);
     #                     /* TROUBLESHOOT
     #                         The memory needed to store the property's keyword is not available.  Try freeing up memory and try again.
     #                      */
@@ -662,7 +760,7 @@ def global_create(name, *args):
     #                 unsigned int64 keyvalue = va_arg(arg, uint64);
     #                 KEYWORD *key = (KEYWORD *) malloc(sizeof(KEYWORD));
     #                 if (key == NULL) {
-    #                     throw_exception("global_create(char *name='%s',...): property keyword could not be stored", name);
+    #                     throw_exception("global_create(char *name='%s',...): property keyword could not be stored" % name);
     #                     /* TROUBLESHOOT
     #                         The memory needed to store the property's keyword is not available.  Try freeing up memory and try again.
     #                      */
@@ -709,7 +807,7 @@ def global_create(name, *args):
     #             } else if (proptype == PROPERTYTYPE.PT_UNITS) {
     #                 char *unitspec = va_arg(arg, char *);
     #                 if ((prop->unit = unit_find(unitspec)) == NULL) {
-    #                     output_warning("global_create(char *name='%s',...): property %s unit '%s' is not recognized", name,
+    #                     output_warning("global_create(char *name='%s',...): property %s unit '%s' is not recognized" % name,
     #                                    prop->name, unitspec);
     #                     /* TROUBLESHOOT
     #                         The property definition uses a unit that is not found.  Check the unit and try again.
@@ -735,7 +833,7 @@ def global_create(name, *args):
     #             prop_buffer = va_arg(arg, uint64);
     #             PROPERTYADDR addr = PROPERTYADDR(prop_buffer);
     #             if (strlen(name) >= sizeof(prop->name)) {
-    #                 throw_exception("global_create(char *name='%s',...): property name '%s' is too big to store", name,
+    #                 throw_exception("global_create(char *name='%s',...): property name '%s' is too big to store" % name,
     #                                 name);
     #                 /* TROUBLESHOOT
     #                     The property name cannot be longer than the size of the internal buffer used to store it (currently this is 63 characters).
@@ -745,11 +843,11 @@ def global_create(name, *args):
     #             prop = property_malloc(proptype, NULL, strdup(name), addr, NULL);
     #
     #             if (prop == NULL)
-    #                 throw_exception("global_create(char *name='%s',...): property '%s' could not be stored", name, name);
+    #                 throw_exception("global_create(char *name='%s',...): property '%s' could not be stored" % name, name);
     #             if (var->prop == NULL)
     #                 var->prop = prop;
     #
-    #             /* link map to oclass if not yet done */
+    #             /* link global_map to oclass if not yet done */
     #             if (lastprop != NULL)
     #                 lastprop->next = prop;
     #             else
@@ -780,7 +878,7 @@ def class_string_to_property(prop, prop_addr, value):
     pass
 
 
-def global_setvar(def_str, *args):
+def global_set_var(def_str, *args):
     name = ""
     value = ""
 
@@ -793,9 +891,9 @@ def global_setvar(def_str, *args):
         v = args[0]
         if v is not None:
             value = v
-            if value != v:
-                output_error("global_setvar(char *name='%s',...): value is too long to store")
-                return FAILED
+            # if value != v:
+            #     output_error("global_setvar(char *name='%s',...): value is too long to store")
+            #     return FAILED
 
     if name != "":
         var = global_find(name)
@@ -803,13 +901,13 @@ def global_setvar(def_str, *args):
 
         if var is None:
             if global_strictnames:
-                output_error("strict naming prevents implicit creation of %s", name)
+                output_error("strict naming prevents implicit creation of %s" % name)
                 return FAILED
 
             var = global_create(name, PROPERTYTYPE.PT_char1024, None,
                                 PROPERTYTYPE.PT_SIZE, 1, PROPERTYTYPE.PT_ACCESS, PROPERTYACCESS.PA_PUBLIC, None)
             if var is None:
-                output_error("unable to implicitly create the global variable '%s'", name)
+                output_error("unable to implicitly create the global variable '%s'" % name)
                 return FAILED
 
         WRITELOCK(globalvar_lock)
@@ -817,14 +915,14 @@ def global_setvar(def_str, *args):
         WRITEUNLOCK(globalvar_lock)
 
         if retval == 0:
-            output_error("global_setvar(): unable to set %s to %s", name, value)
+            output_error("global_setvar(): unable to set %s to %s" % (name, value))
             return FAILED
         elif var.callback:
             var.callback(var.prop.name)
 
         return SUCCESS
     else:
-        output_error("global variable definition '%s' not formatted correctly", def_str)
+        output_error("global variable definition '%s' not formatted correctly" % def_str)
         return FAILED
 
 
@@ -853,7 +951,7 @@ def global_guid(buffer, size):
 
 
 # Function to generate a global run ID
-def global_run(buffer, size):
+def global_run(size):
     global global_value
 
     if global_value == "":
@@ -867,7 +965,7 @@ def global_run(buffer, size):
 
 
 # Function to generate the current date and time in a specific format
-def global_now(buffer, size):
+def global_now(size):
     if size > 32:
         now = time.time()
         tmbuf = time.gmtime(now)
@@ -879,9 +977,9 @@ def global_now(buffer, size):
 
 
 # Function to generate a global "true" value
-def global_true(buffer, size):
+def global_true(size):
     if size > 1:
-        buffer = "1"
+        buffer = True
         return buffer
     else:
         output_error("global_now(...): buffer too small")
@@ -900,27 +998,27 @@ def global_seq(buffer, size, name):
         var = global_find(seq)
 
         if var is not None:
-            output_warning("global_seq(char *name='%s'): sequence is already initialized", seq)
+            output_warning("global_seq(char *name='%s'): sequence is already initialized" % seq)
             return None
         else:
             addr = [0]
             var = global_create(seq, PROPERTYTYPE.PT_int32, addr, PROPERTYTYPE.PT_ACCESS, PROPERTYACCESS.PA_PUBLIC, None)
             addr[0] = 0
-            return global_getvar(seq, buffer, size)
+            return global_get_var(seq, buffer, size)
     elif opt == "INC":
         var = global_find(seq)
         addr = None
 
         if var is None or var.prop.ptype != PROPERTYTYPE.PT_int32:
-            output_error("global_seq(char *name='%s'): sequence name is missing or not an int32 variable", name)
+            output_error("global_seq(char *name='%s'): sequence name is missing or not an int32 variable" % name)
             return None
 
         addr = var.prop.prop_addr
         addr[0] += 1
-        output_debug("updating global sequence '%s' to value '%d'", seq, addr[0])
-        return global_getvar(seq, buffer, size)
+        output_debug("updating global sequence '%s' to value '%d'" % (seq, addr[0]))
+        return global_get_var(seq, buffer, size)
     else:
-        output_error("global_seq(..., char *name='%s'): sequence spec '%s' is invalid", name, opt)
+        output_error("global_seq(..., char *name='%s'): sequence spec '%s' is invalid" % (name, opt))
         return None
 
 
@@ -929,33 +1027,26 @@ def global_isdefined(name):
 
 
 def parameter_expansion(buffer, size, spec):
-    name = ""
-    value = ""
-    pattern = ""
-    op = ""
-    string = ""
-    yes = "1"
-    no = "0"
-    offset = 0
-    length = 0
-    number = 0
+    name, value, pattern, op, string = "", "", "", "", ""
+    yes, no = "1", "0"
+    offset, length, number = 0, 0, 0
 
     # ${name:-value}
     match = re.match(r'([^:]+):-([^}]+)}', spec)
     if match:
         name, value = match.groups()
-        if not global_getvar(name, buffer, size):
+        if not global_get_var(name, buffer, size):
             buffer = value[:size]
-        return 1
+        return (name, value, pattern, op, string, yes, no, offset, length, number)
 
     # ${name:=value}
     match = re.match(r'([^:]+):=([^}]+)}', spec)
     if match:
         name, value = match.groups()
         if not global_isdefined(name):
-            global_setvar(name, value)
-        global_getvar(name, buffer, size)
-        return 1
+            global_set_var(name, value)
+        global_get_var(name, buffer, size)
+        return (name, value, pattern, op, string, yes, no, offset, length, number)
 
     # ${name:+value}
     match = re.match(r'([^:]+):\+([^}]+)}', spec)
@@ -965,54 +1056,54 @@ def parameter_expansion(buffer, size, spec):
             buffer = ""
         else:
             buffer = value[:size]
-        return 1
+        return (name, value, pattern, op, string, yes, no, offset, length, number)
 
     # ${name:offset:length}
     match = re.match(r'([^:]+):(\d+):(\d+)', spec)
     if match:
         name, offset, length = match.groups()
-        temp = global_getvar(name, "", 1024)
+        temp = global_get_var(name, "", 1024)
         if temp:
             buffer = temp[offset:offset+length]
             buffer = buffer[:size]
-            return 1
+            return (name, value, pattern, op, string, yes, no, offset, length, number)
         else:
-            return 0
+            return (name, value, pattern, op, string, yes, no, offset, length, number)
 
     # ${name:offset}
     match = re.match(r'([^:]+):(\d+)', spec)
     if match:
         name, offset = match.groups()
-        temp = global_getvar(name, "", 1024)
+        temp = global_get_var(name, "", 1024)
         if temp:
             buffer = temp[offset:]
             buffer = buffer[:size]
-            return 1
+            return (name, value, pattern, op, string, yes, no, offset, length, number)
         else:
-            return 0
+            return (name, value, pattern, op, string, yes, no, offset, length, number)
 
     # ${name/offset/length}
     match = re.match(r'([^/]+)/([^/]+)/([^}]+)}', spec)
     if match:
         name, pattern, string = match.groups()
-        temp = global_getvar(name, "", 1024)
+        temp = global_get_var(name, "", 1024)
         if not temp:
-            return 0
+            return (name, value, pattern, op, string, yes, no, offset, length, number)
         buffer = ""
         ptr = temp.find(pattern)
         if ptr != -1:
             start = ptr
             buffer = temp[:size]
             buffer = buffer[:start] + string + buffer[start + len(string):]
-        return 1
+        return (name, value, pattern, op, string, yes, no, offset, length, number)
 
     # ${name//offset/length}
     match = re.match(r'([^/]+)/(/[^/]+)/([^}]+)}', spec)
     if match:
         name, pattern, string = match.groups()
-        temp = global_getvar(name, "", 1024)
+        temp = global_get_var(name, "", 1024)
         if not temp:
-            return 0
+            return (name, value, pattern, op, string, yes, no, offset, length, number)
         buffer = ""
         while True:
             ptr = temp.find(pattern)
@@ -1022,7 +1113,7 @@ def parameter_expansion(buffer, size, spec):
             buffer = temp[:size]
             buffer = buffer[:start] + string + buffer[start + len(string):]
             temp = buffer
-        return 1
+        return (name, value, pattern, op, string, yes, no, offset, length, number)
 
     # ${++name}
     match = re.match(r'\+\+([A-Za-z0-9_:.]+)', spec)
@@ -1032,7 +1123,7 @@ def parameter_expansion(buffer, size, spec):
         if var and var.prop.ptype == PROPERTYTYPE.PT_int32:
             addr = var.prop.prop_addr
             buffer = str(addr[0] + 1)
-            return 1
+            return (name, value, pattern, op, string, yes, no, offset, length, number)
 
     # ${--name}
     match = re.match(r'--([A-Za-z0-9_:.]+)', spec)
@@ -1042,7 +1133,7 @@ def parameter_expansion(buffer, size, spec):
         if var and var.prop.ptype == PROPERTYTYPE.PT_int32:
             addr = var.prop.prop_addr
             buffer = str(addr[0] - 1)
-            return 1
+            return (name, value, pattern, op, string, yes, no, offset, length, number)
 
     # ${name op value}
     match = re.match(r'([^!<>=&|~]+)([!<>=&|~])(\d+)\?([^:]+):([^}]+)', spec)
@@ -1053,28 +1144,28 @@ def parameter_expansion(buffer, size, spec):
             addr = var.prop.prop_addr
             if op == "==":
                 buffer = yes if addr[0] == int(number) else no
-                return 1
+                return (name, value, pattern, op, string, yes, no, offset, length, number)
             elif op in ("!=", "<>"):
                 buffer = yes if addr[0] != int(number) else no
-                return 1
+                return (name, value, pattern, op, string, yes, no, offset, length, number)
             elif op == "<=":
                 buffer = yes if addr[0] <= int(number) else no
-                return 1
+                return (name, value, pattern, op, string, yes, no, offset, length, number)
             elif op == "<":
                 buffer = yes if addr[0] < int(number) else no
-                return 1
+                return (name, value, pattern, op, string, yes, no, offset, length, number)
             elif op == ">=":
                 buffer = yes if addr[0] >= int(number) else no
-                return 1
+                return (name, value, pattern, op, string, yes, no, offset, length, number)
             elif op == ">":
                 buffer = yes if addr[0] > int(number) else no
-                return 1
+                return (name, value, pattern, op, string, yes, no, offset, length, number)
             elif op == "&":
                 buffer = yes if addr[0] & int(number) else no
-                return 1
+                return (name, value, pattern, op, string, yes, no, offset, length, number)
             elif op == "|~":
                 buffer = yes if addr[0] | ~int(number) else no
-                return 1
+                return (name, value, pattern, op, string, yes, no, offset, length, number)
 
     # ${name op= value}
     match = re.match(r'([^+-/*%&^|~=]+)([-+/*%&^|~=])(\d+)', spec)
@@ -1087,47 +1178,47 @@ def parameter_expansion(buffer, size, spec):
             if op == "+=":
                 addr[0] += int(number)
                 buffer = str(addr[0])
-                return 1
+                return (name, value, pattern, op, string, yes, no, offset, length, number)
             if op == "-=":
                 addr[0] -= int(number)
                 buffer = str(addr[0])
-                return 1
+                return (name, value, pattern, op, string, yes, no, offset, length, number)
             if op == "*=":
                 addr[0] *= int(number)
                 buffer = str(addr[0])
-                return 1
+                return (name, value, pattern, op, string, yes, no, offset, length, number)
             if op == "/=":
                 addr[0] /= int(number)
                 buffer = str(addr[0])
-                return 1
+                return (name, value, pattern, op, string, yes, no, offset, length, number)
             if op == "%=":
                 addr[0] %= int(number)
                 buffer = str(addr[0])
-                return 1
+                return (name, value, pattern, op, string, yes, no, offset, length, number)
             if op == "&=":
                 addr[0] &= int(number)
                 buffer = str(addr[0])
-                return 1
+                return (name, value, pattern, op, string, yes, no, offset, length, number)
             if op == "|=":
                 addr[0] |= int(number)
                 buffer = str(addr[0])
-                return 1
+                return (name, value, pattern, op, string, yes, no, offset, length, number)
             if op == "^=":
                 addr[0] ^= int(number)
                 buffer = str(addr[0])
-                return 1
+                return (name, value, pattern, op, string, yes, no, offset, length, number)
             if op == "&=~":
                 addr[0] &= ~int(number)
                 buffer = str(addr[0])
-                return 1
+                return (name, value, pattern, op, string, yes, no, offset, length, number)
             if op == "|=~":
                 addr[0] |= ~int(number)
                 buffer = str(addr[0])
-                return 1
+                return (name, value, pattern, op, string, yes, no, offset, length, number)
             if op == "^=~":
                 addr[0] ^= ~int(number)
                 buffer = str(addr[0])
-                return 1
+                return (name, value, pattern, op, string, yes, no, offset, length, number)
 
     # ${name=number}
     match = re.match(r'([^=]+)=(\d+)', spec)
@@ -1142,19 +1233,20 @@ def parameter_expansion(buffer, size, spec):
             addr = var.prop.prop_addr
             addr[0] = int(number)
         buffer = str(number)
-        return 1
+        return (name, value, pattern, op, string, yes, no, offset, length, number)
 
     # ${name=string}
     match = re.match(r'([^=]+)=([^}]+)}', spec)
     if match:
         name, string = match.groups()
-        global_setvar(name, string)
+        global_set_var(name, string)
         buffer = string[:size]
-        return 1
+        return (name, value, pattern, op, string, yes, no, offset, length, number)
 
-    return 0
+    return (name, value, pattern, op, string, yes, no, offset, length, number)
 
-def global_getvar(name, buffer, size):
+
+def global_get_var(name, buffer, size):
     """
     Get the value of a global variable in a safer fashion.
 
@@ -1173,10 +1265,10 @@ def global_getvar(name, buffer, size):
         {"name": "NOW", "call": global_now},
         {"name": "RUN", "call": global_run},
         {"name": "WINDOWS", "call": global_true},
-#        {"name": "APPLE", "call": global_true} if defined __APPLE__ else
-#        {"name": "LINUX", "call": global_true},
-#        {"name": "MATLAB", "call": global_true} if HAVE_MATLAB else
-#        {"name": "MYSQL", "call": global_true} if HAVE_MYSQL else
+        # {"name": "APPLE", "call": global_true} if defined __APPLE__ else
+        # {"name": "LINUX", "call": global_true},
+        # {"name": "MATLAB", "call": global_true} if HAVE_MATLAB else
+        # {"name": "MYSQL", "call": global_true} if HAVE_MYSQL else
         {"name": None, "call": None},  # Placeholder for the loop
     ]
 
@@ -1212,7 +1304,7 @@ def global_getvar(name, buffer, size):
         else:
             return None
 
-    len_ = Class.class_property_to_string(var.prop, var.prop.addr, temp, len(temp))
+    len_ = Class.property_to_string(var.prop, var.prop.addr, temp, len(temp))
     if len_ < size:
         # If we have enough space, copy to the supplied buffer
         buffer[:len_] = temp[:len_]
@@ -1221,7 +1313,7 @@ def global_getvar(name, buffer, size):
     return None  # None if insufficient buffer space
 
 
-def global_getcount():
+def global_get_count():
     """
     Get the count of global variables.
 
@@ -1230,7 +1322,7 @@ def global_getcount():
     count = 0
     var = None
     while var is not None:
-        var = global_getnext(var)
+        var = global_get_next(var)
         count += 1
     return count
 
@@ -1245,9 +1337,9 @@ def global_dump():
     old = global_suppress_repeat_messages
     global_suppress_repeat_messages = 0
     while var is not None:
-        var = global_getnext(var)
+        var = global_get_next(var)
         buffer = [0] * 1024
-        if Class.class_property_to_string(var.prop, var.prop.addr, buffer, len(buffer)):
+        if Class.property_to_string(var.prop, var.prop.addr, buffer, len(buffer)):
             print(f"{var.prop.name}={buffer};")
     global_suppress_repeat_messages = old
 
@@ -1266,15 +1358,16 @@ def global_remote_read(local, var):
     # Single host
     if global_multirun_mode == MULTIRUNMODE.MRM_STANDALONE:
         # Single thread
-        if global_threadcount == 1:
+        if global_thread_count == 1:
             # No lock or fetch required
             local[:size] = addr[:size]
             return local
         # Multithread
         else:
-            rlock(var.lock)
-            local[:size] = addr[:size]
-            runlock(var.lock)
+            with threading.RLock().acquire():
+                # rlock(var.lock)
+                local[:size] = copy.copy(addr[:size])
+                # runlock(var.lock)
             return local
     else:
         # @todo remote object read for multihost
@@ -1294,22 +1387,22 @@ def global_remote_write(local, var):
     # Single host
     if global_multirun_mode == MULTIRUNMODE.MRM_STANDALONE:
         # Single thread
-        if global_threadcount == 1:
+        if global_thread_count == 1:
             # No lock or fetch required
             addr[:size] = local[:size]
         # Multithread
         else:
-            wlock(var.lock)
-            addr[:size] = local[:size]
-            wunlock(var.lock)
+            with threading.Lock().acquire():
+                # wlock(var.lock)
+                addr[:size] = copy.copy(local[:size])
+                # wunlock(var.lock)
     else:
         # @todo remote object write for multihost
         pass  # Placeholder for multihost implementation
 
 
-
-# Property map
-map = [
+# Property global_map
+global_map = [
     {"name": "version.major", "type": PROPERTYTYPE.PT_int32, "addr": global_version_major, "access": PROPERTYACCESS.PA_REFERENCE, "description": "major version"},
     {"name": "version.minor", "type": PROPERTYTYPE.PT_int32, "addr": global_version_minor, "access": PROPERTYACCESS.PA_REFERENCE, "description": "minor version"},
     {"name": "version.patch", "type": PROPERTYTYPE.PT_int32, "addr": global_version_patch, "access": PROPERTYACCESS.PA_REFERENCE, "description": "patch number"},
@@ -1332,14 +1425,14 @@ map = [
     {"name": "savefile", "type": PROPERTYTYPE.PT_char1024, "addr": global_savefile, "access": PROPERTYACCESS.PA_PUBLIC, "description": "save input_code_filename"},
     {"name": "dumpall", "type": PROPERTYTYPE.PT_bool, "addr": global_dumpall, "access": PROPERTYACCESS.PA_PUBLIC, "description": "dumpall enable flag"},
     {"name": "runchecks", "type": PROPERTYTYPE.PT_bool, "addr": global_runchecks, "access": PROPERTYACCESS.PA_PUBLIC, "description": "runchecks enable flag"},
-    {"name": "threadcount", "type": PROPERTYTYPE.PT_int32, "addr": global_threadcount, "access": PROPERTYACCESS.PA_PUBLIC, "description": "number of threads to use while using multicore"},
+    {"name": "threadcount", "type": PROPERTYTYPE.PT_int32, "addr": global_thread_count, "access": PROPERTYACCESS.PA_PUBLIC, "description": "number of threads to use while using multicore"},
     {"name": "profiler", "type": PROPERTYTYPE.PT_bool, "addr": global_profiler, "access": PROPERTYACCESS.PA_PUBLIC, "description": "profiler enable flag"},
     {"name": "pauseatexit", "type": PROPERTYTYPE.PT_bool, "addr": global_pauseatexit, "access": PROPERTYACCESS.PA_PUBLIC, "description": "pause at exit flag"},
     {"name": "testoutputfile", "type": PROPERTYTYPE.PT_char1024, "addr": global_testoutputfile, "access": PROPERTYACCESS.PA_PUBLIC, "description": "input_code_filename for test output"},
     {"name": "xml_encoding", "type": PROPERTYTYPE.PT_int32, "addr": global_xml_encoding, "access": PROPERTYACCESS.PA_PUBLIC, "description": "XML data encoding"},
     {"name": "clock", "type": PROPERTYTYPE.PT_timestamp, "addr": global_clock, "access": PROPERTYACCESS.PA_PUBLIC, "description": "global clock"},
-    {"name": "starttime", "type": PROPERTYTYPE.PT_timestamp, "addr": global_starttime, "access": PROPERTYACCESS.PA_PUBLIC, "description": "simulation start time"},
-    {"name": "stoptime", "type": PROPERTYTYPE.PT_timestamp, "addr": global_stoptime, "access": PROPERTYACCESS.PA_PUBLIC, "description": "simulation stop time"},
+    {"name": "starttime", "type": PROPERTYTYPE.PT_timestamp, "addr": global_start_time, "access": PROPERTYACCESS.PA_PUBLIC, "description": "simulation start time"},
+    {"name": "stoptime", "type": PROPERTYTYPE.PT_timestamp, "addr": global_stop_time, "access": PROPERTYACCESS.PA_PUBLIC, "description": "simulation stop time"},
     {"name": "double_format", "type": PROPERTYTYPE.PT_char32, "addr": global_double_format, "access": PROPERTYACCESS.PA_PUBLIC, "description": "format for writing double values"},
     {"name": "complex_format", "type": PROPERTYTYPE.PT_char256, "addr": global_complex_format, "access": PROPERTYACCESS.PA_PUBLIC, "description": "format for writing complex values"},
     {"name": "complex_output_format", "type": PROPERTYTYPE.PT_enumeration, "addr": global_complex_output_format, "access": PROPERTYACCESS.PA_PUBLIC, "description": "complex output representation", "enum_keys": cnf_keys},
@@ -1372,13 +1465,15 @@ map = [
     {"name": "no_deprecate", "type": PROPERTYTYPE.PT_bool, "addr": global_suppress_deprecated_messages, "access": PROPERTYACCESS.PA_PUBLIC, "description": "suppress deprecated usage message enable flag"},
     # Continue with the remaining entries...
 ]
-map += [
+
+
+global_map += [
     {"name": "sync_dumpfile", "type": PROPERTYTYPE.PT_char1024, "addr": global_sync_dumpfile, "access": PROPERTYACCESS.PA_PUBLIC, "description": "sync event dump file name"},
     {"name": "streaming_io", "type": PROPERTYTYPE.PT_bool, "addr": global_streaming_io_enabled, "access": PROPERTYACCESS.PA_PROTECTED, "description": "streaming I/O enable flag"},
     {"name": "compileonly", "type": PROPERTYTYPE.PT_bool, "addr": global_compileonly, "access": PROPERTYACCESS.PA_PROTECTED, "description": "compile only enable flag"},
     {"name": "relax_naming_rules", "type": PROPERTYTYPE.PT_bool, "addr": global_relax_naming_rules, "access": PROPERTYACCESS.PA_PUBLIC, "description": "relax object naming rules enable flag"},
     {"name": "browser", "type": PROPERTYTYPE.PT_char1024, "addr": global_browser, "access": PROPERTYACCESS.PA_PUBLIC, "description": "browser selection"},
-    {"name": "server_portnum", "type": PROPERTYTYPE.PT_int32, "addr": global_server_portnum, "access": PROPERTYACCESS.PA_PUBLIC, "description": "server port number (default is find first open starting at 6267)"},
+    {"name": "server_portnum", "type": PROPERTYTYPE.PT_int32, "addr": global_server_port_num, "access": PROPERTYACCESS.PA_PUBLIC, "description": "server port number (default is find first open starting at 6267)"},
     {"name": "server_quit_on_close", "type": PROPERTYTYPE.PT_bool, "addr": global_server_quit_on_close, "access": PROPERTYACCESS.PA_PUBLIC, "description": "server quit on connection closed enable flag"},
     {"name": "client_allowed", "type": PROPERTYTYPE.PT_char1024, "addr": global_client_allowed, "access": PROPERTYACCESS.PA_PUBLIC, "description": "clients from which to accept connections"},
     {"name": "autoclean", "type": PROPERTYTYPE.PT_bool, "addr": global_autoclean, "access": PROPERTYACCESS.PA_PUBLIC, "description": "autoclean enable flag"},
@@ -1410,11 +1505,11 @@ map += [
     {"name": "init_max_defer", "type": PROPERTYTYPE.PT_int32, "addr": global_init_max_defer, "access": PROPERTYACCESS.PA_REFERENCE, "description": "deferred initialization limit"},
     {"name": "mt_analysis", "type": PROPERTYTYPE.PT_bool, "addr": global_mt_analysis, "access": PROPERTYACCESS.PA_PUBLIC, "description": "perform multithread profile optimization analysis"},
     {"name": "inline_block_size", "type": PROPERTYTYPE.PT_int32, "addr": global_inline_block_size, "access": PROPERTYACCESS.PA_PUBLIC, "description": "inline code block size"},
-    {"name": "validate", "type": PROPERTYTYPE.PT_set, "addr": global_validateoptions, "access": PROPERTYACCESS.PA_PUBLIC, "description": "validation test options", "enum_keys": vo_keys},
-    {"name": "sanitize", "type": PROPERTYTYPE.PT_set, "addr": global_sanitizeoptions, "access": PROPERTYACCESS.PA_PUBLIC, "description": "sanitize process options", "enum_keys": so_keys},
-    {"name": "sanitize_prefix", "type": PROPERTYTYPE.PT_char8, "addr": global_sanitizeprefix, "access": PROPERTYACCESS.PA_PUBLIC, "description": "sanitized name prefix"},
-    {"name": "sanitize_index", "type": PROPERTYTYPE.PT_char1024, "addr": global_sanitizeindex, "access": PROPERTYACCESS.PA_PUBLIC, "description": "sanitization index file spec"},
-    {"name": "sanitize_offset", "type": PROPERTYTYPE.PT_char32, "addr": global_sanitizeoffset, "access": PROPERTYACCESS.PA_PUBLIC, "description": "sanitization lat/lon offset"},
+    {"name": "validate", "type": PROPERTYTYPE.PT_set, "addr": global_validate_options, "access": PROPERTYACCESS.PA_PUBLIC, "description": "validation test options", "enum_keys": vo_keys},
+    {"name": "sanitize", "type": PROPERTYTYPE.PT_set, "addr": global_sanitize_options, "access": PROPERTYACCESS.PA_PUBLIC, "description": "sanitize process options", "enum_keys": so_keys},
+    {"name": "sanitize_prefix", "type": PROPERTYTYPE.PT_char8, "addr": global_sanitize_prefix, "access": PROPERTYACCESS.PA_PUBLIC, "description": "sanitized name prefix"},
+    {"name": "sanitize_index", "type": PROPERTYTYPE.PT_char1024, "addr": global_sanitize_index, "access": PROPERTYACCESS.PA_PUBLIC, "description": "sanitization index file spec"},
+    {"name": "sanitize_offset", "type": PROPERTYTYPE.PT_char32, "addr": global_sanitize_offset, "access": PROPERTYACCESS.PA_PUBLIC, "description": "sanitization lat/lon offset"},
     {"name": "simulation_mode", "type": PROPERTYTYPE.PT_enumeration, "addr": global_simulation_mode, "access": PROPERTYACCESS.PA_PUBLIC, "description": "current time simulation type", "enum_keys": sm_keys},
     {"name": "deltamode_timestep", "type": PROPERTYTYPE.PT_double, "addr": global_deltamode_timestep_pub, "access": PROPERTYACCESS.PA_PUBLIC, "description": "uniform step size for deltamode simulations", "enum_keys": None, "enum_function": None, "enum_unit": "ns"},
     {"name": "deltamode_maximumtime", "type": PROPERTYTYPE.PT_double, "addr": global_deltamode_maximumtime_pub, "access": PROPERTYACCESS.PA_PUBLIC, "description": "maximum time (ns) deltamode can run", "enum_keys": None, "enum_function": None, "enum_unit": "ns"},
@@ -1425,11 +1520,13 @@ map += [
     {"name": "deltamode_forced_extra_timesteps", "type": PROPERTYTYPE.PT_int32, "addr": global_deltamode_forced_extra_timesteps, "access": PROPERTYACCESS.PA_PUBLIC, "description": "forced extra deltamode timesteps before returning to event-driven mode"},
     {"name": "deltamode_forced_always", "type": PROPERTYTYPE.PT_bool, "addr": global_deltamode_forced_always, "access": PROPERTYACCESS.PA_PUBLIC, "description": "forced deltamode for debugging -- prevents event-driven mode"},
     {"name": "deltamode_preferred_module_order", "type": PROPERTYTYPE.PT_bool, "addr": global_deltamode_force_preferred_order, "access": PROPERTYACCESS.PA_PUBLIC, "description": "sets execution order for deltamode, as opposed to GLM order"},
-    {"name": "run_powerworld", "type": PROPERTYTYPE.PT_bool, "addr": global_run_powerworld, "access": PROPERTYACCESS.PA_PUBLIC, "description": "boolean that says your system is set up correctly to run with PowerWorld"},
+    {"name": "run_powerworld", "type": PROPERTYTYPE.PT_bool, "addr": global_run_power_world, "access": PROPERTYACCESS.PA_PUBLIC, "description": "boolean that says your system is set up correctly to run with PowerWorld"},
     {"name": "bigranks", "type": PROPERTYTYPE.PT_bool, "addr": global_bigranks, "access": PROPERTYACCESS.PA_PUBLIC, "description": "enable fast/blind set_rank operations"},
     {"name": "exename", "type": PROPERTYTYPE.PT_char1024, "addr": global_execname, "access": PROPERTYACCESS.PA_REFERENCE, "description": "argv[0] value"},
     {"name": "wget_options", "type": PROPERTYTYPE.PT_char1024, "addr": global_wget_options, "access": PROPERTYACCESS.PA_PUBLIC, "description": "wget options"},
-    {"name": "svnroot", "type": PROPERTYTYPE.PT_char1024, "addr": global_svnroot, "access": PROPERTYACCESS.PA_PUBLIC, "description": "svnroot"},
+    {"name": "svnroot", "type": PROPERTYTYPE.PT_char1024, "addr": global_svn_root, "access": PROPERTYACCESS.PA_PUBLIC, "description": "svnroot"},
     {"name": "allow_reinclude", "type": PROPERTYTYPE.PT_bool, "addr": global_reinclude, "access": PROPERTYACCESS.PA_PUBLIC, "description": "allow the same include file to be included multiple times"},
     # Add new global variables here
 ]
+
+global_randomnumbergenerator = RANDOMNUMBERGENERATOR.RNG2

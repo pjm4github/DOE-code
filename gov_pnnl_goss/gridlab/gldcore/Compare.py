@@ -2,6 +2,20 @@ import math
 import ctypes
 
 
+
+# <code>
+# /* basic ops */
+# COMPAREOPF(double)
+# COMPAREOPF(float)
+# COMPAREOPI(uint16)
+# COMPAREOPI(uint32)
+# COMPAREOPI(uint64)
+# COMPAREOPB(bool)
+# COMPAREOPS(string)
+# COMPAREOPO(object)
+# </code>
+
+
 class TCOperator:
     def __init__(self, code, symbol, function=None, extra_args=0):
         self.code = code

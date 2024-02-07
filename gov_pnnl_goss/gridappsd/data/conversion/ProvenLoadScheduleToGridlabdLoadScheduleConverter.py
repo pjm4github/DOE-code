@@ -85,7 +85,7 @@ class Calendar(datetime.date):
         #     after(Object when): Checks if the calendar date and time is after the specified date and time.
         pass
     def __eq__(self, other):
-        #     equals(Object obj): Checks if two calendar instances represent the same date and time.
+        #     equals(Object self): Checks if two calendar instances represent the same date and time.
         pass
 
     def roll(self,field: int, up: bool):

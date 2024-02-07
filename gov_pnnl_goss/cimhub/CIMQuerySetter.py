@@ -930,7 +930,7 @@
 #         return "***:" + id + ": not found ***";
 #     }
 #
-#     String obj = "";
+#     String self = "";
 #     StringBuilder buf = new StringBuilder("");
 #     String delims = "[ ]+";
 #

@@ -8,16 +8,15 @@ import os
 from gov_pnnl_goss.gridlab.gldcore import Legal
 from gov_pnnl_goss.gridlab.gldcore.Class import Class
 from gov_pnnl_goss.gridlab.gldcore.Cmdarg import loadall
-from gov_pnnl_goss.gridlab.gldcore.Convert import convert_from_set, convert_to_object
-from gov_pnnl_goss.gridlab.gldcore.Exec import exec_start, Object
+from gov_pnnl_goss.gridlab.gldcore.Convert import convert_from_set, convert_to_object, convert_from_timestamp
+from gov_pnnl_goss.gridlab.gldcore.Exec import Exec, Object
 from gov_pnnl_goss.gridlab.gldcore.Find import Find
-from gov_pnnl_goss.gridlab.gldcore.Globals import FAILED, global_create, SUCCESS, global_setvar
-from gov_pnnl_goss.gridlab.gldcore.GridLabD import convert_from_timestamp
+from gov_pnnl_goss.gridlab.gldcore.Globals import FAILED, global_create, SUCCESS, global_set_var
 from gov_pnnl_goss.gridlab.gldcore.Output import output_error, output_message, output_verbose, output_warning, \
     output_raw
 from gov_pnnl_goss.gridlab.gldcore.Property import PROPERTYTYPE
-from gov_pnnl_goss.gridlab.gldcore.object1702152845 import object_name, object_flag_property
-from gov_pnnl_goss.gridlab.gldcore.timestamp1702152845 import timestamp_current_timezone
+from gov_pnnl_goss.gridlab.gldcore.Object import object_name, object_flag_property
+from gov_pnnl_goss.gridlab.gldcore.Timestamp import timestamp_current_timezone
 
 # Constants
 RHOWATER = 61.82  # lb/cf
@@ -358,7 +357,7 @@ def cmex_load(nlhs, plhs, nrhs, prhs):
 def cmex_start(nlhs, plhs, nrhs, prhs):
     global global_keep_progress
     global_keep_progress = 1
-    result = exec_start()
+    result = Exec.exec_start()
 
     if result == FAILED:
         output_error("Simulation failed!")
@@ -563,7 +562,7 @@ def cmex_set(nlhs, plhs, nrhs, prhs):
                 variable_name = prhs[1]
                 variable_value = prhs[2]
 
-                if global_setvar(variable_name, variable_value) != SUCCESS:
+                if global_set_var(variable_name, variable_value) != SUCCESS:
                     print("unable to set global '{}' to '{}'".format(variable_name, variable_value))
         else:
             object_id = object_name

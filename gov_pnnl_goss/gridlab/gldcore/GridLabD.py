@@ -48,7 +48,7 @@ import ctypes
 import math
 import time
 from datetime import datetime
-from enum import Enum
+
 from inspect import isclass
 
 from time import time_ns as TIMESTAMP
@@ -56,8 +56,6 @@ from time import time_ns as TIMESTAMP
 from gov_pnnl_goss.gridlab.gldcore.Class import PASSCONFIG
 from gov_pnnl_goss.gridlab.gldcore.Output import output_verbose, output_message, output_warning
 from gov_pnnl_goss.gridlab.gldcore.Property import PROPERTYTYPE, PROPERTYCOMPAREOP
-
-# The GridLAB-D external C module header file
 
 
 # Module version info (must match core version info)
@@ -69,9 +67,6 @@ CDECL = ""
 
 # Define EXPORT for exported functions
 EXPORT = CDECL
-
-# Include necessary headers
-from GridLabHeaders import *
 
 # define NATIVE int64	/**< native integer size */
 NATIVE = 64
@@ -116,9 +111,9 @@ OF_RERANK = 16384
 # 	The typical modules will register a class, and immediately publish the variables supported by the class:
 # 	@code
 #
-# 	EXPORT CLASS *init(CALLBACKS *fntable, MODULE *module, int argc, char *argv[])
+# 	EXPORT Class *init(CALLBACKS *fntable, MODULE *module, int argc, char *argv[])
 # 	{
-# 		extern CLASS* node_class; // defined globally in the module
+# 		extern Class* node_class; // defined globally in the module
 # 		if (set_callback(fntable)==NULL)
 # 		{
 # 			errno = EINVAL;
@@ -454,25 +449,6 @@ def global_stoptime_manager(val=None):
 
 gl_globalstoptime = global_stoptime_manager()
 
-# Define timestamp handling functions
-def convert_to_timestamp(string):
-    # Implement based on your specific requirements
-    pass
-
-
-def convert_to_timestamp_delta(string):
-    # Implement based on your specific requirements
-    pass
-
-
-def convert_from_timestamp(timestamp):
-    # Implement based on your specific requirements
-    pass
-
-
-def convert_from_deltatime_timestamp(timestamp):
-    # Implement based on your specific requirements
-    pass
 
 
 def mkdatetime(timestamp):
@@ -586,7 +562,6 @@ def bitof(x, use_throw=False):
 
 
 def gl_name(my, buffer, size):
-    temp = ""
     if my is None or buffer is None:
         return None
     if my.name is None:
@@ -595,7 +570,7 @@ def gl_name(my, buffer, size):
         temp = my.name
     if size < len(temp):
         return None
-    buffer[:] = temp
+    buffer = temp
     return buffer
 
 
@@ -676,12 +651,12 @@ def gl_forecast_save():
 
 # Error handling macros (Replace with Python-style error handling)
 # def SYNC_CATCHALL(C):
-#     obj = C.oclass
-#     gl_error(functions"sync_{C}(obj={obj.id};{obj.name}): {ex}")
+#     self = C.oclass
+#     gl_error(functions"sync_{C}(self={self.id};{self.name}): {ex}")
 #
 # def INIT_CATCHALL(C):
-#     obj = C.oclass
-#     gl_error(functions"init_{C}(obj={obj.id};{obj.name}): {ex}")
+#     self = C.oclass
+#     gl_error(functions"init_{C}(self={self.id};{self.name}): {ex}")
 #
 # def CREATE_CATCHALL(C):
 #     gl_error(functions"create_{C}: {ex}")
@@ -696,7 +671,7 @@ def gl_forecast_save():
 #     try:
 #         pass
 #     except Exception as ex:
-#         gl_error(functions"{T}_{C}(obj={obj.id};{obj.name}): {ex}")
+#         gl_error(functions"{T}_{C}(self={self.id};{self.name}): {ex}")
 
 
 # Transform access
@@ -1464,7 +1439,7 @@ def GL_ATOMIC(T, X):
             self.X = p
 
         def get_string(self):
-            return self.get_property().get_""
+            return self.get_property().get_string()
 
         def set_string(self, str):
             self.get_property().from_string(str)
@@ -1495,7 +1470,7 @@ def GL_STRUCT(T, X):
             self.X = p
 
         def get_string(self):
-            return self.get_property().get_""
+            return self.get_property().get_string()
 
         def set_string(self, str):
             self.get_property().from_string(str)
@@ -1511,13 +1486,13 @@ def GL_STRING(T, X):
             return getattr(self, X).offset
 
         def get(self):
-            return self.X.get_""
+            return self.X.get_string()
 
         def get_property(self):
             return GldProperty(self, X)
 
         def get_with_lock(self, lock):
-            return self.X.get_""
+            return self.X.get_string()
 
         def set(self, p):
             self.X.set_string(p)
@@ -1610,7 +1585,7 @@ def GL_BITFLAGS(T, X):
             self.X = p
 
         def get_string(self):
-            return self.get_property().get_""
+            return self.get_property().get_string()
 
         def set_string(self, str):
             self.get_property().from_string(str)
@@ -1673,7 +1648,7 @@ class GldObject:
         return self.previous.id
 
     def get_groupid(self):
-        return self.previous.groupid.get_""
+        return self.previous.groupid.get_string()
 
     def get_oclass(self):
         return GldClass(self.previous.oclass)
@@ -1933,10 +1908,10 @@ class GldProperty:
         return Callback().convert.property_to_string(self.pstruct.prop, self.get_addr(), buffer, size) if self.pstruct.prop else -1
 
     def get_string(self, sz=1024):
-        res = Gld""
+        res = GldString
         buf = bytearray(1024)
         if len(buf) < sz:
-            raise Exception("get_"" over size limit")
+            raise Exception("get_string over size limit")
         if self.to_string(buf, sz) >= 0:
             res.value = buf.decode("utf-8")
         return res
@@ -1954,10 +1929,10 @@ class GldProperty:
         self.obj = o
 
     # def set_object(self, o):
-    #     self.obj = o.previous
+    #     self.self = o.previous
 
     # def set_property(self, dimensions):
-    #     Callback().properties.get_property(self.obj, dimensions, self.pstruct)
+    #     Callback().properties.get_property(self.self, dimensions, self.pstruct)
 
     def set_property(self, p):
         self.pstruct.prop = p
@@ -2179,10 +2154,10 @@ class GldGlobal:
         return p.to_string(bp, sz)
 
     def get_string(self, sz=1024):
-        res = Gld""
+        res = GldString
         buf = bytearray(1024)
         if len(buf) < sz:
-            raise Exception("get_"" over size limit")
+            raise Exception("get_String over size limit")
         if self.to_string(buf, sz) >= 0:
             res.value = buf.decode("utf-8")
         return res
@@ -2734,11 +2709,11 @@ class Callback:
         return local_datetime(offsetclock, dt)
 
 # Usage example
-# reference = callback["properties.get_reference"](obj, reference_name="your_reference_here")
-# value = callback["properties.get_value_by_name"](obj, property_name="your_property_name")
-# callback["properties.set_value_by_name"](obj, property_name="your_property_name", value="new_value")
-# unit = callback["properties.get_unit"](obj, property_name="your_property_name")
-# converted_value = callback["unit_convert"](obj, property_name="your_property_name", target_unit="target_unit")
+# reference = callback["properties.get_reference"](self, reference_name="your_reference_here")
+# value = callback["properties.get_value_by_name"](self, property_name="your_property_name")
+# callback["properties.set_value_by_name"](self, property_name="your_property_name", value="new_value")
+# unit = callback["properties.get_unit"](self, property_name="your_property_name")
+# converted_value = callback["unit_convert"](self, property_name="your_property_name", target_unit="target_unit")
 
 
 # Define a dictionary to map function names to their Python counterparts
@@ -2806,8 +2781,8 @@ gl_publish_loadmethod = Callback().loadmethod
 
 class GClass:
     """
-    The primary representation of the GridLAB-D CLASS struct in Java.  Includes native hooks for
-    calls in the GridLAB-D core that pertain to the CLASS structures.
+    The primary representation of the GridLAB-D Class struct in Java.  Includes native hooks for
+    calls in the GridLAB-D core that pertain to the Class structures.
     @author Matthew Hauer <matthew.hauer@pnl.gov>
 
     Contains the properties of GridLAB-D classes registered by Java modules and keys them in a HashTable by name.

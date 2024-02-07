@@ -219,7 +219,7 @@ class GossCoreServer(ServerControl):
                 self.connection.close()
 
                 self.connection = self.connection_factory.create_connection(self.system_manager, self.system_manager_password)
-                self.connection.start()
+                self.connection.exec_start()
                 self.session = self.connection.create_session(False, self.session.AUTO_ACKNOWLEDGE)
 
         except JMSException as e:
@@ -286,7 +286,7 @@ class GossCoreServer(ServerControl):
             self.broker.persistence_adapter = None
             # broker.addConnector(stompTransport);
             self.broker.plugins = [shiro_plugin]
-            self.broker.start()
+            self.broker.exec_start()
 
         except Exception as e:
             self.logger.error("Error starting broker", e)
@@ -315,7 +315,7 @@ class GossCoreServer(ServerControl):
                 self.connection_factory = ActiveMQConnectionFactory(self.openwire_transport)
 
             self.connection = self.connection_factory.create_connection(self.system_manager, self.system_manager_password)
-            self.connection.start()
+            self.connection.exec_start()
             self.session = self.connection.create_session(False, self.session.AUTO_ACKNOWLEDGE)
 
             self.scheduler.schedule_at_fixed_rate(ClockTick(self), 1, 1, TimeUnit.SECONDS)

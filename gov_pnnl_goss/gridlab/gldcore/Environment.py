@@ -2,8 +2,8 @@ from gov_pnnl_goss.gridlab.gldcore.Exec import exec_start
 from gov_pnnl_goss.gridlab.gldcore.Output import output_fatal, output_verbose
 from gov_pnnl_goss.gridlab.gldcore.Gui import gui_get_root, gui_startup
 from gov_pnnl_goss.gridlab.gldcore.Globals import global_environment, global_dumpfile, FAILED, SUCCESS
-from gov_pnnl_goss.gridlab.gldcore.matlab1702152845 import matlab_startup
-from gov_pnnl_goss.gridlab.gldcore.xcore1702152845 import xstart
+from gov_pnnl_goss.gridlab.gldcore.Matlab import matlab_startup
+from gov_pnnl_goss.gridlab.gldcore.Xcore import xstart
 
 
 def server_startup(argc, argv):

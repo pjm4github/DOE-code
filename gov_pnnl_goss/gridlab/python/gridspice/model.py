@@ -23,7 +23,7 @@ class SchematicType:
     
 class MapType:
     """
-        MapType contains two constants which represent the map type: BLANK, POLITICAL
+        MapType contains two constants which represent the global_map type: BLANK, POLITICAL
     """
     BLANK = "BLANK"
     POLITICAL = "POLITICAL"

@@ -9,14 +9,26 @@ import platform
 from PyQt5.QtCore.QJsonValue import Object
 
 from gov_pnnl_goss.gridlab.gldcore.Class import Class
-from gov_pnnl_goss.gridlab.gldcore.Globals import FAILED, global_setvar, MAINLOOPSTATE, XC_INIERR, MULTIRUNCONNECTION, \
-    global_getnext, global_dump, global_find, global_getvar
+from gov_pnnl_goss.gridlab.gldcore.Globals import (FAILED, MAINLOOPSTATE, XC_INIERR, MULTIRUNCONNECTION,
+                                                   global_dump, global_find, global_get_var, global_get_next, SUCCESS)
 from gov_pnnl_goss.gridlab.gldcore.Output import output_error, output_verbose, output_fatal, output_message, \
-    output_debug, output_redirect, output_warning, output_both_stdout
-from gov_pnnl_goss.gridlab.gldcore.Property import PROPERTYFLAGS, property_check
+    output_debug, output_redirect, output_warning, output_both_stdout, output_test, output_xsd, output_xsl
+from gov_pnnl_goss.gridlab.gldcore.Property import PROPERTYFLAGS, property_check, PROPERTYTYPE, PROPERTYACCESS
 from gov_pnnl_goss.gridlab.gldcore.Job import job
-from gov_pnnl_goss.gridlab.gldcore.Legal import check_version, Status, legal_license
-from gov_pnnl_goss.gridlab.gldcore.validate1702152845 import validate
+from gov_pnnl_goss.gridlab.gldcore.Legal import check_version, legal_license, legal_notice
+from gov_pnnl_goss.gridlab.gldcore.Validate import validate
+from gridlab.gldcore.Cmex import module_load
+from gridlab.gldcore.Enduse import Enduse
+from gridlab.gldcore.Exec import Exec
+from gridlab.gldcore.GldRandom import random_test
+from gridlab.gldcore.GridLabD import global_setvar
+from gridlab.gldcore.Loadshape import loadshape_test
+from gridlab.gldcore.Module import Module
+from gridlab.gldcore.Sanitize import Sanitize
+from gridlab.gldcore.Schedule import Schedule
+from gridlab.gldcore.Test import test_request, test_lock
+from gridlab.gldcore.Timestamp import timestamp_test
+from gridlab.gldcore.Unit import Unit
 
 # def output_fatal(message):
 #     print(f"FATAL: {message}")
@@ -58,31 +70,13 @@ from gov_pnnl_goss.gridlab.gldcore.validate1702152845 import validate
 
 
 
-# Global variables (you need to define them appropriately)
-global_autostartgui = True
-global_workdir = "/path/to/your/workdir"
-global_browser = "your_browser_executable"
-global_environment = ""
-global_mainloopstate = ""
-
-
-# Global variables (you need to define them appropriately)
-global_profiler = 0
-global_mt_analysis = 0
-global_threadcount = 0
-global_strictnames = True  # Initialize global_strictnames with the desired value
-
 loader_time = 0
 
-#FAILED = -2
-SUCCESS = 0
+
 CMDERR = -2
 CMDOK = -1
 
-#FAILED = -2
-PA_HIDDEN = 0  # Sample values for reference
-PT_set = 1
-PT_enumeration = 2
+
 
 
 # def output_error(message):
@@ -199,7 +193,7 @@ def jprint_class_d(oclass, tabdepth, module):
     while prop and prop.oclass == oclass:
         propname = Class.class_get_property_typename(prop.ptype)
         if propname:
-            if prop.access & PA_HIDDEN == PA_HIDDEN:
+            if prop.access & PROPERTYACCESS.PA_HIDDEN == PROPERTYACCESS.PA_HIDDEN:
                 prop = prop.next
                 continue
 
@@ -207,7 +201,7 @@ def jprint_class_d(oclass, tabdepth, module):
             if prop.unit:
                 _property["type"] = propname
                 _property["unit"] = prop.unit.name
-            elif prop.ptype in {PT_set, PT_enumeration}:
+            elif prop.ptype in {PROPERTYTYPE.PT_set, PROPERTYTYPE.PT_enumeration}:
                 _property["type"] = propname
                 keywords = {}
                 key = prop.keywords
@@ -229,7 +223,7 @@ def jprint_class_d(oclass, tabdepth, module):
     module[oclass.name] = _class
 
 # Example usage:
-# oclass = ...  # Replace with your CLASS instance
+# oclass = ...  # Replace with your Class instance
 # tabdepth = ...  # Replace with your tab depth
 # module = {}  # Initialize an empty dictionary
 # jprint_class_d(oclass, tabdepth, module)
@@ -253,7 +247,7 @@ def jprint_modhelp_tree(ctree, module):
         ctree.right = None  # Set right child to None to free memory
 
 # Example usage:
-# oclass = ...  # Replace with your CLASS instance
+# oclass = ...  # Replace with your Class instance
 # module = {}  # Initialize an empty dictionary
 # jprint_class(oclass, module)
 # print(json.dumps(module, indent=4))  # Pretty print the JSON data
@@ -277,11 +271,11 @@ def print_class_d(oclass, tabdepth):
             break
         propname = Class.class_get_property_typename(prop.ptype)
         if propname:
-            if prop.access & PA_HIDDEN == PA_HIDDEN:
+            if prop.access & PROPERTYACCESS.PA_HIDDEN == PROPERTYACCESS.PA_HIDDEN:
                 continue
             if prop.unit:
                 print(f"{tabs}\t{propname} {prop.name}[{prop.unit.name}];")
-            elif prop.ptype in [PT_set, PT_enumeration]:
+            elif prop.ptype in [PROPERTYTYPE.PT_set, PROPERTYTYPE.PT_enumeration]:
                 keyword_list = ", ".join([f"{key.name}={key.value}" for key in prop.keywords])
                 print(f"{tabs}\t{propname} {{{keyword_list}}} {prop.name};")
             else:
@@ -297,7 +291,7 @@ def print_class_d(oclass, tabdepth):
 
 
 # Example usage:
-# oclass = ...  # Replace with your CLASS instance
+# oclass = ...  # Replace with your Class instance
 # print_class_d(oclass, 0)
 
 
@@ -351,6 +345,8 @@ CMDERR = -2
 def no_cmdargs():
     global global_environment
     global global_mainloopstate
+    global global_autostartgui
+    global global_browser
     htmlfile = "gridlabd.htm"
 
     if global_autostartgui and os.access(htmlfile, os.R_OK):
@@ -389,7 +385,7 @@ def no_cmdargs():
 #     print("Error")
 
 def copyright(argc, argv):
-    Status.legal_notice()
+    legal_notice()
     return 0
 
 
@@ -537,7 +533,7 @@ def server_inaddr(argc, argv):
 
 def version(argc, argv):
     global global_version_major, global_version_minor, global_version_patch
-    global global_version_build, global_version_branch, global_platform,
+    global global_version_build, global_version_branch, global_platform
     output_message("GridLAB-D %d.%d.%d-%d (%.48s) %d-bit %s %s" % 
         (global_version_major, global_version_minor, global_version_patch, 
         global_version_build, global_version_branch, 0, global_platform,
@@ -555,9 +551,10 @@ def randtest(argc, argv):
     random_test()
     return 0
 
+unit_test = Unit()
 
 def unitstest(argc, argv):
-    unit_test()
+    unit_test.unit_test()
     return 0
 
 
@@ -571,9 +568,9 @@ def load_shape_test(argc, argv):
     loadshape_test()
     return 0
 
-
+end_use = Enduse()
 def endusetest(argc, argv):
-    enduse_test()
+    end_use.enduse_test()
     return 0
 
 
@@ -658,7 +655,7 @@ def modattr(argc, argv):
 
         # Dump module globals
         while True:
-            var = global_getnext(var)
+            var = global_get_next(var)
             if var is None:
                 break
 
@@ -668,7 +665,7 @@ def modattr(argc, argv):
             if not var.prop.name.startswith(mod.name):
                 continue
 
-            if prop.access & PA_HIDDEN == PA_HIDDEN:
+            if prop.access & PROPERTYACCESS.PA_HIDDEN == PROPERTYACCESS.PA_HIDDEN:
                 continue
 
             if proptype is not None:
@@ -677,7 +674,7 @@ def modattr(argc, argv):
                 if prop.unit is not None:
                     _property["type"] = proptype
                     _property["unit"] = prop.unit.name
-                elif prop.ptype == PT_set or prop.ptype == PT_enumeration:
+                elif prop.ptype == PROPERTYTYPE.PT_set or prop.ptype == PROPERTYTYPE.PT_enumeration:
                     _property["type"] = proptype
                     for key in prop.keywords:
                         _property["keywords"][key.name] = key.value
@@ -742,7 +739,7 @@ def modhelp(argc, argv):
             # Dump module globals
             print(f"module {mod.name} {{")
             while True:
-                var = global_getnext(var)
+                var = global_get_next(var)
                 if var is None:
                     break
 
@@ -752,13 +749,13 @@ def modhelp(argc, argv):
                 if not var.prop.name.startswith(mod.name):
                     continue
 
-                if prop.access & PA_HIDDEN == PA_HIDDEN:
+                if prop.access & PROPERTYACCESS.PA_HIDDEN == PROPERTYACCESS.PA_HIDDEN:
                     continue
 
                 if proptype is not None:
                     if prop.unit is not None:
                         print(f"\t{proptype} {prop.name.split(':')[-1]}[{prop.unit.name}];")
-                    elif prop.ptype == PT_set or prop.ptype == PT_enumeration:
+                    elif prop.ptype == PROPERTYTYPE.PT_set or prop.ptype == PROPERTYTYPE.PT_enumeration:
                         print(f"\t{proptype} {{")
                         for key in prop.keywords:
                             print(f"\t\t{key.name}={key.value},")
@@ -794,9 +791,9 @@ def modhelp(argc, argv):
 
     return 1
 
-
+module = Module()
 def modlist(arvc, argv):
-    module_list()
+    module.module_list()
     return 1
 
 
@@ -873,7 +870,7 @@ def globals(argc, argv):
 
     # Load the list into the array
     while True:
-        var = global_getnext(var)
+        var = global_get_next(var)
         if var is None:
             break
         if n < 65536:
@@ -890,9 +887,9 @@ def globals(argc, argv):
     for name in list_:
         buffer = [""] * 1024
         var = global_find(name)
-        if (var.prop.access & PA_HIDDEN) == PA_HIDDEN:
+        if (var.prop.access & PROPERTYACCESS.PA_HIDDEN) == PROPERTYACCESS.PA_HIDDEN:
             continue
-        global_getvar(var.prop.name, buffer, 1024)
+        global_get_var(var.prop.name, buffer, 1024)
         value = "".join(buffer)
         print(f"{var.prop.name}={value};", end="")
         if var.prop.description or var.prop.flags & PROPERTYFLAGS.PF_DEPRECATED:
@@ -940,11 +937,11 @@ def redirect(argc, argv):
         output_fatal("redirection is missing")
         return 1
 
-
+module_instance = Module()
 def libinfo(argc, argv):
     if argc - 1 > 0:
         argc -= 1
-        module_libinfo(argv[0])
+        module_instance.module_libinfo(argv[0])
         return CMDOK
     else:
         output_fatal("missing library name")
@@ -1052,21 +1049,22 @@ def server(argc, argv):
     return 0
 
 
+schedule = Schedule()
 def clearmap(argc, argv):
-    sched_clear()
+    schedule.sched_clear()
     return 0
 
 
 def pstatus(argc, argv):
-    sched_init(1)
-    sched_print(0)
+    schedule.sched_init(1)
+    schedule.sched_print(0)
     return 0
 
 
 def pkill(argc, argv):
     if argc > 0:
         argc -= 1
-        sched.sched_pkill(int(argv[0]))
+        schedule.sched_pkill(int(argv[0]))
         return 1
     else:
         output_fatal("processor number not specified")
@@ -1079,14 +1077,14 @@ def pkill(argc, argv):
 
 
 def plist(argc, argv):
-    sched_init(1)
-    sched_print(0)
+    schedule.sched_init(1)
+    schedule.sched_print(0)
     return 0
 
 
 def pcontrol(argc, argv):
-    sched_init(1)
-    sched_controller()
+    schedule.sched_init(1)
+    schedule.sched_controller()
     return 0
 
 
@@ -1162,9 +1160,10 @@ def instance_slave_init():
     # Implement your initialization logic here
     return "SUCCESS"  # Return "SUCCESS" or "FAILED" accordingly
 
+e = Exec()
 
 def slavenode(argc, argv):
-    exec_slave_node()
+    e.exec_slave_node()
     return CMDOK
 
 
@@ -1282,6 +1281,7 @@ def workdir(argc, argv):
     output_verbose("working directory is '%s'" % os.getcwd(global_workdir))
     return 1
 
+sanitize = Sanitize()
 
 main_cmd = [
     # Section heading
@@ -1747,14 +1747,14 @@ main_cmd = [
         'short_str': None,
         'processor_call': clearmap,
         'arglist_desc': None,
-        'help_desc': "Clears the process map of defunct jobs (deprecated form)"
+        'help_desc': "Clears the process global_map of defunct jobs (deprecated form)"
     },
     {
         'long_str': "pclear",
         'short_str': None,
         'processor_call': clearmap,
         'arglist_desc': None,
-        'help_desc': "Clears the process map of defunct jobs"
+        'help_desc': "Clears the process global_map of defunct jobs"
     },
     {
         'long_str': "pcontrol",

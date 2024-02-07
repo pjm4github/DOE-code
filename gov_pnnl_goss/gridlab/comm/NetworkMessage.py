@@ -197,7 +197,7 @@ def create_network_message(obj, parent):
         try:
             my.create()
         except Exception as e:
-            gl_error("%s::%s.create(OBJECT **obj={name='%s', id=%d},...): %s" % (
+            gl_error("%s::%s.create(OBJECT **self={name='%s', id=%d},...): %s" % (
                 obj.oclass.module.name, obj.oclass.name, obj.name, obj.id, str(e)))
             return 0
         return 1

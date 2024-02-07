@@ -2,7 +2,7 @@
 from base64 import encode
 from errno import ENOENT, E2BIG, EINVAL, ENOMEM
 from enum import Enum
-from typing import Union, List
+from typing import Union, List, Any
 
 from gov_pnnl_goss.gridlab.gldcore.Convert import unit_find
 #  PROPERTYACCESS.PA_PUBLIC, PROPERTYACCESS.PA_PROTECTED, PROPERTYACCESS.PA_PRIVATE, PROPERTYACCESS.PA_REFERENCE, PROPERTYACCESS.PA_HIDDEN,
@@ -12,10 +12,9 @@ from gov_pnnl_goss.gridlab.gldcore.GridLabD import gl_error, gl_warning
 # PROPERTYFLAGS.PF_CHARSET, PROPERTYFLAGS.PF_DEPRECATED, PROPERTYFLAGS.PF_EXTENDED, PROPERTYFLAGS.PF_DEPRECATED_NONOTICE,
 from gov_pnnl_goss.gridlab.gldcore.Property import \
     FUNCTIONADDR, PROPERTY, PROPERTYTYPE, PROPERTYFLAGS, DELEGATEDTYPE
-
+from gridlab.gldcore.Module import Module
 
 global_ms_per_second = 1000  # Assuming this value
-
 
 
 class PASSCONFIG(Enum):
@@ -51,10 +50,6 @@ class TECHNOLOGYREADINESSLEVEL(Enum):
     TRL_PROVEN = 9
 
 
-class CLASSNAME:
-    pass
-
-
 class PROPERTYNAME:
     pass
 
@@ -65,6 +60,13 @@ class FUNCTION:
         self.name = None
         self.addr = None
         self.next = None
+
+# class FUNCTION:
+#     def __init__(self) -> None:
+#         self.oclass: Class
+#         self.name: FUNCTIONNAME
+#         self.addr: FUNCTIONADDR
+#         self.next: FUNCTION
 
 
 class LOADDATA:
@@ -80,27 +82,12 @@ class KEYWORD:
         self.value = None
         self.next = None
 
-
-class PROPERTY:
-    def __init__(self) -> None:
-        pass
-
-class MODULE:
-    def __init__(self) -> None:
-        pass
-
-class FUNCTION:
-    def __init__(self) -> None:
-        self.oclass: CLASS
-        self.name: FUNCTIONNAME
-        self.addr: FUNCTIONADDR
-        self.next: FUNCTION
-
 class LOADMETHOD:
     def __init__(self) -> None:
-        self.name: str
-        self.call: Any
+        self.name: str = ""
+        self.call: Any = None
         self.next: LOADMETHOD
+
 
 # Set operations
 SET_MASK = 0xffff
@@ -123,8 +110,8 @@ class CLASSMAGIC(Enum):
     CLASSVALID = 0xc44d822e
 
 
-class CLASS:
-    def __init__(self):
+class Class:
+    def __init__(self, module, name, size, passconfig):
         self.commit: FUNCTIONADDR = None
         self.create: FUNCTIONADDR = None
         self.finalize: FUNCTIONADDR = None
@@ -137,12 +124,12 @@ class CLASS:
         self.isa: FUNCTIONADDR = None
         self.loadmethods: List[LOADMETHOD] = None
         self.magic: CLASSMAGIC = CLASSMAGIC.CLASSVALID
-        self.module: MODULE = None
-        self.name: str = None
-        self.next: CLASS = None
+        self.module: Module = module
+        self.name: str = name
+        self.next: Class = None
         self.notify: FUNCTIONADDR = None
-        self.parent: CLASS = None
-        self.passconfig: PASSCONFIG = None
+        self.parent: Class = None
+        self.passconfig: PASSCONFIG = passconfig
         self.plc: FUNCTIONADDR = None
         self.pmap: List[PROPERTY] = None
         self.precommit: FUNCTIONADDR = None
@@ -153,11 +140,19 @@ class CLASS:
         }
         self.recalc: FUNCTIONADDR = None
         self.runtime: str = None
-        self.size: int = None
+        self.size: int = size
         self.sync: FUNCTIONADDR = None
         self.threadsafe: bool = None
         self.trl: TECHNOLOGYREADINESSLEVEL = None
         self.update: FUNCTIONADDR = None
+        self.property_type = []
+        self.last_class = None
+        self.count = 0
+        self.next_class = None
+        self.check = None
+
+    def unit_find(self):
+        pass
 
     def buffer_write(self, buffer, len, format, *args):
         count = 0
@@ -169,18 +164,19 @@ class CLASS:
             return 0
         temp = ""
         for a in args:
-            encode(a, temp)
+            temp = str(a).encode(format)
         count = len(args)
         if count < len:
             buffer = temp
-            return count
+            return count, buffer
         else:
             check = 0
-            return 0
+            return 0, None
+
 
     def get_first_property(self, oclass):
         if oclass is None:
-            raise Exception("get_first_property(CLASS *oclass=None): oclass is None")
+            raise Exception("get_first_property(Class *oclass=None): oclass is None")
         return oclass.pmap
 
     def get_next_property(self, prop):
@@ -206,7 +202,9 @@ class CLASS:
 
         if oclass.parent == pclass:
             gl_error(
-                f"find_property_rec(CLASS *oclass='{oclass.name}', PROPERTYNAME name='{name}', CLASS *pclass='{pclass.name}') causes an infinite class inheritance loop")
+                f"find_property_rec(Class *oclass='{oclass.name}', "
+                f"PROPERTYNAME name='{name}', Class *pclass='{pclass.name}') causes an infinite class inheritance loop"
+            )
             """
             TROUBLESHOOT
             A class has somehow specified itself as a parent class, either directly or indirectly.
@@ -233,7 +231,7 @@ class CLASS:
                     if prop.flags & PROPERTYFLAGS.PF_DEPRECATED and not (
                             prop.flags & PROPERTYFLAGS.PF_DEPRECATED_NONOTICE) and not global_suppress_deprecated_messages:
                         gl_warning(
-                            f"find_property(CLASS *oclass='{oclass.name}', PROPERTYNAME name='{name}': property is deprecated")
+                            f"find_property(Class *oclass='{oclass.name}', PROPERTYNAME name='{name}': property is deprecated")
                         """
                         TROUBLESHOOT
                         You have done a search on a property that has been flagged as deprecated and will most likely not be supported soon.
@@ -317,6 +315,7 @@ class CLASS:
     def get_count(self,):
         return self.count
 
+
     def get_property_typename(self, type):
         if type <= PROPERTYTYPE.PT_FIRST or type >= PROPERTYTYPE.PT_LAST:
             return "//UNDEF//"
@@ -374,7 +373,7 @@ class CLASS:
                 print(
                     f"module {module.name} is registering a 2nd class {name}, previous one in module {oclass.module.name}")
 
-        oclass = CLASS(module, name, size, passconfig)
+        oclass = Class(module, name, size, passconfig)
         if oclass is None:
             errno = ENOMEM
             return 0
@@ -708,7 +707,7 @@ class CLASS:
     def define_function(self, oclass, functionname, call):
         if self.get_function(oclass.name, functionname) is not None:
             gl_error(
-                f"define_function(CLASS *class={{name='{oclass.name}',...}}, FUNCTIONNAME functionname='{functionname}', ...) the function name has already been defined")
+                f"define_function(Class *class={{name='{oclass.name}',...}}, FUNCTIONNAME functionname='{functionname}', ...) the function name has already been defined")
             errno = 1
             return None
 
@@ -802,7 +801,7 @@ class CLASS:
         hits = 0
         print("Model profiler results")
         print("======================\n")
-        print("Class            Time (s) Time (%%) msec/obj")
+        print("Class            Time (s) Time (%%) msec/self")
         print("---------------- -------- -------- --------")
         cl = self.first_class
         while cl:
@@ -813,7 +812,7 @@ class CLASS:
         if count == 0:
             return
 
-        index = CLASS()
+        index = Class()
         i = 0
         cl = self.first_class
         while cl:

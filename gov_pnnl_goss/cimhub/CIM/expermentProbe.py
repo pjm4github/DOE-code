@@ -8,11 +8,11 @@ import requests
 # g.parse('schema.rdf', format='turtle')
 # # Get all unique classes defined in the schema
 # classes = set()
-# for subj, pred, obj in g.triples((None, None, None)):
+# for subj, pred, self in g.triples((None, None, None)):
 #     if isinstance(subj, rdflib.term.URIRef):
 #         classes.add(subj)
-#     if isinstance(obj, rdflib.term.URIRef):
-#         classes.add(obj)
+#     if isinstance(self, rdflib.term.URIRef):
+#         classes.add(self)
 #
 # # Print the discovered classes
 # print("Discovered Classes:")
@@ -31,7 +31,7 @@ import requests
 #
 # # Explore relationships between classes and properties
 # class_property_relations = {}
-# for subj, pred, obj in g.triples((None, None, None)):
+# for subj, pred, self in g.triples((None, None, None)):
 #     if isinstance(subj, rdflib.term.URIRef) and isinstance(pred, rdflib.term.URIRef):
 #         if subj not in class_property_relations:
 #             class_property_relations[subj] = []

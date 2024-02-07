@@ -246,7 +246,7 @@ class ActiveMQSslConnectionFactory:
                 else:
                     self.connection = factory.create_connection()
 
-            self.connection.start()
+            self.connection.exec_start()
             self.session = self.connection.create_session(False, Session.AUTO_ACKNOWLEDGE)
 
             if username:

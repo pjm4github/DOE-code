@@ -185,7 +185,7 @@ class NetworkInterface:
     # /*
     # //return my->notify(update_mode, prop);
     # int network_interface::notify(int update_mode, PROPERTY *prop){
-    # 	OBJECT *obj = OBJECTHDR(this);
+    # 	OBJECT *self = OBJECTHDR(this);
     # 	if(update_mode == NM_POSTUPDATE){
     # 		if(strcmp(prop->name, "buffer") == 0){
     # 			// new data has been received
@@ -311,15 +311,15 @@ class NetworkInterface:
         #     return None
         #
         # if t1 >= self.inbox.rx_done_sec:
-        #     obj = self.inbox.from_obj
-        #     addr = obj.parent.get_address() + self.target.addr
+        #     self = self.inbox.from_obj
+        #     addr = self.parent.get_address() + self.target.addr
         #
         #     self.curr_buffer_size = self.inbox.buffer_size
         #     self.data_buffer = self.inbox.message[:self.inbox.buffer_size]
         #
-        #     obj.parent.lock_object()
-        #     obj.parent.set_value(self.data_buffer, addr, 0)
-        #     obj.parent.unlock_object()
+        #     self.parent.lock_object()
+        #     self.parent.set_value(self.data_buffer, addr, 0)
+        #     self.parent.unlock_object()
         #
         #     return self.inbox.next
         #
@@ -335,7 +335,7 @@ def create_network_interface(obj, parent):
             my.create()
         except Exception as e:
             gl_error(
-                "%s::%s.create(OBJECT **obj={name='%s', id=%d},...): %s" %
+                "%s::%s.create(OBJECT **self={name='%s', id=%d},...): %s" %
                 (obj[0].oclass.module.name, obj[0].oclass.name, obj[0].name, obj[0].id, str(e))
             )
             return 0
@@ -349,7 +349,7 @@ def init_network_interface(obj):
         return my.init(obj.parent)
     except Exception as e:
         gl_error(
-            "%s::%s.init(OBJECT *obj={name='%s', id=%d}): %s" %
+            "%s::%s.init(OBJECT *self={name='%s', id=%d}): %s" %
             (obj.oclass.module.name, obj.oclass.name, obj.name, obj.id, str(e))
         )
         return 0
@@ -383,7 +383,7 @@ def sync_network_interface(obj, t1, pass_config):
         ts = "TIMESTAMP t1='{0}'".format(obj.clock)
         gl_localtime(t1, dt)
         ts = gl_strtime(dt, ts, len(ts))
-        gl_error("{0}::{1}.init(OBJECT **obj={{name='{2}', id={3}}},{4}): {5}".format(obj.oclass.module.name, obj.oclass.name, obj.name, obj.id, ts, str(e)))
+        gl_error("{0}::{1}.init(OBJECT **self={{name='{2}', id={3}}},{4}): {5}".format(obj.oclass.module.name, obj.oclass.name, obj.name, obj.id, ts, str(e)))
         return 0
 
 def commit_network_interface(obj, t1, t2):
@@ -393,5 +393,5 @@ def commit_network_interface(obj, t1, t2):
     except Exception as e:
         dt = time.time_ns()
         ts = "TIMESTAMP t1='{0}', t2='{1}'".format(t1, t2)
-        gl_error("{0}::{1}.init(OBJECT *obj={{name='{2}', id={3}}},{4}): {5}".format(obj.oclass.module.name, obj.oclass.name, obj.name, obj.id, ts, str(e)))
+        gl_error("{0}::{1}.init(OBJECT *self={{name='{2}', id={3}}},{4}): {5}".format(obj.oclass.module.name, obj.oclass.name, obj.name, obj.id, ts, str(e)))
         return 0

@@ -5,7 +5,7 @@ import time
 from gov_pnnl_goss.gridlab.climate.CsvReader import ISLEAPYEAR
 from gov_pnnl_goss.gridlab.climate.Test import DATETIME
 from gov_pnnl_goss.gridlab.gldcore.Convert import output_error, FMT_INT64
-from gov_pnnl_goss.gridlab.gldcore.Globals import SUCCESS, global_threadcount, FAILED
+from gov_pnnl_goss.gridlab.gldcore.Globals import SUCCESS, global_thread_count, FAILED
 from gov_pnnl_goss.gridlab.gldcore.GridLabD import TS_NEVER, TS_ZERO, local_datetime, TS_INVALID, convert_to_timestamp, \
     mkdatetime, convert_from_timestamp
 from gov_pnnl_goss.gridlab.gldcore.Output import output_debug, output_warning, output_test, output_verbose
@@ -741,7 +741,7 @@ class Schedule:
 
         self.sc_activelock = threading.Lock()
         self.sc_active = threading.Condition(self.sc_activelock)
-        global_threadcount = 0  # You should define the actual value of global_threadcount
+        global_threadcount = 0  # You should define the actual value of global_thread_count
 
         with self.sc_activelock:
             while self.sc_running >= global_threadcount:
