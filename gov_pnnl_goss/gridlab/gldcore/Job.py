@@ -67,7 +67,7 @@ def get_last_error_msg():
     #     None,
     #     dw,
     #     0,
-    #     ctypes.byref(lp_msg_buf),
+    #     ctypes.by_ref(lp_msg_buf),
     #     0, None
     # )
     #

@@ -1,6 +1,6 @@
 #Python Extraction and Calibration Version of MATLAB Scripts
 #Note: This assumes that dictionary being passed in already contains split-phase center-tapped transformers with spot loads ( triplex_nodes ) on the secondary side.
-#Note: All triplex_node dictionaries must contain a load classification key which tells what type of houses are located at this spot load.
+#Note: All triplex_node dictionaries must contain a load classification key which tells what global_property_types of houses are located at this spot load.
 #Note: All swing node objects must have a Dictionary key
 from __future__ import division
 import ResidentialLoads

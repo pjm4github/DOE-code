@@ -34,12 +34,12 @@ class OperationalLimits:
     SELECT ?voltage_id ?val ?dur ?dir ?bus WHERE {
      ?fdr c:IdentifiedObject.mRID ?fdrid.
      ?status c:ConnectivityNode.ConnectivityNodeContainer ?fdr.
-     ?status r:type c:ConnectivityNode.
+     ?status r:global_property_types c:ConnectivityNode.
      ?status c:IdentifiedObject.name ?bus.
      ?status c:IdentifiedObject.mRID ?voltage_id.
      ?status c:ConnectivityNode.OperationalLimitSet ?ols.
      ?vlim c:OperationalLimit.OperationalLimitSet ?ols.
-     ?vlim r:type c:VoltageLimit.
+     ?vlim r:global_property_types c:VoltageLimit.
      ?vlim c:OperationalLimit.OperationalLimitType ?olt.
      ?olt c:OperationalLimitType.acceptableDuration ?dur.
      ?olt c:OperationalLimitType.direction ?rawdir.
@@ -56,7 +56,7 @@ class OperationalLimits:
      ?t c:Terminal.ConductingEquipment ?eq.
      ?t c:ACDCTerminal.OperationalLimitSet ?ols.
      ?clim c:OperationalLimit.OperationalLimitSet ?ols.
-     ?clim r:type c:CurrentLimit.
+     ?clim r:global_property_types c:CurrentLimit.
      ?clim c:OperationalLimit.OperationalLimitType ?olt.
      ?olt c:OperationalLimitType.acceptableDuration ?dur.
      ?olt c:OperationalLimitType.direction ?rawdir.

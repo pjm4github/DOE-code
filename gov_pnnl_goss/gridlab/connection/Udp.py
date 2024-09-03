@@ -46,7 +46,7 @@ def handle_socket_error(on_error, max_retry, retry):
         debug(9, "udp::recv() socket error, ignoring")
         return 0
     else:
-        exception("invalid on_error type")
+        exception("invalid on_error global_property_types")
 
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106 python
@@ -225,7 +225,7 @@ def recv_udp(self, buf, len):
 
 
             else:
-                raise Exception("invalid on_error type")
+                raise Exception("invalid on_error global_property_types")
 
         msg[rcv_len] = b'\0'
 

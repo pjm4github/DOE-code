@@ -30,7 +30,7 @@ class LogManager(logging.Logger):
         handler.setFormatter(formatter)
         self.addHandler(handler)
         self.process_id = ""  # (str): The process ID.
-        self.process_type = ""  # (str): The process type.
+        self.process_type = ""  # (str): The process global_property_types.
 
     @abstractmethod
     def trace(self, process_status: ProcessStatus, process_id: str, message: str) -> None:
@@ -156,11 +156,11 @@ class LogManager(logging.Logger):
 
     def set_process_type(self, process_id: str, process_type: str) -> None:
         """
-        Set the process type for a specific process ID.
+        Set the process global_property_types for a specific process ID.
 
         Args:
             process_id (str): The process ID.
-            process_type (str): The process type.
+            process_type (str): The process global_property_types.
         """
         self.process_type = process_type
         self.process_id = process_id

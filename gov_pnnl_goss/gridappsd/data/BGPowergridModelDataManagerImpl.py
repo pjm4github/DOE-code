@@ -28,7 +28,7 @@ class BGPowergridModelDataManagerImpl:
     nsRDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
     nsXSD = "http://www.w3.org/2001/XMLSchema#"
     feederProperty = "http://iec.ch/TC57/CIM100#Feeder.NormalEnergizingSubstation"
-    RDF_TYPE = nsRDF + "type"
+    RDF_TYPE = nsRDF + "global_property_types"
     RDF_RESOURCE = "rdf:resource"
     RDF_ID = "rdf:ID"
     SUBJECT = "subject"
@@ -136,7 +136,7 @@ class BGPowergridModelDataManagerImpl:
         return self.format_string_list(object_type_list, "objectTypes", result_format)
 
     def query_object_type_list(self, model_id, process_id, username):
-        query = "select DISTINCT ?type where {?subject rdf:type ?type "
+        query = "select DISTINCT ?global_property_types where {?subject rdf:global_property_types ?global_property_types "
         if model_id is not None and len(model_id.strip()) > 0:
             query += f". ?subject ?p2 <{self.get_endpoint_ns(model_id)}> "
 
@@ -147,7 +147,7 @@ class BGPowergridModelDataManagerImpl:
         object_types = []
         while rs.hasNext():
             binding = rs.nextSolution()
-            type = binding.get("type")
+            type = binding.get("global_property_types")
             object_types.append(type.getURI())
 
         return object_types
@@ -184,10 +184,10 @@ class BGPowergridModelDataManagerImpl:
                 value = ""
                 if qs.get(self.OBJECT).isLiteral():
                     literal = qs.getLiteral(self.OBJECT)
-                    value = literal.to""
+                    value = literal.to_string()
                 else:
                     resource = qs.getResource(self.OBJECT)
-                    value = resource.to""
+                    value = resource.to_string()
                     if value not in already_seen and value not in new_ids and value.startswith(
                             base_url) and property_name != self.feederProperty:
                         new_ids.append(value)
@@ -259,7 +259,7 @@ class BGPowergridModelDataManagerImpl:
             query += f" ?status ?p2 <{self.get_endpoint_ns(model_id)}> "
 
         if object_type is not None and object_type.strip():
-            query += f" ?status rdf:type <{object_type}> "
+            query += f" ?status rdf:global_property_types <{object_type}> "
 
         if filter is not None and filter.strip():
             if filter.startswith("."):
@@ -281,7 +281,7 @@ class BGPowergridModelDataManagerImpl:
         models = []
 
         modelNameQuery = "SELECT ?feeder ?fid  WHERE {"
-        modelNameQuery += "?status r:type c:Feeder."
+        modelNameQuery += "?status r:global_property_types c:Feeder."
         modelNameQuery += "?status c:IdentifiedObject.name ?feeder."
         modelNameQuery += "?status c:IdentifiedObject.mRID ?fid	}"
         modelNameQuery += " ORDER by ?fid"
@@ -289,7 +289,7 @@ class BGPowergridModelDataManagerImpl:
         modelNameRS = self.query_result_set(None, modelNameQuery, process_id, username)
         while modelNameRS.hasNext():
             qs = modelNameRS.nextSolution()
-            models.append(qs.get("fid").to"")
+            models.append(qs.get("fid").to_string())
 
         return models
 
@@ -305,7 +305,7 @@ class BGPowergridModelDataManagerImpl:
                 " ?status ?precisions <" + self.get_endpoint_ns(model_id) + "> ."
 
         if object_type is not None and object_type.strip():
-            query += " ?status rdf:type <" + Constants.nsCIM + object_type + "> ."
+            query += " ?status rdf:global_property_types <" + Constants.nsCIM + object_type + "> ."
 
         query += "}"
         baseUrl = self.get_endpoint_ns(None)
@@ -313,7 +313,7 @@ class BGPowergridModelDataManagerImpl:
 
         while rs.hasNext():
             qs = rs.nextSolution()
-            value = qs.get("status").to""
+            value = qs.get("status").to_string()
 
             if value.startswith(baseUrl + "#"):
                 value = value[len(baseUrl) + 1:]
@@ -346,7 +346,7 @@ class BGPowergridModelDataManagerImpl:
             raise Exception("queryObjectDict: model id missing")
 
         if (object_type is None or not object_type.strip()) and (object_id is None or not object_id.strip()):
-            raise Exception("queryObjectDict: both object id and object type missing, at least one required")
+            raise Exception("queryObjectDict: both object id and object global_property_types missing, at least one required")
 
         query = ""
         subject = "?status"
@@ -359,7 +359,7 @@ class BGPowergridModelDataManagerImpl:
                 subject + " ?p2 <" + self.get_endpoint_ns(model_id) + "> . "
 
         if (object_id is None or not object_id.strip()) and object_type is not None and object_type.strip():
-            query += subject + " rdf:type <" + Constants.nsCIM + object_type + "> ."
+            query += subject + " rdf:global_property_types <" + Constants.nsCIM + object_type + "> ."
 
         query += "}"
         queryHandler = self.BlazegraphQueryHandler(self.get_endpoint_url(model_id), self.logger, process_id, username)
@@ -376,16 +376,16 @@ class BGPowergridModelDataManagerImpl:
             while rs.hasNext():
                 qs = rs.nextSolution()
                 obj = {
-                    "measid": qs.getLiteral("measid").get"",
-                    "type": qs.getLiteral("type").get"",
-                    "class": qs.getLiteral("class").get"",
-                    "name": qs.getLiteral("name").get"",
-                    "bus": qs.getLiteral("bus").get"",
-                    "phases": qs.getLiteral("phases").get"",
-                    "eqtype": qs.getLiteral("eqtype").get"",
-                    "eqname": qs.getLiteral("eqname").get"",
-                    "eqid": qs.getLiteral("eqid").get"",
-                    "trmid": qs.getLiteral("trmid").get"",
+                    "measid": qs.getLiteral("measid").get_string(),
+                    "global_property_types": qs.getLiteral("global_property_types").get_string(),
+                    "class": qs.getLiteral("class").get_string(),
+                    "name": qs.getLiteral("name").get_string(),
+                    "bus": qs.getLiteral("bus").get_string(),
+                    "phases": qs.getLiteral("phases").get_string(),
+                    "eqtype": qs.getLiteral("eqtype").get_string(),
+                    "eqname": qs.getLiteral("eqname").get_string(),
+                    "eqid": qs.getLiteral("eqid").get_string(),
+                    "trmid": qs.getLiteral("trmid").get_string(),
                 }
                 result_arr.append(obj)
 
@@ -407,12 +407,12 @@ class BGPowergridModelDataManagerImpl:
             raise Exception("queryMeasurementDict: model id missing")
 
         query = (
-            "SELECT ?class ?type ?name ?bus ?phases ?eqtype ?eqname ?eqid ?trmid ?measid WHERE { "
+            "SELECT ?class ?global_property_types ?name ?bus ?phases ?eqtype ?eqname ?eqid ?trmid ?measid WHERE { "
             "?eq c:Equipment.EquipmentContainer ?fdr. "
             "?fdr c:IdentifiedObject.mRID ?fdrid. "
-            "{ ?status r:type c:Discrete. bind (\"Discrete\" as ?class)} "
+            "{ ?status r:global_property_types c:Discrete. bind (\"Discrete\" as ?class)} "
             "UNION "
-            "{ ?status r:type c:Analog. bind (\"Analog\" as ?class)} "
+            "{ ?status r:global_property_types c:Analog. bind (\"Analog\" as ?class)} "
         )
 
         if object_id is not None and object_id.strip():
@@ -423,24 +423,24 @@ class BGPowergridModelDataManagerImpl:
                 "?status c:IdentifiedObject.mRID ?measid . "
                 "?status c:Measurement.PowerSystemResource ?eq . "
                 "?status c:Measurement.Terminal ?trm . "
-                "?status c:Measurement.measurementType ?type . "
+                "?status c:Measurement.measurementType ?global_property_types . "
                 "?trm c:IdentifiedObject.mRID ?trmid. "
                 "?eq c:IdentifiedObject.mRID ?eqid. "
                 "?eq c:IdentifiedObject.name ?eqname. "
                 "?eq c:Equipment.EquipmentContainer <" + self.get_endpoint_ns(model_id) + ">. "
-                                                                                          "?eq r:type ?typeraw. "
+                                                                                          "?eq r:global_property_types ?typeraw. "
                                                                                           "bind(strafter(str(?typeraw),\"#\") as ?eqtype) "
         )
 
         if (object_id is None or not object_id.strip()) and object_type is not None and object_type.strip():
-            query += "?eq r:type <" + Constants.nsCIM + object_type + "> ."
+            query += "?eq r:global_property_types <" + Constants.nsCIM + object_type + "> ."
 
         query += (
             "?trm c:Terminal.ConnectivityNode ?cn. "
             "?cn c:IdentifiedObject.name ?bus. "
             "?status c:Measurement.phases ?phsraw . "
             "{bind(strafter(str(?phsraw),\"PhaseCode.\") as ?phases)} "
-            "} ORDER BY ?class ?type ?name "
+            "} ORDER BY ?class ?global_property_types ?name "
         )
 
         query_handler = self.BlazegraphQueryHandler(self.get_endpoint_url(model_id), self.log_manager, process_id,
@@ -552,7 +552,7 @@ class BGPowergridModelDataManagerImpl:
     #
     # 	    StringWriter resultWriter = new StringWriter();
     # 	    transformer.transform(new DOMSource(rootDoc), new StreamResult(resultWriter));
-    # 		return resultWriter.to"";
+    # 		return resultWriter.to_string();
     # 	}
 
 
@@ -622,11 +622,11 @@ class BGPowergridModelDataManagerImpl:
 
                 if obj.is_literal():
                     literal = obj.get_literal()
-                    value = literal.to_""
+                    value = literal.to_string()
                     tmp.text = value
                 else:
                     resource = obj.get_resource()
-                    value = resource.to_""
+                    value = resource.to_string()
 
                     if value.startswith(base_url + "#"):
                         value = value[len(base_url):]
@@ -696,7 +696,7 @@ class BGPowergridModelDataManagerImpl:
         elif result_format == "CSV":
             return ",".join(values)
         else:
-            # TODO: Send an unrecognized type error
+            # TODO: Send an unrecognized global_property_types error
             pass
         return None
 
@@ -707,14 +707,14 @@ class BGPowergridModelDataManagerImpl:
             result_list = []
             while rs.has_next():
                 qs = rs.next_solution()
-                feeder_name = qs.get_literal(self.FEEDER_NAME).get_""
-                feeder_id = qs.get_literal(self.FEEDER_ID).get_""
-                station_name = qs.get_literal(self.STATION_NAME).get_""
-                station_id = qs.get_literal(self.STATION_ID).get_""
-                subregion_name = qs.get_literal(self.SUBREGION_NAME).get_""
-                subregion_id = qs.get_literal(self.SUBREGION_ID).get_""
-                region_name = qs.get_literal(self.REGION_NAME).get_""
-                region_id = qs.get_literal(self.REGION_ID).get_""
+                feeder_name = qs.get_literal(self.FEEDER_NAME).get_string()
+                feeder_id = qs.get_literal(self.FEEDER_ID).get_string()
+                station_name = qs.get_literal(self.STATION_NAME).get_string()
+                station_id = qs.get_literal(self.STATION_ID).get_string()
+                subregion_name = qs.get_literal(self.SUBREGION_NAME).get_string()
+                subregion_id = qs.get_literal(self.SUBREGION_ID).get_string()
+                region_name = qs.get_literal(self.REGION_NAME).get_string()
+                region_id = qs.get_literal(self.REGION_ID).get_string()
 
                 feeder_obj = {
                     self.FEEDER_NAME: feeder_name,
@@ -737,14 +737,14 @@ class BGPowergridModelDataManagerImpl:
                     qs = rs.next_solution()
                     model_element = ET.Element("model")
 
-                    feeder_name = qs.get_literal(self.FEEDER_NAME).get_""
-                    feeder_id = qs.get_literal(self.FEEDER_ID).get_""
-                    station_name = qs.get_literal(self.STATION_NAME).get_""
-                    station_id = qs.get_literal(self.STATION_ID).get_""
-                    subregion_name = qs.get_literal(self.SUBREGION_NAME).get_""
-                    subregion_id = qs.get_literal(self.SUBREGION_ID).get_""
-                    region_name = qs.get_literal(self.REGION_NAME).get_""
-                    region_id = qs.get_literal(self.REGION_ID).get_""
+                    feeder_name = qs.get_literal(self.FEEDER_NAME).get_string()
+                    feeder_id = qs.get_literal(self.FEEDER_ID).get_string()
+                    station_name = qs.get_literal(self.STATION_NAME).get_string()
+                    station_id = qs.get_literal(self.STATION_ID).get_string()
+                    subregion_name = qs.get_literal(self.SUBREGION_NAME).get_string()
+                    subregion_id = qs.get_literal(self.SUBREGION_ID).get_string()
+                    region_name = qs.get_literal(self.REGION_NAME).get_string()
+                    region_id = qs.get_literal(self.REGION_ID).get_string()
 
                     model_element.set(self.FEEDER_NAME, feeder_name)
                     model_element.set(self.FEEDER_ID, feeder_id)
@@ -767,26 +767,26 @@ class BGPowergridModelDataManagerImpl:
             values = []
             while rs.has_next():
                 qs = rs.next_solution()
-                feeder_name = qs.get_literal(self.FEEDER_NAME).get_""
-                feeder_id = qs.get_literal(self.FEEDER_ID).get_""
-                station_name = qs.get_literal(self.STATION_NAME).get_""
-                station_id = qs.get_literal(self.STATION_ID).get_""
-                subregion_name = qs.get_literal(self.SUBREGION_NAME).get_""
-                subregion_id = qs.get_literal(self.SUBREGION_ID).get_""
-                region_name = qs.get_literal(self.REGION_NAME).get_""
-                region_id = qs.get_literal(self.REGION_ID).get_""
+                feeder_name = qs.get_literal(self.FEEDER_NAME).get_string()
+                feeder_id = qs.get_literal(self.FEEDER_ID).get_string()
+                station_name = qs.get_literal(self.STATION_NAME).get_string()
+                station_id = qs.get_literal(self.STATION_ID).get_string()
+                subregion_name = qs.get_literal(self.SUBREGION_NAME).get_string()
+                subregion_id = qs.get_literal(self.SUBREGION_ID).get_string()
+                region_name = qs.get_literal(self.REGION_NAME).get_string()
+                region_id = qs.get_literal(self.REGION_ID).get_string()
 
                 value = f"{feeder_name}|{feeder_id}|{station_name}|{station_id}|{subregion_name}|{subregion_id}|{region_name}|{region_id}"
                 values.append(value)
 
             return ",".join(values)
         else:
-            # TODO: Send unrecognized type error
+            # TODO: Send unrecognized global_property_types error
             pass
 
     def query_model_names_and_ids_result_set(self, process_id, username):
         model_name_query = "SELECT ?{FEEDER_NAME} ?{FEEDER_ID} ?{STATION_NAME} ?{STATION_ID} ?{SUBREGION_NAME} ?{SUBREGION_ID} ?{REGION_NAME} ?{REGION_ID} WHERE {" \
-                           " ?status r:type c:Feeder." \
+                           " ?status r:global_property_types c:Feeder." \
                            " ?status c:IdentifiedObject.name ?{FEEDER_NAME}." \
                            " ?status c:IdentifiedObject.mRID ?{FEEDER_ID}." \
                            " ?status c:Feeder.NormalEnergizingSubstation ?sub." \

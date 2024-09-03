@@ -241,7 +241,7 @@ class AppManagerTest2(unittest.TestCase, ConnectionListener):
 
         if self.connection:
             message_json = json.dumps(message, default=lambda o: o.__dict__)
-            self.connection.send(destination, message_json, headers={'content-type': 'application/json'})
+            self.connection.send(destination, message_json, headers={'content-global_property_types': 'application/json'})
         else:
             connection_factory = StompJmsConnectionFactory()
             connection_factory.set_broker_URI("tcp://localhost:61613")

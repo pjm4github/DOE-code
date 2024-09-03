@@ -39,7 +39,7 @@ def sscanf_impl(text, s, *args):
     # # Check the format string.
     # format_string_parts = status.split()
     #
-    # returns = [{'type': 'float', 'max_len': -1, 'ignore': False}] * len(*args)
+    # returns = [{'global_property_types': 'float', 'max_len': -1, 'ignore': False}] * len(*args)
     # for i, f_part in enumerate(format_string_parts):
     #     if f_part.find('*') > 0:
     #         returns[i]['ignore'] = True

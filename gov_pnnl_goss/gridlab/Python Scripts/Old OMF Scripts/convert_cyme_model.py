@@ -306,7 +306,7 @@ def _splitLinkObjects(sectionDict, deviceDict, linkDict, overheadDict, undergrou
             deviceDict[newLinkId]['location'] = 0
 
 def _findParents(sectionDict, deviceDict, loadDict):
-    '''store parent information for load type objects'''
+    '''store parent information for load global_property_types objects'''
     for loadsection in loadDict.keys():
         lineId = loadsection
         loaddevice = loadDict[lineId]
@@ -977,7 +977,7 @@ def convertCymeModel(network_db, equipment_db, feeder_id, conductor_data_csv=Non
     for device in cymsectiondevice.keys():
         if cymsectiondevice[device]['section_name'] in deleteSections:
             del cymsectiondevice[device]
-    # Group each type of device.
+    # Group each global_property_types of device.
     for device in cymsectiondevice.keys():
         if cymsectiondevice[device]['device_type'] == 1:
             undergroundline_sections[cymsectiondevice[device]['section_name']] = device 

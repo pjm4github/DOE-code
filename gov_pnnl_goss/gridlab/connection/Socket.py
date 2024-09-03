@@ -33,10 +33,10 @@ def convert_error_code(err):
         10038: "socket operation on nonsocket",
         10040: "destination address required",
         10040: "message too long",
-        10041: "protocol wrong type for socket",
+        10041: "protocol wrong global_property_types for socket",
         10042: "bad protocol option",
         10043: "protocol not supported",
-        10044: "socket type not supported",
+        10044: "socket global_property_types not supported",
         10046: "protocol family not supported",
         10047: "address family not supported",
         10048: "address already in use",
@@ -65,7 +65,7 @@ def convert_error_code(err):
         8: "insufficient memory available",
         995: "overlapped operation aborted"
     }
-    return error_map.get(err, "undefined error type")
+    return error_map.get(err, "undefined error global_property_types")
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106 python
 import socket
@@ -133,7 +133,7 @@ def socket_strerror():
                 winsock.WSAEMFILE: "too many open files",
                 winsock.WSAEWOULDBLOCK: "resource temporarily unavailable",
                 winsock.WSAEPROTONOSUPPORT: "protocol not supported",
-                winsock.WSAEPROTOTYPE: "protocol wrong type for socket",
+                winsock.WSAEPROTOTYPE: "protocol wrong global_property_types for socket",
                 winsock.WSAENOTSOCK: "socket operation on nonsocket",
                 winsock.WSAEINTR: "interrupted function call",
                 winsock.WSAEDESTADDRREQ: "destination address required",
@@ -165,7 +165,7 @@ def socket_strerror():
                 winerror.WSA_OPERATION_ABORTED: "overlapped operation aborted"
             }[err]
         except KeyError:
-            return "undefined error type"
+            return "undefined error global_property_types"
     except ImportError:
         return errno.strerror(errno)
 

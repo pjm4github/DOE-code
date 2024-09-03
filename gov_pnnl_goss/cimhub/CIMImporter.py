@@ -54,8 +54,8 @@ from gov_pnnl_goss.cimhub.components.DistSectionaliser import DistSectionaliser
 from gov_pnnl_goss.cimhub.dto.ModelState import ModelState
 from gov_pnnl_goss.cimhub.queryhandler.QueryHandler import QueryHandler
 from gov_pnnl_goss.cimhub.queryhandler.impl.HTTPBlazegraphQueryHandler import HTTPBlazegraphQueryHandler
+# https://github.com/GRIDAPPSD/CIMHub/blob/master/cimhub/src/main/java/gov/pnnl/gridappsd/cimhub/CIMImporter.java
 
-# https://github.com/GRIDAPPSD/CIMHub/cimhub/src/main/java/gov/pnnl/gridappsd/cimhub/CIMImporter.java
 
 class CIMImporter(QueryHandler, CIMQuerySetter, OperationalLimits):
     def __init__(self):
@@ -567,7 +567,7 @@ class CIMImporter(QueryHandler, CIMQuerySetter, OperationalLimits):
         print(label)
         keys = sorted(component_map.keys())
         for key in keys:
-            print(component_map[key].display_"")
+            print(component_map[key].display_string())
 
     def print_one_count_map(self, count_map, label):
         print(label)
@@ -579,7 +579,7 @@ class CIMImporter(QueryHandler, CIMQuerySetter, OperationalLimits):
         print(label)
         keys = sorted(node_map.keys())
         for key in keys:
-            print(node_map[key].display_"")
+            print(node_map[key].display_string())
 
     def print_all_count_maps(self):
         self.print_one_count_map(self.map_count_bank, "Count of Bank Tanks")
@@ -1066,13 +1066,13 @@ class CIMImporter(QueryHandler, CIMQuerySetter, OperationalLimits):
             "SELECT ?name WHERE {"
             " ?fdr c:IdentifiedObject.mRID ?fdrid."
             " ?status c:ConnectivityNode.ConnectivityNodeContainer ?fdr."
-            " ?status r:type c:ConnectivityNode."
+            " ?status r:global_property_types c:ConnectivityNode."
             " ?status c:IdentifiedObject.name ?name."
             "} ORDER by ?name", "list nodes")
 
         mapNodes = {}
         for soln in results:
-            bus = DistComponent.safe_name(soln.get("?name").to"")
+            bus = DistComponent.safe_name(soln.get("?name").to_string())
             mapNodes[bus] = GldNode(bus)
 
         for pair in self.map_substations.items():

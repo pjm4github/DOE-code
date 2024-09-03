@@ -35,6 +35,10 @@ MAXYEAR = 2969
 DT_INFINITY = 0xfffffffe
 DT_INVALID = 0xffffffff
 DT_SECOND = 1000000000
+# DT_INFINITY = math.inf
+# DT_INVALID = -1
+# DT_SECOND = 1.0
+
 
 USE_TS_CACHE = False
 
@@ -43,7 +47,7 @@ def is_leap_year(year: int) -> bool:
     return year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)
 
 
-class DateTime:
+class TimeStamp:
     def __init__(self, year, month, day, hour=0, minute=0, second=0, nanosecond=0, is_dst=0, tz='UTC', weekday=0, yearday=0, timestamp=0, tzoffset=0):
         self.year = year
         self.month = month
@@ -60,12 +64,13 @@ class DateTime:
         self.tzoffset = tzoffset
 
     @staticmethod
-    def from_timestamp(ts: int) -> 'DateTime':
+    def to_timestamp(ts: int) -> 'TimeStamp':
         dt = datetime.utcfromtimestamp(ts)
-        return DateTime(dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second)
+        return TimeStamp(dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second)
 
-    def to_timestamp(self) -> int:
-        return int(datetime(self.year, self.month, self.day, self.hour, self.minute, self.second).timestamp())
+    @staticmethod
+    def from_timestamp(ts: 'TimeStamp') -> int:
+        return int(datetime(ts.year, ts.month, ts.day, ts.hour, ts.minute, ts.second).timestamp())
 
 
 # Function stubs for conversion functions
@@ -76,7 +81,7 @@ def mkdatetime(dt):
     return int(time.mktime(dt.timetuple()))
 
 def strdatetime(dt, buffer, size):
-    # This function would format a DateTime object into a string.
+    # This function would format a TimeStamp object into a string.
     # The implementation would depend on the specific format desired.
     pass
 
@@ -94,7 +99,7 @@ def convert_from_timestamp_delta(ts: int, delta_ns: int) -> str:
     Convert a timestamp and delta (in nanoseconds) to a human-readable string.
 
     Parameters:
-    - ts: Timestamp in seconds since the Unix epoch (1970-01-01 00:00:00 UTC).
+    - ts: TimeStamp in seconds since the Unix epoch (1970-01-01 00:00:00 UTC).
     - delta_ns: Delta time in nanoseconds to be added to the timestamp.
 
     Returns:
@@ -118,7 +123,7 @@ def convert_from_deltatime_timestamp(ts_v: float) -> str:
     Convert a high-resolution timestamp (with nanoseconds) to a human-readable string.
 
     Parameters:
-    - ts_v: Timestamp in seconds since the Unix epoch (1970-01-01 00:00:00 UTC),
+    - ts_v: TimeStamp in seconds since the Unix epoch (1970-01-01 00:00:00 UTC),
             including fractional seconds for nanosecond precision.
 
     Returns:
@@ -195,7 +200,7 @@ def local_datetime(ts: int, timezone_str: str) -> datetime:
     Convert a UTC timestamp to a local datetime object considering the timezone and DST.
 
     Parameters:
-    - ts: Timestamp in seconds since the Unix epoch (1970-01-01 00:00:00 UTC).
+    - ts: TimeStamp in seconds since the Unix epoch (1970-01-01 00:00:00 UTC).
     - timezone_str: A string representing the timezone (e.g., 'America/New_York').
 
     Returns:
@@ -219,7 +224,7 @@ def local_datetime_delta(ts: float, timezone_str: str) -> datetime:
     considering the specified timezone.
 
     Parameters:
-    - ts: Timestamp in seconds since the Unix epoch (1970-01-01 00:00:00 UTC),
+    - ts: TimeStamp in seconds since the Unix epoch (1970-01-01 00:00:00 UTC),
           including fractional seconds for nanosecond precision.
     - timezone_str: A string representing the timezone (e.g., 'America/New_York').
 
@@ -418,12 +423,12 @@ def local_tzoffset(t):
         return int(tzoffset + (3600 if isdst(t) else 0))
 
 # Example of handling DST changes and timezone conversions might require third-party libraries like pytz
-def adjust_for_dst(dt: DateTime, timezone_str: str) -> DateTime:
+def adjust_for_dst(dt: TimeStamp, timezone_str: str) -> TimeStamp:
     tz = pytz.timezone(timezone_str)
     naive_dt = datetime(dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second)
     local_dt = tz.localize(naive_dt, is_dst=None)
     utc_dt = local_dt.astimezone(pytz.utc)
-    return DateTime.from_timestamp(int(utc_dt.timestamp()))
+    return TimeStamp.from_timestamp(int(utc_dt.timestamp()))
 
 
 def timestamp_get_part(ts, part_name):
@@ -485,7 +490,7 @@ def earliest_timestamp(*timestamps):
     timestamp3 = 1614556800  # Example timestamp for 2021-03-01 00:00:00 UTC
 
     earliest = earliest_timestamp(timestamp1, timestamp2, timestamp3)
-    print(f"Earliest Timestamp: {earliest}")
+    print(f"Earliest TimeStamp: {earliest}")
     """
 
     # Filter out any None values or other types that are not int or float
@@ -510,10 +515,9 @@ def absolute_timestamp(ts):
     # Example usage
     timestamp_example = -1609459200  # An example negative timestamp
     absolute_ts = absolute_timestamp(timestamp_example)
-    print(f"Absolute Timestamp: {absolute_ts}")
+    print(f"Absolute TimeStamp: {absolute_ts}")
     """
-    return abs(ts)
-
+    return datetime.fromtimestamp(ts)
 
 def is_soft_timestamp(ts):
     """

@@ -254,7 +254,7 @@ def output_verbose(format, *args):
 #         # Print the verbose message
 #         print(format_str % args)
 #
-#         # Update the last output type
+#         # Update the last output global_property_types
 #         last_out = OutputType.VERBOSE
 
 

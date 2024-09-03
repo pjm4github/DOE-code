@@ -83,7 +83,7 @@
 # 				new_simulation_process, configuration_manager, simulation_manager, app_manager, log_manager, service_manager, data_manager, test_manager, security_config, field_bus_manager);
 #
 # 		PowergridModelDataRequest pgDataRequest = new PowergridModelDataRequest();
-# 		String queryString = "select ?line_name ?subregion_name ?region_name WHERE {?line rdf:type cim:Line."+
+# 		String queryString = "select ?line_name ?subregion_name ?region_name WHERE {?line rdf:global_property_types cim:Line."+
 #                               			 "?line cim:IdentifiedObject.name ?line_name."+
 #                                          "?line cim:Line.Region ?subregion."+
 #                                          "?subregion cim:IdentifiedObject.name ?subregion_name."+
@@ -240,7 +240,7 @@ class ProcessEventTests(unittest.TestCase):
 						  self.securityConfig, self.fieldBusManager)
 
         pgDataRequest = PowergridModelDataRequest()
-        query_string = "select ?line_name ?subregion_name ?region_name WHERE {?line rdf:type cim:Line." + \
+        query_string = "select ?line_name ?subregion_name ?region_name WHERE {?line rdf:global_property_types cim:Line." + \
                        "?line cim:IdentifiedObject.name ?line_name." + \
                        "?line cim:Line.Region ?subregion." + \
                        "?subregion cim:IdentifiedObject.name ?subregion_name." + \

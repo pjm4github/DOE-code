@@ -411,7 +411,7 @@ def ConvertMDB(cfg):
                     if row['primarycontrolmode'] == 'VOLTS':
                             # used metering phase for PT phase
                             # used same time delay for both
-                            capf.write(' type=voltage element=capacitor.' + name + ' terminal=1'+\
+                            capf.write(' global_property_types=voltage element=capacitor.' + name + ' terminal=1'+\
                                     ' ptphase=' + get_phnum(row['meteringphase']) + ' ptratio=1'+\
                                     ' offsetting=' + str(row['module1capswitchtripvalue'])+\
                                     ' onsetting=' + str(row['module1capswitchclosevalue'])+\
@@ -419,7 +419,7 @@ def ConvertMDB(cfg):
                                     ' delayoff=' + str(row['timedelaysec'])+\
                                     ' deadtime=0\n')
                     else:
-                            # unrecognized control type: disable the controller
+                            # unrecognized control global_property_types: disable the controller
                             print('Warning: "'+row['control']+'" cap control not implemented')
                             capf.write(' enabled=false\n')
     capf.close()

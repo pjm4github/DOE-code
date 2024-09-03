@@ -5,7 +5,7 @@ import threading
 import signal
 
 from gridlab.gldcore import Globals
-from gridlab.gldcore.Class import Class
+from gridlab.gldcore.Class import DynamicClass
 
 """
 This program provides the same kill functionality that is available to Linux versions.

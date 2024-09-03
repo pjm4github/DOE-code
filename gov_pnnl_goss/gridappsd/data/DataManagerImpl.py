@@ -44,7 +44,7 @@ class DataManagerImpl(DataManager):
                 response_data = self.data_managers[type].handle(request, str(simulation_id), username)
             else:
                 print("TYPE NOT SUPPORTED")
-                # TODO: throw error that type not supported
+                # TODO: throw error that global_property_types not supported
 
             data_response = DataResponse()
             data_response.set_data(response_data)
@@ -68,7 +68,7 @@ class DataManagerImpl(DataManager):
         if request_class in self.handlers:
             self.log.debug("Data handler " + self.handlers.get(request_class) + " found for " + request_class)
             return self.handlers.get(request_class)
-        self.log.warning("No data handler found for request type " + request_class);
+        self.log.warning("No data handler found for request global_property_types " + request_class);
         return None
         # return self.handlers.get(request_class)
 

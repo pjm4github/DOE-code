@@ -6,7 +6,8 @@
 ; The file describes each unit available as a function of fundamental physical constants, basic SI units, or a derivation of other units.
 ; Physical Constants and Basic Units
 ;
-; The physical constants for c (speed of light in meters per second), 
+; The physical constants for
+;  c (speed of light in meters per second),
 ;  e (charge of an electron in Coulombs), 
 ;  h (Plank's constant in kilogram meters squared per second),
 ;  k (Boltzman's constant in kilogram meters squared per second squared Kelvin),
@@ -103,6 +104,8 @@ degF=R-459.65
 N=1 m*kg/s^2
 Pa=N/m^2
 J=N*m
+Nm=J
+kg=1000 g
 
 ; Currency
 1975$=0.42 1990$

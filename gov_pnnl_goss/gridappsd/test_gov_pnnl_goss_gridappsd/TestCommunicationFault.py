@@ -24,11 +24,11 @@
 #
 # 		GsonBuilder gsonBuilder = new GsonBuilder();
 #
-# //		RuntimeTypeAdapterFactory<BaseEventCommand> commandAdapterFactory = RuntimeTypeAdapterFactory.of(BaseEventCommand.class, "type")
+# //		RuntimeTypeAdapterFactory<BaseEventCommand> commandAdapterFactory = RuntimeTypeAdapterFactory.of(BaseEventCommand.class, "global_property_types")
 # //				.registerSubtype(FaultCommand.class,"FaultCommand")
 # //		    .registerSubtype(EventCommand.class, "EventCommand");
 #
-# //		RuntimeTypeAdapterFactory<BaseEvent> eventAdapterFactory = RuntimeTypeAdapterFactory.of(BaseEvent.class, "type")
+# //		RuntimeTypeAdapterFactory<BaseEvent> eventAdapterFactory = RuntimeTypeAdapterFactory.of(BaseEvent.class, "global_property_types")
 # //				.registerSubtype(FailureEvent.class,"FailureEvent")
 # //		    .registerSubtype(CommunicationFaultData.class, "CommunicationFaultData");
 #
@@ -84,7 +84,7 @@
 # 		String faultCommandString = "{\"message\":{\"rGround\":0.0,\"xGround\":0.5,\"rLineToLine\":0.0,\"xLineToLine\":0.0,\"PhaseConnectedFaultKind\":\"lineToGround\",\"faultMRID\":\"_1f4467ee-678b-49c6-b58c-9f9462cf5ae4\"},\"command\":\"FaultEvent\",\"simulation_id\":9999999}";
 #
 #
-# 		String eventCommandString = "{\"type\":\"EventCommand\",\"command\": \"CommEvent\", \"simulation_id\": 9999999, \"message\": {\"inputList\": [{\"objectMRID\": \"UU123214\", \"attribute\": \"RegulatingControl.mode\"}], \"outputList\": [\"UU12323\"], \"filterAllInputs\": false, \"filterAllOutputs\": false, \"timeInitiated\": 1248156005, \"timeCleared\": 1248156008}}";
+# 		String eventCommandString = "{\"global_property_types\":\"EventCommand\",\"command\": \"CommEvent\", \"simulation_id\": 9999999, \"message\": {\"inputList\": [{\"objectMRID\": \"UU123214\", \"attribute\": \"RegulatingControl.mode\"}], \"outputList\": [\"UU12323\"], \"filterAllInputs\": false, \"filterAllOutputs\": false, \"timeInitiated\": 1248156005, \"timeCleared\": 1248156008}}";
 #
 #
 # 		if(eventCommandString.contains("CommEvent")){
@@ -174,7 +174,7 @@ class TestCommunicationFault(unittest.TestCase):
         }
 
         event_command = {
-            "type": "EventCommand",
+            "global_property_types": "EventCommand",
             "command": "CommEvent",
             "simulation_id": 9999999,
             "message": dm

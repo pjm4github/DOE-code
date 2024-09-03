@@ -45,7 +45,7 @@
 #             "  UNION "+
 #             " { ?end c:PowerTransformerEnd.PowerTransformer|c:TransformerTankEnd.TransformerTank ?status."+
 #             "     ?end c:TransformerEnd.BaseVoltage ?lev.}"+
-#             " ?lev r:type c:BaseVoltage."+
+#             " ?lev r:global_property_types c:BaseVoltage."+
 #             " ?lev c:BaseVoltage.nominalVoltage ?vnom."+
 #             "} ORDER BY ?vnom");
 #
@@ -54,7 +54,7 @@
 #              " ?ctrlenabled ?discrete ?mode ?deadband ?setpoint ?delay ?monclass ?moneq ?monbus ?monphs ?id ?fdrid WHERE {"+
 #              " ?status c:Equipment.EquipmentContainer ?fdr."+
 #              " ?fdr c:IdentifiedObject.mRID ?fdrid."+
-#              " ?status r:type c:LinearShuntCompensator."+
+#              " ?status r:global_property_types c:LinearShuntCompensator."+
 #              " ?status c:IdentifiedObject.name ?name."+
 #              " ?status c:ConductingEquipment.BaseVoltage ?bv."+
 #              " ?bv c:BaseVoltage.nominalVoltage ?basev."+
@@ -94,12 +94,12 @@
 #             "SELECT DISTINCT ?name ?rad ?corerad ?gmr ?rdc ?r25 ?r50 ?r75 ?amps ?ins ?insmat ?id"+
 #             " ?insthick ?diacore ?diains ?diascreen ?diajacket ?sheathneutral"+
 #             " ?strand_cnt ?strand_rad ?strand_gmr ?strand_rdc WHERE {"+
-#             " ?eq r:type c:ACLineSegment."+
+#             " ?eq r:global_property_types c:ACLineSegment."+
 #             " ?eq c:Equipment.EquipmentContainer ?fdr."+
 #             " ?fdr c:IdentifiedObject.mRID ?fdrid."+
 #             " ?acp c:ACLineSegmentPhase.ACLineSegment ?eq."+
 #             " ?acp c:ACLineSegmentPhase.WireInfo ?w."+
-#             " ?w r:type c:ConcentricNeutralCableInfo."+
+#             " ?w r:global_property_types c:ConcentricNeutralCableInfo."+
 #             " ?w c:IdentifiedObject.name ?name."+
 #             " bind(strafter(str(?w),\"#\") as ?id)."+
 #             " ?w c:WireInfo.radius ?rad."+
@@ -152,7 +152,7 @@
 #
 #         mapQueries.put ("DistFeeder",
 #              "SELECT ?feeder ?fid ?station ?sid ?subregion ?sgrid ?region ?rgnid WHERE {"+
-#              "?status r:type c:Feeder."+
+#              "?status r:global_property_types c:Feeder."+
 #              "?status c:IdentifiedObject.name ?feeder."+
 #              "?status c:IdentifiedObject.mRID ?fid."+
 #              "?status c:Feeder.NormalEnergizingSubstation ?sub."+
@@ -169,7 +169,7 @@
 #
 #         mapQueries.put ("DistHouse",
 #             "SELECT ?name ?parent ?coolingSetpoint ?coolingSystem ?floorArea ?heatingSetpoint ?heatingSystem ?hvacPowerFactor ?numberOfStories ?thermalIntegrity ?id ?fdrid WHERE {" +
-#                     "?h r:type c:House. " +
+#                     "?h r:global_property_types c:House. " +
 #                     "?h c:IdentifiedObject.name ?name. " +
 #                     "?h c:IdentifiedObject.mRID ?id. " +
 #                     "?h c:House.floorArea ?floorArea. " +
@@ -191,7 +191,7 @@
 #
 #         mapQueries.put ("DistLinesCodeZ",
 #             "SELECT ?name ?id ?basev ?bus1 ?bus2 ?len ?lname ?codeid ?fdrid ?seq ?phs WHERE {"+
-#             " ?status r:type c:ACLineSegment."+
+#             " ?status r:global_property_types c:ACLineSegment."+
 #             " ?status c:Equipment.EquipmentContainer ?fdr."+
 #             " ?fdr c:IdentifiedObject.mRID ?fdrid."+
 #             " ?status c:IdentifiedObject.name ?name."+
@@ -219,7 +219,7 @@
 #
 #         mapQueries.put ("DistLinesInstanceZ",
 #             "SELECT ?name ?id ?basev ?bus1 ?bus2 ?len ?r ?x ?b ?r0 ?x0 ?b0 ?fdrid WHERE {"+
-#             " ?status r:type c:ACLineSegment."+
+#             " ?status r:global_property_types c:ACLineSegment."+
 #             " ?status c:Equipment.EquipmentContainer ?fdr."+
 #             " ?fdr c:IdentifiedObject.mRID ?fdrid."+
 #             " ?status c:IdentifiedObject.name ?name."+
@@ -248,7 +248,7 @@
 #         mapQueries.put ("DistLinesSpacingZ",
 #             "SELECT ?name ?id ?basev ?bus1 ?bus2 ?fdrid ?len ?spacing ?spcid ?phs ?phname ?phclass"+
 #             " WHERE {"+
-#             " ?status r:type c:ACLineSegment."+
+#             " ?status r:global_property_types c:ACLineSegment."+
 #             " ?status c:Equipment.EquipmentContainer ?fdr."+
 #             " ?fdr c:IdentifiedObject.mRID ?fdrid."+
 #             " ?status c:IdentifiedObject.name ?name."+
@@ -280,7 +280,7 @@
 #         mapQueries.put ("DistLineSpacing",
 #             "SELECT DISTINCT ?name ?cable ?usage ?bundle_count ?bundle_sep ?id ?seq ?x ?y"+
 #             " WHERE {"+
-#             " ?eq r:type c:ACLineSegment."+
+#             " ?eq r:global_property_types c:ACLineSegment."+
 #             " ?eq c:Equipment.EquipmentContainer ?fdr."+
 #             " ?fdr c:IdentifiedObject.mRID ?fdrid."+
 #             " ?eq c:ACLineSegment.WireSpacingInfo ?w."+
@@ -301,7 +301,7 @@
 #             "SELECT ?name ?bus ?basev ?precisions ?q ?cnt ?conn ?pz ?qz ?pi ?qi ?pp ?qp ?pe ?qe ?id ?fdrid "+
 #             "(group_concat(distinct ?phs;separator=\"\\dimensions\") as ?phases) "+
 #             "WHERE {"+
-#             " ?status r:type c:EnergyConsumer."+
+#             " ?status r:global_property_types c:EnergyConsumer."+
 #             " ?status c:Equipment.EquipmentContainer ?fdr."+
 #             " ?fdr c:IdentifiedObject.mRID ?fdrid."+
 #             " ?status c:IdentifiedObject.name ?name."+
@@ -333,36 +333,36 @@
 #             "ORDER BY ?name");
 #
 #         mapQueries.put ("DistMeasurement",
-#             "SELECT ?class ?type ?name ?bus ?phases ?eqtype ?eqname ?eqid ?trmid ?id WHERE {"+
+#             "SELECT ?class ?global_property_types ?name ?bus ?phases ?eqtype ?eqname ?eqid ?trmid ?id WHERE {"+
 #             " ?eq c:Equipment.EquipmentContainer ?fdr."+
 #             " ?fdr c:IdentifiedObject.mRID ?fdrid."+
-#             " { ?status r:type c:Discrete. bind (\"Discrete\" as ?class)}"+
+#             " { ?status r:global_property_types c:Discrete. bind (\"Discrete\" as ?class)}"+
 #             "   UNION"+
-#             " { ?status r:type c:Analog. bind (\"Analog\" as ?class)}"+
+#             " { ?status r:global_property_types c:Analog. bind (\"Analog\" as ?class)}"+
 #             "  ?status c:IdentifiedObject.name ?name ."+
 #             "  ?status c:IdentifiedObject.mRID ?id ."+
 #             "  ?status c:Measurement.PowerSystemResource ?eq ."+
 #             "  ?status c:Measurement.Terminal ?trm ."+
-#             "  ?status c:Measurement.measurementType ?type ."+
+#             "  ?status c:Measurement.measurementType ?global_property_types ."+
 #             "  ?trm c:IdentifiedObject.mRID ?trmid."+
 #             "  ?eq c:IdentifiedObject.mRID ?eqid."+
 #             "  ?eq c:IdentifiedObject.name ?eqname."+
-#             "  ?eq r:type ?typeraw."+
+#             "  ?eq r:global_property_types ?typeraw."+
 #             "   bind(strafter(str(?typeraw),\"#\") as ?eqtype)"+
 #             "  ?trm c:Terminal.ConnectivityNode ?cn."+
 #             "  ?cn c:IdentifiedObject.name ?bus."+
 #             "  ?status c:Measurement.phases ?phsraw ."+
 #             "    {bind(strafter(str(?phsraw),\"PhaseCode.\") as ?phases)}"+
-#             " } ORDER BY ?class ?type ?name");
+#             " } ORDER BY ?class ?global_property_types ?name");
 #
 #         mapQueries.put ("DistOverheadWire",
 #             "SELECT DISTINCT ?name ?rad ?corerad ?gmr ?rdc ?r25 ?r50 ?r75 ?amps ?ins ?insmat ?insthick ?id WHERE {"+
-#             " ?eq r:type c:ACLineSegment."+
+#             " ?eq r:global_property_types c:ACLineSegment."+
 #             " ?eq c:Equipment.EquipmentContainer ?fdr."+
 #             " ?fdr c:IdentifiedObject.mRID ?fdrid."+
 #             " ?acp c:ACLineSegmentPhase.ACLineSegment ?eq."+
 #             " ?acp c:ACLineSegmentPhase.WireInfo ?w."+
-#             " ?w r:type c:OverheadWireInfo."+
+#             " ?w r:global_property_types c:OverheadWireInfo."+
 #             " ?w c:IdentifiedObject.name ?name."+
 #             "   bind(strafter(str(?w),\"#\") as ?id)."+
 #             " ?w c:WireInfo.radius ?rad."+
@@ -381,11 +381,11 @@
 #
 #         mapQueries.put ("DistPhaseMatrix",
 #             "SELECT DISTINCT ?name ?cnt ?row ?col ?r ?x ?b ?id WHERE {"+
-#             " ?eq r:type c:ACLineSegment."+
+#             " ?eq r:global_property_types c:ACLineSegment."+
 #             " ?eq c:Equipment.EquipmentContainer ?fdr."+
 #             " ?fdr c:IdentifiedObject.mRID ?fdrid."+
 #             " ?eq c:ACLineSegment.PerLengthImpedance ?status."+
-#             " ?status r:type c:PerLengthPhaseImpedance."+
+#             " ?status r:global_property_types c:PerLengthPhaseImpedance."+
 #             " ?status c:IdentifiedObject.name ?name."+
 #             " ?status c:PerLengthPhaseImpedance.conductorCount ?cnt."+
 #             " bind(strafter(str(?status),\"#\") as ?id)."+
@@ -400,7 +400,7 @@
 #         mapQueries.put ("DistPowerXfmrCore",
 #             "SELECT ?pname ?enum ?b ?g WHERE {"+
 #             " ?fdr c:IdentifiedObject.mRID ?fdrid."+
-#             " ?precisions r:type c:PowerTransformer."+
+#             " ?precisions r:global_property_types c:PowerTransformer."+
 #             " ?precisions c:Equipment.EquipmentContainer ?fdr."+
 #             " ?precisions c:IdentifiedObject.name ?pname."+
 #             " ?end c:PowerTransformerEnd.PowerTransformer ?precisions."+
@@ -413,7 +413,7 @@
 #         mapQueries.put ("DistPowerXfmrMesh",
 #             "SELECT ?pname ?fnum ?tnum ?r ?x WHERE {"+
 #             " ?fdr c:IdentifiedObject.mRID ?fdrid."+
-#             " ?precisions r:type c:PowerTransformer."+
+#             " ?precisions r:global_property_types c:PowerTransformer."+
 #             " ?precisions c:Equipment.EquipmentContainer ?fdr."+
 #             " ?precisions c:IdentifiedObject.name ?pname."+
 #             " ?from c:PowerTransformerEnd.PowerTransformer ?precisions."+
@@ -427,7 +427,7 @@
 #
 #         mapQueries.put ("DistPowerXfmrWinding",
 #             "SELECT ?pname ?vgrp ?enum ?bus ?basev ?conn ?ratedS ?ratedU ?r ?ang ?grounded ?rground ?xground ?id ?fdrid ?ename ?eid WHERE {"+
-#             " ?precisions r:type c:PowerTransformer."+
+#             " ?precisions r:global_property_types c:PowerTransformer."+
 #             " ?precisions c:Equipment.EquipmentContainer ?fdr."+
 #             " ?fdr c:IdentifiedObject.mRID ?fdrid."+
 #             " ?precisions c:IdentifiedObject.name ?pname."+
@@ -462,7 +462,7 @@
 #             " WHERE {"+
 #             " ?pxf c:Equipment.EquipmentContainer ?fdr."+
 #             " ?fdr c:IdentifiedObject.mRID ?fdrid."+
-#             " ?rtc r:type c:RatioTapChanger."+
+#             " ?rtc r:global_property_types c:RatioTapChanger."+
 #             " ?rtc c:IdentifiedObject.name ?rname."+
 #             " ?rtc c:RatioTapChanger.TransformerEnd ?end."+
 #             " ?end c:TransformerEnd.endNumber ?wnum.");
@@ -519,11 +519,11 @@
 #
 #         mapQueries.put ("DistSequenceMatrix",
 #             "SELECT DISTINCT ?name ?r1 ?x1 ?b1 ?r0 ?x0 ?b0 ?id WHERE {"+
-#             " ?eq r:type c:ACLineSegment."+
+#             " ?eq r:global_property_types c:ACLineSegment."+
 #             " ?eq c:Equipment.EquipmentContainer ?fdr."+
 #             " ?fdr c:IdentifiedObject.mRID ?fdrid."+
 #             " ?eq c:ACLineSegment.PerLengthImpedance ?status."+
-#             " ?status r:type c:PerLengthSequenceImpedance."+
+#             " ?status r:global_property_types c:PerLengthSequenceImpedance."+
 #             " ?status c:IdentifiedObject.name ?name."+
 #             " bind(strafter(str(?status),\"#\") as ?id)."+
 #             " ?status c:PerLengthSequenceImpedance.r ?r1."+
@@ -537,7 +537,7 @@
 #         mapQueries.put ("DistSolar",
 #             "SELECT ?name ?bus ?ratedS ?ratedU ?ipu ?precisions ?q ?id ?fdrid (group_concat(distinct ?phs;separator=\"\\dimensions\") as ?phases) "+
 #             "WHERE {"+
-#             " ?status r:type c:PhotovoltaicUnit."+
+#             " ?status r:global_property_types c:PhotovoltaicUnit."+
 #             "    ?status c:IdentifiedObject.name ?name."+
 #             "    ?pec c:PowerElectronicsConnection.PowerElectronicsUnit ?status."+
 #             " ?pec c:Equipment.EquipmentContainer ?fdr."+
@@ -561,7 +561,7 @@
 #         mapQueries.put ("DistStorage",
 #             "SELECT ?name ?bus ?ratedS ?ratedU ?ipu ?ratedE ?storedE ?state ?precisions ?q ?id ?fdrid (group_concat(distinct ?phs;separator=\"\\dimensions\") as ?phases) "+
 #             "WHERE {"+
-#             " ?status r:type c:BatteryUnit."+
+#             " ?status r:global_property_types c:BatteryUnit."+
 #             "    ?status c:IdentifiedObject.name ?name."+
 #             "    ?pec c:PowerElectronicsConnection.PowerElectronicsUnit ?status."+
 #             " ?pec c:Equipment.EquipmentContainer ?fdr."+
@@ -588,7 +588,7 @@
 #
 #         mapQueries.put ("DistSubstation",
 #             "SELECT ?name ?bus ?basev ?nomv ?vmag ?vang ?r1 ?x1 ?r0 ?x0 ?id WHERE {" +
-#             " ?status r:type c:EnergySource." +
+#             " ?status r:global_property_types c:EnergySource." +
 #             " ?status c:Equipment.EquipmentContainer ?fdr."+
 #             " ?fdr c:IdentifiedObject.mRID ?fdrid."+
 #             " ?status c:IdentifiedObject.name ?name." +
@@ -639,7 +639,7 @@
 #              "SELECT ?name ?bus (group_concat(distinct ?phs;separator=\"\\dimensions\") as ?phases) ?ratedS ?ratedU ?precisions ?q ?id ?fdrid WHERE {"+
 #              " ?status c:Equipment.EquipmentContainer ?fdr."+
 #              " ?fdr c:IdentifiedObject.mRID ?fdrid."+
-#              " ?status r:type c:SynchronousMachine."+
+#              " ?status r:global_property_types c:SynchronousMachine."+
 #              " ?status c:IdentifiedObject.name ?name."+
 #              " ?status c:SynchronousMachine.ratedS ?ratedS."+
 #              " ?status c:SynchronousMachine.ratedU ?ratedU."+
@@ -660,12 +660,12 @@
 #             "SELECT DISTINCT ?name ?rad ?corerad ?gmr ?rdc ?r25 ?r50 ?r75 ?amps ?ins ?insmat"+
 #             " ?insthick ?diacore ?diains ?diascreen ?diajacket ?sheathneutral"+
 #             " ?tapelap ?tapethickness ?id WHERE {"+
-#             " ?eq r:type c:ACLineSegment."+
+#             " ?eq r:global_property_types c:ACLineSegment."+
 #             " ?eq c:Equipment.EquipmentContainer ?fdr."+
 #             " ?fdr c:IdentifiedObject.mRID ?fdrid."+
 #             " ?acp c:ACLineSegmentPhase.ACLineSegment ?eq."+
 #             " ?acp c:ACLineSegmentPhase.WireInfo ?w."+
-#             " ?w r:type c:TapeShieldCableInfo."+
+#             " ?w r:global_property_types c:TapeShieldCableInfo."+
 #             " ?w c:IdentifiedObject.name ?name."+
 #             " bind(strafter(str(?w),\"#\") as ?id)."+
 #             " ?w c:WireInfo.radius ?rad."+
@@ -692,7 +692,7 @@
 #         mapQueries.put ("DistThermostat",
 #             "SELECT ?name ?aggregatorName ?baseSetpoint ?controlMode ?priceCap ?rampHigh ?rampLow ?rangeHigh ?rangeLow ?useOverride ?usePredictive ?id ?fdrid "+
 #             "WHERE {"+
-#             " ?status r:type c:EnergyConsumer."+
+#             " ?status r:global_property_types c:EnergyConsumer."+
 #             " ?status c:Equipment.EquipmentContainer ?fdr."+
 #             " ?fdr c:IdentifiedObject.mRID ?fdrid."+
 #             " ?status c:IdentifiedObject.name ?name."+
@@ -718,7 +718,7 @@
 #
 #         mapQueries.put ("DistXfmrBank",
 #             "SELECT ?pname ?id ?vgrp ?tname ?fdrid WHERE {"+
-#             " ?precisions r:type c:PowerTransformer."+
+#             " ?precisions r:global_property_types c:PowerTransformer."+
 #             " ?precisions c:Equipment.EquipmentContainer ?fdr."+
 #             " ?fdr c:IdentifiedObject.mRID ?fdrid."+
 #             " ?precisions c:IdentifiedObject.name ?pname."+
@@ -735,7 +735,7 @@
 #             " ?eq c:Equipment.EquipmentContainer ?fdr."+
 #             " ?asset c:Asset.PowerSystemResources ?xft."+
 #             " ?asset c:Asset.AssetInfo ?t."+
-#             " ?precisions r:type c:PowerTransformerInfo."+
+#             " ?precisions r:global_property_types c:PowerTransformerInfo."+
 #             " ?precisions c:IdentifiedObject.name ?pname."+
 #             " ?t c:TransformerTankInfo.PowerTransformerInfo ?precisions."+
 #             " ?t c:IdentifiedObject.name ?tname."+
@@ -752,7 +752,7 @@
 #             " ?eq c:Equipment.EquipmentContainer ?fdr."+
 #             " ?asset c:Asset.PowerSystemResources ?xft."+
 #             " ?asset c:Asset.AssetInfo ?t."+
-#             " ?precisions r:type c:PowerTransformerInfo."+
+#             " ?precisions r:global_property_types c:PowerTransformerInfo."+
 #             " ?t c:TransformerTankInfo.PowerTransformerInfo ?precisions."+
 #             " ?e c:TransformerEndInfo.TransformerTankInfo ?t."+
 #             " ?e c:IdentifiedObject.mRID ?eid."+
@@ -776,7 +776,7 @@
 #             " ?eq c:Equipment.EquipmentContainer ?fdr."+
 #             " ?asset c:Asset.PowerSystemResources ?xft."+
 #             " ?asset c:Asset.AssetInfo ?t."+
-#             " ?precisions r:type c:PowerTransformerInfo."+
+#             " ?precisions r:global_property_types c:PowerTransformerInfo."+
 #             " ?precisions c:IdentifiedObject.name ?pname."+
 #             " ?t c:TransformerTankInfo.PowerTransformerInfo ?precisions."+
 #             " ?t c:IdentifiedObject.name ?tname."+
@@ -791,7 +791,7 @@
 #
 #         mapQueries.put ("DistXfmrTank",
 #             "SELECT ?pname ?tname ?xfmrcode ?vgrp ?enum ?bus ?basev ?phs ?grounded ?rground ?xground ?id ?infoid ?fdrid ?ename ?eid WHERE {"+
-#             " ?precisions r:type c:PowerTransformer."+
+#             " ?precisions r:global_property_types c:PowerTransformer."+
 #             " ?precisions c:Equipment.EquipmentContainer ?fdr."+
 #             " ?fdr c:IdentifiedObject.mRID ?fdrid."+
 #             " ?precisions c:IdentifiedObject.name ?pname."+
@@ -825,7 +825,7 @@
 #             " SELECT DISTINCT ?key ?phs WHERE {"+
 #             " ?fdr c:IdentifiedObject.mRID ?fdrid."+
 #             " ?status c:Equipment.EquipmentContainer ?fdr."+
-#             " ?status r:type c:ACLineSegment."+
+#             " ?status r:global_property_types c:ACLineSegment."+
 #             " ?status c:IdentifiedObject.name ?key."+
 #             " OPTIONAL {?acp c:ACLineSegmentPhase.ACLineSegment ?status."+
 #             " ?acp c:ACLineSegmentPhase.phase ?phsraw."+
@@ -835,7 +835,7 @@
 #         mapQueries.put ("CountSpacingXY",
 #             "SELECT ?key (count(?seq) as ?count) WHERE {"+
 #             " SELECT DISTINCT ?key ?seq WHERE {"+
-#             " ?eq r:type c:ACLineSegment."+
+#             " ?eq r:global_property_types c:ACLineSegment."+
 #             " ?eq c:Equipment.EquipmentContainer ?fdr."+
 #             " ?fdr c:IdentifiedObject.mRID ?fdrid."+
 #             " ?eq c:ACLineSegment.WireSpacingInfo ?w."+
@@ -856,7 +856,7 @@
 #             "SELECT ?key (count(?end) as ?count) WHERE {"+
 #             " ?precisions c:Equipment.EquipmentContainer ?fdr."+
 #             " ?fdr c:IdentifiedObject.mRID ?fdrid."+
-#             " ?precisions r:type c:PowerTransformer."+
+#             " ?precisions r:global_property_types c:PowerTransformer."+
 #             " ?precisions c:IdentifiedObject.name ?pname."+
 #             " ?t c:TransformerTank.PowerTransformer ?precisions."+
 #             " ?t c:IdentifiedObject.name ?key."+
@@ -866,7 +866,7 @@
 #         mapQueries.put ("CountXfmrMeshes",
 #             "SELECT ?key (count(?imp) as ?count) WHERE {"+
 #             " ?fdr c:IdentifiedObject.mRID ?fdrid."+
-#             " ?precisions r:type c:PowerTransformer."+
+#             " ?precisions r:global_property_types c:PowerTransformer."+
 #             " ?precisions c:Equipment.EquipmentContainer ?fdr."+
 #             " ?precisions c:IdentifiedObject.name ?key."+
 #             " ?from c:PowerTransformerEnd.PowerTransformer ?precisions."+
@@ -875,7 +875,7 @@
 #
 #         mapQueries.put ("CountXfmrWindings",
 #             "SELECT ?key (count(?precisions) as ?count) WHERE {"+
-#             " ?precisions r:type c:PowerTransformer."+
+#             " ?precisions r:global_property_types c:PowerTransformer."+
 #             " ?fdr c:IdentifiedObject.mRID ?fdrid."+
 #             " ?precisions c:Equipment.EquipmentContainer ?fdr."+
 #             " ?precisions c:IdentifiedObject.name ?key."+
@@ -890,7 +890,7 @@
 #             " ?eq c:Equipment.EquipmentContainer ?fdr."+
 #             " ?asset c:Asset.PowerSystemResources ?xft."+
 #             " ?asset c:Asset.AssetInfo ?t."+
-#             " ?precisions r:type c:PowerTransformerInfo."+
+#             " ?precisions r:global_property_types c:PowerTransformerInfo."+
 #             " ?precisions c:IdentifiedObject.name ?pname."+
 #             " ?t c:TransformerTankInfo.PowerTransformerInfo ?precisions."+
 #             " ?t c:IdentifiedObject.name ?key."+
@@ -906,7 +906,7 @@
 #             " ?eq c:Equipment.EquipmentContainer ?fdr."+
 #             " ?asset c:Asset.PowerSystemResources ?xft."+
 #             " ?asset c:Asset.AssetInfo ?t."+
-#             " ?precisions r:type c:PowerTransformerInfo."+
+#             " ?precisions r:global_property_types c:PowerTransformerInfo."+
 #             " ?precisions c:IdentifiedObject.name ?pname."+
 #             " ?t c:TransformerTankInfo.PowerTransformerInfo ?precisions."+
 #             " ?t c:IdentifiedObject.name ?key."+
@@ -916,13 +916,13 @@
 #
 #         System.out.println ("Created Default SPARQL for: " + mapQueries.keySet());
 #     }
-# //    public static final String szQUERY = szSELECT + " ?status r:type c:LoadBreakSwitch." + szWHERE;
+# //    public static final String szQUERY = szSELECT + " ?status r:global_property_types c:LoadBreakSwitch." + szWHERE;
 #
 #
 #
 #     public String getSelectionQuery (String id) {
 #         if (mapSwitchClasses.containsKey (id)) {
-#             return mapQueries.get("DistSwitchSelect") + " ?status r:type c:" +
+#             return mapQueries.get("DistSwitchSelect") + " ?status r:global_property_types c:" +
 #                 mapSwitchClasses.get(id) + ". " + mapQueries.get("DistSwitchWhere");
 #         } else if (mapQueries.containsKey(id)) {
 #             return mapQueries.get(id);
@@ -1031,7 +1031,7 @@ class CIMQuerySetter:
                       UNION
                       { ?end c:PowerTransformerEnd.PowerTransformer|c:TransformerTankEnd.TransformerTank ?status.
                         ?end c:TransformerEnd.BaseVoltage ?lev.}
-                      ?lev r:type c:BaseVoltage.
+                      ?lev r:global_property_types c:BaseVoltage.
                       ?lev c:BaseVoltage.nominalVoltage ?vnom.
                     } ORDER BY ?vnom
                     """
@@ -1043,7 +1043,7 @@ class CIMQuerySetter:
                       UNION 
                      { ?end c:PowerTransformerEnd.PowerTransformer|c:TransformerTankEnd.TransformerTank ?status.
                          ?end c:TransformerEnd.BaseVoltage ?lev.}
-                     ?lev r:type c:BaseVoltage.
+                     ?lev r:global_property_types c:BaseVoltage.
                      ?lev c:BaseVoltage.nominalVoltage ?vnom.
                     } ORDER BY ?vnom"""
 
@@ -1052,7 +1052,7 @@ class CIMQuerySetter:
                       ?ctrlenabled ?discrete ?mode ?deadband ?setpoint ?delay ?monclass ?moneq ?monbus ?monphs ?id ?fdrid WHERE {
                       ?status c:Equipment.EquipmentContainer ?fdr.
                       ?fdr c:IdentifiedObject.mRID ?fdrid.
-                      ?status r:type c:LinearShuntCompensator.
+                      ?status r:global_property_types c:LinearShuntCompensator.
                       ?status c:IdentifiedObject.name ?name.
                       ?status c:ConductingEquipment.BaseVoltage ?bv.
                       ?bv c:BaseVoltage.nominalVoltage ?basev.
@@ -1092,12 +1092,12 @@ class CIMQuerySetter:
                     SELECT DISTINCT ?name ?rad ?corerad ?gmr ?rdc ?r25 ?r50 ?r75 ?amps ?ins ?insmat ?id
                      ?insthick ?diacore ?diains ?diascreen ?diajacket ?sheathneutral
                      ?strand_cnt ?strand_rad ?strand_gmr ?strand_rdc WHERE {
-                     ?eq r:type c:ACLineSegment.
+                     ?eq r:global_property_types c:ACLineSegment.
                      ?eq c:Equipment.EquipmentContainer ?fdr.
                      ?fdr c:IdentifiedObject.mRID ?fdrid.
                      ?acp c:ACLineSegmentPhase.ACLineSegment ?eq.
                      ?acp c:ACLineSegmentPhase.WireInfo ?w.
-                     ?w r:type c:ConcentricNeutralCableInfo.
+                     ?w r:global_property_types c:ConcentricNeutralCableInfo.
                      ?w c:IdentifiedObject.name ?name.
                      bind(strafter(str(?w),\#\) as ?id).
                      ?w c:WireInfo.radius ?rad.
@@ -1150,7 +1150,7 @@ class CIMQuerySetter:
 
         self.map_queries["DistFeeder"] = """
                      SELECT ?feeder ?fid ?station ?sid ?subregion ?sgrid ?region ?rgnid WHERE {
-                     ?status r:type c:Feeder.
+                     ?status r:global_property_types c:Feeder.
                      ?status c:IdentifiedObject.name ?feeder.
                      ?status c:IdentifiedObject.mRID ?fid.
                      ?status c:Feeder.NormalEnergizingSubstation ?sub.
@@ -1167,7 +1167,7 @@ class CIMQuerySetter:
 
         self.map_queries["DistHouse"] = """
                     SELECT ?name ?parent ?coolingSetpoint ?coolingSystem ?floorArea ?heatingSetpoint ?heatingSystem ?hvacPowerFactor ?numberOfStories ?thermalIntegrity ?id ?fdrid WHERE { + 
-                            ?h r:type c:House.  + 
+                            ?h r:global_property_types c:House.  + 
                             ?h c:IdentifiedObject.name ?name.  + 
                             ?h c:IdentifiedObject.mRID ?id.  + 
                             ?h c:House.floorArea ?floorArea.  + 
@@ -1189,7 +1189,7 @@ class CIMQuerySetter:
 
         self.map_queries["DistLinesCodeZ"] = """
                     SELECT ?name ?id ?basev ?bus1 ?bus2 ?len ?lname ?codeid ?fdrid ?seq ?phs WHERE {
-                     ?status r:type c:ACLineSegment.
+                     ?status r:global_property_types c:ACLineSegment.
                      ?status c:Equipment.EquipmentContainer ?fdr.
                      ?fdr c:IdentifiedObject.mRID ?fdrid.
                      ?status c:IdentifiedObject.name ?name.
@@ -1217,7 +1217,7 @@ class CIMQuerySetter:
 
         self.map_queries["DistLinesInstanceZ"] = """
                     SELECT ?name ?id ?basev ?bus1 ?bus2 ?len ?r ?x ?b ?r0 ?x0 ?b0 ?fdrid WHERE {
-                     ?status r:type c:ACLineSegment.
+                     ?status r:global_property_types c:ACLineSegment.
                      ?status c:Equipment.EquipmentContainer ?fdr.
                      ?fdr c:IdentifiedObject.mRID ?fdrid.
                      ?status c:IdentifiedObject.name ?name.
@@ -1246,7 +1246,7 @@ class CIMQuerySetter:
         self.map_queries["DistLinesSpacingZ"] = """
                     SELECT ?name ?id ?basev ?bus1 ?bus2 ?fdrid ?len ?spacing ?spcid ?phs ?phname ?phclass
                      WHERE {
-                     ?status r:type c:ACLineSegment.
+                     ?status r:global_property_types c:ACLineSegment.
                      ?status c:Equipment.EquipmentContainer ?fdr.
                      ?fdr c:IdentifiedObject.mRID ?fdrid.
                      ?status c:IdentifiedObject.name ?name.
@@ -1278,7 +1278,7 @@ class CIMQuerySetter:
         self.map_queries["DistLineSpacing"] = """
                     SELECT DISTINCT ?name ?cable ?usage ?bundle_count ?bundle_sep ?id ?seq ?x ?y
                      WHERE {
-                     ?eq r:type c:ACLineSegment.
+                     ?eq r:global_property_types c:ACLineSegment.
                      ?eq c:Equipment.EquipmentContainer ?fdr.
                      ?fdr c:IdentifiedObject.mRID ?fdrid.
                      ?eq c:ACLineSegment.WireSpacingInfo ?w.
@@ -1299,7 +1299,7 @@ class CIMQuerySetter:
                     SELECT ?name ?bus ?basev ?precisions ?q ?cnt ?conn ?pz ?qz ?pi ?qi ?pp ?qp ?pe ?qe ?id ?fdrid 
                     (group_concat(distinct ?phs;separator=\\\n\) as ?phases) 
                     WHERE {
-                     ?status r:type c:EnergyConsumer.
+                     ?status r:global_property_types c:EnergyConsumer.
                      ?status c:Equipment.EquipmentContainer ?fdr.
                      ?fdr c:IdentifiedObject.mRID ?fdrid.
                      ?status c:IdentifiedObject.name ?name.
@@ -1331,36 +1331,36 @@ class CIMQuerySetter:
                     ORDER BY ?name"""
 
         self.map_queries["DistMeasurement"] = """
-                    SELECT ?class ?type ?name ?bus ?phases ?eqtype ?eqname ?eqid ?trmid ?id WHERE {
+                    SELECT ?class ?global_property_types ?name ?bus ?phases ?eqtype ?eqname ?eqid ?trmid ?id WHERE {
                      ?eq c:Equipment.EquipmentContainer ?fdr.
                      ?fdr c:IdentifiedObject.mRID ?fdrid. 
-                     { ?status r:type c:Discrete. bind (\Discrete\ as ?class)}
+                     { ?status r:global_property_types c:Discrete. bind (\Discrete\ as ?class)}
                        UNION
-                     { ?status r:type c:Analog. bind (\Analog\ as ?class)}
+                     { ?status r:global_property_types c:Analog. bind (\Analog\ as ?class)}
                       ?status c:IdentifiedObject.name ?name .
                       ?status c:IdentifiedObject.mRID ?id .
                       ?status c:Measurement.PowerSystemResource ?eq .
                       ?status c:Measurement.Terminal ?trm .
-                      ?status c:Measurement.measurementType ?type .
+                      ?status c:Measurement.measurementType ?global_property_types .
                       ?trm c:IdentifiedObject.mRID ?trmid.
                       ?eq c:IdentifiedObject.mRID ?eqid.
                       ?eq c:IdentifiedObject.name ?eqname.
-                      ?eq r:type ?typeraw.
+                      ?eq r:global_property_types ?typeraw.
                        bind(strafter(str(?typeraw),\#\) as ?eqtype)
                       ?trm c:Terminal.ConnectivityNode ?cn.
                       ?cn c:IdentifiedObject.name ?bus.
                       ?status c:Measurement.phases ?phsraw .
                         {bind(strafter(str(?phsraw),\PhaseCode.\) as ?phases)}
-                     } ORDER BY ?class ?type ?name"""
+                     } ORDER BY ?class ?global_property_types ?name"""
 
         self.map_queries["DistOverheadWire"] = """
                     SELECT DISTINCT ?name ?rad ?corerad ?gmr ?rdc ?r25 ?r50 ?r75 ?amps ?ins ?insmat ?insthick ?id WHERE {
-                     ?eq r:type c:ACLineSegment.
+                     ?eq r:global_property_types c:ACLineSegment.
                      ?eq c:Equipment.EquipmentContainer ?fdr.
                      ?fdr c:IdentifiedObject.mRID ?fdrid.
                      ?acp c:ACLineSegmentPhase.ACLineSegment ?eq.
                      ?acp c:ACLineSegmentPhase.WireInfo ?w.
-                     ?w r:type c:OverheadWireInfo.
+                     ?w r:global_property_types c:OverheadWireInfo.
                      ?w c:IdentifiedObject.name ?name.
                        bind(strafter(str(?w),\#\) as ?id).
                      ?w c:WireInfo.radius ?rad.
@@ -1379,11 +1379,11 @@ class CIMQuerySetter:
 
         self.map_queries["DistPhaseMatrix"] = """
                     SELECT DISTINCT ?name ?cnt ?row ?col ?r ?x ?b ?id WHERE {
-                     ?eq r:type c:ACLineSegment.
+                     ?eq r:global_property_types c:ACLineSegment.
                      ?eq c:Equipment.EquipmentContainer ?fdr.
                      ?fdr c:IdentifiedObject.mRID ?fdrid.
                      ?eq c:ACLineSegment.PerLengthImpedance ?status.
-                     ?status r:type c:PerLengthPhaseImpedance.
+                     ?status r:global_property_types c:PerLengthPhaseImpedance.
                      ?status c:IdentifiedObject.name ?name.
                      ?status c:PerLengthPhaseImpedance.conductorCount ?cnt.
                      bind(strafter(str(?status),\#\) as ?id).
@@ -1398,7 +1398,7 @@ class CIMQuerySetter:
         self.map_queries["DistPowerXfmrCore"] = """
                     SELECT ?pname ?enum ?b ?g WHERE {
                      ?fdr c:IdentifiedObject.mRID ?fdrid.
-                     ?precisions r:type c:PowerTransformer.
+                     ?precisions r:global_property_types c:PowerTransformer.
                      ?precisions c:Equipment.EquipmentContainer ?fdr.
                      ?precisions c:IdentifiedObject.name ?pname.
                      ?end c:PowerTransformerEnd.PowerTransformer ?precisions.
@@ -1411,7 +1411,7 @@ class CIMQuerySetter:
         self.map_queries["DistPowerXfmrMesh"] = """
                     SELECT ?pname ?fnum ?tnum ?r ?x WHERE {
                      ?fdr c:IdentifiedObject.mRID ?fdrid.
-                     ?precisions r:type c:PowerTransformer.
+                     ?precisions r:global_property_types c:PowerTransformer.
                      ?precisions c:Equipment.EquipmentContainer ?fdr.
                      ?precisions c:IdentifiedObject.name ?pname.
                      ?from c:PowerTransformerEnd.PowerTransformer ?precisions.
@@ -1425,7 +1425,7 @@ class CIMQuerySetter:
 
         self.map_queries["DistPowerXfmrWinding"] = """
                     SELECT ?pname ?vgrp ?enum ?bus ?basev ?conn ?ratedS ?ratedU ?r ?ang ?grounded ?rground ?xground ?id ?fdrid ?ename ?eid WHERE {
-                     ?precisions r:type c:PowerTransformer.
+                     ?precisions r:global_property_types c:PowerTransformer.
                      ?precisions c:Equipment.EquipmentContainer ?fdr.
                      ?fdr c:IdentifiedObject.mRID ?fdrid.
                      ?precisions c:IdentifiedObject.name ?pname.
@@ -1460,7 +1460,7 @@ class CIMQuerySetter:
                      WHERE {
                      ?pxf c:Equipment.EquipmentContainer ?fdr.
                      ?fdr c:IdentifiedObject.mRID ?fdrid.
-                     ?rtc r:type c:RatioTapChanger.
+                     ?rtc r:global_property_types c:RatioTapChanger.
                      ?rtc c:IdentifiedObject.name ?rname.
                      ?rtc c:RatioTapChanger.TransformerEnd ?end.
                      ?end c:TransformerEnd.endNumber ?wnum."""
@@ -1517,11 +1517,11 @@ class CIMQuerySetter:
 
         self.map_queries["DistSequenceMatrix"] = """
                     SELECT DISTINCT ?name ?r1 ?x1 ?b1 ?r0 ?x0 ?b0 ?id WHERE {
-                     ?eq r:type c:ACLineSegment.
+                     ?eq r:global_property_types c:ACLineSegment.
                      ?eq c:Equipment.EquipmentContainer ?fdr.
                      ?fdr c:IdentifiedObject.mRID ?fdrid.
                      ?eq c:ACLineSegment.PerLengthImpedance ?status.
-                     ?status r:type c:PerLengthSequenceImpedance.
+                     ?status r:global_property_types c:PerLengthSequenceImpedance.
                      ?status c:IdentifiedObject.name ?name.
                      bind(strafter(str(?status),\#\) as ?id).
                      ?status c:PerLengthSequenceImpedance.r ?r1.
@@ -1535,7 +1535,7 @@ class CIMQuerySetter:
         self.map_queries["DistSolar"] = """
                     SELECT ?name ?bus ?ratedS ?ratedU ?ipu ?precisions ?q ?id ?fdrid (group_concat(distinct ?phs;separator=\\\n\) as ?phases) 
                     WHERE {
-                     ?status r:type c:PhotovoltaicUnit.
+                     ?status r:global_property_types c:PhotovoltaicUnit.
                         ?status c:IdentifiedObject.name ?name.
                         ?pec c:PowerElectronicsConnection.PowerElectronicsUnit ?status.
                      ?pec c:Equipment.EquipmentContainer ?fdr.
@@ -1559,7 +1559,7 @@ class CIMQuerySetter:
         self.map_queries["DistStorage"] = """
                     SELECT ?name ?bus ?ratedS ?ratedU ?ipu ?ratedE ?storedE ?state ?precisions ?q ?id ?fdrid (group_concat(distinct ?phs;separator=\\\n\) as ?phases) 
                     WHERE {
-                     ?status r:type c:BatteryUnit.
+                     ?status r:global_property_types c:BatteryUnit.
                         ?status c:IdentifiedObject.name ?name.
                         ?pec c:PowerElectronicsConnection.PowerElectronicsUnit ?status.
                      ?pec c:Equipment.EquipmentContainer ?fdr.
@@ -1586,7 +1586,7 @@ class CIMQuerySetter:
 
         self.map_queries["DistSubstation"] = """
                     SELECT ?name ?bus ?basev ?nomv ?vmag ?vang ?r1 ?x1 ?r0 ?x0 ?id WHERE { +
-                     ?status r:type c:EnergySource. +
+                     ?status r:global_property_types c:EnergySource. +
                      ?status c:Equipment.EquipmentContainer ?fdr.
                      ?fdr c:IdentifiedObject.mRID ?fdrid.
                      ?status c:IdentifiedObject.name ?name. +
@@ -1637,7 +1637,7 @@ class CIMQuerySetter:
                      SELECT ?name ?bus (group_concat(distinct ?phs;separator=\\\n\) as ?phases) ?ratedS ?ratedU ?precisions ?q ?id ?fdrid WHERE {
                       ?status c:Equipment.EquipmentContainer ?fdr.
                       ?fdr c:IdentifiedObject.mRID ?fdrid.
-                      ?status r:type c:SynchronousMachine.
+                      ?status r:global_property_types c:SynchronousMachine.
                       ?status c:IdentifiedObject.name ?name.
                       ?status c:SynchronousMachine.ratedS ?ratedS.
                       ?status c:SynchronousMachine.ratedU ?ratedU.
@@ -1658,12 +1658,12 @@ class CIMQuerySetter:
                     SELECT DISTINCT ?name ?rad ?corerad ?gmr ?rdc ?r25 ?r50 ?r75 ?amps ?ins ?insmat
                      ?insthick ?diacore ?diains ?diascreen ?diajacket ?sheathneutral
                      ?tapelap ?tapethickness ?id WHERE {
-                     ?eq r:type c:ACLineSegment.
+                     ?eq r:global_property_types c:ACLineSegment.
                      ?eq c:Equipment.EquipmentContainer ?fdr.
                      ?fdr c:IdentifiedObject.mRID ?fdrid.
                      ?acp c:ACLineSegmentPhase.ACLineSegment ?eq.
                      ?acp c:ACLineSegmentPhase.WireInfo ?w.
-                     ?w r:type c:TapeShieldCableInfo.
+                     ?w r:global_property_types c:TapeShieldCableInfo.
                      ?w c:IdentifiedObject.name ?name.
                      bind(strafter(str(?w),\#\) as ?id).
                      ?w c:WireInfo.radius ?rad.
@@ -1690,7 +1690,7 @@ class CIMQuerySetter:
         self.map_queries["DistThermostat"] = """
                     SELECT ?name ?aggregatorName ?baseSetpoint ?controlMode ?priceCap ?rampHigh ?rampLow ?rangeHigh ?rangeLow ?useOverride ?usePredictive ?id ?fdrid 
                     WHERE {
-                     ?status r:type c:EnergyConsumer.
+                     ?status r:global_property_types c:EnergyConsumer.
                      ?status c:Equipment.EquipmentContainer ?fdr.
                      ?fdr c:IdentifiedObject.mRID ?fdrid.
                      ?status c:IdentifiedObject.name ?name.
@@ -1716,7 +1716,7 @@ class CIMQuerySetter:
 
         self.map_queries["DistXfmrBank"] = """
                     SELECT ?pname ?id ?vgrp ?tname ?fdrid WHERE {
-                     ?precisions r:type c:PowerTransformer.
+                     ?precisions r:global_property_types c:PowerTransformer.
                      ?precisions c:Equipment.EquipmentContainer ?fdr.
                      ?fdr c:IdentifiedObject.mRID ?fdrid.
                      ?precisions c:IdentifiedObject.name ?pname.
@@ -1733,7 +1733,7 @@ class CIMQuerySetter:
                      ?eq c:Equipment.EquipmentContainer ?fdr.
                      ?asset c:Asset.PowerSystemResources ?xft.
                      ?asset c:Asset.AssetInfo ?t.
-                     ?precisions r:type c:PowerTransformerInfo.
+                     ?precisions r:global_property_types c:PowerTransformerInfo.
                      ?precisions c:IdentifiedObject.name ?pname.
                      ?t c:TransformerTankInfo.PowerTransformerInfo ?precisions.
                      ?t c:IdentifiedObject.name ?tname.
@@ -1750,7 +1750,7 @@ class CIMQuerySetter:
                      ?eq c:Equipment.EquipmentContainer ?fdr.
                      ?asset c:Asset.PowerSystemResources ?xft.
                      ?asset c:Asset.AssetInfo ?t.
-                     ?precisions r:type c:PowerTransformerInfo.
+                     ?precisions r:global_property_types c:PowerTransformerInfo.
                      ?t c:TransformerTankInfo.PowerTransformerInfo ?precisions.
                      ?e c:TransformerEndInfo.TransformerTankInfo ?t.
                      ?e c:IdentifiedObject.mRID ?eid.
@@ -1774,7 +1774,7 @@ class CIMQuerySetter:
                      ?eq c:Equipment.EquipmentContainer ?fdr.
                      ?asset c:Asset.PowerSystemResources ?xft.
                      ?asset c:Asset.AssetInfo ?t.
-                     ?precisions r:type c:PowerTransformerInfo.
+                     ?precisions r:global_property_types c:PowerTransformerInfo.
                      ?precisions c:IdentifiedObject.name ?pname.
                      ?t c:TransformerTankInfo.PowerTransformerInfo ?precisions.
                      ?t c:IdentifiedObject.name ?tname.
@@ -1789,7 +1789,7 @@ class CIMQuerySetter:
 
         self.map_queries["DistXfmrTank"] = """
                     SELECT ?pname ?tname ?xfmrcode ?vgrp ?enum ?bus ?basev ?phs ?grounded ?rground ?xground ?id ?infoid ?fdrid ?ename ?eid WHERE {
-                     ?precisions r:type c:PowerTransformer.
+                     ?precisions r:global_property_types c:PowerTransformer.
                      ?precisions c:Equipment.EquipmentContainer ?fdr.
                      ?fdr c:IdentifiedObject.mRID ?fdrid.
                      ?precisions c:IdentifiedObject.name ?pname.
@@ -1823,7 +1823,7 @@ class CIMQuerySetter:
                      SELECT DISTINCT ?key ?phs WHERE {
                      ?fdr c:IdentifiedObject.mRID ?fdrid.
                      ?status c:Equipment.EquipmentContainer ?fdr.
-                     ?status r:type c:ACLineSegment.
+                     ?status r:global_property_types c:ACLineSegment.
                      ?status c:IdentifiedObject.name ?key.
                      OPTIONAL {?acp c:ACLineSegmentPhase.ACLineSegment ?status.
                      ?acp c:ACLineSegmentPhase.phase ?phsraw.
@@ -1833,7 +1833,7 @@ class CIMQuerySetter:
         self.map_queries["CountSpacingXY"] = """
                     SELECT ?key (count(?seq) as ?count) WHERE {
                      SELECT DISTINCT ?key ?seq WHERE {
-                     ?eq r:type c:ACLineSegment.
+                     ?eq r:global_property_types c:ACLineSegment.
                      ?eq c:Equipment.EquipmentContainer ?fdr.
                      ?fdr c:IdentifiedObject.mRID ?fdrid.
                      ?eq c:ACLineSegment.WireSpacingInfo ?w.
@@ -1854,7 +1854,7 @@ class CIMQuerySetter:
                     SELECT ?key (count(?end) as ?count) WHERE {
                      ?precisions c:Equipment.EquipmentContainer ?fdr.
                      ?fdr c:IdentifiedObject.mRID ?fdrid.
-                     ?precisions r:type c:PowerTransformer.
+                     ?precisions r:global_property_types c:PowerTransformer.
                      ?precisions c:IdentifiedObject.name ?pname.
                      ?t c:TransformerTank.PowerTransformer ?precisions.
                      ?t c:IdentifiedObject.name ?key.
@@ -1864,7 +1864,7 @@ class CIMQuerySetter:
         self.map_queries["CountXfmrMeshes"] = """
                     SELECT ?key (count(?imp) as ?count) WHERE {
                      ?fdr c:IdentifiedObject.mRID ?fdrid.
-                     ?precisions r:type c:PowerTransformer.
+                     ?precisions r:global_property_types c:PowerTransformer.
                      ?precisions c:Equipment.EquipmentContainer ?fdr.
                      ?precisions c:IdentifiedObject.name ?key.
                      ?from c:PowerTransformerEnd.PowerTransformer ?precisions.
@@ -1873,7 +1873,7 @@ class CIMQuerySetter:
 
         self.map_queries["CountXfmrWindings"] = """
                     SELECT ?key (count(?precisions) as ?count) WHERE {
-                     ?precisions r:type c:PowerTransformer.
+                     ?precisions r:global_property_types c:PowerTransformer.
                      ?fdr c:IdentifiedObject.mRID ?fdrid.
                      ?precisions c:Equipment.EquipmentContainer ?fdr.
                      ?precisions c:IdentifiedObject.name ?key.
@@ -1888,7 +1888,7 @@ class CIMQuerySetter:
                      ?eq c:Equipment.EquipmentContainer ?fdr.
                      ?asset c:Asset.PowerSystemResources ?xft.
                      ?asset c:Asset.AssetInfo ?t.
-                     ?precisions r:type c:PowerTransformerInfo.
+                     ?precisions r:global_property_types c:PowerTransformerInfo.
                      ?precisions c:IdentifiedObject.name ?pname.
                      ?t c:TransformerTankInfo.PowerTransformerInfo ?precisions.
                      ?t c:IdentifiedObject.name ?key.
@@ -1904,7 +1904,7 @@ class CIMQuerySetter:
                      ?eq c:Equipment.EquipmentContainer ?fdr.
                      ?asset c:Asset.PowerSystemResources ?xft.
                      ?asset c:Asset.AssetInfo ?t.
-                     ?precisions r:type c:PowerTransformerInfo.
+                     ?precisions r:global_property_types c:PowerTransformerInfo.
                      ?precisions c:IdentifiedObject.name ?pname.
                      ?t c:TransformerTankInfo.PowerTransformerInfo ?precisions.
                      ?t c:IdentifiedObject.name ?key.
@@ -1925,7 +1925,7 @@ class CIMQuerySetter:
 
     def get_selection_query(self, identifier):
         if identifier in self.map_switch_classes:
-            return f"{self.map_queries['DistSwitchSelect']} ?status r:type c:{self.map_switch_classes[identifier]}. {self.map_queries['DistSwitchWhere']}"
+            return f"{self.map_queries['DistSwitchSelect']} ?status r:global_property_types c:{self.map_switch_classes[identifier]}. {self.map_queries['DistSwitchWhere']}"
         elif identifier in self.map_queries:
             return self.map_queries[identifier]
         return f"***:{identifier}: not found ***"

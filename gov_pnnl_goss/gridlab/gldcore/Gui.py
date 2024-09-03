@@ -1,19 +1,25 @@
 
 
+import sys
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QPushButton, QLabel
 import os
 from time import time
 from enum import Enum
-import sys
-import ctypes
-from gov_pnnl_goss.gridlab.gldcore.Class import Class
-from gov_pnnl_goss.gridlab.gldcore.Cmex import object_set_value_by_name
+
+from gov_pnnl_goss.gridlab.gldcore.Class import ClassRegistry
 from gov_pnnl_goss.gridlab.gldcore.Convert import output_error, convert_from_timestamp, object_find_name
 from gov_pnnl_goss.gridlab.gldcore.Globals import FAILED, global_find, SUCCESS
 from gov_pnnl_goss.gridlab.gldcore.Output import output_verbose, output_warning, output_error_raw
 from gov_pnnl_goss.gridlab.gldcore.GridLabD import global_getvar, global_setvar
-from gov_pnnl_goss.gridlab.gldcore.Object import convert_from_latitude, convert_from_longitude, Object, object_name
-from gridlab.gldcore.Environment import server_startup
 from gridlab.gldcore.Find import Find
+
+
+MAX_TABLES = 16
+table=-1
+row = ["" * MAX_TABLES]
+col= ["" * MAX_TABLES]
+span= ["" * MAX_TABLES]
+TABLEOPTIONS = " border=0 CELLPADDING=0 CELLSPACING=0"
 
 
 class GUIENTITYTYPE(Enum):
@@ -41,36 +47,6 @@ class GUIENTITYTYPE(Enum):
     _GUI_ACTION_END = 21
 
 
-class GUIENTITY:
-    def __init__(self):
-        self.type = None  # Instance of GUIENTITYTYPE
-        self.srcref = ""
-        self.value = ""
-        self.globalname = ""
-        self.objectname = ""
-        self.propertyname = ""
-        self.action = ""
-        self.span = 0
-        self.size = 0
-        self.height = 0
-        self.width = 0
-        self.action_status = None  # Instance of GUIACTIONSTATUS
-        self.wait_for = ""
-        self.source = ""
-        self.options = ""
-        self.gnuplot = ""
-        self.hold = 0
-        self.next = None  # Could be another instance of GUIENTITY or None
-        self.parent = None  # Could be another instance of GUIENTITY or None
-        # Internal variables
-        self.var = None  # Instance of GLOBALVAR or None
-        self.env = None  # Environmental variables, represented as a string or None
-        self.obj = None  # Instance of OBJECT or None
-        self.prop = None  # Instance of PROPERTY or None
-        self.data = None  # Can be any type, depending on the usage context
-        self.unit = None  # Instance of UNIT or None
-
-
 class GUIACTIONSTATUS(Enum):
     GUIACT_NONE = 0
     GUIACT_WAITING = 1
@@ -82,15 +58,6 @@ class GUIStreamFn:
     def __call__(self, ref, message, *args):
         pass
 
-
-MAX_TABLES = 16
-table=-1
-row = ["" * MAX_TABLES]
-col= ["" * MAX_TABLES]
-span= ["" * MAX_TABLES]
-TABLEOPTIONS = " border=0 CELLPADDING=0 CELLSPACING=0"
-
-
 class GuiEntity:
     """
     This class represents a GUI entity and provides methods to manipulate GUI entities and generate HTML output.
@@ -98,34 +65,36 @@ class GuiEntity:
     gui_root = None
     gui_last = None
     def __init__(self):
-        self._gui_root = None
-        self._gui_last = None
+        # Internal variables
         self._fp = None
+        self._gui_last = None
+        self._gui_root = None
         self._wait_status = "GUIACT_NONE"
+        # Public values
         self.action = ""
-        self.action_status = GUIACTIONSTATUS.GUIACT_NONE
-        self.data = None
-        self.env = ""
+        self.action_status = GUIACTIONSTATUS.GUIACT_NONE  # Instance of GUIACTIONSTATUS
+        self.data = None  # Can be any global_property_types, depending on the usage context
+        self.env = ""  # Environmental variables, represented as a string or None
         self.fp = None
         self.globalname = ""
         self.gnuplot = ""
         self.height = 0
         self.hold = 0
-        self.next = None
-        self.obj = None
+        self.next = None  # Could be another instance of GUIENTITY or None
+        self.obj = None  # Instance of OBJECT or None
         self.objectname = ""
         self.options = ""
-        self.parent = None
-        self.prop = None
+        self.parent = None  # Could be another instance of GUIENTITY or None
+        self.prop = None  # Instance of PROPERTY or None
         self.propertyname = ""
         self.size = 0
         self.source = ""
         self.span = 0
         self.srcref = ""
-        self.type = GUIENTITYTYPE.GUI_UNKNOWN
-        self.unit = None
+        self.type = GUIENTITYTYPE.GUI_UNKNOWN  # Instance of GUIENTITYTYPE
+        self.unit = None  # Instance of UNIT or None
         self.value = ""
-        self.var = None
+        self.var = None  # Instance of GLOBALVAR or None
         self.wait_for = ""
         self.wait_status = GUIACTIONSTATUS.GUIACT_NONE
         self.width = 0
@@ -156,8 +125,8 @@ class GuiEntity:
 
     def gui_create_entity(self):
         entity = self.gui_last
-        if entity is None or entity.type != GUIENTITYTYPE.GUI_UNKNOWN:
-            entity = GUIENTITY()
+        if entity is None or entity.global_property_types != GUIENTITYTYPE.GUI_UNKNOWN:
+            entity = GuiEntity()
         if entity is None:
             return None
         # entity = GUIENTITY()
@@ -169,7 +138,7 @@ class GuiEntity:
         return entity
 
     def gui_get_type(self, entity):
-        return self.entity.type
+        return self.entity.global_property_types
 
     def gui_glm_typename(self, type):
         type_name = [
@@ -206,16 +175,16 @@ class GuiEntity:
             13: GUIENTITYTYPE.GUI_SELECT,
             14: GUIENTITYTYPE.GUI_ACTION
         }
-        return type_mapping.get(entity.type, "<INVALID>")
+        return type_mapping.get(entity.global_property_types, "<INVALID>")
 
     def gui_is_header(self, entity):
-        return entity.type in [
+        return entity.global_property_types in [
             GUIENTITYTYPE.GUI_TITLE,
             GUIENTITYTYPE.GUI_STATUS,
         ]
 
     def gui_is_grouping(self, entity):
-        return entity.type in [
+        return entity.global_property_types in [
             GUIENTITYTYPE.GUI_ROW,
             GUIENTITYTYPE.GUI_TAB,
             GUIENTITYTYPE.GUI_PAGE,
@@ -224,14 +193,14 @@ class GuiEntity:
         ]
 
     def gui_is_labeling(self, entity):
-        return entity.type in [
+        return entity.global_property_types in [
             GUIENTITYTYPE.GUI_TITLE,
             GUIENTITYTYPE.GUI_STATUS,
             GUIENTITYTYPE.GUI_TEXT,
         ]
 
     def gui_is_input(self, entity):
-        return entity.type in [
+        return entity.global_property_types in [
             GUIENTITYTYPE.GUI_INPUT,
             GUIENTITYTYPE.GUI_CHECK,
             GUIENTITYTYPE.GUI_RADIO,
@@ -239,20 +208,20 @@ class GuiEntity:
         ]
 
     def gui_is_output(self, entity):
-        return entity.type in [
+        return entity.global_property_types in [
             GUIENTITYTYPE.GUI_BROWSE,
             GUIENTITYTYPE.GUI_TABLE,
             GUIENTITYTYPE.GUI_GRAPH,
         ]
 
     def gui_is_action(self, entity):
-        return entity.type in [GUIENTITYTYPE.GUI_ACTION]
+        return entity.global_property_types in [GUIENTITYTYPE.GUI_ACTION]
 
     def gui_set_srcref(self, entity, filename, linenum):
         entity.srcref = f"{filename}:{linenum}"
 
     def gui_set_type(self, entity, type):
-        entity.type = type
+        entity.global_property_types = type
 
     def gui_set_value(self, entity, value):
         entity.value = value[:min(len(value), len(entity.value))]
@@ -262,11 +231,9 @@ class GuiEntity:
             entity.global_name) else global_name
 
     def gui_set_objectname(self, entity, objectname):
+        entity.data = None
         entity.objectname = objectname
 
-    # def gui_set_objectname(self, entity, objectname):
-    #     entity.data = None
-    #     entity.objectname = objectname[:len(entity.objectname)]
 
     def gui_set_propertyname(self, entity, property_name):
         entity.data = None
@@ -300,12 +267,8 @@ class GuiEntity:
     def gui_set_wait(self, entity, wait):
         entity.wait_for = wait
 
-    # def gui_set_wait(entity, wait):
-    #     entity.wait_for = wait[:len(entity.wait_for)]
-    #
-
     def gui_get_dump(self, entity):
-        buffer = "{type=%s,srcref='%s',value='%s',globalname='%s',object='%s',property='%s',action='%s',span=%d}" % (
+        buffer = "{global_property_types=%s,srcref='%s',value='%s',globalname='%s',object='%s',property='%s',action='%s',span=%d}" % (
             self.gui_get_typename(entity), entity.srcref, entity.value, entity.globalname, entity.objectname,
             entity.propertyname, entity.action, entity.span)
         return buffer
@@ -317,19 +280,21 @@ class GuiEntity:
         return entity.next
 
     def gui_get_value(self, entity):
+        from gridlab.gldcore.Object import Object
         obj = self.gui_get_object(entity)
         buffer = ""
         if obj:
             if entity.propertyname == "name":
-                entity.value = object_name(obj, buffer, 63)
+
+                entity.value = Object.object_name(obj)
             elif entity.propertyname == "class":
-                entity.value = obj.oclass.name
+                entity.value = obj.owner_class.name
             elif entity.propertyname == "parent":
-                entity.value = object_name(obj.parent, buffer, 63) if obj.parent else ""
+                entity.value = Object.object_name(obj.parent) if obj.parent else ""
             elif entity.propertyname == "rank":
                 entity.value = str(obj.rank)
             elif entity.propertyname == "clock":
-                entity.value = convert_from_timestamp(obj.clock)
+                entity.value = convert_from_timestamp(obj.exec_clock)
             elif entity.propertyname == "valid_to":
                 entity.value = convert_from_timestamp(obj.valid_to)
             elif entity.propertyname == "in_svc":
@@ -337,10 +302,10 @@ class GuiEntity:
             elif entity.propertyname == "out_svc":
                 entity.value = convert_from_timestamp(obj.out_svc)
             elif entity.propertyname == "latitude":
-                entity.value = convert_from_latitude(obj.latitude)
+                entity.value = Object.convert_from_latitude(obj.latitude)
             elif entity.propertyname == "longitude":
-                entity.value = convert_from_longitude(obj.longitude)
-            elif not Object().object_get_value_by_name(obj, entity.propertyname, entity.value):
+                entity.value = Object.convert_from_latitude(obj.longitude)
+            elif not obj.object_get_value_by_name(entity.propertyname, entity.value):
                 output_error_raw("{}: ERROR: {} refers to a non-existent property '{}'".format(entity.srcref, self.gui_get_typename(entity), entity.propertyname))
         elif self.gui_get_variable(entity):
             entity.var = global_find(entity.globalname)
@@ -358,7 +323,7 @@ class GuiEntity:
     def gui_get_property(self, entity):
         if entity.prop == None:
             if self.gui_get_object(entity):
-                entity.prop = Class.class_find_property(entity.obj.oclass, entity.propertyname)
+                entity.prop = ClassRegistry.find_property(entity.obj.owner_class, entity.propertyname)
             elif self.gui_get_variable(entity):
                 entity.prop = entity.var.prop
         return entity.prop
@@ -373,8 +338,10 @@ class GuiEntity:
             return ""
 
     def gui_get_data(self, entity):
+        from gridlab.gldcore.Object import Object
         if entity.data is None:
             if self.gui_get_object(entity):
+
                 entity.data = Object.object_get_addr(entity.obj, entity.propertyname)
             elif self.gui_get_variable(entity):
                 entity.data = entity.var.prop.addr
@@ -409,7 +376,7 @@ class GuiEntity:
         return 0
 
     def gui_cmd_entity(self, item, entity):
-        self.gui_type = entity.type
+        self.gui_type = entity.global_property_types
         if self.gui_type == GUIENTITYTYPE.GUI_TITLE:
             print("%s " % self.gui_get_value(entity))
         elif self.gui_type == GUIENTITYTYPE.GUI_STATUS:
@@ -443,6 +410,7 @@ class GuiEntity:
         return 0
 
     def gui_cmd_prompt(self, parent):
+        from gridlab.gldcore.Object import Object
         buffer = [1024]
         item = 0
         ans = -1
@@ -460,7 +428,7 @@ class GuiEntity:
             result = input()
             if result == "":
                 return
-            result = object_set_value_by_name(entity.obj, entity.propertyname, result)
+            result = Object.object_set_value_by_name(entity.obj, entity.propertyname, result)
             if entity.obj and not result:
                 print("Invalid input, try again.")
                 pass
@@ -540,7 +508,7 @@ class GuiEntity:
         if col[table] > 0:
             self.gui_html_output(self.fp, f"\t</td> <!-- table {table} col {col[table]} -->\n")
         col[table] += 1
-        if entity.type == GUIENTITYTYPE.GUI_SPAN:
+        if entity.global_property_types == GUIENTITYTYPE.GUI_SPAN:
             self.gui_html_output(self.fp, f"\t<td colspan=\"{entity.size}\"> <!-- table {table} col {col[table]} -->\n")
             if entity.size == 0:
                 output_warning(
@@ -668,34 +636,34 @@ class GuiEntity:
     def gui_entity_html_content(self, entity):
         ptype = self.gui_get_property(entity).class_get_property_typename() if self.gui_get_property(entity) else ""
 
-        if entity.type ==  GUIENTITYTYPE.GUI_PAGE:
+        if entity.global_property_types ==  GUIENTITYTYPE.GUI_PAGE:
             if entity.source and not self.gui_html_source_page(entity.source):
                 self.gui_html_output(self.fp, f"ERROR: page '{entity.source}' not found")
 
-        elif entity.type == GUIENTITYTYPE.GUI_TITLE:
+        elif entity.global_property_types == GUIENTITYTYPE.GUI_TITLE:
             if entity.parent is None:
                 self.gui_html_output(self.fp, f"<title>{entity.value}</title>\n")
-            elif entity.parent.type == GUIENTITYTYPE.GUI_GROUP:
+            elif entity.parent.global_property_types == GUIENTITYTYPE.GUI_GROUP:
                 self.gui_html_output(self.fp, f"<legend>{entity.value}</legend>\n")
             else:
                 # Assuming 'table' is defined elsewhere, and handling it accordingly
                 self.gui_html_output(self.fp, f"<h{table + 1}>{entity.value}</h{table + 1}>\n")
 
-        elif entity.type == GUIENTITYTYPE.GUI_STATUS:
+        elif entity.global_property_types == GUIENTITYTYPE.GUI_STATUS:
             self.gui_html_output(self.fp, f'<script lang="jscript"> window.status="{entity.value}";</script>\n')
 
-        elif entity.type == GUIENTITYTYPE.GUI_TEXT:
+        elif entity.global_property_types == GUIENTITYTYPE.GUI_TEXT:
             if not entity.parent or self.gui_get_type(entity.parent) != "GUI_SPAN":
                 entity.newcol()
             self.gui_html_output(self.fp, f'<span class="text">{entity.value}</span>\n')
 
-        elif entity.type == GUIENTITYTYPE.GUI_INPUT:
+        elif entity.global_property_types == GUIENTITYTYPE.GUI_INPUT:
             if not entity.parent or self.gui_get_type(entity.parent) != "GUI_SPAN":
                 entity.newcol()
             self.gui_html_output(self.fp,
-                            f'<input class="{ptype}" type="text" name="{self.gui_get_name(entity)}" value="{self.gui_get_value(entity)}" onchange="update_{ptype}(this)" />\n')
+                            f'<input class="{ptype}" global_property_types="text" name="{self.gui_get_name(entity)}" value="{self.gui_get_value(entity)}" onchange="update_{ptype}(this)" />\n')
 
-        elif entity.type == GUIENTITYTYPE.GUI_CHECK:
+        elif entity.global_property_types == GUIENTITYTYPE.GUI_CHECK:
             prop = self.gui_get_property(entity)
             if not entity.parent or self.gui_get_type(entity.parent) != "GUI_SPAN":
                 entity.newcol()
@@ -704,9 +672,9 @@ class GuiEntity:
                 checked = "checked" if value == key.value else ""
                 label = key.name.replace('_', ' ').capitalize()
                 self.gui_html_output(self.fp,
-                                f'<nobr><input class="{ptype}" type="checkbox" name="{self.gui_get_name(entity)}" value="{key.value}" {checked} onchange="update_{ptype}(this)" />{label}</nobr>\n')
+                                f'<nobr><input class="{ptype}" global_property_types="checkbox" name="{self.gui_get_name(entity)}" value="{key.value}" {checked} onchange="update_{ptype}(this)" />{label}</nobr>\n')
 
-        elif entity.type == GUIENTITYTYPE.GUI_RADIO:
+        elif entity.global_property_types == GUIENTITYTYPE.GUI_RADIO:
             prop = self.gui_get_property(entity)
             if not entity.parent or self.gui_get_type(entity.parent) != "GUI_SPAN":
                 entity.newcol()
@@ -715,11 +683,11 @@ class GuiEntity:
                 checked = "checked" if value == key.value else ""
                 label = key.name.replace('_', ' ').capitalize()
                 self.gui_html_output(self.fp,
-                                f'<nobr><input class="{ptype}" type="radio" name="{self.gui_get_name(entity)}" value="{key.value}" {checked} onchange="update_{ptype}(this)" />{label}</nobr>\n')
+                                f'<nobr><input class="{ptype}" global_property_types="radio" name="{self.gui_get_name(entity)}" value="{key.value}" {checked} onchange="update_{ptype}(this)" />{label}</nobr>\n')
 
-        elif entity.type == GUIENTITYTYPE.GUI_SELECT:
+        elif entity.global_property_types == GUIENTITYTYPE.GUI_SELECT:
             prop = self.gui_get_property(entity)
-            multiple = "multiple" if prop.ptype == "PT_set" else ""
+            multiple = "multiple" if prop.global_property_types == "PT_set" else ""
             size = f'size="{entity.size}"' if entity.size > 0 else ""
             if not entity.parent or self.gui_get_type(entity.parent) != "GUI_SPAN":
                 entity.newcol()
@@ -732,35 +700,35 @@ class GuiEntity:
                 self.gui_html_output(self.fp, f'<option value="{key.value}" {selected}>{label}</option>\n')
             self.gui_html_output(self.fp, '</select>\n')
 
-        elif entity.type == GUIENTITYTYPE.GUI_BROWSE:
+        elif entity.global_property_types == GUIENTITYTYPE.GUI_BROWSE:
             if not entity.parent or self.gui_get_type(entity.parent) != "GUI_SPAN":
                 entity.newcol()
             self.gui_output_html_textarea(entity)
 
-        elif entity.type == GUIENTITYTYPE.GUI_TABLE:
+        elif entity.global_property_types == GUIENTITYTYPE.GUI_TABLE:
             if not entity.parent or self.gui_get_type(entity.parent) != "GUI_SPAN":
                 entity.newcol()
             self.gui_output_html_table(entity)
 
-        elif entity.type == GUIENTITYTYPE.GUI_GRAPH:
+        elif entity.global_property_types == GUIENTITYTYPE.GUI_GRAPH:
             if not entity.parent or self.gui_get_type(entity.parent) != "GUI_SPAN":
                 entity.newcol()
             self.gui_output_html_graph(entity)
 
-        elif entity.type == GUIENTITYTYPE.GUI_ACTION:
+        elif entity.global_property_types == GUIENTITYTYPE.GUI_ACTION:
             if not entity.parent or self.gui_get_type(entity.parent) != "GUI_SPAN":
                 entity.newcol()
             self.gui_html_output(self.fp,
-                            f'<input class="action" type="submit" name="action" value="{entity.action}" onclick="click(this)" />\n')
+                            f'<input class="action" global_property_types="submit" name="action" value="{entity.action}" onclick="click(this)" />\n')
 
     def gui_entity_html_open(self, entity):
-        if entity.type == GUIENTITYTYPE.GUI_TAB:
+        if entity.global_property_types == GUIENTITYTYPE.GUI_TAB:
             pass
-        elif entity.type == GUIENTITYTYPE.GUI_GROUP:
+        elif entity.global_property_types == GUIENTITYTYPE.GUI_GROUP:
             entity.newcol()
             self.gui_html_output(self.fp, "<fieldset>\n")
             entity.newtable()
-        elif entity.type == GUIENTITYTYPE.GUI_SPAN:
+        elif entity.global_property_types == GUIENTITYTYPE.GUI_SPAN:
             entity.newcol()
             entity.start_span()
         else:
@@ -768,7 +736,7 @@ class GuiEntity:
         self.gui_entity_html_content(entity)
 
     def gui_entity_html_close(self, entity):
-        entity_type = entity.type
+        entity_type = entity.global_property_types
         if entity_type == GUIENTITYTYPE.GUI_ROW:
             entity.newrow()
         elif entity_type == GUIENTITYTYPE.GUI_TAB:
@@ -889,7 +857,7 @@ class GuiEntity:
             return "SUCCESS"
 
     def gui_wait(self):
-        if server_startup(0, None) == FAILED:
+        if self.server_startup(0, None) == FAILED:
             output_error("gui is unable to start server")
             return 0
         if self.gui_startup(0, None) == FAILED:
@@ -907,3 +875,96 @@ class GuiEntity:
 
     def gui_wait_status(self, status):
         wait_status = status
+
+class GUIEntity(QWidget):
+    def __init__(self, parent=None):
+        super(GUIEntity, self).__init__(parent)
+        self.layout = QVBoxLayout()
+        self.setLayout(self.layout)
+        # Initialize all the properties
+        self.sourceRef = ""
+        self.entityType = None
+        self.value = None
+        self.variableName = None
+        self.propertyName = None
+        self.span = 1  # Default span value
+        self.unit = None
+        self.nextEntity = None
+        self.parentEntity = parent  # Use the provided parent as the parent entity
+        self.source = None
+        self.options = None
+        self.wait_for = None
+
+    def add_label(self, text):
+        label = QLabel(text)
+        self.layout.addWidget(label)
+
+
+    # Other previously defined methods remain the same
+
+    def set_propertyname(self, propertyName):
+        self.propertyName = propertyName
+        # Handle the property name as needed for your application
+
+    def set_span(self, span):
+        self.span = span
+        # Adjust GUI layout or widget size based on span, if applicable
+
+    def set_unit(self, unit):
+        self.unit = unit
+        # Use the unit for formatting or displaying values
+
+    def set_next(self, nextEntity):
+        self.nextEntity = nextEntity
+        # You might use this to manage a sequence or chain of GUI entities
+
+    def set_parent(self, parentEntity):
+        self.parentEntity = parentEntity
+        # This can be used to establish a hierarchical relationship between entities
+
+    def set_source(self, source):
+        self.source = source
+        # Use source information as needed, perhaps for loading external data
+
+    def set_options(self, options):
+        self.options = options
+        # Options could be used to configure the appearance or behavior of the entity
+
+    def set_wait(self, wait):
+        self.wait_for = wait
+        # Implement logic to handle waiting conditions as required by your application
+
+
+    def add_action(self, action_name, callback):
+        button = QPushButton(action_name)
+        button.clicked.connect(callback)
+        self.layout.addWidget(button)
+
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super(MainWindow, self).__init__()
+        self.setWindowTitle('GridLAB-D GUI')
+        self.central_widget = GUIEntity(self)
+        self.setCentralWidget(self.central_widget)
+        self.setup_gui()
+
+    def setup_gui(self):
+        # Example adding GUI entities
+        self.central_widget.add_label('Welcome to GridLAB-D GUI')
+        self.central_widget.add_action('Action 1', self.action1_callback)
+        self.central_widget.add_action('Quit', self.quit_application)
+
+    def action1_callback(self):
+        print("Action 1 triggered")
+
+    def quit_application(self):
+        QApplication.quit()
+
+def main():
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec_())
+
+if __name__ == '__main__':
+    main()

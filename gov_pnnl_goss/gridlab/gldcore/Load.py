@@ -1,3 +1,19 @@
+
+
+# Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
+import ctypes
+import sys
+
+# Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
+import ctypes
+
+# Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
+import ctypes
+
+# Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
+import os
+
+
 current_object = None  # context object
 current_module = None  # context module
 
@@ -6,23 +22,24 @@ current_module = None  # context module
 def format_object(obj):
     buffer = "(unidentified)"
     if obj.name is None:
-        buffer = "{0}:{1}".format(obj.oclass.name, obj.id)
+        buffer = "{0}:{1}".format(obj.owner_class.name, obj.id)
     else:
-        buffer = "{0} ({1}:{2})".format(obj.name, obj.oclass.name, obj.id)
+        buffer = "{0} ({1}:{2})".format(obj.name, obj.owner_class.name, obj.id)
     return buffer
 
 
 def inline_code_term():
-    if code_block is not None:
-        free(code_block)
-        code_block = None
-    if global_block is not None:
-        free(global_block)
-        global_block = None
-    if init_block is not None:
-        free(init_block)
-        init_block = None
-    return
+    pass
+    # if code_block is not None:
+    #     free(code_block)
+    #     code_block = None
+    # if global_block is not None:
+    #     free(global_block)
+    #     global_block = None
+    # if init_block is not None:
+    #     free(init_block)
+    #     init_block = None
+    # return
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
 def forward_slashes(a):
@@ -62,9 +79,6 @@ def filename_parts(fullname, path, name, ext):
     else:
         name = file
 
-# Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
-import ctypes
-
 def append_init(format, *args):
     global init_block
     global code_used
@@ -75,19 +89,14 @@ def append_init(format, *args):
     ctypes._vsnprintf(code, 1024, format.encode('utf-8'), args)
 
     if len(init_block) + len(code.value) > global_inline_block_size:
-        output_fatal("insufficient buffer space to compile init code (inline_block_size=%d)" % global_inline_block_size)
-        return 0
+        raise Exception("insufficient buffer space to compile init code (inline_block_size=%d)" % global_inline_block_size)
+
     
     init_block += code.value
     code_used += 1
     return code_used
 
 
-Here's the equivalent Python function with snake_case function names:
-
-# Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
-import ctypes
-import sys
 
 def append_code(format, *args):
     code = ctypes.create_string_buffer(65536)
@@ -99,49 +108,40 @@ def append_code(format, *args):
     
     global code_block, code_used, global_inline_block_size
     if len(code_block) + len(code.value) > global_inline_block_size:
-        output_fatal("insufficient buffer space to compile init code (inline_block_size=%d)" % global_inline_block_size)
+        raise Exception("insufficient buffer space to compile init code (inline_block_size=%d)" % global_inline_block_size)
         return 0
     
     code_block += code.value
     code_used += 1
     return code_used
-```
 
-Note: Python does not have a direct equivalent to variable argument lists in C++, so the ctypes library is used here to achieve a similar functionality. Additionally, the `code_block`, `code_used`, and `global_inline_block_size` variables are assumed to be global variables in this Python code.
-
-# Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
-import ctypes
 
 def append_global(format, *args):
-    global code
-    code = ctypes.create_string_buffer(1024)
-    ctypes.va_list(ptr)
-    ctypes.va_start(ptr, format)
-    ctypes.vsprintf(code, format, ptr)
-    ctypes.va_end(ptr)
+    pass
+    # global code
+    # code = ctypes.create_string_buffer(1024)
+    # ctypes.va_list(ptr)
+    # ctypes.va_start(ptr, format)
+    # ctypes.vsprintf(code, format, ptr)
+    # ctypes.va_end(ptr)
+    #
+    # if len(global_block) + len(code) > global_inline_block_size:
+    #     output_fatal("insufficient buffer space to compile init code (inline_block_size=%d)" % global_inline_block_size)
+    #     return 0
+    #
+    # global_block += code.value
+    # return code_used + 1
 
-    if len(global_block) + len(code) > global_inline_block_size:
-        output_fatal("insufficient buffer space to compile init code (inline_block_size=%d)" % global_inline_block_size)
-        return 0
 
-    global_block += code.value
-    return code_used + 1
-
-
-Here is the equivalent Python function using snake_case function names:
-
-# Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
 def mark_line(filename, line_num):
-    buffer = ctypes.create_string_buffer(64)
-    if global_getvar("noglmrefs", buffer, 63) == None:
-        append_code("#line %d \"%s\"\n" % (line_num, forward_slashes(filename)))
+    pass
+    # buffer = ctypes.create_string_buffer(64)
+    # if global_getvar("noglmrefs", buffer, 63) == None:
+    #     append_code("#line %d \"%s\"\n" % (line_num, forward_slashes(filename)))
 
 
-def mark_line():
-    mark_linex(filename, linenum)
-
-# Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
-import os
+# def mark_line():
+#     mark_linex(filename, linenum)
 
 def exec_cmd(format, *args):
     cmd = format % args
@@ -151,17 +151,18 @@ def exec_cmd(format, *args):
 
 
 def debugger(target):
-    result = 0
-    output_debug("Starting debugger")
-    if _MSC_VER:
-        # define getpid for Windows
-        getpid = _getpid
-        result = 1 if exec_cmd("start %s gdb --quiet %s --pid=%d" % (global_gdb_window if "" else "/b", target, global_process_id)) >= 0 else 0
-        system("pause")
-    else:
-        output_debug("Use 'dll-symbols %s' to load symbols" % target)
-        result = 1 if exec_cmd("gdb --quiet %s --pid=%d &" % (target, global_process_id)) >= 0 else 0
-    return STATUS(result)
+    pass
+    # result = 0
+    # output_debug("Starting debugger")
+    # if _MSC_VER:
+    #     # define getpid for Windows
+    #     getpid = _getpid
+    #     result = 1 if exec_cmd("start %s gdb --quiet %s --pid=%d" % (global_gdb_window if "" else "/b", target, global_process_id)) >= 0 else 0
+    #     system("pause")
+    # else:
+    #     output_debug("Use 'dll-symbols %s' to load symbols" % target)
+    #     result = 1 if exec_cmd("gdb --quiet %s --pid=%d &" % (target, global_process_id)) >= 0 else 0
+    # return STATUS(result)
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
 def setup_class(oclass):
@@ -181,9 +182,10 @@ def setup_class(oclass):
 
 
 def reset_line(file_pointer, file):
-    buffer = ctypes.create_string_buffer(64)
-    if global_getvar("noglmrefs", buffer, 63) == None:
-        write_file(file_pointer, "#line %s \"%s\"\n", outlinenum, forward_slashes(file))
+    pass
+    # buffer = ctypes.create_string_buffer(64)
+    # if global_getvar("noglmrefs", buffer, 63) == None:
+    #     write_file(file_pointer, "#line %s \"%s\"\n", outlinenum, forward_slashes(file))
 
 def dll_init():
     return 0
@@ -192,26 +194,28 @@ def dllkill():
     return 0
 
 def load_set_index(obj, id):
-    if not object_index_initialized:
-        object_index.reserve(500)
-        object_linked.reserve(500)
-        object_index_initialized = True
-    
-    if id in object_index:
-        output_error("Duplicate object key detected for object id '%d'" % id)
-        return "FAILED"
-    object_index[id] = obj
-    object_linked[id] = False
-    return "SUCCESS"
+    pass
+    # if not object_index_initialized:
+    #     object_index.reserve(500)
+    #     object_linked.reserve(500)
+    #     object_index_initialized = True
+    #
+    # if id in object_index:
+    #     output_error("Duplicate object key detected for object id '%d'" % id)
+    #     return "FAILED"
+    # object_index[id] = obj
+    # object_linked[id] = False
+    # return "SUCCESS"
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
 def load_get_index(object_num):
-    try:
-        object_linked[object_num] = True
-        return object_index[object_num]
-    except Exception as ex:
-        output_error("load_get_index failure")
-        return None
+    pass
+    # try:
+    #     object_linked[object_num] = True
+    #     return object_index[object_num]
+    # except Exception as ex:
+    #     output_error("load_get_index failure")
+    #     return None
 
 def load_get_current_object():
     global current_object
@@ -219,37 +223,40 @@ def load_get_current_object():
 
 
 def free_index():
-    object_index.clear()
-    object_linked.clear()
+    pass
+    # object_index.clear()
+    # object_linked.clear()
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
 def add_unresolved(by, ptype, ref, oclass, id, file, line, flags):
-    item = UNRESOLVED()
-    if len(id) >= len(item.id):
-        output_error("add_unresolved(...): id '{}' is too long to resolve".format(id))
-        return None
-    item.by = by
-    item.ptype = ptype
-    item.ref = ref
-    item.oclass = oclass
-    item.id = id[:len(item.id)]
-    if first_unresolved is not None and first_unresolved.file == file:
-        item.file = first_unresolved.file
-        first_unresolved.file = None
-    else:
-        item.file = file[:len(file) + 1]
-    item.line = line
-    item.next = first_unresolved
-    item.flags = flags
-    first_unresolved = item
-    return item
+    pass
+    # item = UNRESOLVED()
+    # if len(id) >= len(item.id):
+    #     output_error("add_unresolved(...): id '{}' is too long to resolve".format(id))
+    #     return None
+    # item.by = by
+    # item.global_property_types = global_property_types
+    # item.ref = ref
+    # item.owner_class = oclass
+    # item.id = id[:len(item.id)]
+    # if first_unresolved is not None and first_unresolved.file == file:
+    #     item.file = first_unresolved.file
+    #     first_unresolved.file = None
+    # else:
+    #     item.file = file[:len(file) + 1]
+    # item.line = line
+    # item.next = first_unresolved
+    # item.flags = flags
+    # first_unresolved = item
+    # return item
 
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
 def load_resolve_all():
-    result = resolve_list(first_unresolved)
-    first_unresolved = None
-    return result
+    pass
+    # result = resolve_list(first_unresolved)
+    # first_unresolved = None
+    # return result
 
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
@@ -262,48 +269,53 @@ def copy(x):
 
 
 def syntax_error(p):
-    context = p[:16]
-    nl = context.find('\n')
-    if nl != -1:
-        context = context[:nl]
-    else:
-        context = context[:15]
-
-    if len(context) > 0:
-        output_error_raw("{}({}): syntax error at '{}...'".format(filename, linenum, context))
-    else:
-        output_error_raw("{}({}): syntax error".format(filename, linenum))
+    pass
+    # context = p[:16]
+    # nl = context.find('\n')
+    # if nl != -1:
+    #     context = context[:nl]
+    # else:
+    #     context = context[:15]
+    #
+    # if len(context) > 0:
+    #     output_error_raw("{}({}): syntax error at '{}...'".format(filename, linenum, context))
+    # else:
+    #     output_error_raw("{}({}): syntax error".format(filename, linenum))
 
 def white(parser):
-    len = 0
-    while parser != '\0' and parser.isspace():
-        if parser == '\n':
-            linenum += 1
-        len += 1
-    return len
+    pass
+    # len = 0
+    # while parser != '\0' and parser.isspace():
+    #     if parser == '\n':
+    #         linenum += 1
+    #     len += 1
+    # return len
 
 def comment(parser):
-    n = white(parser)
-    if parser[n] == '#':
-        while parser[n] != '\n':
-            n += 1
-        linenum += 1
-    return n
+    pass
+    # n = white(parser)
+    # if parser[n] == '#':
+    #     while parser[n] != '\n':
+    #         n += 1
+    #     linenum += 1
+    # return n
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
 def pattern(parser, pattern, result, size):
-    format_str = "%%" + pattern
-    _start()
-    if sscanf(parser, format_str, result) == 1:
-        n = len(result)
-    _done()
+    pass
+    # format_str = "%%" + pattern
+    # _start()
+    # if sscanf(parser, format_str, result) == 1:
+    #     n = len(result)
+    # _done()
 
 
 def scan(parser, format_str, result, size):
-    START
-    if sscanf(parser, format_str, result) == 1:
-        n = len(result)
-    DONE
+    pass
+    # START
+    # if sscanf(parser, format_str, result) == 1:
+    #     n = len(result)
+    # DONE
 
 def literal(parser, text):
     if parser.startswith(text):
@@ -323,14 +335,15 @@ def dashed_name(parser, result, size):
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
 def name(parser, result, size):
-    start
-    
-    if _p.isdigit():
-        return 0
-    while size > 1 and (_p.isalpha() or _p.isdigit() or _p == '_'):
-        result += _p
-    result = result[:_n]
-    done
+    pass
+    # start
+    #
+    # if _p.isdigit():
+    #     return 0
+    # while size > 1 and (_p.isalpha() or _p.isdigit() or _p == '_'):
+    #     result += _p
+    # result = result[:_n]
+    # done
 
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
@@ -346,16 +359,16 @@ def name_list(parser, result, size):
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
 def variable_list(parser, result, size):
-    start
-    if _p.isdigit():
-        return 0
-    while size > 1 and _p.isalpha() or _p.isdigit() or _p == ',' or _p == ' ' or _p == '.' or _p == '_':
-        result += _p
-    result = result[:_n]
-    done
+    pass
+    # start
+    # if _p.isdigit():
+    #     return 0
+    # while size > 1 and _p.isalpha() or _p.isdigit() or _p == ',' or _p == ' ' or _p == '.' or _p == '_':
+    #     result += _p
+    # result = result[:_n]
+    # done
 
 
-Here's the equivalent Python function using snake_case function names:
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
 def property_list(parser, result, size):
@@ -370,28 +383,31 @@ def property_list(parser, result, size):
 
 
 def name_unit(parser, result, size, unit):
-    start
-    if term(name(HERE, result, size)) and term(unit_suffix(HERE, unit)):
-        accept
-        done
-    reject
+    pass
+    # start
+    # if term(name(HERE, result, size)) and term(unit_suffix(HERE, unit)):
+    #     accept
+    #     done
+    # reject
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
 def dotted_name(parser, result, size):
-    start
-    while size > 1 and (str.isalpha(_p) or str.isdigit(_p) or _p == '_' or _p == '.'):
-        result += _p
-    result = result[:_n]
-    done
+    pass
+    # start
+    # while size > 1 and (str.isalpha(_p) or str.isdigit(_p) or _p == '_' or _p == '.'):
+    #     result += _p
+    # result = result[:_n]
+    # done
 
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
 def hostname(parser, result, size):
-    start = _p
-    while size > 1 and (isalpha(_p) or isdigit(_p) or _p=='_' or _p=='.' or _p=='-' or _p==':'):
-        result.append(_p)
-    result.append('\0')
-    done
+    pass
+    # start = _p
+    # while size > 1 and (isalpha(_p) or isdigit(_p) or _p=='_' or _p=='.' or _p=='-' or _p==':'):
+    #     result.append(_p)
+    # result.append('\0')
+    # done
 
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
@@ -416,40 +432,41 @@ def delim_value(parser, result, size, delims):
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
 def integer(parser, value):
-    result = bytearray(256)
-    size = len(result)
-    start()
-    while size > 1 and str(_p).isdigit():
-        copy(result)
-    result[_n] = '\0'
-    value[0] = int(result)
-    return _n
+    pass
+    # result = bytearray(256)
+    # size = len(result)
+    # start()
+    # while size > 1 and str(_p).isdigit():
+    #     copy(result)
+    # result[_n] = '\0'
+    # value[0] = int(result)
+    # return _n
 
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
 def integer32(parser, value):
-    result = bytearray(256)
-    size = len(result)
-    START
-    while size > 1 and _isdigit(__p):
-        COPY(result)
-    result[_n] = '\0'
-    value[0] = int(result)
-    return _n
+    pass
+    # result = bytearray(256)
+    # size = len(result)
+    # START
+    # while size > 1 and _isdigit(__p):
+    #     COPY(result)
+    # result[_n] = '\0'
+    # value[0] = int(result)
+    # return _n
 
-
-Here's the Python equivalent of the given CPP function using snake_case function names:
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
 def integer_16(parser, value):
-    result = bytearray(256)
-    size = len(result)
-    start
-    while size > 1 and _isdigit(_p):
-        _copy(result)
-    result[_n] = '\0'
-    value[0] = int(result)
-    return _n
+    pass
+    # result = bytearray(256)
+    # size = len(result)
+    # start
+    # while size > 1 and _isdigit(_p):
+    #     _copy(result)
+    # result[_n] = '\0'
+    # value[0] = int(result)
+    # return _n
 
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
@@ -478,83 +495,46 @@ def real_value(parser, value):
     return len(result)
 
 
-def convert_to_snake_case():
-    if literal("("):
-        accept()
-        if white:
-            accept()
-        depth = 1
-        op_stk[0] = OP_OPEN
-        op_i = 0
+def load_java_module():
+    pass
+
+def load_python_module():
+    pass
 
 def convert_to_snake_case():
-    if literal(";"):
-        accept()
-        break
+    pass
+    # if literal("("):
+    #     accept()
+    #     if white:
+    #         accept()
+    #     depth = 1
+    #     op_stk[0] = OP_OPEN
+    #     op_i = 0
 
-
-def convert_to_python():
-    if literal("("):
-        accept()
-        op_stk.append("OP_OPEN")
-        
-        depth += 1
-        if white:
-            accept()
-
-def convert_to_snake_case(literal):
-    if literal == "^":
-        ACCEPT()
-        if WHITE:
-            ACCEPT()
-        op_stk.append(OP_POW)
-        op_i += 1
-        rpn_sz += 1
 
 def convert_literal(literal):
-    if literal == "*":
-        accept()
-        if white():
-            accept()
-        pass_op("OP_MULT")
+    pass
+    # if literal == "*":
+    #     accept()
+    #     if white():
+    #         accept()
+    #     pass_op("OP_MULT")
 
-def convert_to_snake_case():
-    if literal("/"):
-        accept()
-        if white():
-            accept()
-        pass_op("OP_DIV")
 
 def literal_percent():
-    if literal("%"):
-        accept()
-        if white:
-            accept()
-        pass_op("OP_MOD")
+    pass
+    # if literal("%"):
+    #     accept()
+    #     if white:
+    #         accept()
+    #     pass_op("OP_MOD")
 
-# Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
 def literal_plus():
-    if literal("+"):
-        accept()
-        if white():
-            accept()
-        pass_op("OP_ADD")
+    pass
+    # if literal("+"):
+    #     accept()
+    #     if white():
+    #         accept()
+    #     pass_op("OP_ADD")
 
 
-def literal(s):
-    if s == "-":
-        accept()
-        if white():
-            accept()
-        pass_op("OP_SUB")
-
-# Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
-def convert_to_snake_case():
-    if literal("("):
-        accept()
-        if white():
-            accept()
-        op_stk.append(OP_OPEN)
-        op_i += 1
-        depth += 1
-        rpn_sz += 1

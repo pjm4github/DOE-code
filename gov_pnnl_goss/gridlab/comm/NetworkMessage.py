@@ -8,7 +8,7 @@ from gov_pnnl_goss.gridlab.comm.NetworkInterface import NetworkInterface, DXM
 
 from gov_pnnl_goss.gridlab.gldcore.GridLabD import gl_register_class, PC_BOTTOMUP, gl_publish_variable, gl_error, \
     gl_create_object, gl_object_isa, TS_NEVER, gl_name
-from gov_pnnl_goss.gridlab.gldcore.Property import PROPERTYTYPE
+from gov_pnnl_goss.gridlab.gldcore.PropertyHeader import PropertyType
 
 
 class MSGSTATE(Enum):
@@ -30,11 +30,11 @@ def OBJECTHDR(nif):
 
 
 class NetworkMessage:
-    oclass = None
+    owner_class = None
 
     def __init__(self, mod=None):
-        if NetworkMessage.oclass is None:
-            NetworkMessage.oclass = self.register_class(mod)
+        if NetworkMessage.owner_class is None:
+            NetworkMessage.owner_class = self.register_class(mod)
         self.buffer_size = 0
         self.bytes_received_MB = 0.0
         self.bytes_resent_MB = 0.0
@@ -52,39 +52,39 @@ class NetworkMessage:
 
     @staticmethod
     def register_class(mod):
-        oclass = {
+        owner_class = {
             "name": "network_message",
             "size": NetworkMessage.get_size(),
             "parent_class": PC_BOTTOMUP
         }
-        oclass = gl_register_class(mod)
-        if oclass is None:
+        owner_class = gl_register_class(mod)
+        if owner_class is None:
             gl_error("unable to register object class implemented by %s" % __name__)
-        if gl_publish_variable(oclass,
-            PROPERTYTYPE.PT_object, "from_interface", PADDR("from_interface"),
-            PROPERTYTYPE.PT_object, "to_interface", PADDR("to_interface"),
-            PROPERTYTYPE.PT_double, "size_MB", PADDR("size_MB"),
-            PROPERTYTYPE.PT_char1024, "message", PADDR("message"),
-            PROPERTYTYPE.PT_int16, "buffer_size", PADDR("buffer_size"),
-            PROPERTYTYPE.PT_int64, "start_time", PADDR("start_time"),
-            PROPERTYTYPE.PT_int64, "end_time", PADDR("end_time"),
-            PROPERTYTYPE.PT_double, "start_time_frac_s", PADDR("start_time_frac_s"),
-            PROPERTYTYPE.PT_double, "end_time_frac_s", PADDR("end_time_frac_s"),
-            PROPERTYTYPE.PT_double, "bytes_sent_MB", PADDR("bytes_sent_MB"),
-            PROPERTYTYPE.PT_double, "bytes_resent_MB", PADDR("bytes_resent_MB"),
-            PROPERTYTYPE.PT_double, "bytes_received_MB", PADDR("bytes_received_MB"),
-            PROPERTYTYPE.PT_enumeration, "msg_state", PADDR("msg_state"),
-                PROPERTYTYPE.PT_KEYWORD, "NONE", MSGSTATE.NMS_NONE,
-                PROPERTYTYPE.PT_KEYWORD, "PENDING", MSGSTATE.NMS_PENDING,
-                PROPERTYTYPE.PT_KEYWORD, "SENDING", MSGSTATE.NMS_SENDING,
-                PROPERTYTYPE.PT_KEYWORD, "DELIVERED", MSGSTATE.NMS_DELIVERED,
-                PROPERTYTYPE.PT_KEYWORD, "REJECTED", MSGSTATE.NMS_REJECTED,
-                PROPERTYTYPE.PT_KEYWORD, "FAILED", MSGSTATE.NMS_FAILED,
-                PROPERTYTYPE.PT_KEYWORD, "ERROR", MSGSTATE.NMS_ERROR,
-                PROPERTYTYPE.PT_KEYWORD, "DELAYED", MSGSTATE.NMS_DELAYED,
-            None) < 1:
+        if gl_publish_variable(owner_class,
+                               PropertyType.PT_object, "from_interface", PADDR("from_interface"),
+                               PropertyType.PT_object, "to_interface", PADDR("to_interface"),
+                               PropertyType.PT_double, "size_MB", PADDR("size_MB"),
+                               PropertyType.PT_char1024, "message", PADDR("message"),
+                               PropertyType.PT_int16, "buffer_size", PADDR("buffer_size"),
+                               PropertyType.PT_int64, "start_time", PADDR("start_time"),
+                               PropertyType.PT_int64, "end_time", PADDR("end_time"),
+                               PropertyType.PT_double, "start_time_frac_s", PADDR("start_time_frac_s"),
+                               PropertyType.PT_double, "end_time_frac_s", PADDR("end_time_frac_s"),
+                               PropertyType.PT_double, "bytes_sent_MB", PADDR("bytes_sent_MB"),
+                               PropertyType.PT_double, "bytes_resent_MB", PADDR("bytes_resent_MB"),
+                               PropertyType.PT_double, "bytes_received_MB", PADDR("bytes_received_MB"),
+                               PropertyType.PT_enumeration, "msg_state", PADDR("msg_state"),
+                               PropertyType.PT_KEYWORD, "NONE", MSGSTATE.NMS_NONE,
+                               PropertyType.PT_KEYWORD, "PENDING", MSGSTATE.NMS_PENDING,
+                               PropertyType.PT_KEYWORD, "SENDING", MSGSTATE.NMS_SENDING,
+                               PropertyType.PT_KEYWORD, "DELIVERED", MSGSTATE.NMS_DELIVERED,
+                               PropertyType.PT_KEYWORD, "REJECTED", MSGSTATE.NMS_REJECTED,
+                               PropertyType.PT_KEYWORD, "FAILED", MSGSTATE.NMS_FAILED,
+                               PropertyType.PT_KEYWORD, "ERROR", MSGSTATE.NMS_ERROR,
+                               PropertyType.PT_KEYWORD, "DELAYED", MSGSTATE.NMS_DELAYED,
+                               None) < 1:
             gl_error("unable to publish properties in %s" % __name__)
-        return oclass
+        return owner_class
 
     @staticmethod
     def get_size():
@@ -190,7 +190,7 @@ class NetworkMessage:
 # //////////////////////////////////////////////////////////////////////////
 
 def create_network_message(obj, parent):
-    obj = gl_create_object(NetworkMessage.oclass)
+    obj = gl_create_object(NetworkMessage.owner_class)
     if obj is not None:
         my = OBJECTDATA(obj, NetworkMessage)
         gl_set_parent(obj, parent)
@@ -198,13 +198,13 @@ def create_network_message(obj, parent):
             my.create()
         except Exception as e:
             gl_error("%s::%s.create(OBJECT **self={name='%s', id=%d},...): %s" % (
-                obj.oclass.module.name, obj.oclass.name, obj.name, obj.id, str(e)))
+                obj.owner_class.module.name, obj.owner_class.name, obj.name, obj.id, str(e)))
             return 0
         return 1
     return 0
 
 def sync_network_message(obj, t1, passconfig):
-    obj.clock = t1
+    obj.exec_clock = t1
     return TS_NEVER
 
 def isa_network_message(obj, classname):

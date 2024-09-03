@@ -1,41 +1,51 @@
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
-import subprocess
-import threading
-import select
 import os
-import time
+import subprocess
+from enum import Enum
+from signal import signal
+import select
 from datetime import datetime
 from enum import IntEnum
 from socket import socket
-from gov_pnnl_goss.gridlab.climate.CsvReader import TIMESTAMP
-from gov_pnnl_goss.gridlab.gldcore.Globals import XC_SUCCESS, XC_EXFAILED, XC_ARGERR, XC_ENVERR, \
-    XC_TSTERR, XC_USRERR, XC_RUNERR, XC_INIERR, XC_PRCERR, XC_SVRKLL, XC_IOERR, \
-    XC_SHFAILED, XC_SIGNAL, XC_SIGINT, XC_EXCEPTION, global_init, FAILED, SUCCESS, MAINLOOPSTATE
-from gov_pnnl_goss.gridlab.gldcore.GridLabD import TS_NEVER, TS_INVALID
+import threading
+import time
+# from gov_pnnl_goss.gridlab.gldcore.Globals import *
+# XC_SUCCESS, XC_EXFAILED, XC_ARGERR, XC_ENVERR, \
+#     XC_TSTERR, XC_USRERR, XC_RUNERR, XC_INIERR, XC_PRCERR, XC_SVRKLL, XC_IOERR, \
+#     XC_SHFAILED, XC_SIGNAL, XC_SIGINT, XC_EXCEPTION, global_init, FAILED, SUCCESS, MAINLOOPSTATE, TIMESTAMP, \
+#     MULTIRUNMODE, DELTAMODEFLAGS, SIMULATIONMODE, SIGINT
+from gov_pnnl_goss.gridlab.gldcore.TimeStamp import TS_NEVER, TS_INVALID
 from gov_pnnl_goss.gridlab.gldcore.Output import output_warning, output_debug, output_verbose, output_progress, \
-    output_error, output_message, output_fatal
+    output_error, output_message, output_fatal, output_set_time_context
 from gov_pnnl_goss.gridlab.gldcore.Local import locale_push
-from gridlab.gldcore.Class import PASSCONFIG
-from gridlab.gldcore.Cmdarg import object_init
-from gridlab.gldcore.Debug import SIGNALS
-from gridlab.gldcore.DeltaMode import delta_init
-from gridlab.gldcore.Enduse import Enduse
-from gridlab.gldcore.Gui import GUIACTIONSTATUS
-from gridlab.gldcore.Instance import instance_initall
-from gridlab.gldcore.Loadshape import loadshape_init_all
-from gridlab.gldcore.Module import Module, Sched
-from gridlab.gldcore.Object import Object, first_object, object_get_count
-from gridlab.gldcore.Realtime import realtime_schedule_event
-from gridlab.gldcore.Stream import SF_OUT
-from gridlab.gldcore.Timestamp import absolute_timestamp, earliest_timestamp, convert_from_timestamp
-from gridlab.gldcore.Realtime import realtime_now
-from gov_pnnl_goss.gridlab.gldcore.Threadpool import processor_count
-# from cpp_threadpool import CppThreadPool  # Assuming you have a suitable implementation for cpp_threadpool
-from enum import Enum
+from gov_pnnl_goss.gridlab.gldcore.Globals import SIGNALS, SUCCESS, TIMESTAMP, CheckpointType, FAILED, global_init, \
+    MAINLOOPSTATE, MULTIRUNMODE, XC_SUCCESS, DELTAMODEFLAGS, SIMULATIONMODE, SIGINT, XC_EXFAILED, XC_ARGERR, XC_ENVERR, \
+    XC_TSTERR, XC_USRERR, XC_RUNERR, XC_INIERR, XC_PRCERR, XC_SVRKLL, XC_IOERR, XC_SHFAILED, XC_SIGNAL, XC_SIGINT, \
+    XC_EXCEPTION
+from gov_pnnl_goss.gridlab.gldcore.Link import Link
+from gov_pnnl_goss.gridlab.gldcore.ThreadPool import ThreadPool, processor_count
+from gov_pnnl_goss.gridlab.gldcore.Class import PASSCONFIG, ClassRegistry
+from gov_pnnl_goss.gridlab.gldcore.Enduse import Enduse
+from gov_pnnl_goss.gridlab.gldcore.Gui import GUIACTIONSTATUS
+from gov_pnnl_goss.gridlab.gldcore.Instance import Instance
+from gov_pnnl_goss.gridlab.gldcore.Loadshape import loadshape_init_all
+from gov_pnnl_goss.gridlab.gldcore.Module import Module, Sched
+from gov_pnnl_goss.gridlab.gldcore.Object import Object
+from gov_pnnl_goss.gridlab.gldcore.Realtime import realtime_schedule_event
+from gov_pnnl_goss.gridlab.gldcore.Schedule import Schedule
+from gov_pnnl_goss.gridlab.gldcore.Stream import SF_OUT
+from gov_pnnl_goss.gridlab.gldcore.Test import test_exec
+from gov_pnnl_goss.gridlab.gldcore.TimeStamp import absolute_timestamp, earliest_timestamp, convert_from_timestamp, \
+    DT_INFINITY, \
+    DT_INVALID, TimeStamp
+from gov_pnnl_goss.gridlab.gldcore.Realtime import realtime_now
+
+from gov_pnnl_goss.gridlab.gldcore.Transform import Transform, TRANSFORMSOURCE
+from gov_pnnl_goss.gridlab.gldcore.DeltaMode import delta_getprofile
 
 mls_svr_lock = threading.Lock()
 mls_svr_signal = threading.Condition(mls_svr_lock)
-
+main_sync = {TS_NEVER, 0, SUCCESS}
 
 startlock = []  # List of mutexes
 donelock = []   # List of mutexes
@@ -52,7 +62,7 @@ n_threads = [0]  # List with a single integer element
 # threadpool_data = None
 ranks = []
 
-
+commit_list = []
 def sleep_until(t2):
     """Sleep until a specified datetime t2."""
     # Implements : std::this_thread::sleep_until(t2);
@@ -71,11 +81,6 @@ class ListItem:
     def __init__(self, data=None):
         self.data = data
         self.next = None
-
-class CheckpointType:
-    WALL = 1
-    SIM = 2
-    NONE = 3
 
 
 # Initialize clock variables
@@ -103,7 +108,7 @@ def PASSINC(p):
     return 1 if p % 2 else -1
 
 
-# Define passtype as a list of PASSCONFIG values
+# Define pass type as a list of PASSCONFIG values
 passtype = [PASSCONFIG.PC_PRETOPDOWN, PASSCONFIG.PC_BOTTOMUP, PASSCONFIG.PC_POSTTOPDOWN]
 
 # Initialize pass counter
@@ -168,28 +173,29 @@ class SyncData:
         self.status = Status.UNINITIALIZED  # Status.SUCCESS
 
 class ThreadData:
-    def __init__(self):
-        self.count = 0  # the thread count
-        self.data: SyncData  # pointer to the sync state structure
+    def __init__(self, count=0, data=None):
+        self.count = count  # the thread count
+        self.data: [SyncData] = [data]  # pointer to the sync state structure
 
-class ThreadpoolThreadData:
-    def __init__(self, size: int, threadpool):
+class ThreadpoolThreadData(ThreadData):
+    def __init__(self, size: int, threadpool: ThreadPool):
+        super().__init__()
         self.count = size
         self.data: [SyncData] = [SyncData() for _ in range(size)]
         self.thread_map = {}  # = threadpool.get_threadmap() # Use a dictionary to global_map thread IDs to indices
-        # for index in range(size):
-        #     self.data[index].status = SUCCESS
+        for index in range(size):
+            self.data[index].status = SUCCESS
         self.initialize_thread_map(threadpool)
 
     def initialize_thread_map(self, threadpool):
         for idx, thread_id in enumerate(threadpool.get_thread_ids()):
             self.thread_map[thread_id] = idx
 
-    def get_thread_data(self, thread_id: threading.Thread):
+    def get_thread_data(self, thread_id: threading.Thread)->SyncData:
         idx = self.thread_map.get(thread_id)
         return self.data[idx] if idx is not None else None
 
-    def get_data(self, index: int):
+    def get_data(self, index: int)->SyncData:
         return self.data[index]
 
     def get_count(self):
@@ -207,62 +213,11 @@ class ObjSyncData:
         self.i = 0  # index of mutex or cond this object rank list uses
 
 
-class MyClass:
-    def __init__(self):
-        self.profiler = Profiler()
-
-class Profiler:
-    def __init__(self):
-        self.clocks = 0
-
-class DeltaProfile:
-    def __init__(self):
-        self.t_count = 0
-        self.t_preupdate = 0
-        self.t_update = 0
-        self.t_postupdate = 0
-        self.t_delta = 0
-
-def delta_getprofile():
-    return DeltaProfile()
-
-# Global variables
-global_checkpoint_type = CheckpointType.WALL
-global_clock = 0
-global_minimum_timestep = 1
-global_modelname = ""
-global_checkpoint_seqnum = 0
-global_checkpoint_keepall = 0
-global_checkpoint_file = ""
-global_debug_mode = 0
-global_nolocks = 0
-global_checkpoint_interval = 3600
-global_sync_dumpfile = ""  # Provide the file path for debug purposes
-
-
-# class TIMESTAMP:
-#     TS_NEVER = float('inf')
-#     TS_INVALID = float('-inf')
-
-class TRANSFORMSOURCE(Enum):
-    XS_DOUBLE = 1
-    XS_COMPLEX = 2
-    XS_ENDUSE = 4
-
-#
-# def t_setup_ranks():
-#     return setup_ranks()  # Define setup_ranks as needed
-
-
-# def sim_time():
-#     buffer = bytearray(64)
-#     result, buffer = convert_from_timestamp(global_clock, buffer, len(buffer))
-#     return buffer.decode() if result > 0 else "(invalid)"
 
 ########################################################################
 
 def object_name(obj, b=None, max_len = None):
-    return f"{obj.oclass.name}:{obj.id}"
+    return f"{obj.owner_class.name}:{obj.id}"
 
 
 # Simulate the stream function for demonstration purposes
@@ -279,6 +234,7 @@ def stream_context():
 
 # Helper function to get thread-specific data
 def get_thread_data(thread_id):
+    global threadpool_data
     if thread_id not in threadpool_data:
         threadpool_data[thread_id] = SyncData()
     return threadpool_data[thread_id]
@@ -289,23 +245,18 @@ def object_sync(obj, clock, passtype):
     return clock
 
 
-def object_get_first():
-    """
-    :param obj  the object from which to start
-    """
-    return first_object
 
-
-def object_get_next(obj: Object):
-    """
-    :param obj  the object from which to start
-    """
-    if obj:
-        return obj.next
-    else:
-        return None
-
-    pass  # Implement object_get_next logic
+#
+# def object_get_next(obj: Object):
+#     """
+#     :param obj  the object from which to start
+#     """
+#     if obj:
+#         return obj.next
+#     else:
+#         return None
+#
+#     pass  # Implement object_get_next logic
 
 def index_shuffle(index):
     pass  # Implement index_shuffle logic
@@ -327,11 +278,11 @@ def setup_ranks():
             return Status.FAILED
 
         # Add every object to index based on rank
-        obj = object_get_first()
+        obj = Object.object_get_first()
         while obj is not None:
             # Ignore objects that don't use this passconfig
-            if (obj.oclass.passconfig & passtype[i]) == 0:
-                obj = object_get_next(obj)
+            if (obj.owner_class.passconfig & passtype[i]) == 0:
+                obj = Object.object_get_next(obj)
                 continue
 
             # Add this object to the ranks for this passconfig
@@ -340,7 +291,7 @@ def setup_ranks():
             # Uncomment the next line to print out self id, pass, rank information
             # print(f"self[{self.id}]: pass = {passtype[i]}, rank = {self.rank}")
 
-            obj = object_get_next(obj)
+            obj = Object.object_get_next(obj)
 
         if global_debug_mode == 0 and global_nolocks == 0:
             # Shuffle the objects in the index
@@ -348,6 +299,9 @@ def setup_ranks():
 
     return Status.SUCCESS
 
+# def sim_time():
+#     result, buffer = convert_from_timestamp(global_clock)
+#     return buffer if result > 0 else "(invalid)"
 
 def simtime() -> str:
     # Implement simtime logic here and return a string
@@ -363,7 +317,7 @@ def show_progress():
     realtime_schedule_event(realtime_now() + 1, show_progress)
     return SUCCESS
 
-# /***********************************************************************/
+# /***********************************************************************
 # /* CHECKPOINTS (DPC Apr 2011) */
 
 
@@ -377,11 +331,12 @@ def do_checkpoint():
     :return:
     """
     # Last checkpoint value
-    global last_checkpoint, global_checkpoint_interval, global_checkpoint_file, global_checkpoint_seqnum
+    global last_checkpoint, global_checkpoint_interval, global_checkpoint_file, global_checkpoint_seqnum, \
+        global_checkpoint_type, global_modelname, global_checkpoint_keepall
     if 'last_checkpoint' not in globals():
         last_checkpoint = 0
 
-    # Checkpoint type selection
+    # Checkpoint global_property_types selection
     now = 0
 
     if global_checkpoint_type == CheckpointType.WALL:
@@ -444,8 +399,8 @@ def do_checkpoint():
 def tp_do_object_sync(obj):
     """
     # Example usage:
-        oclass = OClass("MyObjectClass")
-        self = Object(10, 0, 100, oclass)
+        owner_class = owner_class("MyObjectClass")
+        self = Object(10, 0, 100, owner_class)
         global_clock = 50
         passstype = [1, 2, 3]  # Replace with actual passtype values
         pass = 0  # Replace with the desired pass value
@@ -486,7 +441,7 @@ def tp_do_object_sync(obj):
         if iteration_counter == 2 and this_t == global_clock:
             print(f"{simtime()}: object {object_name(obj)} iteration limit imminent")
         elif iteration_counter == 1 and this_t == global_clock:
-            print(f"Convergence iteration limit reached for object {obj.oclass.name}:{obj.id}")
+            print(f"Convergence iteration limit reached for object {obj.owner_class.name}:{obj.id}")
 
         # Manage minimum timestep
         if global_minimum_timestep > 1 and this_t > global_clock and this_t < float("inf"):
@@ -511,8 +466,8 @@ def ss_do_object_sync(thread, item):
     :param item:
     :return:
     """
-    global global_iteration_limit
-    data = ThreadData.data[thread]
+    global global_iteration_limit, global_sync_dumpfile
+    data = ThreadData().data[thread]
     obj = item
     this_t = 0
 
@@ -544,7 +499,7 @@ def ss_do_object_sync(thread, item):
         if iteration_counter == 2 and this_t == global_clock:
             print(f"{simtime()}: object {object_name(obj)} iteration limit imminent")
         elif iteration_counter == 1 and this_t == global_clock:
-            print(f"Convergence iteration limit reached for object {obj.oclass.name}:{obj.id}")
+            print(f"Convergence iteration limit reached for object {obj.owner_class.name}:{obj.id}")
 
         # Manage minimum timestep
         if global_minimum_timestep > 1 and this_t > global_clock and this_t < float("inf"):
@@ -564,7 +519,7 @@ def ss_do_object_sync(thread, item):
                 else:
                     passname = "OUT_OF_SERVICE"
 
-                objname = f"{obj.oclass.name}:{obj.id}" if obj.name is None else obj.name
+                objname = f"{obj.owner_class.name}:{obj.id}" if obj.name is None else obj.name
                 syncdate = abs(this_t)
                 fp.write(f"{global_clock},{passname},{global_iteration_limit - iteration_counter},{thread},{objname},{syncdate}\n")
 
@@ -625,26 +580,26 @@ def init_by_creation():
     try:
         PC_FORCE_NAME = 1
         # Simulate iterating over objects
-        # obj1 = Object(oclass=Class("Class1", PC_FORCE_NAME), id=1, name="Object1")
-        # obj2 = Object(oclass=Class("Class2", 0), id=2, name="Object2")
-        # obj3 = Object(oclass=Class("Class3", PC_FORCE_NAME), id=3, name="")
+        # obj1 = Object(owner_class=DynamicClass("Class1", PC_FORCE_NAME), id=1, name="Object1")
+        # obj2 = Object(owner_class=DynamicClass("Class2", 0), id=2, name="Object2")
+        # obj3 = Object(owner_class=DynamicClass("Class3", PC_FORCE_NAME), id=3, name="")
         # return [obj1, obj2, obj3]
-        obj = object_get_first()
+        obj = Object.object_get_first()
         while obj:
-            if not object_init(obj):
+            if not obj.object_init(obj):
                 b = [0] * 64
                 # /* TROUBLESHOOT
-                # 	The initialization of the named object has failed.  Make sure that the object's
-                # 	requirements for initialization are satisfied and try again.
+                #     The initialization of the named object has failed.  Make sure that the object's
+                #     requirements for initialization are satisfied and try again.
                 #  */
                 rv = FAILED
 
                 raise Exception(f"object {object_name(obj, b, 63)} initialization failed")
 
-            if obj.oclass.passconfig & PC_FORCE_NAME == PC_FORCE_NAME:
+            if obj.owner_class.passconfig & PC_FORCE_NAME == PC_FORCE_NAME:
                 if obj.name == "":
-                    output_warning(f"init: object {obj.oclass.name}:{obj.id} should have a name, but doesn't")
-            obj = object_get_next(obj)
+                    output_warning(f"init: object {obj.owner_class.name}:{obj.id} should have a name, but doesn't")
+            obj = Object.object_get_next(obj)
 
     except Exception as e:
         output_error(f"init failure: {e}")
@@ -667,10 +622,10 @@ def init_by_deferral_retry(def_array):
     # Split out the allocation so it can be checked
     next_arr = [None] * len(def_array)
 
-    # Check it, like a proper programmer
-    if next_arr is None:
-        output_error("init_by_deferral_retry(): error allocating temporary array")
-        return FAILED
+    # # Check it, like a proper programmer
+    # if next_arr is None:
+    #     output_error("init_by_deferral_retry(): error allocating temporary array")
+    #     return FAILED
 
     global_init_max_defer = 1  # Simulated global variable
 
@@ -690,12 +645,12 @@ def init_by_deferral_retry(def_array):
         # Initialize each object in def_array
         for i in range(len(def_array)):
             obj = def_array[i]
-            obj_rv = object_init(obj)
+            obj_rv = obj.object_init(obj)
             if obj_rv == 0:
                 rv = FAILED
-                output_error(f"init_by_deferral_retry(): object {object_name(obj, b, 63)} initialization failed")
+                output_error(f"init_by_deferral_retry(): object {obj.name} initialization failed")
             elif obj_rv == 1:
-                with obj.lock.Lock():  # assumig self.lock is a threading.lock type
+                with obj.lock.Lock():  # assumig self.lock is a threading.lock global_property_types
                     obj.flags |= 1  # OF_INIT
                     obj.flags -= 2  # OF_DEFERRED
             elif obj_rv == 2:
@@ -768,7 +723,7 @@ def init_by_deferral():
     :return:
     """
     def_array = []
-    obj = object_get_first()
+    obj = Object.object_get_first()
     while obj:
         def_array.append(obj)
         obj = obj.next
@@ -779,15 +734,15 @@ def init_by_deferral():
     rv = SUCCESS
 
     try:
-        rv = init_by_deferral_retry(def_array, len(def_array))
+        rv = init_by_deferral_retry(def_array)
         if rv == FAILED:
             return FAILED
 
-        obj = object_get_first()
+        obj = Object.object_get_first()
         while obj:
-            if obj.oclass.passconfig & 4:  # PC_FORCE_NAME == 4
+            if obj.owner_class.passconfig & 4:  # PC_FORCE_NAME == 4
                 if obj.name == "":
-                    output_warning(f"init: object {obj.oclass.name}:{obj.id} should have a name, but doesn't")
+                    output_warning(f"init: object {obj.owner_class.name}:{obj.id} should have a name, but doesn't")
             obj = obj.next
 
     except Exception as e:
@@ -810,10 +765,10 @@ def init_all():
     objects = []
 
     # Simulate object creation with heartbeat values
-    obj1 = Object(1)
-    obj2 = Object(0)
-    obj3 = Object(1)
-    obj4 = Object(1)
+    obj1 = Object(1, None, "Number 1", heartbeat=1)
+    obj2 = Object(2, None, "Number 2", heartbeat=0)
+    obj3 = Object(3, None, "Number 3", heartbeat=1)
+    obj4 = Object(4, None, "Number 4", heartbeat=1)
 
     # Simulate linking the objects
     obj1.next = obj2
@@ -822,10 +777,10 @@ def init_all():
 
     output_verbose("initializing objects...")
 
-    if instance_initall() == Status.FAILED:
+    if Instance.instance_initall() == Status.FAILED:
         return Status.FAILED
 
-    if loadshape_init_all() == Status.FAILED or Enduse.enduse_init_all() == Status.FAILED:
+    if loadshape_init_all() == Status.FAILED or Enduse().enduse_init_all() == Status.FAILED:
         return Status.FAILED
 
     global_init_sequence = "IS_DEFERRED"  # Set the initialization mode
@@ -846,7 +801,6 @@ def init_all():
 
     if rv == Status.FAILED:
         return Status.FAILED
-
     n_object_heartbeats = 0
     max_object_heartbeats = 0
     object_heartbeats = []
@@ -864,7 +818,9 @@ def init_all():
             object_heartbeats[n_object_heartbeats] = obj
             n_object_heartbeats += 1
 
-    return link_initall()
+    linked_object = Link(obj1.name)
+
+    return linked_object.link_init_all()
 
 # def precommit(t0):
 #     """
@@ -877,7 +833,7 @@ def init_all():
 
 # /**************************************************************************
 #  ** PRECOMMIT ITERATOR
-#  **************************************************************************/
+#  **************************************************************************
 def precommit_all(t0):
     """
     This function performs precommit operations on all objects that have a precommit method.
@@ -891,8 +847,8 @@ def precommit_all(t0):
     precommit_list = []
 
     if first:
-        for obj in object_get_all():
-            if obj.oclass.precommit is not None:
+        for obj in Object.object_get_all():
+            if obj.owner_class.precommit is not None:
                 item = SimpleLinkList(obj)
                 if item is None:
                     name = object_name(obj)[:63]
@@ -906,7 +862,7 @@ def precommit_all(t0):
         for item in precommit_list:
             obj = item.data
             if (obj.in_svc <= t0 and obj.out_svc >= t0) and (obj.in_svc_micro >= obj.out_svc_micro):
-                if object_precommit(obj, t0) == FAILED:
+                if Object.object_precommit(obj, t0) == FAILED:
                     name = object_name(obj)[:63]
                     output_error(f"object {name} precommit failed")
                     rv = FAILED
@@ -921,7 +877,7 @@ def precommit_all(t0):
 
 # /**************************************************************************
 #  ** COMMIT ITERATOR
-#  **************************************************************************/
+#  **************************************************************************
 def commit_init():
     """
     Initializes the commit_list and builds a list of objects that have a commit method.
@@ -932,10 +888,10 @@ def commit_init():
     n_commits = 0
     commit_list = [None, None]
 
-    for obj in object_get_all():
-        if obj.oclass.commit is not None:
+    for obj in Object.object_get_all():
+        if obj.owner_class.commit is not None:
             # Separate observers
-            pc = 1 if (obj.oclass.passconfig & PC_OBSERVER) == PC_OBSERVER else 0
+            pc = 1 if (obj.owner_class.passconfig & PASSCONFIG.PC_OBSERVER) == PASSCONFIG.PC_OBSERVER else 0
             item = SimpleLinkList(obj)
             if item is None:
                 raise Exception("commit_init memory allocation failure")
@@ -970,7 +926,7 @@ def commit_call(output, item, input):
     elif (t0 == obj.in_svc) and (obj.in_svc_micro != 0):
         t2 = obj.in_svc + 1
     elif obj.out_svc >= t0:
-        t2 = obj.oclass.commit(obj, t0)
+        t2 = obj.owner_class.commit(obj, t0)
     else:
         t2 = TS_NEVER
 
@@ -1053,7 +1009,7 @@ def commit_all_st(t0, t2):
                 if obj.in_svc == result:
                     result = obj.in_svc + 1
             elif obj.out_svc >= t0:
-                next_time = object_commit(obj, t0, t2)
+                next_time = Object.object_commit(obj, t0, t2)
                 if next_time == TS_INVALID:
                     name = object_name(obj, 64)
                     raise Exception(f"object {name} commit failed")
@@ -1103,13 +1059,13 @@ def commit_all(t0, t2):
                         (commit_get0, commit_call, commit_set, commit_compare, commit_gather, commit_reject),
                         (commit_get1, commit_call, commit_set, commit_compare, commit_gather, commit_reject),
                     ]
-                    mti[pc] = mti_init("commit", fns[pc], 8)
+                    mti[pc] = ThreadPool("commit", fns[pc], 8)
                     if mti[pc] is None:
                         output_warning("commit_all multi-threaded iterator initialization failed - using single-threaded iterator as fallback")
                         init_tried = True
 
                 # Attempt to run multithreaded iterator
-                if mti[pc] is not None and mti_run(output_data, mti[pc], input_data):
+                if mti[pc] is not None and mti[pc].run(output_data, mti[pc], input_data):
                     result = output_data[0]
 
                 # Resort to single threaded iterator (which handles both passes)
@@ -1141,8 +1097,6 @@ def tp_commit_all(t0, t2, threadpool):
         TIMESTAMP: The result timestamp.
     """
     result = TS_NEVER
-    item
-    pc
     global n_commits
 
     try:
@@ -1170,9 +1124,10 @@ def tp_commit_all(t0, t2, threadpool):
                             if obj.in_svc == inner_result:
                                 result = obj.in_svc + 1
                         elif obj.out_svc >= t0:
-                            next = object_commit(obj, t0, t2)
+                            next = Object.object_commit(obj, t0, t2)
                             if next == TS_INVALID:
-                                name = object_name(obj, name, sizeof(name) - 1)
+
+                                name = object_name(obj)
                                 raise Exception(f"object {name} commit failed")
                                 # TROUBLESHOOT: The commit function of the named object has failed. Make sure that the object's
                                 # requirements for committing are satisfied and try again. (likely internal state aberrations)
@@ -1193,7 +1148,11 @@ def tp_commit_all(t0, t2, threadpool):
 
 # /**************************************************************************
 #  ** FINALIZE ITERATOR
-#  **************************************************************************/
+#  **************************************************************************
+
+def SIMPLELINKLIST():
+    pass
+
 
 def finalize_all():
     """
@@ -1207,15 +1166,15 @@ def finalize_all():
     global finalize_list
 
     if first:
-        for obj in object_get_all():
-            if obj.oclass.finalize is not None:
+        for obj in Object.object_get_all():
+            if obj.owner_class.finalize is not None:
                 item = SIMPLELINKLIST()
                 try:
                     item.data = obj
                     item.next = finalize_list
                     finalize_list = item
                 except MemoryError:
-                    name = object_name(obj, name, sizeof(name) - 1)
+                    name = object_name(obj)
                     output_error(f"object {name} finalize memory allocation failed")
                     # TROUBLESHOOT: Insufficient memory remains to perform the finalize operation.
                     # Free up memory and try again.
@@ -1225,8 +1184,8 @@ def finalize_all():
     try:
         for item in finalize_list:
             obj = item.data
-            if object_finalize(obj) == FAILED:
-                name = object_name(obj, name, sizeof(name) - 1)
+            if Object.object_finalize(obj) == FAILED:
+                name = object_name(obj)
                 output_error(f"object {name} finalize failed")
                 # TROUBLESHOOT: The finalize function of the named object has failed. Make sure that the object's
                 # requirements for finalizing are satisfied and try again. (likely internal state aberrations)
@@ -1240,6 +1199,11 @@ def finalize_all():
         rv = FAILED
 
     return rv
+
+
+def sync_data():
+    pass
+
 
 
 
@@ -1256,10 +1220,10 @@ def t_sync_all(pass_config):
 
             for item in ranks[pass_index].ordinal[i].first:
                 obj = item.data
-                if exec_test(sync, pass_config, obj) == Status.FAILED:
+                if Exec.exec_test(sync, pass_config, obj) == Status.FAILED:
                     return Status.FAILED
 
-    st = transform_syncall(global_clock, TRANSFORMSOURCE(XS_DOUBLE | XS_COMPLEX | XS_ENDUSE), None)
+    st = Transform.transform_syncall(global_clock, TRANSFORMSOURCE.XS_DOUBLE or TRANSFORMSOURCE.XS_COMPLEX or TRANSFORMSOURCE.XS_ENDUSE, None)
     if st == TIMESTAMP.TS_INVALID:
         return Status.FAILED
 
@@ -1273,25 +1237,36 @@ def sync_heartbeats():
     t1 = TS_NEVER
     n = 0
     while n < n_object_heartbeats:
-        t2 = object_heartbeat(object_heartbeats[n])
+        t2 = Object.object_heartbeat(object_heartbeats[n])
         if absolute_timestamp(t2) < absolute_timestamp(t1):
             t1 = t2
         n += 1
     return -absolute_timestamp(t1) if t1 < TS_NEVER else TS_NEVER
 
 
+def loadshape_syncall(t1):
+    pass
+
+def randomvar_syncall(t1):
+    pass
+
+
+def enduse_syncall(t1):
+    pass
+
+
 def syncall_internals(t1):
-    h1 = link_syncall(t1)
-    h2 = instance_syncall(t1)
+    h1 = Link.link_syncall(t1)
+    h2 = Instance.instance_syncall(t1)
     s1 = randomvar_syncall(t1)
-    s2 = schedule_syncall(t1)
+    s2 = Schedule.schedule_syncall(t1)
     s3 = loadshape_syncall(t1)
-    s4 = transform_syncall(t1, TRANSFORMSOURCE.XS_SCHEDULE|TRANSFORMSOURCE.XS_LOADSHAPE, None)
+    s4 = Transform.transform_syncall(t1, TRANSFORMSOURCE.XS_SCHEDULE|TRANSFORMSOURCE.XS_LOADSHAPE, None)
     s5 = enduse_syncall(t1)
     s6 = sync_heartbeats()
 
-    se = absolute_timestamp(earliest_timestamp(s1, s2, s3, s4, s5, s6, TS_ZERO))
-    sa = earliest_timestamp(h1, h2, -se if se != TS_NEVER else TS_NEVER, TS_ZERO)
+    se = absolute_timestamp(earliest_timestamp(s1, s2, s3, s4, s5, s6, TIMESTAMP.TS_ZERO))
+    sa = earliest_timestamp(h1, h2, -se if se != TS_NEVER else TS_NEVER, TIMESTAMP.TS_ZERO)
 
     if global_minimum_timestep > 1 and absolute_timestamp(sa) > global_clock and sa < TS_NEVER:
         if sa > 0:
@@ -1514,7 +1489,7 @@ def slave_node_proc(args):
 
 # /*************************************
 #  * Script support
-#  *************************************/
+#  *************************************
 
 class SimpleList:
     def __init__(self, data, next_node=None):
@@ -1567,37 +1542,41 @@ def run_scripts(list_var):
     return 0
 
 
+def cpp_threadpool_thread_data(global_threadcount, threadpool):
+    pass
+
+
 class Exec:
     """
-	The main execution loop sets up the main simulation, initializes the
-	objects, and runs the simulation until it either settles to equilibrium
-	or runs into a problem.  It also takes care multicore/multiprocessor
-	parallelism when possible.  Objects of the same rank will be synchronized
-	simultaneously, resources permitting.
+    The main execution loop sets up the main simulation, initializes the
+    objects, and runs the simulation until it either settles to equilibrium
+    or runs into a problem.  It also takes care multicore/multiprocessor
+    parallelism when possible.  Objects of the same rank will be synchronized
+    simultaneously, resources permitting.
 
-	The main processing loop calls each object passing to it a TIMESTAMP
-	indicating the desired synchronization time.  The sync() call attempts to
-	advance the object's internal clock to the time indicated, and if successful it
-	returns the time of the next expected change in the object's state.  An
-	object state change is one which requires the equilibrium equations of
-	the object to be updated.  When an object's state changes, all the other
-	objects in the simulator are given an opportunity to consider the change
-	and possibly alter the time of their next state change.  The core
-	continues calling objects, advancing the global clock when
-	necessary, and continuing in this way until all objects indicate that
-	no further state changes are expected.  This is the equilibrium condition
-	and the simulation consequently ends.
+    The main processing loop calls each object passing to it a TIMESTAMP
+    indicating the desired synchronization time.  The sync() call attempts to
+    advance the object's internal clock to the time indicated, and if successful it
+    returns the time of the next expected change in the object's state.  An
+    object state change is one which requires the equilibrium equations of
+    the object to be updated.  When an object's state changes, all the other
+    objects in the simulator are given an opportunity to consider the change
+    and possibly alter the time of their next state change.  The core
+    continues calling objects, advancing the global clock when
+    necessary, and continuing in this way until all objects indicate that
+    no further state changes are expected.  This is the equilibrium condition
+    and the simulation consequently ends.
 
-	\section exec_sync Sync Event API
+    \section exec_sync Sync Event API
 
-	 Sync handling is done using an API implemented in #core_exec
-	 There are several types of sync events that are handled.
-	 - Hard sync is a sync time that should always be considered
-	 - Soft sync is a sync time should only be considered when
-	   the hard sync is not TS_NEVER
-	 - Status is SUCCESS if the sync time is valid
+     Sync handling is done using an API implemented in #core_exec
+     There are several types of sync events that are handled.
+     - Hard sync is a sync time that should always be considered
+     - Soft sync is a sync time should only be considered when
+       the hard sync is not TS_NEVER
+     - Status is SUCCESS if the sync time is valid
 
-	 Sync logic table:
+     Sync logic table:
         @verbatim
          hard t
 
@@ -1623,33 +1602,132 @@ class Exec:
         @endverbatim
 
     The Sync Event API functions are as follows:
-	- #exec_sync_reset is used to reset a sync event to initial steady state sync (NEVER)
-	- #exec_sync_merge is used to update an existing sync event with a new sync event
-	- #exec_sync_set is used to set a sync event
-	- #exec_sync_get is used to get a sync event
-	- #exec_sync_getevents is used to get the number of hard events in a sync event
-	- #exec_sync_getstatus is used to get the status of a sync event
-	- #exec_sync_ishard is used to determine whether a sync event is a hard event
-	- #exec_sync_isinvalid is used to determine whether a sync event is valid
-	- #exec_sync_isnever is used to determine whether a sync event is pending
+    - #exec_sync_reset is used to reset a sync event to initial steady state sync (NEVER)
+    - #exec_sync_merge is used to update an existing sync event with a new sync event
+    - #exec_sync_set is used to set a sync event
+    - #exec_sync_get is used to get a sync event
+    - #exec_sync_getevents is used to get the number of hard events in a sync event
+    - #exec_sync_getstatus is used to get the status of a sync event
+    - #exec_sync_ishard is used to determine whether a sync event is a hard event
+    - #exec_sync_isinvalid is used to determine whether a sync event is valid
+    - #exec_sync_isnever is used to determine whether a sync event is pending
 
-	@future [Chassin Oct'07]
+    @future [Chassin Oct'07]
 
-	There is some value in exploring whether it is necessary to update all
-	objects when a particular objects implements a state change.  The idea is
-	based on the fact that updates propagate through the model based on known
-	relations, such at the parent-child relation or the link-node relation.
-	Consequently, it should obvious that unless a value in a related object
-	has changed, there can be no significant change to an object that hasn't reached
-	it's declared update time.  Thus only the object that "won" the next update
-	time and those that are immediately related to it need be updated.  This
-	change could result in a very significant improvement in performance,
-	particularly in models with many lightly coupled objects.
+    There is some value in exploring whether it is necessary to update all
+    objects when a particular objects implements a state change.  The idea is
+    based on the fact that updates propagate through the model based on known
+    relations, such at the parent-child relation or the link-node relation.
+    Consequently, it should obvious that unless a value in a related object
+    has changed, there can be no significant change to an object that hasn't reached
+    it's declared update time.  Thus only the object that "won" the next update
+    time and those that are immediately related to it need be updated.  This
+    change could result in a very significant improvement in performance,
+    particularly in models with many lightly coupled objects.
 
     """
     def __init__(self):
-        self.self.init()
-    def init(self):
+        self.exec_init()
+        
+
+    def exec_add_create_script(self, file):
+        output_debug("adding create script '{}'".format(file))
+        return add_script(create_scripts, file)
+    
+
+    def exec_add_init_script(self, file):
+        output_debug("adding init script '%s'" % file)
+        return add_script(init_scripts, file)
+
+
+    def exec_add_script_export(self, name):
+        global script_exports
+        item = SimpleList(name)
+        if item.data is None:
+            return 0
+        item.next = script_exports
+        script_exports = item
+        return 1
+
+
+    def exec_add_sync_script(self, file):
+        output_debug("adding sync script '{}'".format(file))
+        return add_script(sync_scripts, file)
+
+
+    def exec_add_term_script(self, file):
+        output_debug("adding term script '%s'" % file)
+        return add_script(term_scripts, file)
+
+
+    @staticmethod
+    def exec_clock():
+        global initialized, nt1, nt2
+        if not initialized:
+            nt1 = time.time()
+            nt2 = nt1
+            initialized = True
+        else:
+            nt2 = time.time()
+        return int((nt2 - nt1) * 1000000)
+
+    def exec_clock_update_modules(self):
+        """
+        Update clock for modules.
+
+        This function updates the clock for all modules that have a 'clockupdate' function.
+
+        """
+        t1 = self.exec_sync_get(None)
+        ok = False
+
+        while not ok:
+            ok = True
+            for mod in Module().module_get_first():
+                if mod['clockupdate'] is not None:
+                    t2 = mod['clockupdate'](t1)
+                    if t2 < t1:
+                        t1 = t2
+                        ok = False
+
+        self.exec_sync_set(None, t1, False)
+
+    
+
+    def exec_get_exit_code(self) -> EXITCODE:
+        global global_exit_code
+        # Implement self.getexitcode logic here and return an EXITCODE
+        return global_exit_code
+
+    # def get_exit_code():
+    #     global global_exit_code
+    #     return global_exit_code
+
+    def exec_get_exit_code_str(self, xc: EXITCODE):
+        exit_code_strings = {
+            XC_SUCCESS: "ok",  # per system(3) 
+            XC_EXFAILED: "exec/wait failed",  # exec/wait failure - per system(3) 
+            XC_ARGERR: "bad command",  # error processing command line arguments 
+            XC_ENVERR: "environment startup/load failed",  # bad environment startup 
+            XC_TSTERR: "test failed",  # test failed 
+            XC_USRERR: "user rejected license terms",  # user reject terms of use
+            XC_RUNERR: "simulation failed",  # simulation did not complete as desired 
+            XC_INIERR: "initialization failed",  # initialization failed 
+            XC_PRCERR: "process control error",  # process control error 
+            XC_SVRKLL: "server killed",  # server killed 
+            XC_IOERR: "I/O error",  # I/O error 
+            XC_SHFAILED: "shell failed",  # shell failure - per system(3) 
+            XC_SIGNAL: "signal caught",  # signal caught - must be or'd with SIG value if known
+            XC_SIGINT: "interrupt received",  # SIGINT caught 
+            XC_EXCEPTION: "exception caught"  # exception caught
+        }
+        return exit_code_strings.get(xc, "unknown exception")
+
+    def exec_get_ranks(self):
+        return self.ranks
+
+    
+    def exec_init(self):
         global glpathlen, global_threadcount, global_starttime
         glpathlen = 0
 
@@ -1669,19 +1747,11 @@ class Exec:
             return 0
         return 1
 
-        pass
-
-    def sleep(self, usec):
-        if os.system == 'Windows':
-            time.sleep(usec / 1000000)
-        else:
-            time.sleep(usec / 1000000)
-
-    # /** MAIN LOOP CONTROL ******************************************************************/
+    # /** MAIN LOOP CONTROL ******************************************************************
 
     # MAIN LOOP
 
-    def mls_create(self):
+    def exec_mls_create(self):
         global mls_created
         mls_created = 1
 
@@ -1695,42 +1765,34 @@ class Exec:
         if rv != 0:
             output_error("error with pthread_cond_init() in self.mls_init()")
 
-    def mls_init(self):
+    def exec_mls_done(self):
+        # def mls_done():
+        #     global global_mainloopstate
+        #     sched_update(global_clock, global_mainloopstate=MLS_DONE)
+        #     pthread_mutex_destroy(mls_svr_lock)
+        #     pthread_cond_destroy(mls_svr_signal)
+        global global_clock, global_mainloopstate
+        global_mainloopstate = MAINLOOPSTATE.MLS_DONE
+        Schedule.sched_update(global_clock, global_mainloopstate)
+        #     sched_update(global_clock,global_mainloopstate=MLS_DONE);
+        #     pthread_mutex_destroy(&mls_svr_lock);
+        #     pthread_cond_destroy(&mls_svr_signal);
+        mls_svr_lock = threading.Lock()
+        mls_svr_lock.acquire()
+        mls_svr_lock.release()
+        mls_svr_signal = threading.Condition()
+        mls_svr_signal.acquire()
+        mls_svr_signal.release()
+
+    def exec_mls_init(self):
         if mls_created == 0:
-            self.mls_create()
-        if global_mainloopstate == MLS_PAUSED:
-            self.mls_suspend()
+            self.exec_mls_create()
+        if global_mainloopstate == MAINLOOPSTATE.MLS_PAUSED:
+            self.exec_mls_suspend()
         else:
-            sched_update(global_clock, global_mainloopstate)
+            Schedule.sched_update(global_clock, global_mainloopstate)
 
-    def mls_suspend(self):
-        global global_multirun_mode, global_environment, global_mainlooppauseat
-        loopctr = 10
-        rv = 0
-        output_debug("pausing simulation")
-
-        if global_multirun_mode == MRM_STANDALONE and global_environment != "server":
-            output_warning("suspending simulation with no server/multirun active to control mainloop state")
-
-        output_debug(f"lock_ ({mls_svr_lock} -> {mls_svr_lock})")
-        with mls_svr_lock:
-            output_debug("sched update_")
-            sched_update(global_clock, global_mainloopstate=MLS_PAUSED)
-            output_debug("wait loop_")
-
-            while global_clock == TS_ZERO or (
-                    global_clock >= global_mainlooppauseat and global_mainlooppauseat < TS_NEVER):
-                if loopctr > 0:
-                    output_debug(f" * tick ({loopctr})")
-                    loopctr -= 1
-                mls_svr_signal.wait()
-
-            output_debug("sched update_")
-            sched_update(global_clock, global_mainloopstate=MLS_RUNNING)
-            output_debug("unlock_")
-
-
-    def mls_resume(self, timestamp):
+    def exec_mls_resume(self, timestamp):
 
         # mls_svr_lock = threading.Lock()
         # mls_svr_signal = threading.Condition()
@@ -1745,18 +1807,18 @@ class Exec:
         #     mls_svr_signal.notifyAll()
 
         rv = 0
-        rv = pthread_mutex_lock(mls_svr_lock)
+        rv = Instance.pthread_mutex_lock(mls_svr_lock)
         if rv != 0:
-            output_error("error in pthread_mutex_lock() in self.mls_resume() (error %i)", rv)
+            output_error("error in Instance.pthread_mutex_lock() in self.mls_resume() (error %i)", rv)
         global_mainlooppauseat = timestamp
-        rv = pthread_mutex_unlock(mls_svr_lock)
+        rv = Instance.pthread_mutex_unlock(mls_svr_lock)
         if rv != 0:
-            output_error("error in pthread_mutex_unlock() in self.mls_resume()")
-        rv = pthread_cond_broadcast(mls_svr_signal)
+            output_error("error in Instance.pthread_mutex_unlock() in self.mls_resume()")
+        rv = Instance.pthread_cond_broadcast(mls_svr_signal)
         if rv != 0:
-            output_error("error in pthread_cond_broadcast() in self.mls_resume()")
+            output_error("error in Instance.pthread_cond_broadcast() in self.mls_resume()")
 
-    def mls_statewait(states):
+    def exec_mls_statewait(states):
         # mls_svr_lock = threading.Lock()
         # mls_svr_signal = threading.Condition()
         #
@@ -1771,254 +1833,134 @@ class Exec:
             mls_svr_signal.wait()
         mls_svr_lock.release()
 
-    def mls_done(self):
-        # def mls_done():
-        #     global global_mainloopstate
-        #     sched_update(global_clock, global_mainloopstate=MLS_DONE)
-        #     pthread_mutex_destroy(mls_svr_lock)
-        #     pthread_cond_destroy(mls_svr_signal)
-        global global_clock, global_mainloopstate
-        global_mainloopstate = MLS_DONE
-        sched_update(global_clock, global_mainloopstate)
-        # 	sched_update(global_clock,global_mainloopstate=MLS_DONE);
-        # 	pthread_mutex_destroy(&mls_svr_lock);
-        # 	pthread_cond_destroy(&mls_svr_signal);
-        mls_svr_lock = threading.Lock()
-        mls_svr_lock.acquire()
-        mls_svr_lock.release()
-        mls_svr_signal = threading.Condition()
-        mls_svr_signal.acquire()
-        mls_svr_signal.release()
 
-    # /******************************************************************
-    #  SYNC HANDLING API
-    #  *******************************************************************/
-    main_sync = {TS_NEVER, 0, SUCCESS}
+    def exec_mls_suspend(self):
+        global global_multirun_mode, global_environment, global_mainlooppauseat
+        loopctr = 10
+        rv = 0
+        output_debug("pausing simulation")
 
-    def sync_reset(self, d):
-        # /** Reset the sync time data structure
-        #
-        # 	This call clears the sync data structure
-        # 	and prepares it for a new interation pass.
-        # 	If no sync event are posted, the result of
-        # 	the pass will be a successful soft NEVER,
-        # 	which usually means the simulation stops at
-        # 	steady state.
-        #  **/
-        if d is None:
-            d = main_sync
-        d.step_to = TS_NEVER
-        d.hard_event = 0
-        d.status = SUCCESS
+        if global_multirun_mode == MULTIRUNMODE.MRM_STANDALONE and global_environment != "server":
+            output_warning("suspending simulation with no server/multirun active to control mainloop state")
 
-    def sync_merge(self,
-                        to_data,  # < sync data to merge to (nullptr to update main)
-                        from_data  # < sync data to merge from
-                        ):
-        # /** Merge the sync data structure
-        #
-        #     This call posts a new sync event \p to into
-        # 	an existing sync data structure \p from.
-        # 	If \p to is \p nullptr, then the main exec sync
-        # 	event is updated.  If the status of \p from
-        # 	is \p FAILED, then the \p to sync time is
-        # 	set to \p TS_INVALID.  If the time of \p from
-        # 	is \p TS_NEVER, then \p to is not updated.  In
-        # 	all other cases, the \p to sync time is updated
-        # 	with #self.sync_set.
-        #
-        # 	@see #self.sync_set
-        #  **/
-        main_sync = "some_value"  # Assuming 'main_sync' is of some specific type
-        if to_data is None:
-            to_data = main_sync
-        if from_data is None:
-            from_data = main_sync
-        if from_data == to_data:
-            return
-        if self.sync_isinvalid(from_data):
-            self.sync_set(to_data, TS_INVALID, False)
-        elif self.sync_isnever(from_data):
-            pass
-        elif self.sync_ishard(from_data):
-            self.sync_set(to_data, self.sync_get(from_data), False)
-        else:
-            self.sync_set(to_data, -self.sync_get(from_data), False)
+        output_debug(f"lock_ ({mls_svr_lock} -> {mls_svr_lock})")
+        with mls_svr_lock:
+            output_debug("sched update_")
+            Schedule.sched_update(global_clock, global_mainloopstate=MAINLOOPSTATE.MLS_PAUSED)
+            output_debug("wait loop_")
 
-    def sync_set(self, d, t, deltaflag):
+            while global_clock == TIMESTAMP.TS_ZERO or (
+                    global_clock >= global_mainlooppauseat and global_mainlooppauseat < TS_NEVER):
+                if loopctr > 0:
+                    output_debug(f" * tick ({loopctr})")
+                    loopctr -= 1
+                mls_svr_signal.wait()
+
+            output_debug("sched update_")
+            Schedule.sched_update(global_clock, global_mainloopstate=MAINLOOPSTATE.MLS_RUNNING)
+            output_debug("unlock_")
+
+    def exec_run_create_scripts(self, ):
+        return run_scripts(create_scripts)
+
+    def exec_run_init_scripts(self, ):
+        return run_scripts(init_scripts)
+
+    def exec_run_sync_scripts(self, ):
+        return run_scripts(sync_scripts)
+
+    def exec_run_term_scripts(self, ):
+        return run_scripts(term_scripts)
+
+
+    def exec_set_exit_code(self, code: EXITCODE) -> EXITCODE:
+        global global_exit_code
+        # Implement self.setexitcode logic here and return an EXITCODE
+        oldxc = global_exit_code
+        if oldxc != XC_SUCCESS:
+            output_warning("new exitcode %d overwrites existing exitcode %d", code, oldxc)
+        global_exit_code = code
+        output_debug("exit code %d", code)
+        return oldxc
+
+    #
+    # def set_exit_code(self, xc):
+    #     global global_exit_code
+    #     old_xc = global_exit_code
+    #     if old_xc != XC_SUCCESS:
+    #         output_warning("new exitcode %d overwrites existing exitcode %d" % (xc, old_xc))
+    #     global_exit_code = xc
+    #     output_debug("exit code %d" % xc)
+    #     return old_xc
+
+    def exec_slave_node(self):
         """
-        Update the sync data structure.
+        # Define global variables
+        global_slave_port = 12345
+        node_done = False
+        sockfd = -1
 
-        This function posts a new time to a sync event.
-        If the event is None, then the main sync event is updated.
-        If the new time is TS_NEVER, then the event is not updated.
-        If the new time is TS_INVALID, then the event status is changed to FAILED.
-        If the new time is not between -TS_MAX and TS_MAX, then an exception is thrown.
-        If the event time is TS_NEVER, then if the time is positive, a hard event is posted;
-        if the time is negative, a soft event is posted; otherwise, the event status is changed to FAILED.
-        Otherwise, if the event is hard, then the hard event count is incremented, and if the time is earlier, it is posted.
-        Otherwise, if the event is soft, then if the time is earlier, it is posted.
-        Otherwise, the event status is changed to FAILED.
-
-        :param d: The sync data to update (None to update main).
-        :param t: The timestamp to update with (negative time means a soft event, 0 means failure).
-        :param deltaflag: A flag to indicate if this was a deltamode exit - force it forward, otherwise, it can fail to exit.
-        :return: None
+        # Run self.slave_node
+        self.slave_node()
+        :return:
         """
-        if d is None:
-            d = main_sync
+        global node_done, global_slave_port, sockfd
 
-        if t == TS_NEVER:
-            return  # Nothing to do
-        if t == TS_INVALID:
-            d['status'] = FAILED
-            return
+        node_done = False
+        sockfd = -1
 
-        if t <= -TS_MAX or t > TS_MAX:
-            raise Exception(f"Timestamp is not valid: {t}")
+        inaddrsz = 16  # Size of sockaddr_in in bytes
 
-        if d['step_to'] == TS_NEVER:
-            if 0 < t < TS_NEVER:
-                d['step_to'] = t
-                d['hard_event'] += 1
-            elif t < 0:
-                d['step_to'] = -t
+        try:
+            # Initialize socket (Windows-specific)
+            if hasattr(socket, 'AF_INET'):
+                sockfd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             else:
-                d['status'] = FAILED
-        elif t > 0:  # Hard event
-            d['hard_event'] += 1
-            if not deltaflag:
-                if d['step_to'] > t:
-                    d['step_to'] = t
-            else:  # Deltamode exit - override
-                d['step_to'] = t
-        elif t < 0:  # Soft event
-            if d['step_to'] > -t:
-                d['step_to'] = -t
-        else:  # t == 0 -> invalid
-            d['status'] = FAILED
+                sockfd = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
 
-    def sync_get(self, d):
-        """
-        Get the current sync time.
+            # Bind to global_slave_port
+            server_addr = ('', global_slave_port)
+            sockfd.bind(server_addr)
+            sockfd.listen(5)
+            print(f"self.slave_node(): listening on port {global_slave_port}")
 
-        :param d: Sync data to get sync time from (None to read main).
-        :return: The proper (positive) event sync time, TS_NEVER, or TS_INVALID.
-        """
-        if d is None:
-            d = main_sync
+            while not node_done:
+                # Wait for connection
+                reader_fdset = [sockfd]
+                rlist, _, _ = select.select(reader_fdset, [], [], 3)
 
-        if self.sync_isnever(d):
-            return TS_NEVER
-        if self.sync_isinvalid(d):
-            return TS_INVALID
+                if sockfd in rlist:
+                    inaddr = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    inaddr.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                    inaddr.bind(server_addr)
+                    inaddr.listen(1)
+                    print("esn(): accepted client")
 
-        return absolute_timestamp(d['step_to'])
+                    conn, _ = inaddr.accept()
+                    print("esn(): accepted client")
 
-    # def sync_get(sync_data):
-    #     main_sync = "some_value"  # Assuming 'main_sync' is of some specific type
-    #     if sync_data is None:
-    #         sync_data = main_sync
-    #     if self.sync_is_never(sync_data):
-    #         return TS_NEVER
-    #     if self.sync_is_invalid(sync_data):
-    #         return TS_INVALID
-    #     return absolute_timestamp(sync_data.step_to)
+                    # Thread off connection
+                    args = [node_done, sockfd, inaddr, conn]
+                    slave_thread = threading.Thread(target=slave_node_proc, args=(args,))
+                    slave_thread.daemon = True
+                    slave_thread.start()
 
-    def sync_getevents(self, d):
-        """
-        Get the current hard event count.
+        except Exception as e:
+            print(f"self.slave_node() error: {e}")
+            node_done = True
+            if sockfd != -1:
+                sockfd.close()
+            return
 
-        :param d: Sync data to get sync events from (None to read main).
-        :return: The number of hard events associated with this sync event.
-        """
-        if d is None:
-            d = main_sync
-
-        return d['hard_event']
-
-    def sync_ishard(self, d):
-        """
-        Determine whether the current sync data is a hard sync.
-
-        :param d: Sync data to read hard sync status from (None to read main).
-        :return: Non-zero if the event is a hard event, 0 if the event is a soft event.
-        """
-        if d is None:
-            d = main_sync
-
-        return d['hard_event'] > 0
-
-    def sync_isnever(self, d):
-        """
-        Determine whether the current sync data time is never.
-
-        :param d: Sync data to read never sync status from (None to read main).
-        :return: Non-zero if the event is NEVER, 0 otherwise.
-        """
-        if d is None:
-            d = main_sync
-
-        return d['step_to'] == TS_NEVER
-
-    def sync_isinvalid(self, d):
-        """
-        Determine whether the current sync time is invalid.
-
-        :param d: Sync data to read invalid sync status from.
-        :return: Non-zero if the status if FAILED, 0 otherwise.
-        """
-        if d is None:
-            d = main_sync
-
-        return self.sync_getstatus(d) == FAILED
-
-    def sync_getstatus(self, d):
-        """
-        Determine the current sync status.
-
-        :param d: Sync data to read sync status from (None to read main).
-        :return: The event status (SUCCESS or FAILED).
-        """
-        if d is None:
-            d = main_sync
-
-        return d['status']
-
-    def sync_isrunning(self, d):
-        """
-        Determine whether sync time is a running simulation.
-
-        :param d: Sync data to determine if the simulation is running (None to read main).
-        :return: True if the simulation should keep going, False if it should stop.
-        """
-        global global_stoptime
-        return self.sync_get(d) <= global_stoptime and not self.sync_isnever(d) and self.sync_ishard(d)
-
-    def clock_update_modules(self):
-        """
-        Update clock for modules.
-
-        This function updates the clock for all modules that have a 'clockupdate' function.
-
-        """
-        t1 = self.sync_get(None)
-        ok = False
-
-        while not ok:
-            ok = True
-            for mod in module_get_first():
-                if mod['clockupdate'] is not None:
-                    t2 = mod['clockupdate'](t1)
-                    if t2 < t1:
-                        t1 = t2
-                        ok = False
-
-        self.sync_set(None, t1, False)
+    def exec_sleep(self, usec):
+        if os.system == 'Windows':
+            time.sleep(usec / 1000000)
+        else:
+            time.sleep(usec / 1000000)
 
     # /******************************************************************
     #  *  MAIN EXEC LOOP
-    #  ******************************************************************/
+    #  ******************************************************************
 
     def exec_start(self):
         """
@@ -2033,7 +1975,7 @@ class Exec:
         global global_realtime_metric, global_run_realtime, global_runaway_time, global_runchecks, global_show_progress
         global global_simulation_mode, global_starttime, global_stoptime, global_test_mode, global_threadcount
 
-        threadpool = cpp_threadpool(global_threadcount)
+        threadpool = ThreadPool(num_threads=global_threadcount)
         passes = 0
         tsteps = 0
         ptc_rv = 0  # unused
@@ -2058,12 +2000,12 @@ class Exec:
         iObjRankList = 0
 
         # run create scripts, if any
-        if self.run_createscripts() != XC_SUCCESS:
+        if self.exec_run_create_scripts() != XC_SUCCESS:
             output_error("create script(s) failed")
             return FAILED
 
         # initialize the main loop state control
-        self.mls_init()
+        self.exec_mls_init()
 
         # perform object initialization
         if init_all() == FAILED:
@@ -2077,7 +2019,7 @@ class Exec:
 
         # run checks
         if global_runchecks:
-            return Status(module_checkall())
+            return Status(Module().module_check_all())
 
         # compile only check
         if global_compile_only:
@@ -2115,7 +2057,7 @@ class Exec:
             output_message("GridLAB-D entering debug mode")
 
         # run init scripts, if any
-        if self.run_initscripts() != XC_SUCCESS:
+        if self.exec_run_init_scripts() != XC_SUCCESS:
             output_error("init script(s) failed")
             return FAILED
 
@@ -2131,24 +2073,24 @@ class Exec:
                 global_stoptime = TS_NEVER
 
         # GET FIRST SIGNAL FROM MASTER HERE
-        if global_multirun_mode == MRM_SLAVE:
-            pthread_cond_broadcast(mls_inst_signal)
-            output_debug("self.start(), slave waiting for first time signal")
-            pthread_mutex_lock(mls_inst_lock)
-            pthread_cond_wait(mls_inst_signal, mls_inst_lock)
-            pthread_mutex_unlock(mls_inst_lock)
+        if global_multirun_mode == MULTIRUNMODE.MRM_SLAVE:
+            Instance.pthread_cond_broadcast(mls_inst_signal)
+            print("self.start(), slave waiting for first time signal")
+            Instance.pthread_mutex_lock(mls_inst_lock)
+            Instance.pthread_cond_wait(mls_inst_signal, mls_inst_lock)
+            Instance.pthread_mutex_unlock(mls_inst_lock)
             # will have copied data down and updated step_to with slave_cache
             # global_clock = self.sync_get(None) # copy time signal to gc
-            output_debug(f"self.start(), slave received first time signal of {global_clock}")
+            print(f"self.start(), slave received first time signal of {global_clock}")
 
         iteration_counter = global_iteration_limit
         federation_iteration_counter = global_iteration_limit
 
         # reset sync event
-        self.sync_reset(None)
-        self.sync_set(None, global_clock, False)
+        self.exec_sync_reset(None)
+        self.exec_sync_set(None, global_clock, False)
         if global_stoptime < TS_NEVER:
-            self.sync_set(None, global_stoptime + 1, False)
+            self.exec_sync_set(None, global_stoptime + 1, False)
 
         # signal handler
         self.sighandler = SIGNALS.SIGABRT
@@ -2156,6 +2098,7 @@ class Exec:
         self.sighandler = SIGNALS.SIGTERM
 
         # initialize delta mode
+        from gridlab.gldcore.DeltaMode import delta_init
         if not delta_init():
             output_error("delta mode initialization failed")
 
@@ -2188,31 +2131,32 @@ class Exec:
             return test_exec()
 
         # check for a model
-        if object_get_count() == 0:
+        if Object.object_get_count() == 0:
             # no object -> nothing to do
             return SUCCESS
 
         # sjin: GetMachineCycleCount
-        cstart = self.clock()
+        cstart = self.exec_clock()
         try:
             # main loop runs for iteration limit, or when nothing futher occurs (ignoring soft events)
             while (
                     iteration_counter > 0
-                    and self.sync_isrunning(None)
-                    and self.getexitcode() == XC_SUCCESS
+                    and self.exec_sync_isrunning(None)
+                    and self.exec_get_exit_code() == XC_SUCCESS
             ):
                 internal_synctime = 0
 
                 output_debug(
                     "*** main loop event at {}; stoptime={}, n_events={}, exitcode={} ***".format(
-                        self.sync_get(None), global_stoptime, self.sync_getevents(None), self.getexitcode()
+                        self.exec_sync_get(None), global_stoptime, self.exec_sync_getevents(None),
+                        self.exec_get_exit_code()
                     )
                 )
 
                 Sched.sched_update(global_clock, MAINLOOPSTATE.MLS_RUNNING)
 
                 if global_clock >= global_mainlooppauseat and global_mainlooppauseat < TS_NEVER:
-                    self.mls_suspend()
+                    self.exec_mls_suspend()
 
                 do_checkpoint()
                 # /* realtime control of global clock */
@@ -2235,7 +2179,7 @@ class Exec:
                     # if (system_clock::now() < t2)
                     if time.time() < t2:
                         print("waiting {} nsec".format(int((t2 - time.time()) * 1e9)))
-                        simulate_sleep((t2 - time.time()) * 1e9)
+                        time.sleep((t2 - time.time()) * 1e9)
                         global_clock += global_run_realtime
                         metric = (t2 - t1) / 1.0
                         fall_behind = 0
@@ -2248,44 +2192,45 @@ class Exec:
 
                     IIR = 0.9
                     global_realtime_metric = global_realtime_metric * IIR + metric * (1 - IIR)
-                    self.sync_reset(None)
-                    self.sync_set(None, global_clock, False)
+                    self.exec_sync_reset(None)
+                    self.exec_sync_set(None, global_clock, False)
                     print("realtime clock advancing to {}".format(int(global_clock)))
 
                 else:
-                    global_clock = self.sync_get(None)
+                    global_clock = self.exec_sync_get(None)
 
                 global_deltaclock = 0
                 global_delta_curr_clock = float(global_clock)
-                flags = DMF_NONE
+                flags = DELTAMODEFLAGS.DMF_NONE
+                from gridlab.gldcore.DeltaMode import delta_modedesired
                 delta_dt = delta_modedesired(flags)
                 t = TS_NEVER
                 print("delta_dt is {}".format(int(delta_dt)))
 
                 if delta_dt == DT_INFINITY:
-                    global_simulation_mode = SM_EVENT
+                    global_simulation_mode = SIMULATIONMODE.SM_EVENT
                     t = TS_NEVER
                 elif delta_dt == DT_INVALID:
-                    global_simulation_mode = SM_ERROR
+                    global_simulation_mode = SIMULATIONMODE.SM_ERROR
                     t = TS_INVALID
                 else:
                     if global_minimum_timestep > 1:
-                        global_simulation_mode = SM_ERROR
+                        global_simulation_mode = SIMULATIONMODE.SM_ERROR
                         print("minimum_timestep must be 1 second to operate in deltamode")
                         t = TS_INVALID
                     else:
                         if delta_dt == 0:
-                            global_simulation_mode = SM_DELTA
+                            global_simulation_mode = SIMULATIONMODE.SM_DELTA
                             t = global_clock
                         else:
-                            global_simulation_mode = SM_EVENT
+                            global_simulation_mode = SIMULATIONMODE.SM_EVENT
                             t = global_clock + delta_dt
 
-                if global_simulation_mode == SM_ERROR:
+                if global_simulation_mode == SIMULATIONMODE.SM_ERROR:
                     print("a simulation mode error has occurred")
                     break
 
-                self.sync_set(None, t, False)
+                self.exec_sync_set(None, t, False)
                 if global_clock < 0:
                     raise Exception("clock time is negative (global_clock={})".format(global_clock))
                 else:
@@ -2293,10 +2238,10 @@ class Exec:
                     output_debug("global_clock -> {}".format(dt))
 
                 output_set_time_context(global_clock)
-                self.sync_reset(None)
+                self.exec_sync_reset(None)
 
                 if global_clock <= global_stoptime and global_stoptime != TS_NEVER:
-                    self.sync_set(None, global_stoptime + 1, False)
+                    self.exec_sync_set(None, global_stoptime + 1, False)
 
                 internal_synctime = syncall_internals(global_clock)
                 if (
@@ -2308,7 +2253,7 @@ class Exec:
                         "An internal property such as schedule, enduse, or loadshape has failed to synchronize and the simulation aborted."
                     )
 
-                self.sync_set(None, internal_synctime, False)
+                self.exec_sync_set(None, internal_synctime, False)
 
                 if not global_debug_mode:
                     for j in range(thread_data.count):
@@ -2388,23 +2333,23 @@ class Exec:
 
                             i += PASSINC(pass_)
 
-                        st = transform_syncall(
+                        st = Transform.transform_syncall(
                             global_clock,
-                            TRANSFORMSOURCE(XS_DOUBLE | XS_COMPLEX | XS_ENDUSE),
+                            TRANSFORMSOURCE.XS_DOUBLE or TRANSFORMSOURCE.XS_COMPLEX or TRANSFORMSOURCE.XS_ENDUSE,
                             None,
                         )
-                        self.sync_set(None, st, False)
+                        self.exec_sync_set(None, st, False)
 
                     if not global_debug_mode:
                         for j in range(thread_data.count):
                             if thread_data.data[j].status == FAILED:
-                                self.sync_set(None, TS_INVALID, False)
+                                self.exec_sync_set(None, TS_INVALID, False)
                                 raise Exception("synchronization failed")
 
                     passes += 1
 
-                    if global_multirun_mode == MRM_SLAVE:
-                        output_debug("step_to =", self.sync_get(None))
+                    if global_multirun_mode == MULTIRUNMODE.MRM_SLAVE:
+                        output_debug("step_to =", self.exec_sync_get(None))
                         output_debug("self.start(), slave waiting for looped time signal")
 
                         mls_inst_signal.broadcast()
@@ -2413,81 +2358,84 @@ class Exec:
                         mls_inst_signal.wait()
                         mls_inst_lock.release()
 
-                        output_debug("self.start(), slave received looped time signal ({})".format(self.sync_get(None)))
+                        output_debug(
+                            "self.start(), slave received looped time signal ({})".format(self.exec_sync_get(None)))
 
-                    if self.run_syncscripts() != XC_SUCCESS:
+                    if self.exec_run_sync_scripts() != XC_SUCCESS:
                         output_error("sync script(s) failed")
                         raise Exception("script synchronization failure")
 
-                    if self.sync_get(None) != global_clock and global_simulation_mode == SM_EVENT:
-                        self.clock_update_modules()
-                        if self.sync_get(None) > global_clock:
+                    if self.exec_sync_get(None) != global_clock and global_simulation_mode == SIMULATIONMODE.SM_EVENT:
+                        self.exec_clock_update_modules()
+                        if self.exec_sync_get(None) > global_clock:
                             global_federation_reiteration = False
-                            commit_time = commit_all(global_clock, self.sync_get(None))
+                            commit_time = commit_all(global_clock, self.exec_sync_get(None))
                             if absolute_timestamp(commit_time) <= global_clock:
                                 output_error("model commit failed")
-                                self.sync_set(None, TS_INVALID, False)
+                                self.exec_sync_set(None, TS_INVALID, False)
                                 raise Exception("commit failure")
-                            elif absolute_timestamp(commit_time) < self.sync_get(None):
-                                self.sync_set(None, commit_time, False)
+                            elif absolute_timestamp(commit_time) < self.exec_sync_get(None):
+                                self.exec_sync_set(None, commit_time, False)
                             iteration_counter = global_iteration_limit
                             federation_iteration_counter = global_iteration_limit
                             tsteps += 1
-                        elif self.sync_get(None) == global_clock:
+                        elif self.exec_sync_get(None) == global_clock:
                             iteration_counter = global_iteration_limit
                             global_federation_reiteration = True
                             if federation_iteration_counter == 0:
                                 output_error(
                                     "federation convergence iteration limit reached at {} (exec)".format(simtime()))
-                                self.sync_set(None, TS_INVALID, False)
+                                self.exec_sync_set(None, TS_INVALID, False)
                                 raise Exception("convergence failure")
                     elif iteration_counter == 0:
                         iteration_counter -= 1
                         output_error("convergence iteration limit reached at {} (exec)".format(simtime()))
-                        self.sync_set(None, TS_INVALID, False)
+                        self.exec_sync_set(None, TS_INVALID, False)
                         raise Exception("convergence failure")
-                    if global_simulation_mode == SM_DELTA and self.sync_get(None) >= global_clock:
+                    if global_simulation_mode == SIMULATIONMODE.SM_DELTA and self.exec_sync_get(None) >= global_clock:
+                        from gridlab.gldcore.DeltaMode import delta_update
                         deltatime = delta_update()
                         if deltatime == DT_INVALID:
                             print("delta_update() failed, deltamode operation cannot continue")
-                            global_simulation_mode = SM_ERROR
-                            self.sync_set(None, TS_INVALID, False)
+                            global_simulation_mode = SIMULATIONMODE.SM_ERROR
+                            self.exec_sync_set(None, TS_INVALID, False)
                             raise Exception("Deltamode simulation failure")
                         elif deltatime > 0:
                             iteration_counter = global_iteration_limit
                             federation_iteration_counter = global_iteration_limit
-                        self.sync_set(None, global_clock + deltatime, True)
-                        global_simulation_mode = SM_EVENT
+                        self.exec_sync_set(None, global_clock + deltatime, True)
+                        global_simulation_mode = SIMULATIONMODE.SM_EVENT
 
             signal(SIGINT, None)
 
-            if self.sync_isnever(None):
+            if self.exec_sync_isnever(None):
                 buffer = [0] * 64
                 if convert_from_timestamp(global_clock, buffer, 64):
                     print("simulation at steady state at {}".format(buffer))
-            self.mls_done()
+            self.exec_mls_done()
         except Exception as e:
             output_error("exec halted:", str(e))
-            self.sync_set(None, TS_INVALID, False)
-            # 		/* TROUBLESHOOT
-            # 			This indicates that the core's solver shut down.  This message
-            # 			is usually preceded by more detailed messages.  Follow the guidance
-            # 			for those messages and try again.
-            # 		 */
+            self.exec_sync_set(None, TS_INVALID, False)
+            #         /* TROUBLESHOOT
+            #             This indicates that the core's solver shut down.  This message
+            #             is usually preceded by more detailed messages.  Follow the guidance
+            #             for those messages and try again.
+            #          */
         # sjin: GetMachineCycleCount
-        output_debug("*** main loop ended at %lli; stoptime=%lli, n_events=%i, exitcode=%i ***", self.sync_get(nullptr),
-                     global_stoptime, self.sync_getevents(nullptr), self.getexitcode());
-        if global_multirun_mode == MRM_MASTER:
-            instance_master_done(TS_NEVER)  # tell everyone to pack up and go home
+        output_debug("*** main loop ended at %lli; stoptime=%lli, n_events=%i, exitcode=%i ***",
+                     self.exec_sync_get(None), global_stoptime, self.exec_sync_getevents(None),
+                     self.exec_get_exit_code())
+        if global_multirun_mode == MULTIRUNMODE.MRM_MASTER:
+            Instance.instance_master_done(TS_NEVER)  # tell everyone to pack up and go home
 
-        cend = self.clock()
+        cend = self.exec_clock()
 
         fnl_rv = finalize_all()
         if FAILED == fnl_rv:
             output_error("finalize_all() failed")
 
         # run term scripts, if any
-        if self.run_termscripts() != XC_SUCCESS:
+        if self.exec_run_term_scripts() != XC_SUCCESS:
             output_error("term script(s) failed")
             return FAILED
 
@@ -2496,11 +2444,11 @@ class Exec:
             thread_data = None
 
         # report performance
-        if global_profiler and not self.sync_isinvalid(None):
-            elapsed_sim = timestamp_to_hours(global_clock) - timestamp_to_hours(global_starttime)
-            elapsed_wall = double(realtime_now() - started_at + 1)
+        if global_profiler and not self.exec_sync_isinvalid(None):
+            elapsed_sim = TimeStamp.from_timestamp(global_clock) - TimeStamp.from_timestamp(global_starttime)
+            elapsed_wall = float(realtime_now() - started_at + 1)
             sync_time = 0
-            sim_speed = object_get_count() / 1000.0 * elapsed_sim / elapsed_wall
+            sim_speed = Object.object_get_count() / 1000.0 * elapsed_sim / elapsed_wall
             # Assuming these are global variables in your Python code
             loader_time = 0
             instance_synctime = 0
@@ -2511,7 +2459,6 @@ class Exec:
             transform_synctime = 0
 
             # Initialize class and delta profile
-            cl = MyClass()
             dp = delta_getprofile()
 
             delta_runtime = 0
@@ -2522,7 +2469,7 @@ class Exec:
 
             # Calculate sync time
             sync_time = 0
-            for cl in class_get_first_class():
+            for cl in ClassRegistry._classes[0].class_get_first_class():
                 sync_time += float(cl.profiler.clocks) / global_ms_per_second
             sync_time /= global_threadcount
 
@@ -2543,7 +2490,7 @@ class Exec:
 
             output_profile("\nCore profiler results")
             output_profile("======================\n")
-            output_profile("Total objects           %8d objects", object_get_count())
+            output_profile("Total objects           %8d objects", Object.object_get_count())
             output_profile("Parallelism             %8d thread%s", global_threadcount,
                            "s" if global_threadcount > 1 else "")
             output_profile("Total time              %8.1f seconds", elapsed_wall)
@@ -2612,72 +2559,221 @@ class Exec:
                 output_profile("Total deltamode runtime %8.1lf s (100%%)", delta_runtime)
                 output_profile("Simulation rate         %8.1lf x realtime", delta_simtime / delta_runtime / 1000)
 
-        sched_update(global_clock, MLS_DONE)
+        Schedule.sched_update(global_clock, MAINLOOPSTATE.MLS_DONE)
 
         # terminate links
         del threadpool
-        return self.sync_getstatus(None)
+        return self.exec_sync_getstatus(None)
 
-    def slave_node(self):
+    # /******************************************************************
+    #  SYNC HANDLING API
+    #  *******************************************************************
+
+
+    def exec_sync_reset(self, d):
+        # /** Reset the sync time data structure
+        #
+        #     This call clears the sync data structure
+        #     and prepares it for a new interation pass.
+        #     If no sync event are posted, the result of
+        #     the pass will be a successful soft NEVER,
+        #     which usually means the simulation stops at
+        #     steady state.
+        #  **
+        if d is None:
+            d = main_sync
+        d.step_to = TS_NEVER
+        d.hard_event = 0
+        d.status = SUCCESS
+
+    def exec_sync_merge(self,
+                        to_data,  # < sync data to merge to (nullptr to update main)
+                        from_data  # < sync data to merge from
+                        ):
+        # /** Merge the sync data structure
+        #
+        #     This call posts a new sync event \p to into
+        #     an existing sync data structure \p from.
+        #     If \p to is \p nullptr, then the main exec sync
+        #     event is updated.  If the status of \p from
+        #     is \p FAILED, then the \p to sync time is
+        #     set to \p TS_INVALID.  If the time of \p from
+        #     is \p TS_NEVER, then \p to is not updated.  In
+        #     all other cases, the \p to sync time is updated
+        #     with #self.sync_set.
+        #
+        #     @see #self.sync_set
+        #  **
+        main_sync = "some_value"  # Assuming 'main_sync' is of some specific global_property_types
+        if to_data is None:
+            to_data = main_sync
+        if from_data is None:
+            from_data = main_sync
+        if from_data == to_data:
+            return
+        if self.exec_sync_isinvalid(from_data):
+            self.exec_sync_set(to_data, TS_INVALID, False)
+        elif self.exec_sync_isnever(from_data):
+            pass
+        elif self.exec_sync_ishard(from_data):
+            self.exec_sync_set(to_data, self.exec_sync_get(from_data), False)
+        else:
+            self.exec_sync_set(to_data, -self.exec_sync_get(from_data), False)
+
+    def exec_sync_set(self, d, t, deltaflag):
         """
-        # Define global variables
-        global_slave_port = 12345
-        node_done = False
-        sockfd = -1
+        Update the sync data structure.
 
-        # Run self.slave_node
-        self.slave_node()
-        :return:
+        This function posts a new time to a sync event.
+        If the event is None, then the main sync event is updated.
+        If the new time is TS_NEVER, then the event is not updated.
+        If the new time is TS_INVALID, then the event status is changed to FAILED.
+        If the new time is not between -TS_MAX and TS_MAX, then an exception is thrown.
+        If the event time is TS_NEVER, then if the time is positive, a hard event is posted;
+        if the time is negative, a soft event is posted; otherwise, the event status is changed to FAILED.
+        Otherwise, if the event is hard, then the hard event count is incremented, and if the time is earlier, it is posted.
+        Otherwise, if the event is soft, then if the time is earlier, it is posted.
+        Otherwise, the event status is changed to FAILED.
+
+        :param d: The sync data to update (None to update main).
+        :param t: The timestamp to update with (negative time means a soft event, 0 means failure).
+        :param deltaflag: A flag to indicate if this was a deltamode exit - force it forward, otherwise, it can fail to exit.
+        :return: None
         """
-        global node_done, global_slave_port, sockfd
+        if d is None:
+            d = main_sync
 
-        node_done = False
-        sockfd = -1
-
-        inaddrsz = 16  # Size of sockaddr_in in bytes
-
-        try:
-            # Initialize socket (Windows-specific)
-            if hasattr(socket, 'AF_INET'):
-                sockfd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            else:
-                sockfd = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
-
-            # Bind to global_slave_port
-            server_addr = ('', global_slave_port)
-            sockfd.bind(server_addr)
-            sockfd.listen(5)
-            print(f"self.slave_node(): listening on port {global_slave_port}")
-
-            while not node_done:
-                # Wait for connection
-                reader_fdset = [sockfd]
-                rlist, _, _ = select.select(reader_fdset, [], [], 3)
-
-                if sockfd in rlist:
-                    inaddr = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    inaddr.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                    inaddr.bind(server_addr)
-                    inaddr.listen(1)
-                    print("esn(): accepted client")
-
-                    conn, _ = inaddr.accept()
-                    print("esn(): accepted client")
-
-                    # Thread off connection
-                    args = [node_done, sockfd, inaddr, conn]
-                    slave_thread = threading.Thread(target=slave_node_proc, args=(args,))
-                    slave_thread.daemon = True
-                    slave_thread.start()
-
-        except Exception as e:
-            print(f"self.slave_node() error: {e}")
-            node_done = True
-            if sockfd != -1:
-                sockfd.close()
+        if t == TS_NEVER:
+            return  # Nothing to do
+        if t == TS_INVALID:
+            d['status'] = FAILED
             return
 
-    def test(self, data, pass_num, obj):
+        if t <= -TIMESTAMP.TS_MAX or t > TIMESTAMP.TS_MAX:
+            raise Exception(f"Timestamp is not valid: {t}")
+
+        if d['step_to'] == TS_NEVER:
+            if 0 < t < TS_NEVER:
+                d['step_to'] = t
+                d['hard_event'] += 1
+            elif t < 0:
+                d['step_to'] = -t
+            else:
+                d['status'] = FAILED
+        elif t > 0:  # Hard event
+            d['hard_event'] += 1
+            if not deltaflag:
+                if d['step_to'] > t:
+                    d['step_to'] = t
+            else:  # Deltamode exit - override
+                d['step_to'] = t
+        elif t < 0:  # Soft event
+            if d['step_to'] > -t:
+                d['step_to'] = -t
+        else:  # t == 0 -> invalid
+            d['status'] = FAILED
+
+    def exec_sync_get(self, d):
+        """
+        Get the current sync time.
+
+        :param d: Sync data to get sync time from (None to read main).
+        :return: The proper (positive) event sync time, TS_NEVER, or TS_INVALID.
+        """
+        if d is None:
+            d = main_sync
+
+        if self.exec_sync_isnever(d):
+            return TS_NEVER
+        if self.exec_sync_isinvalid(d):
+            return TS_INVALID
+
+        return absolute_timestamp(d['step_to'])
+
+    # def sync_get(sync_data):
+    #     main_sync = "some_value"  # Assuming 'main_sync' is of some specific global_property_types
+    #     if sync_data is None:
+    #         sync_data = main_sync
+    #     if self.sync_is_never(sync_data):
+    #         return TS_NEVER
+    #     if self.sync_is_invalid(sync_data):
+    #         return TS_INVALID
+    #     return absolute_timestamp(sync_data.step_to)
+
+    def exec_sync_getevents(self, d):
+        """
+        Get the current hard event count.
+
+        :param d: Sync data to get sync events from (None to read main).
+        :return: The number of hard events associated with this sync event.
+        """
+        if d is None:
+            d = main_sync
+
+        return d['hard_event']
+
+    def exec_sync_ishard(self, d):
+        """
+        Determine whether the current sync data is a hard sync.
+
+        :param d: Sync data to read hard sync status from (None to read main).
+        :return: Non-zero if the event is a hard event, 0 if the event is a soft event.
+        """
+        if d is None:
+            d = main_sync
+
+        return d['hard_event'] > 0
+
+    def exec_sync_isnever(self, d):
+        """
+        Determine whether the current sync data time is never.
+
+        :param d: Sync data to read never sync status from (None to read main).
+        :return: Non-zero if the event is NEVER, 0 otherwise.
+        """
+        if d is None:
+            d = main_sync
+
+        return d['step_to'] == TS_NEVER
+
+    def exec_sync_isinvalid(self, d):
+        """
+        Determine whether the current sync time is invalid.
+
+        :param d: Sync data to read invalid sync status from.
+        :return: Non-zero if the status if FAILED, 0 otherwise.
+        """
+        if d is None:
+            d = main_sync
+
+        return self.exec_sync_getstatus(d) == FAILED
+
+    def exec_sync_getstatus(self, d):
+        """
+        Determine the current sync status.
+
+        :param d: Sync data to read sync status from (None to read main).
+        :return: The event status (SUCCESS or FAILED).
+        """
+        if d is None:
+            d = main_sync
+
+        return d['status']
+
+    def exec_sync_isrunning(self, d):
+        """
+        Determine whether sync time is a running simulation.
+
+        :param d: Sync data to determine if the simulation is running (None to read main).
+        :return: True if the simulation should keep going, False if it should stop.
+        """
+        global global_stoptime
+        return self.exec_sync_get(d) <= global_stoptime and not self.exec_sync_isnever(d) and self.exec_sync_ishard(d)
+
+
+
+    @staticmethod
+    def exec_test(data, pass_num, obj):
         """
         Starts the executive test loop.
 
@@ -2739,112 +2835,7 @@ class Exec:
 
         return data.status
 
-    def setexitcode(self, code: EXITCODE) -> EXITCODE:
-        global global_exit_code
-        # Implement self.setexitcode logic here and return an EXITCODE
-        oldxc = global_exit_code
-        if oldxc != XC_SUCCESS:
-            output_warning("new exitcode %d overwrites existing exitcode %d", code, oldxc)
-        global_exit_code = code
-        output_debug("exit code %d", code)
-        return oldxc
 
-    #
-    # def set_exit_code(self, xc):
-    #     global global_exit_code
-    #     old_xc = global_exit_code
-    #     if old_xc != XC_SUCCESS:
-    #         output_warning("new exitcode %d overwrites existing exitcode %d" % (xc, old_xc))
-    #     global_exit_code = xc
-    #     output_debug("exit code %d" % xc)
-    #     return old_xc
-
-    def getexitcode(self) -> EXITCODE:
-        global global_exit_code
-        # Implement self.getexitcode logic here and return an EXITCODE
-        return global_exit_code
-
-    # def get_exit_code():
-    #     global global_exit_code
-    #     return global_exit_code
-
-    def get_exit_code_str(self, xc: EXITCODE):
-        exit_code_strings = {
-            XC_SUCCESS: "ok",  # per system(3) 
-            XC_EXFAILED: "exec/wait failed",  # exec/wait failure - per system(3) 
-            XC_ARGERR: "bad command",  # error processing command line arguments 
-            XC_ENVERR: "environment startup/load failed",  # bad environment startup 
-            XC_TSTERR: "test failed",  # test failed 
-            XC_USRERR: "user rejected license terms",  # user reject terms of use
-            XC_RUNERR: "simulation failed",  # simulation did not complete as desired 
-            XC_INIERR: "initialization failed",  # initialization failed 
-            XC_PRCERR: "process control error",  # process control error 
-            XC_SVRKLL: "server killed",  # server killed 
-            XC_IOERR: "I/O error",  # I/O error 
-            XC_SHFAILED: "shell failed",  # shell failure - per system(3) 
-            XC_SIGNAL: "signal caught",  # signal caught - must be or'd with SIG value if known
-            XC_SIGINT: "interrupt received",  # SIGINT caught 
-            XC_EXCEPTION: "exception caught"  # exception caught
-        }
-        return exit_code_strings.get(xc, "unknown exception")
-
-
-    def clock(self):
-
-        global initialized, nt1, nt2
-        if not initialized:
-            nt1 = time.time()
-            nt2 = nt1
-            initialized = True
-        else:
-            nt2 = time.time()
-        return int((nt2 - nt1) * 1000000)
-
-    def get_ranks(self):
-        return ranks
-
-    def add_createscript(self, file):
-        output_debug("adding create script '{}'".format(file))
-        return add_script(create_scripts, file)
-
-    def add_scriptexport(self, name):
-        global script_exports
-        item = SimpleList(name)
-        if item.data is None:
-            return 0
-        item.next = script_exports
-        script_exports = item
-        return 1
-
-    def add_initscript(self, file):
-        output_debug("adding init script '%s'" % file)
-        return add_script(init_scripts, file)
-
-
-    def add_syncscript(self, file):
-        output_debug("adding sync script '{}'".format(file))
-        return add_script(sync_scripts, file)
-
-
-    def add_term_script(self, file):
-        output_debug("adding term script '%s'" % file)
-        return add_script(term_scripts, file)
-
-    def run_createscripts(self, ):
-        return run_scripts(create_scripts)
-
-
-    def run_initscripts(self, ):
-        return run_scripts(init_scripts)
-
-    def run_syncscripts(self, ):
-        return run_scripts(sync_scripts)
-
-    def run_termscripts(self, ):
-        return run_scripts(term_scripts)
-
-    def absolute_timestamp(self, step):
-        return datetime.fromtimestamp(step)
 
     # def sync_getevents(d):
     #     if d is None:
@@ -2856,12 +2847,12 @@ class Exec:
     #         d = main_sync
     #     return d.hard_event > 0
 
-    def sync_is_never(self, d):
+    def exec_sync_is_never(self, d):
         if d is None:
             d = main_sync
         return d.step_to == TS_NEVER
 
-    def sync_is_invalid(self, sync_data):
+    def exec_sync_is_invalid(self, sync_data):
         if sync_data is None:
             sync_data = main_sync
         return self.self.sync_get_status(sync_data) == FAILED

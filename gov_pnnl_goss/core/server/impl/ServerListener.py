@@ -32,7 +32,7 @@ class ServerListener(MessageListener):
 
     def on_message(self, message1):
         message = message1
-        self.logger.debug("Message of type: " + message1.getClass() + " received")
+        self.logger.debug("Message of global_property_types: " + message1.getClass() + " received")
 
         def process_message():
             server_publisher = ServerPublisher(self.session)
@@ -40,11 +40,11 @@ class ServerListener(MessageListener):
 
             try:
                 object_message = ObjectMessage(message)
-                # Assume that the passed object on the wire is of type Request.  An error will be thrown
+                # Assume that the passed object on the wire is of global_property_types Request.  An error will be thrown
                 # if that is not the case.
                 request = object_message.getObject()
 
-                self.logger.debug("Handling request type: " + request.getClass())
+                self.logger.debug("Handling request global_property_types: " + request.getClass())
 
                 if self.use_auth:
                     if not message.getBooleanProperty(SecurityConstants.HAS_SUBJECT_HEADER):
@@ -57,7 +57,7 @@ class ServerListener(MessageListener):
                     allowed = self.handler_registry.check_access(request, identifier)
 
                     if not allowed:
-                        self.logger.info("Access denied to " + identifier + " for request type " + request.getClass().getName())
+                        self.logger.info("Access denied to " + identifier + " for request global_property_types " + request.getClass().getName())
                         server_publisher.send_error("Access Denied for the requested data", message.getJMSReplyTo())
                         return
 

@@ -35,7 +35,7 @@
 # #endif
 #
 # 	/* always return the first class registered */
-# 	return network::oclass;
+# 	return network::owner_class;
 # }
 #
 # CDECL int do_kill()

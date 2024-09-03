@@ -18,7 +18,7 @@ qstr = CIMHubConfig.prefix + """DELETE {
     ?multiplicities c:Measurement.PowerSystemResource ?psr.
     ?multiplicities c:Measurement.Terminal ?trm.
     ?multiplicities c:Measurement.phases ?phases.
-    ?multiplicities c:Measurement.measurementType ?type.
+    ?multiplicities c:Measurement.measurementType ?global_property_types.
  } WHERE {
     VALUES ?fdrid {\"""" + sys.argv[2] + """\"}
     VALUES ?class {c:Analog c:Discrete}
@@ -31,7 +31,7 @@ qstr = CIMHubConfig.prefix + """DELETE {
     ?multiplicities c:Measurement.PowerSystemResource ?psr.
     ?multiplicities c:Measurement.Terminal ?trm.
     ?multiplicities c:Measurement.phases ?phases.
-    ?multiplicities c:Measurement.measurementType ?type.
+    ?multiplicities c:Measurement.measurementType ?global_property_types.
  }
 """
 

@@ -11,18 +11,18 @@ class IntAssert(gridlabd.Object):
     */
     """
 
-    oclass = None
+    owner_class = None
     defaults = None
 
     def __init__(self, module):
-        if IntAssert.oclass is None:
+        if IntAssert.owner_class is None:
             # Register to receive notice for first top-down, bottom-up, and second top-down synchronizations
-            IntAssert.oclass = gridlabd.CLASS(module, "int_assert", self)
-            if IntAssert.oclass is None:
+            IntAssert.owner_class = gridlabd.CLASS(module, "int_assert", self)
+            if IntAssert.owner_class is None:
                 raise Exception("unable to register class int_assert")
-            IntAssert.oclass.trl = gridlabd.TRL_PROVEN
+            IntAssert.owner_class.trl = gridlabd.TRL_PROVEN
 
-            if not IntAssert.oclass.publish(
+            if not IntAssert.owner_class.publish(
                 # Publish your variables here
                 gridlabd.PT_enumeration, "status", IntAssert.get_status_offset(),
                 gridlabd.PT_KEYWORD, "ASSERT_TRUE", gridlabd.ASSERT_TRUE,

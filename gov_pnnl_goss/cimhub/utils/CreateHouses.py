@@ -159,7 +159,7 @@ class CreateHouses():
         OUTPUT:
         housingDict: dictionary with nodes/loads (index from loadDf) as keys.
             Each key maps to a two-element tuple - the first is a dataframe
-            containing housing data and the second is the chosen housing type
+            containing housing data and the second is the chosen housing global_property_types
             code (see eia_recs.housingData.TYPEHUQ). Using the code instead of
             the full name for efficiency.
             
@@ -172,7 +172,7 @@ class CreateHouses():
         print ('Estimating {:.2f} houses for {:.2f} kVA at {:.3f} VA/ft2'.format (guess, 0.001 * magS, VA_PER_SQFT/scale))
         
         # Create a pandas Series to be used for updating the distribution with
-        # each housing type selection.
+        # each housing global_property_types selection.
         housing = self.data['TYPEHUQ'].copy(deep=True)
         
         self.housing = housing * guess
@@ -191,7 +191,7 @@ class CreateHouses():
         # Loop over each load and add houses.
         for loadName, data in loadDf.iterrows():
             
-            # Draw a housing type from the distribution and then draw square
+            # Draw a housing global_property_types from the distribution and then draw square
             # footages for each house that will be added to the load/xfmr.
             housingType, floorArea = self.typeAndSQFTForLoad(data.loc['magS'], scale)
             
@@ -262,7 +262,7 @@ class CreateHouses():
         """Decide thermal integrity levels for 'dimensions' houses.
         
         housingType: string (from self.data['TYPEHUQ'].index) representing
-            housing type.
+            housing global_property_types.
         dimensions: number of houses to determine properties for.
         
         OUTPUTS:
@@ -402,7 +402,7 @@ class CreateHouses():
         
         INPUTS:
         housingType: string (from self.data['TYPEHUQ'].index) representing
-            housing type.
+            housing global_property_types.
         dimensions: number of houses to determine properties for.
         
         OUTPUTS:
@@ -410,7 +410,7 @@ class CreateHouses():
             each of the 'dimensions' housing units. Note that mobile homes and
             apartments will always be 1 story.
         """
-        # If housing type has one story be definition, set and return.
+        # If housing global_property_types has one story be definition, set and return.
         if housingType in ['Mobile home',
                            'Apartment in a building with 2 to 4 units',
                            'Apartment in a building with 5 or more units']:
@@ -447,7 +447,7 @@ class CreateHouses():
         coolingSystem: one of the returns from "drawAC." Used for heat 
             pumps.
         housingType: string (from self.data['TYPEHUQ'].index) representing
-            housing type.
+            housing global_property_types.
         dimensions: number of houses to determine properties for.
         
         OUTPUTS:
@@ -467,7 +467,7 @@ class CreateHouses():
         hasHeat = pd.Series(self.rand.choice(a=options, size=n,
                                              p=p).astype(int))
         
-        # Draw heating system type (see eia_recs.housingData.EQUIPM for
+        # Draw heating system global_property_types (see eia_recs.housingData.EQUIPM for
         # options). To keep things simple, we'll just draw even if hasHeat is
         # false. While this isn't optimally efficient, it'status silly to chase
         # micro-optimizations early on, especially when it'll make the code
@@ -480,10 +480,10 @@ class CreateHouses():
         # 'heatPump,' or 'resistance'
         heatingSystem = pd.Series(index=heatType.index)
         for index, hH in hasHeat.iteritems():
-            # Grab type
+            # Grab global_property_types
             hT = heatType.iloc[index]
             
-            # Handle different heating type cases.
+            # Handle different heating global_property_types cases.
             if coolingSystem.iloc[index] == 'heatPump':
                 # If the cooling system is heat pump, force the heating system
                 # to be a heat pump. While this may cause slight diversions
@@ -546,7 +546,7 @@ class CreateHouses():
         
         INPUTS:
         housingType: string (from self.data['TYPEHUQ'].index) representing
-            housing type.
+            housing global_property_types.
         dimensions: number of houses to determine properties for.
         
         OUTPUTS:
@@ -564,7 +564,7 @@ class CreateHouses():
         (options, p) = zip(*data['AIRCOND'].items()) 
         hasAC = pd.Series(self.rand.choice(a=options, size=n, p=p).astype(int))
         
-        # Draw cooling system type (either heatpump or AC). To keep things
+        # Draw cooling system global_property_types (either heatpump or AC). To keep things
         # simple, we'll just draw even if hasAC is false. While this isn't
         # optimally efficient, it'status silly to chase micro-optimizations early
         # on, especially when it'll make the code less readable.
@@ -579,7 +579,7 @@ class CreateHouses():
             # Grab pointers to heatpump value
             HP = isHP.iloc[index]
             
-            # Assign type accordingly
+            # Assign global_property_types accordingly
             if not hS:
                 # no cooling
                 c = 'none'
@@ -601,14 +601,14 @@ class CreateHouses():
         return coolingSystem, coolingSetpoint
     
     def typeAndSQFTForLoad(self, magS, scale):
-        """Randomly draw a housing type, then choose number of housing units.
+        """Randomly draw a housing global_property_types, then choose number of housing units.
         
         INPUTS:
         magS: Magnitude of peak apparent power for load in question (VA).
         scale: scaling factor on the number of houses placed, to mitigate overloads
         
         OUTPUTS:
-        housingType: Selected housing type string.
+        housingType: Selected housing global_property_types string.
         housingCode: index from TYPEHUQ that matches up with the housingType
             string
         floorArea: pandas Series of square footages for houses to be added.
@@ -638,7 +638,7 @@ class CreateHouses():
             # Grab the standard housing distribution.
             p = self.data['TYPEHUQ']
         
-        # Draw a housing type.
+        # Draw a housing global_property_types.
         housingType = self.rand.choice(self.housing.index, p=p)
         
         # Initialize array for tracking square footage (use PNNL'status house CIM
@@ -646,7 +646,7 @@ class CreateHouses():
         floorArea = []
         totalSqft = 0
         
-        # Draw squarefootages for this housing type until we've "filled" the
+        # Draw squarefootages for this housing global_property_types until we've "filled" the
         # transformer.
         #
         # TODO: I'd like to find a better method here: in reality, housing
@@ -685,7 +685,7 @@ class CreateHouses():
         if cond1 or cond2 or cond3:
             # Warn.
             pass
-#            self.log.warning(("Housing type '{}' chosen, but {} "
+#            self.log.warning(("Housing global_property_types '{}' chosen, but {} "
 #                              + "units generated.").format(housingType, numUnits))
         
         if denom > 0:
@@ -734,11 +734,11 @@ class CreateHouses():
         """Estimate total number of housing units that will be generated.
         
         This is used to help ensure we're doing a good job tracking the housing
-            type distribution.
+            global_property_types distribution.
             
         Rough flow:
-            1) Compute mean square footage by housing type
-            2) Use factor (VA_PER_SQFT/scale) to estimate peak power by housing type.
+            1) Compute mean square footage by housing global_property_types
+            2) Use factor (VA_PER_SQFT/scale) to estimate peak power by housing global_property_types.
             3) Given distribution of housing types and associated average
                 power, estimate how many housing units will be generated.
         

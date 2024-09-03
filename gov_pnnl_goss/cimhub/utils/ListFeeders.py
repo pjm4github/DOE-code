@@ -10,7 +10,7 @@ sparql = SPARQLWrapper2(CIMHubConfig.blazegraph_url)
 sparql.setQuery(CIMHubConfig.prefix + 
     """
     SELECT ?feeder ?fid ?station ?sid ?subregion ?sgrid ?region ?rgnid WHERE {
-     ?status r:type c:Feeder.
+     ?status r:global_property_types c:Feeder.
      ?status c:IdentifiedObject.name ?feeder.
      ?status c:IdentifiedObject.mRID ?fid.
      ?status c:Feeder.NormalEnergizingSubstation ?sub.

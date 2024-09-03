@@ -32,13 +32,13 @@ class GldSimulationOutputConfigurationHandler(BaseConfigurationHandler, Configur
                     '"broker": "BROKER_LOCATION:BROKER_PORT",'\
                     '"endpoints": [{'\
                     '				  "name": "helics_input",'\
-                    '				  "global": false,"type": "string",	'\
+                    '				  "global": false,"global_property_types": "string",	'\
                     '               "info": "This is the endpoint which recieves CIM commands from the HELICS GOSS bridge."'\
                     '				 },'\
                     '				 {'\
                     '				  "name": "helics_output",'\
                     '				  "global": false,'\
-                    '				  "type": "string",	'\
+                    '				  "global_property_types": "string",	'\
                     '				  "destination": "HELICS_GOSS_Bridge_PROCESS_ID/helics_output",	"info": "'
 
     HELICS_SUFFIX = '"}]}'
@@ -237,7 +237,7 @@ class GldSimulationOutputConfigurationHandler(BaseConfigurationHandler, Configur
                 property_name = "voltage_" + phases
             else:
                 raise ValueError(
-                    f"CimMeasurementsToGldPubs::parseMeasurement: The value of measurementType is not a valid type.\nValid types for LinearShuntCompensators are VA, Pos, and PNV.\nmeasurementType = {measurement_type}")
+                    f"CimMeasurementsToGldPubs::parseMeasurement: The value of measurementType is not a valid global_property_types.\nValid types for LinearShuntCompensators are VA, Pos, and PNV.\nmeasurementType = {measurement_type}")
         elif "PowerTransformer" in conducting_equipment_type or "TransformerTank" in conducting_equipment_type:
             if measurement_type == "VA":
                 object_name = conducting_equipment_name
@@ -250,7 +250,7 @@ class GldSimulationOutputConfigurationHandler(BaseConfigurationHandler, Configur
                 property_name = "current_in_" + phases
             else:
                 raise ValueError(
-                    f"CimMeasurementsToGldPubs::parseMeasurement: The value of measurementType is not a valid type.\nValid types for PowerTransformers and TransformerTanks are VA, PNV, and A.\nmeasurementType = {measurement_type}")
+                    f"CimMeasurementsToGldPubs::parseMeasurement: The value of measurementType is not a valid global_property_types.\nValid types for PowerTransformers and TransformerTanks are VA, PNV, and A.\nmeasurementType = {measurement_type}")
         elif "RatioTapChanger" in conducting_equipment_type:
             if measurement_type == "VA":
                 object_name = conducting_equipment_name
@@ -266,7 +266,7 @@ class GldSimulationOutputConfigurationHandler(BaseConfigurationHandler, Configur
                 property_name = "tap_" + phases
             else:
                 raise ValueError(
-                    f"CimMeasurementsToGldPubs::parseMeasurement: The value of measurementType is not a valid type.\nValid types for RatioTapChanger are VA, PNV, A, and Pos.\nmeasurementType = {measurement_type}")
+                    f"CimMeasurementsToGldPubs::parseMeasurement: The value of measurementType is not a valid global_property_types.\nValid types for RatioTapChanger are VA, PNV, A, and Pos.\nmeasurementType = {measurement_type}")
         elif "ACLineSegment" in conducting_equipment_type:
             if measurement_type == "VA":
                 object_name = conducting_equipment_name
@@ -284,7 +284,7 @@ class GldSimulationOutputConfigurationHandler(BaseConfigurationHandler, Configur
                 property_name = "current_in_" + phases
             else:
                 raise ValueError(
-                    f"CimMeasurementsToGldPubs::parseMeasurement: The value of measurementType is not a valid type.\nValid types for ACLineSegments are VA, A, and PNV.\nmeasurementType = {measurement_type}")
+                    f"CimMeasurementsToGldPubs::parseMeasurement: The value of measurementType is not a valid global_property_types.\nValid types for ACLineSegments are VA, A, and PNV.\nmeasurementType = {measurement_type}")
         elif "LoadBreakSwitch" in conducting_equipment_type or "Recloser" in conducting_equipment_type or "Breaker" in conducting_equipment_type:
             if measurement_type == "VA":
                 object_name = conducting_equipment_name
@@ -305,7 +305,7 @@ class GldSimulationOutputConfigurationHandler(BaseConfigurationHandler, Configur
                     property_name = "current_in_" + phases
             else:
                 raise ValueError(
-                    f"CimMeasurementsToGldPubs::parseMeasurement: The value of measurementType is not a valid type.\nValid types for LoadBreakSwitch are VA, A, and PNV.\nmeasurementType = {measurement_type}")
+                    f"CimMeasurementsToGldPubs::parseMeasurement: The value of measurementType is not a valid global_property_types.\nValid types for LoadBreakSwitch are VA, A, and PNV.\nmeasurementType = {measurement_type}")
         elif "EnergyConsumer" in conducting_equipment_type:
             if measurement_type == "VA":
                 object_name = conducting_equipment_name
@@ -321,7 +321,7 @@ class GldSimulationOutputConfigurationHandler(BaseConfigurationHandler, Configur
                 property_name = "measured_current_" + phases
             else:
                 raise ValueError(
-                    f"CimMeasurementsToGldPubs::parseMeasurement: The value of measurementType is not a valid type.\nValid types for EnergyConsumer are VA, A, and PNV.\nmeasurementType = {measurement_type}")
+                    f"CimMeasurementsToGldPubs::parseMeasurement: The value of measurementType is not a valid global_property_types.\nValid types for EnergyConsumer are VA, A, and PNV.\nmeasurementType = {measurement_type}")
         elif "PowerElectronicsConnection" in conducting_equipment_type:
             if measurement_type == "VA":
                 object_name = conducting_equipment_name
@@ -340,7 +340,7 @@ class GldSimulationOutputConfigurationHandler(BaseConfigurationHandler, Configur
                 property_name = "state_of_charge"
             else:
                 raise ValueError(
-                    f"CimMeasurementsToGldPubs::parseMeasurement: The value of measurementType is not a valid type.\nValid types for PowerElectronicsConnection are VA, A, PNV, and SoC.\nmeasurementType = {measurement_type}")
+                    f"CimMeasurementsToGldPubs::parseMeasurement: The value of measurementType is not a valid global_property_types.\nValid types for PowerElectronicsConnection are VA, A, PNV, and SoC.\nmeasurementType = {measurement_type}")
         elif "SynchronousMachine" in conducting_equipment_type:
             if measurement_type == "VA":
                 object_name = conducting_equipment_name
@@ -353,10 +353,10 @@ class GldSimulationOutputConfigurationHandler(BaseConfigurationHandler, Configur
                 property_name = "measured_current_" + phases
             else:
                 raise ValueError(
-                    f"CimMeasurementsToGldPubs::parseMeasurement: The value of measurementType is not a valid type.\nValid types for SynchronousMachine are VA, A, and PNV.\nmeasurementType = {measurement_type}")
+                    f"CimMeasurementsToGldPubs::parseMeasurement: The value of measurementType is not a valid global_property_types.\nValid types for SynchronousMachine are VA, A, and PNV.\nmeasurementType = {measurement_type}")
         else:
             raise ValueError(
-                f"CimMeasurementsToGldPubs::parseMeasurement: The value of ConductingEquipment_type is not a recognized object type.\nValid types are ACLineSegment, LinearShuntCompesator, RatioTapChanger, LoadBreakSwitch, EnergyConsumer, PowerElectronicsConnection, TransformerTank, and PowerTransformer.\nConductingEquipment_type = {conducting_equipment_type}")
+                f"CimMeasurementsToGldPubs::parseMeasurement: The value of ConductingEquipment_type is not a recognized object global_property_types.\nValid types are ACLineSegment, LinearShuntCompesator, RatioTapChanger, LoadBreakSwitch, EnergyConsumer, PowerElectronicsConnection, TransformerTank, and PowerTransformer.\nConductingEquipment_type = {conducting_equipment_type}")
 
         if object_name in measurements:
             p = property_name

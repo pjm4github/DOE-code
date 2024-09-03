@@ -9,7 +9,7 @@ from gov_pnnl_goss.gridlab.gldcore.GridLabD import gl_error, gl_register_class, 
 from gov_pnnl_goss.gridlab.comm.NetworkMessage import NetworkMessage, MSGSTATE
 from enum import Enum
 
-from gov_pnnl_goss.gridlab.gldcore.Property import PROPERTYTYPE
+from gov_pnnl_goss.gridlab.gldcore.PropertyHeader import PropertyType
 
 
 class QUEUERESOLUTION(Enum):
@@ -56,15 +56,15 @@ class Network:
         self.latency_next_update = 0
         self.latency_period = 0.0
         self.next_event = 0
-        self.oclass = None
+        self.owner_class = None
         self.queue_resolution = QUEUERESOLUTION.QR_REJECT # determines what the network does when the sum of the interface traffic wants to exceed the bandwidth
         self.random_type = RandomType  # You need to define RANDOMTYPE accordingly
         self.timeout = 0.0
 
-        if self.oclass is None:
+        if self.owner_class is None:
             # register the class definition
-            self.oclass = gl_register_class(mod, "network", Network, PC_BOTTOMUP)
-            if self.oclass is None:
+            self.owner_class = gl_register_class(mod, "network", Network, PC_BOTTOMUP)
+            if self.owner_class is None:
                 raise ValueError("unable to register object class implemented by {}".format(__file__))
                 # TROUBLESHOOT
                 # The registration for the network class failed. This is usually caused
@@ -72,18 +72,18 @@ class Network:
                 # Please report this error to the developers.
 
             # publish the class properties
-            if gl_publish_variable(self.oclass,
-                                   PROPERTYTYPE.PT_double, "latency[s]", PADDR(self.latency),
-                                   PROPERTYTYPE.PT_char32, "latency_mode", PADDR(self.latency_mode),
-                                   PROPERTYTYPE.PT_double, "latency_period[s]", PADDR(self.latency_period),
-                                   PROPERTYTYPE.PT_double, "latency_arg1", PADDR(self.latency_arg1),
-                                   PROPERTYTYPE.PT_double, "latency_arg2", PADDR(self.latency_arg2),
-                                   PROPERTYTYPE.PT_double, "bandwidth[MB/s]", PADDR(self.bandwidth),
-                                   PROPERTYTYPE.PT_enumeration, "queue_resolution", PADDR(self.queue_resolution),
-                                   PROPERTYTYPE.PT_KEYWORD, "REJECT", QUEUERESOLUTION.QR_REJECT,
-                                   PROPERTYTYPE.PT_KEYWORD, "QUEUE", QUEUERESOLUTION.QR_QUEUE,
-                                   PROPERTYTYPE.PT_double, "buffer_size[MB]", PADDR(self.buffer_size),
-                                   PROPERTYTYPE.PT_double, "bandwidth_used[MB/s]", PADDR(self.bandwidth_used), PROPERTYTYPE.PT_ACCESS,
+            if gl_publish_variable(self.owner_class,
+                                   PropertyType.PT_double, "latency[s]", PADDR(self.latency),
+                                   PropertyType.PT_char32, "latency_mode", PADDR(self.latency_mode),
+                                   PropertyType.PT_double, "latency_period[s]", PADDR(self.latency_period),
+                                   PropertyType.PT_double, "latency_arg1", PADDR(self.latency_arg1),
+                                   PropertyType.PT_double, "latency_arg2", PADDR(self.latency_arg2),
+                                   PropertyType.PT_double, "bandwidth[MB/s]", PADDR(self.bandwidth),
+                                   PropertyType.PT_enumeration, "queue_resolution", PADDR(self.queue_resolution),
+                                   PropertyType.PT_KEYWORD, "REJECT", QUEUERESOLUTION.QR_REJECT,
+                                   PropertyType.PT_KEYWORD, "QUEUE", QUEUERESOLUTION.QR_QUEUE,
+                                   PropertyType.PT_double, "buffer_size[MB]", PADDR(self.buffer_size),
+                                   PropertyType.PT_double, "bandwidth_used[MB/s]", PADDR(self.bandwidth_used), PropertyType.PT_ACCESS,
                                    PA_REFERENCE,
                                    None) < 1:
                 raise ValueError("unable to publish properties in {}".format(__file__))
@@ -112,7 +112,7 @@ class Network:
         if self.latency_mode[0] != 0:
             self.random_type = self.gl_randomtype(self.latency_mode)
             if self.random_type == RandomType.RT_INVALID:
-                self.GL_THROW("unrecognized random type '{}'".format(self.latency_mode))
+                self.GL_THROW("unrecognized random global_property_types '{}'".format(self.latency_mode))
         else:
             self.random_type = RandomType.RT_INVALID  # prevents update_latency from updating the value
         if self.latency_period < 0.0:
@@ -348,7 +348,7 @@ def create_network(obj, parent):
         try:
             my.create()
         except Exception as msg:
-            gl_error("%s::%s.create(OBJECT *self={name='%s', id=%d},...): %s" % (obj.oclass.module.name, obj.oclass.name, obj.name, obj.id, msg))
+            gl_error("%s::%s.create(OBJECT *self={name='%s', id=%d},...): %s" % (obj.owner_class.module.name, obj.owner_class.name, obj.name, obj.id, msg))
             return 0, obj
         return 1, obj
     return 0, obj
@@ -359,7 +359,7 @@ def init_network(obj):
     try:
         return my.init(obj.parent)
     except Exception as msg:
-        gl_error("%s::%s.init(OBJECT *self={name='%s', id=%d}): %s" % (obj.oclass.module.name, obj.oclass.name, obj.name, obj.id, msg))
+        gl_error("%s::%s.init(OBJECT *self={name='%s', id=%d}): %s" % (obj.owner_class.module.name, obj.owner_class.name, obj.name, obj.id, msg))
         return 0
 
 
@@ -378,26 +378,26 @@ def str_time(dt):
 def sync_network(obj, t1):
     my = obj.get_data(Network)
     try:
-        t2 = my.sync(obj.clock, t1)
+        t2 = my.sync(obj.exec_clock, t1)
         return t2
     except Exception as msg:
         dt = global_time(t1)
         ts = str_time(dt)
-        gl_error("%s::%s.init(OBJECT *self={name='%s', id=%d},TIMESTAMP t1='%s'): %s" % (obj.oclass.module.name, obj.oclass.name, obj.name, obj.id, ts, msg))
+        gl_error("%s::%s.init(OBJECT *self={name='%s', id=%d},TIMESTAMP t1='%s'): %s" % (obj.owner_class.module.name, obj.owner_class.name, obj.name, obj.id, ts, msg))
         return 0
 
 
 def commit_network(obj, t1, t2):
     my = obj.get_data(Network)
     rv = my.commit(t1, t2)
-    obj.clock = gl_globalclock()
+    obj.exec_clock = gl_globalclock()
     return rv
 #
-# def initialize_network_properties(oclass, mod, latency, latency_mode, latency_period, latency_arg1, latency_arg2, bandwidth, queue_resolution, buffer_size, bandwidth_used):
-#     if oclass is None:
+# def initialize_network_properties(owner_class, mod, latency, latency_mode, latency_period, latency_arg1, latency_arg2, bandwidth, queue_resolution, buffer_size, bandwidth_used):
+#     if owner_class is None:
 #         # Register the class definition
-#         oclass = gl_register_class(mod, "network", sizeof(network), PC_BOTTOMUP)
-#         if oclass is None:
+#         owner_class = gl_register_class(mod, "network", sizeof(network), PC_BOTTOMUP)
+#         if owner_class is None:
 #             raise BlockingIOError("unable to register object class implemented by %s" % __FILE__)
 #             # TROUBLESHOOT
 #             # The registration for the network class failed.   This is usually caused
@@ -406,19 +406,19 @@ def commit_network(obj, t1, t2):
 #
 #         # Publish the class properties
 #         if gl_publish_variable(
-#             oclass,
-#             PROPERTYTYPE.PT_double, "latency[s]", PADDR(latency),
-#             PROPERTYTYPE.PT_char32, "latency_mode", PADDR(latency_mode),
-#             PROPERTYTYPE.PT_double, "latency_period[s]", PADDR(latency_period),
-#             PROPERTYTYPE.PT_double, "latency_arg1", PADDR(latency_arg1),
-#             PROPERTYTYPE.PT_double, "latency_arg2", PADDR(latency_arg2),
-#             PROPERTYTYPE.PT_double, "bandwidth[MB/s]", PADDR(bandwidth),
-#             PROPERTYTYPE.PT_enumeration, "queue_resolution", PADDR(queue_resolution),
-#             PROPERTYTYPE.PT_KEYWORD, "REJECT", QUEUERESOLUTION.QR_REJECT,
-#             PROPERTYTYPE.PT_KEYWORD, "QUEUE", QUEUERESOLUTION.QR_QUEUE,
-#             PROPERTYTYPE.PT_double, "buffer_size[MB]", PADDR(buffer_size),
-#             PROPERTYTYPE.PT_double, "bandwidth_used[MB/s]", PADDR(bandwidth_used),
-#             PROPERTYTYPE.PT_ACCESS, PA_REFERENCE,
+#             owner_class,
+#             PropertyType.PT_double, "latency[s]", PADDR(latency),
+#             PropertyType.PT_char32, "latency_mode", PADDR(latency_mode),
+#             PropertyType.PT_double, "latency_period[s]", PADDR(latency_period),
+#             PropertyType.PT_double, "latency_arg1", PADDR(latency_arg1),
+#             PropertyType.PT_double, "latency_arg2", PADDR(latency_arg2),
+#             PropertyType.PT_double, "bandwidth[MB/s]", PADDR(bandwidth),
+#             PropertyType.PT_enumeration, "queue_resolution", PADDR(queue_resolution),
+#             PropertyType.PT_KEYWORD, "REJECT", QUEUERESOLUTION.QR_REJECT,
+#             PropertyType.PT_KEYWORD, "QUEUE", QUEUERESOLUTION.QR_QUEUE,
+#             PropertyType.PT_double, "buffer_size[MB]", PADDR(buffer_size),
+#             PropertyType.PT_double, "bandwidth_used[MB/s]", PADDR(bandwidth_used),
+#             PropertyType.PT_ACCESS, PA_REFERENCE,
 #             NULL
 #         ) < 1:
 #             GL_THROW("unable to publish properties in %s" % __FILE__)
@@ -430,10 +430,10 @@ def commit_network(obj, t1, t2):
 #
 # # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106 python
 # def defaults_network(self, mod):
-#     if self.oclass is None:
+#     if self.owner_class is None:
 #         # register the class definition
-#         self.oclass = gl_register_class(mod, "network", network, PC_BOTTOMUP)
-#         if self.oclass is None:
+#         self.owner_class = gl_register_class(mod, "network", network, PC_BOTTOMUP)
+#         if self.owner_class is None:
 #             raise ValueError("unable to register object class implemented by {}".format(__file__))
 #             # TROUBLESHOOT
 #             # The registration for the network class failed. This is usually caused
@@ -441,18 +441,18 @@ def commit_network(obj, t1, t2):
 #             # Please report this error to the developers.
 #
 #         # publish the class properties
-#         if gl_publish_variable(self.oclass,
-#             PROPERTYTYPE.PT_double, "latency[s]", PADDR(self.latency),
-#             PROPERTYTYPE.PT_char32, "latency_mode", PADDR(self.latency_mode),
-#             PROPERTYTYPE.PT_double, "latency_period[s]", PADDR(self.latency_period),
-#             PROPERTYTYPE.PT_double, "latency_arg1", PADDR(self.latency_arg1),
-#             PROPERTYTYPE.PT_double, "latency_arg2", PADDR(self.latency_arg2),
-#             PROPERTYTYPE.PT_double, "bandwidth[MB/s]", PADDR(self.bandwidth),
-#             PROPERTYTYPE.PT_enumeration, "queue_resolution", PADDR(self.queue_resolution),
-#                 PROPERTYTYPE.PT_KEYWORD, "REJECT", QUEUERESOLUTION.QR_REJECT,
-#                 PROPERTYTYPE.PT_KEYWORD, "QUEUE", QUEUERESOLUTION.QR_QUEUE,
-#             PROPERTYTYPE.PT_double, "buffer_size[MB]", PADDR(self.buffer_size),
-#             PROPERTYTYPE.PT_double, "bandwidth_used[MB/s]", PADDR(self.bandwidth_used), PROPERTYTYPE.PT_ACCESS, PA_REFERENCE,
+#         if gl_publish_variable(self.owner_class,
+#             PropertyType.PT_double, "latency[s]", PADDR(self.latency),
+#             PropertyType.PT_char32, "latency_mode", PADDR(self.latency_mode),
+#             PropertyType.PT_double, "latency_period[s]", PADDR(self.latency_period),
+#             PropertyType.PT_double, "latency_arg1", PADDR(self.latency_arg1),
+#             PropertyType.PT_double, "latency_arg2", PADDR(self.latency_arg2),
+#             PropertyType.PT_double, "bandwidth[MB/s]", PADDR(self.bandwidth),
+#             PropertyType.PT_enumeration, "queue_resolution", PADDR(self.queue_resolution),
+#                 PropertyType.PT_KEYWORD, "REJECT", QUEUERESOLUTION.QR_REJECT,
+#                 PropertyType.PT_KEYWORD, "QUEUE", QUEUERESOLUTION.QR_QUEUE,
+#             PropertyType.PT_double, "buffer_size[MB]", PADDR(self.buffer_size),
+#             PropertyType.PT_double, "bandwidth_used[MB/s]", PADDR(self.bandwidth_used), PropertyType.PT_ACCESS, PA_REFERENCE,
 #             NULL) < 1:
 #             raise ValueError("unable to publish properties in {}".format(__file__))
 #             # TROUBLESHOOT

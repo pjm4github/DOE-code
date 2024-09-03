@@ -1,3 +1,18 @@
+# GridLAB-D v5.2 (Perkins)
+
+    MAJOR=5
+    MINOR=2
+    PATCH=0
+    NAME=Perkins
+
+https://github.com/gridlab-d/gridlab-d/blob/release/5.2/VERSION
+
+## Python Version is in this Package
+    gov_pnnl_goss.gridlab.gldcore
+
+### See 
+    gov_pnnl_goss.gridlab.gldcore.Main
+
 # Building GridLAB-D
 
 ## Prerequisites

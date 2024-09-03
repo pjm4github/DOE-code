@@ -1,6 +1,6 @@
-from gov_pnnl_goss.gridlab.gldcore.Exec import exec_start
+from gov_pnnl_goss.gridlab.gldcore.Exec import Exec
 from gov_pnnl_goss.gridlab.gldcore.Output import output_fatal, output_verbose
-from gov_pnnl_goss.gridlab.gldcore.Gui import gui_get_root, gui_startup
+from gov_pnnl_goss.gridlab.gldcore.Gui import GuiEntity
 from gov_pnnl_goss.gridlab.gldcore.Globals import global_environment, global_dumpfile, FAILED, SUCCESS
 from gov_pnnl_goss.gridlab.gldcore.Matlab import matlab_startup
 from gov_pnnl_goss.gridlab.gldcore.Xcore import xstart
@@ -27,11 +27,11 @@ class Environment:
     def environment_start(self, argc, argv):
         global global_environment
         if global_environment == "batch":
-            if gui_get_root():
+            if GuiEntity.gui_get_root():
                 global_environment = "gui"
                 # go to UseGui
             # do the run
-            if exec_start() == FAILED:
+            if Exec.exec_start() == FAILED:
                 output_fatal("shutdown after simulation stopped prematurely")
                 # TROUBLESHOOT
                 # The simulation stopped because an unexpected condition was encountered.
@@ -51,7 +51,7 @@ class Environment:
             # server only mode (no GUI)
             output_verbose("starting server")
             if server_startup(argc, argv):
-                return exec_start()
+                return Exec.exec_start()
             else:
                 return FAILED
         elif global_environment == "html":
@@ -60,9 +60,9 @@ class Environment:
         elif global_environment == "gui":
             # go to UseGui
             output_verbose("starting server")
-            if server_startup(argc, argv) and gui_startup(argc, argv):
-                result = exec_start()
-                gui = gui_get_root()
+            if server_startup(argc, argv) and GuiEntity.gui_startup(argc, argv):
+                result = Exec.exec_start()
+                gui = GuiEntity.gui_get_root()
                 if result != SUCCESS:
                     return result
                 if gui == None:
@@ -76,9 +76,9 @@ class Environment:
         elif global_environment == "X11":
             try:
                 xstart()
-                if gui_get_root():
+                if GuiEntity.gui_get_root():
                     gui_X11_start()
-                return exec_start()
+                return Exec.exec_start()
             except Exception as e:
                 output_fatal("X11 not supported")
                 return FAILED

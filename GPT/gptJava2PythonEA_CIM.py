@@ -59,7 +59,7 @@ def convert_code(code_snippet):
             messages=[
                 {
                     "role": "system",
-                    "content": "Given the Java class, convert that code to python, using snake_case methods and local imports, include the original comments, and add python typing to the python class assuming that the Java class type "
+                    "content": "Given the Java class, convert that code to python, using snake_case methods and local imports, include the original comments, and add python typing to the python class assuming that the Java class global_property_types "
                                "is also availible as a Python library. Keep the class name CamelCase."
                 },
                 {

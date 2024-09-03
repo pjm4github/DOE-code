@@ -1,9 +1,16 @@
-
-
+import math
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
 import time
 
-class Kml:  
+from gridlab.gldcore import Convert
+from gridlab.gldcore.Class import DynamicClass
+from gridlab.gldcore.Globals import global_modelname, global_clock
+from gridlab.gldcore.Module import Module
+from gridlab.gldcore.Object import Object
+from gridlab.gldcore.TimeStamp import TimeStamp
+
+
+class Kml:
     def __init__(self):
         self.kml = None
 
@@ -11,41 +18,41 @@ class Kml:
         pass
 
     def kml_document(self, fp):
-        oclass, openclass = None, None
+        owner_class, openclass = None, None
         mod = None
         buffer = [1024]
         now = time.time()
         self.kml_write("%s", "    <Document>\n")
         self.kml_write("    <name>%s</name>\n", global_modelname)
         self.kml_write("    <description>GridLAB-D results for %s</description>\n",
-                        convert_from_timestamp(global_clock, buffer, buffer.size) if buffer else "unknown date/time")
-        for mod in module_get_first():
+                        Convert.convert_from_timestamp(global_clock, buffer, buffer.size) if buffer else "unknown date/time")
+        for mod in Module.module_get_first():
             if mod.kmldump:
                 mod.kmldump(self.kml_write, None)
-        for oclass in class_get_first_class():
+        for owner_class in DynamicClass.class_get_first_class():
             obj = None
-            for obj in object_get_first():
+            for obj in Object.object_get_first():
                 has_location = not (math.isnan(obj.latitude) or math.isnan(obj.longitude))
                 if not has_location:
                     continue
-                if obj.oclass != oclass:
+                if obj.owner_class != owner_class:
                     continue
                 if not openclass:
                     pass
-                mod = obj.oclass.module
+                mod = obj.owner_class.module
                 if mod and mod.kmldump:
                     mod.kmldump(self.kml_write, obj)
                 else:
-                    prop = oclass.pmap
+                    prop = owner_class.pmap
                     self.kml_write("    <Placemark>\n")
                     if obj.name:
                         self.kml_write("        <name>%s</name>\n", obj.name)
                     else:
-                        self.kml_write("        <name>%s %d</name>\n", obj.oclass.name, obj.id)
+                        self.kml_write("        <name>%s %d</name>\n", obj.owner_class.name, obj.id)
                     self.kml_write("        <description>\n")
                     self.kml_write("            <![CDATA[\n")
                     self.kml_write("            <TABLE><TR>\n")
-                    while prop and prop.oclass == oclass:
+                    while prop and prop.owner_class == owner_class:
                         pass
                     self.kml_write("            </TR></TABLE>\n")
                     self.kml_write("            ]]>\n")
@@ -87,6 +94,11 @@ def kml_write(fmt, *args):
     return len
 
 
+def kml_document(fp):
+    pass
+
+
+
 def kml_output(fp):
     global kml
     kml = fp
@@ -105,8 +117,8 @@ def kml_dump(filename):
         filename = "gridlabd.kml"
 
     # find basename
-    b = strcspn(filename, "/\\:")
-    basename = filename + (b < len(filename) and b or 0)
+    colon = filename.find(":")
+    basename = filename + (filename[colon:] if colon else "")
 
     # find extension
     ext = filename.rfind('.')

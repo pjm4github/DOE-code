@@ -66,7 +66,7 @@ function choose(num)
     choice = num;
     file.selectedIndex=num;
     date.selectedIndex=num;
-//    type.selectedIndex=num;
+//    global_property_types.selectedIndex=num;
     size.selectedIndex=num;
     selection.value = file.value;
 }
@@ -98,7 +98,7 @@ function on_choose(select)
 <option value="myfile.glm">9:23:48 PDT</option>
 <select size=23>
 </select>
-<!--select size=23 name="type" onchange="on_choose(this);">
+<!--select size=23 name="global_property_types" onchange="on_choose(this);">
 <option value=0>Type</option>
 <option value="..">Parent folder</option>
 <option value="test">Folder</option>

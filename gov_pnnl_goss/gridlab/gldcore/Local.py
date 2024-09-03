@@ -1,3 +1,4 @@
+from gridlab.gldcore.TimeStamp import TimeStamp
 
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
@@ -12,17 +13,17 @@ class Locale:
         pass
 
 
-def locale_push():
-    tz = timestamp_current_timezone()
+def locale_push(stack=None):
+    tz = TimeStamp.timestamp_current_timezone()
     locale = Locale()
     if locale is None:
-        output_error("locale push failed; no memory")
+        print("locale push failed; no memory")
         return
     else:
         locale.next = stack
         stack = locale
         if tz is None:
-            output_warning("locale TZ is empty")
+            print("locale TZ is empty")
             """
             TROUBLESHOOT
             This warning indicates that the TZ environment variable has not been set.  
@@ -36,15 +37,15 @@ def locale_push():
 def locale_pop():
     global stack
     if stack is None:
-        output_error("locale pop failed; stack empty")
+        print("locale pop failed; stack empty")
         return
     else:
         next_locale = stack
         tz = "TZ=" + next_locale.tz
         stack = stack.next
-        if putenv(tz) != 0:
-            output_warning("locale pop failed")
+        if TimeStamp.putenv(tz) != 0:
+            print("locale pop failed")
             # TROUBLESHOOT: This is an internal error causes by a corrupt locale stack.
         else:
-            tzset()
+            TimeStamp.tzset()
         del next_locale

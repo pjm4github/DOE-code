@@ -2,9 +2,9 @@ from typing import List, Optional
 import time
 import math
 
-from gov_pnnl_goss.gridlab.gldcore.Globals import SUCCESS, DT_INFINITY, DT_INVALID, DT_SECOND, SIMULATIONMODE, FAILED
+from gov_pnnl_goss.gridlab.gldcore.Globals import SUCCESS,  SIMULATIONMODE, FAILED
+from gov_pnnl_goss.gridlab.gldcore.TimeStamp import DT_INFINITY, DT_INVALID, DT_SECOND
 from gov_pnnl_goss.gridlab.gldcore.GridLabD import gl_error
-from gridlab.gldcore.Exec import object_get_first
 from gridlab.gldcore.Module import Module
 from gridlab.gldcore.Object import Object, OF_DELTAMODE
 
@@ -93,7 +93,7 @@ def delta_init() -> STATUS:
     if global_deltamode_force_preferred_order:
         ordered_module = [False] * mod_count
 
-    for obj in object_get_first():
+    for obj in Object.object_get_first():
         if obj.flags & OF_DELTAMODE:
             delta_objectcount += 1
             if obj.rank > toprank:
@@ -108,7 +108,7 @@ def delta_init() -> STATUS:
     ranklist = [None] * (toprank + 1)
     rankcount = [0] * (toprank + 1)
 
-    for obj in object_get_first():
+    for obj in Object.object_get_first():
         if obj.flags & OF_DELTAMODE:
             rankcount[obj.rank] += 1
 
@@ -116,7 +116,7 @@ def delta_init() -> STATUS:
         if rankcount[n] > 0:
             ranklist[n] = [None] * rankcount[n]
 
-    for obj in object_get_first():
+    for obj in Object.object_get_first():
         if obj.flags & OF_DELTAMODE:
             ranklist[obj.rank][rankcount[obj.rank]] = obj
             rankcount[obj.rank] += 1

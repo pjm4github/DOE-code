@@ -22,7 +22,7 @@ class BGPGModelManagerTest:
         try:
             pg_data_request = PowergridModelDataRequest()
             # query_string = "SELECT ?feeder ?fid  WHERE {" \
-            # 		+ "?status r:type c:Feeder." \
+            # 		+ "?status r:global_property_types c:Feeder." \
             # 		+ "?status c:IdentifiedObject.name ?feeder." \
             # 		+ "?status c:IdentifiedObject.mRID ?fid." \
             # 		+ "?status c:Feeder.NormalEnergizingSubstation ?sub." \
@@ -39,7 +39,7 @@ class BGPGModelManagerTest:
             query_string = "SELECT ?name ?mRID ?substationName ?substationID " \
                            "?subregionName ?subregionID ?regionName " \
                            "?regionID WHERE { " \
-                           "?status r:type c:Feeder. " \
+                           "?status r:global_property_types c:Feeder. " \
                            "?status c:IdentifiedObject.name ?name. " \
                            "?status c:IdentifiedObject.mRID ?mRID. " \
                            "?status c:Feeder.NormalEnergizingSubstation ?subStation. " \

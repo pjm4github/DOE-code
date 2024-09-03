@@ -8,7 +8,7 @@ from gov_pnnl_goss.gridlab.gldcore.Globals import FAILED, SUCCESS, RANDOMNUMBERG
 from gov_pnnl_goss.gridlab.gldcore.Object import Object
 from gov_pnnl_goss.gridlab.gldcore.Output import output_warning, output_test
 from gov_pnnl_goss.gridlab.gldcore.Platform import QNAN
-from gov_pnnl_goss.gridlab.gldcore.Timestamp import TS_NEVER
+from gov_pnnl_goss.gridlab.gldcore.TimeStamp import TS_NEVER
 from gov_pnnl_goss.gridlab.gldcore.GldRandom import RandomType, RandomVar
 from gov_pnnl_goss.gridlab.gldcore.Unit import Unit
 
@@ -16,21 +16,21 @@ RNF_INTEGRATE = True
 
 random_map = [
     # tested
-    # name, type, nargs
-    {"name": "degenerate", "type": RandomType.RT_DEGENERATE, "nargs": 1},
-    {"name": "uniform", "type": RandomType.RT_UNIFORM, "nargs": 2},
-    {"name": "normal", "type": RandomType.RT_NORMAL, "nargs": 2},
-    {"name": "bernoulli", "type": RandomType.RT_BERNOULLI, "nargs": 1},
-    {"name": "sampled", "type": RandomType.RT_SAMPLED, "nargs": -1},
-    {"name": "pareto", "type": RandomType.RT_PARETO, "nargs": 2},
-    {"name": "lognormal", "type": RandomType.RT_LOGNORMAL, "nargs": 2},
-    {"name": "exponential", "type": RandomType.RT_EXPONENTIAL, "nargs": 1},
-    {"name": "rayleigh", "type": RandomType.RT_RAYLEIGH, "nargs": 1},
+    # name, global_property_types, nargs
+    {"name": "degenerate", "global_property_types": RandomType.RT_DEGENERATE, "nargs": 1},
+    {"name": "uniform", "global_property_types": RandomType.RT_UNIFORM, "nargs": 2},
+    {"name": "normal", "global_property_types": RandomType.RT_NORMAL, "nargs": 2},
+    {"name": "bernoulli", "global_property_types": RandomType.RT_BERNOULLI, "nargs": 1},
+    {"name": "sampled", "global_property_types": RandomType.RT_SAMPLED, "nargs": -1},
+    {"name": "pareto", "global_property_types": RandomType.RT_PARETO, "nargs": 2},
+    {"name": "lognormal", "global_property_types": RandomType.RT_LOGNORMAL, "nargs": 2},
+    {"name": "exponential", "global_property_types": RandomType.RT_EXPONENTIAL, "nargs": 1},
+    {"name": "rayleigh", "global_property_types": RandomType.RT_RAYLEIGH, "nargs": 1},
     # untested
-    {"name": "weibull", "type": RandomType.RT_WEIBULL, "nargs": 2},
-    {"name": "gamma", "type": RandomType.RT_GAMMA, "nargs": 1},
-    {"name": "beta", "type": RandomType.RT_BETA, "nargs": 2},
-    {"name": "triangle", "type": RandomType.RT_TRIANGLE, "nargs": 2},
+    {"name": "weibull", "global_property_types": RandomType.RT_WEIBULL, "nargs": 2},
+    {"name": "gamma", "global_property_types": RandomType.RT_GAMMA, "nargs": 1},
+    {"name": "beta", "global_property_types": RandomType.RT_BETA, "nargs": 2},
+    {"name": "triangle", "global_property_types": RandomType.RT_TRIANGLE, "nargs": 2},
     # @todo Add some other distributions (e.g., Cauchy, Laplace)  (ticket #56)*/
  ]
 
@@ -50,13 +50,13 @@ def convert_to_randomvar(string, var):
         param = param.strip()
         value = value.strip()
 
-        if param == "type":
+        if param == "global_property_types":
             type_info = re.match(r'(\w+)\(([^)]*)\)', value)
             if type_info:
                 type_name, args = type_info.groups()
-                var.type = random_type(type_name)
-                if var.type == RandomType.RT_INVALID:
-                    print(f"Error: invalid type '{type_name}'")
+                var.global_property_types = random_type(type_name)
+                if var.global_property_types == RandomType.RT_INVALID:
+                    print(f"Error: invalid global_property_types '{type_name}'")
                     return False
 
                 args = args.split(',')
@@ -64,7 +64,7 @@ def convert_to_randomvar(string, var):
                 if len(args) == 2:
                     var.b = float(args[1])
             else:
-                print(f"Error: missing '(' in type spec '{value}'")
+                print(f"Error: missing '(' in global_property_types spec '{value}'")
                 return False
 
         elif param == "min":
@@ -89,7 +89,7 @@ def convert_to_randomvar(string, var):
         elif param == "integrate":
             var.flags |= RNF_INTEGRATE
         elif re.match(r'[-+.\d]', param):
-            var.type = RandomType.RT_DEGENERATE
+            var.global_property_types = RandomType.RT_DEGENERATE
             var.a = float(param)
         elif param:
             print(f"Error: invalid parameter '{param}'")
@@ -101,17 +101,17 @@ def convert_to_randomvar(string, var):
 
 def random_type(name):
     """
-    Returns the type of the random variable given its name
+    Returns the global_property_types of the random variable given its name
     """
     for item in random_map:
         if item["name"] == name:
-            return item["type"]
+            return item["global_property_types"]
     return RandomType.RT_INVALID # Assuming RT_INVALID is represented by -1
 
 
 def random_nargs(name):
     """
-    Returns the number of arguments needed for the given random variable type.
+    Returns the number of arguments needed for the given random variable global_property_types.
     """
     for p in random_map:
         if p['name'] == name:
@@ -439,7 +439,7 @@ def random_specs(type, a, b):
     elif type == RandomType.RT_TRIANGLE:
         return f"triangle({a}, {b})"
     else:
-        raise ValueError(f"random_specs(type={type},...): type is not valid")
+        raise ValueError(f"random_specs(global_property_types={type},...): global_property_types is not valid")
 
 
 def random_apply(group_expression, property_name, random_type, *args):
@@ -449,7 +449,7 @@ def random_apply(group_expression, property_name, random_type, *args):
     Parameters:
     group_expression (str): The group definition.
     property_name (str): The property to update.
-    random_type (RANDOMTYPE): The distribution type.
+    random_type (RANDOMTYPE): The distribution global_property_types.
     *args: The distribution's parameters.
 
     Returns:
@@ -459,7 +459,7 @@ def random_apply(group_expression, property_name, random_type, *args):
     count = 0
 
     for obj in object_list:
-        # Generate random value based on the provided random type and parameters
+        # Generate random value based on the provided random global_property_types and parameters
         rv = _random_value(random_type, *args)
         # Set the property of the object to the random value
         Object.object_set_double_by_name(obj, property_name, rv)
@@ -470,7 +470,7 @@ def random_apply(group_expression, property_name, random_type, *args):
 
 def random_value(type_, *args):
     """
-    :param type_: the type of distribution desired
+    :param type_: the global_property_types of distribution desired
     :param args: the distribution's parameters
     :return:
     """
@@ -479,7 +479,7 @@ def random_value(type_, *args):
 
 def pseudorandom_value(type, *args):
     """
-    :param type: the type of distribution desired
+    :param type: the global_property_types of distribution desired
     :param args: the distribution's parameters
     :return:
     """
@@ -516,7 +516,7 @@ def _random_value(random_type, *args):
         return random_triangle(args[0], args[1])
         # @todo Add some other distributions (e.g., Cauchy, Laplace)  (ticket #56)*/
     else:
-        raise ValueError(f"_random_value: Unsupported random type {random_type}")
+        raise ValueError(f"_random_value: Unsupported random global_property_types {random_type}")
 
 
 def samp_mean(sample):
@@ -583,7 +583,7 @@ def convert_from_randomvar(data):
 # struct s_randomvar {
 # 	double value;				/**< current value */
 # 	unsigned int state;			/**< RNG state */
-# 	RANDOMTYPE type;			/**< RNG distribution */
+# 	RANDOMTYPE global_property_types;			/**< RNG distribution */
 # 	double a, b;				/**< RNG distribution parameters */
 # 	double low, high;			/**< RNG truncations limits */
 # 	unsigned int update_rate;	/**< RNG refresh rate in seconds */
@@ -604,7 +604,7 @@ def randomvar_create():
 
 def randomvar_update(var):
     while var.low < var.high and not (var.low < var.value and var.value < var.high):
-        v = pseudorandom_value(var.type, var.state, var.a, var.b)
+        v = pseudorandom_value(var.global_property_types, var.state, var.a, var.b)
         if var.flags & RNF_INTEGRATE:
             var.value += v
         else:
@@ -641,7 +641,7 @@ def randomvar_get_next(var):
 
 
 def randomvar_getspec(str_, size, var):
-    result = "state: {}; type: {}; min: {}; max: {}; refresh: {}{}".format(
+    result = "state: {}; global_property_types: {}; min: {}; max: {}; refresh: {}{}".format(
         var.state, "any", var.low, var.high, var.update_rate, "; integrate" if var.flags & RNF_INTEGRATE else "")
     if 0 < len(result) < size:
         str_[:len(result)] = result.encode()

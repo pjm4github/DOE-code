@@ -1,7 +1,7 @@
 # CIMHub
 
 ## Note: 
-### This directory is a refactor of the https://github.com/GRIDAPPSD/CIMHub.git repository that was clones and refactored on November 2023.  
+### This directory is a refactor of the https://github.com/GRIDAPPSD/CIMHub.git repository that was cloned and refactored on November 2023.  
 ### This does not use docker and runs directly in native Python 3.
 
 #### The files have been cloned to this directory:

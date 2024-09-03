@@ -2,14 +2,15 @@ import math
 import re
 
 from gov_pnnl_goss.gridlab.climate.CsvReader import PADDR
-from gov_pnnl_goss.gridlab.gldcore.Class import Class
-from gov_pnnl_goss.gridlab.gldcore.Convert import output_error, unit_find
-from gov_pnnl_goss.gridlab.gldcore.Exec import exec_clock
-from gov_pnnl_goss.gridlab.gldcore.GridLabD import TS_ZERO
+from gov_pnnl_goss.gridlab.gldcore.Class import DynamicClass
+from gov_pnnl_goss.gridlab.gldcore.Convert import unit_find
+from gov_pnnl_goss.gridlab.gldcore.TimeStamp import TS_ZERO
 from gov_pnnl_goss.gridlab.gldcore.Output import output_verbose
-from gov_pnnl_goss.gridlab.gldcore.Property import QNAN, PROPERTYTYPE, PROPERTY, PROPERTYACCESS
+from gov_pnnl_goss.gridlab.gldcore.PropertyHeader import PropertyType, PropertyAccess
 from enum import Enum, auto
 from ctypes import memset
+
+from gridlab.gldcore.Globals import STATUS
 
 EUC_IS110 = 0x0000
 EUC_IS220 = 0x0001
@@ -20,6 +21,21 @@ n_enduses = 0
 enduse_magic = 0x8c3d7762
 run = 0
 enduse_synctime = 0
+
+
+
+
+class EUMOTORTYPE(Enum):
+    EUMT_MOTOR_A = auto()  #  /**< 3ph induction motors driving constant torque loads */
+    EUMT_MOTOR_B = auto()  #  /**< induction motors driving high inertia speed-squares torque loads */
+    EUMT_MOTOR_C = auto()  #  /**< induction motors driving low inertia loads speed-squared torque loads
+    EUMT_MOTOR_D = auto()  #  /**< 1ph induction motors driving constant torque loads */
+    _EUMT_COUNT = auto()   # /* must be last */
+
+class EUELECTRONICTYPE(Enum):
+    EUET_ELECTRONIC_A = auto()
+    EUET_ELECTRONIC_B = auto()
+    _EUET_COUNT = auto()
 
 
 class Enduse:
@@ -85,7 +101,7 @@ class Enduse:
         if name == "total.arg":
             return e.total.Arg()
         if name == "total.ang":
-            return e.total.Arg() * 180 / PI
+            return e.total.Arg() * 180 / math.pi
 
         if name == "energy.real":
             return e.energy.Re()
@@ -96,7 +112,7 @@ class Enduse:
         if name == "energy.arg":
             return e.energy.Arg()
         if name == "energy.ang":
-            return e.energy.Arg() * 180 / PI
+            return e.energy.Arg() * 180 / math.pi
 
         if name == "demand.real":
             return e.demand.Re()
@@ -107,7 +123,7 @@ class Enduse:
         if name == "demand.arg":
             return e.demand.Arg()
         if name == "demand.ang":
-            return e.demand.Arg() * 180 / PI
+            return e.demand.Arg() * 180 / math.pi
 
         if name == "breaker_amps":
             return e.breaker_amps
@@ -121,7 +137,7 @@ class Enduse:
         if name == "admittance.arg":
             return e.admittance.Arg()
         if name == "admittance.ang":
-            return e.admittance.Arg() * 180 / PI
+            return e.admittance.Arg() * 180 / math.pi
 
         if name == "current.real":
             return e.current.Re()
@@ -132,7 +148,7 @@ class Enduse:
         if name == "current.arg":
             return e.current.Arg()
         if name == "current.ang":
-            return e.current.Arg() * 180 / PI
+            return e.current.Arg() * 180 / math.pi
 
         if name == "power.real":
             return e.power.Re()
@@ -143,7 +159,7 @@ class Enduse:
         if name == "power.arg":
             return e.power.Arg()
         if name == "power.ang":
-            return e.power.Arg() * 180 / PI
+            return e.power.Arg() * 180 / math.pi
 
         if name == "impedance_fraction":
             return e.impedance_fraction
@@ -167,84 +183,84 @@ class Enduse:
             return e.heatgain_fraction
 
         if name == "motorA.power":
-            return e.motor[EUMT_MOTOR_A].power
+            return e.motor[EUMOTORTYPE.EUMT_MOTOR_A].power
         if name == "motorA.impedance":
-            return e.motor[EUMT_MOTOR_A].impedance
+            return e.motor[EUMOTORTYPE.EUMT_MOTOR_A].impedance
         if name == "motorA.inertia":
-            return e.motor[EUMT_MOTOR_A].inertia
+            return e.motor[EUMOTORTYPE.EUMT_MOTOR_A].inertia
         if name == "motorA.v_stall":
-            return e.motor[EUMT_MOTOR_A].v_stall
+            return e.motor[EUMOTORTYPE.EUMT_MOTOR_A].v_stall
         if name == "motorA.v_start":
-            return e.motor[EUMT_MOTOR_A].v_start
+            return e.motor[EUMOTORTYPE.EUMT_MOTOR_A].v_start
         if name == "motorA.v_trip":
-            return e.motor[EUMT_MOTOR_A].v_trip
+            return e.motor[EUMOTORTYPE.EUMT_MOTOR_A].v_trip
         if name == "motorA.t_trip":
-            return e.motor[EUMT_MOTOR_A].t_trip
+            return e.motor[EUMOTORTYPE.EUMT_MOTOR_A].t_trip
 
         if name == "motorB.power":
-            return e.motor[EUMT_MOTOR_B].power
+            return e.motor[EUMOTORTYPE.EUMT_MOTOR_B].power
         if name == "motorB.impedance":
-            return e.motor[EUMT_MOTOR_B].impedance
+            return e.motor[EUMOTORTYPE.EUMT_MOTOR_B].impedance
         if name == "motorB.inertia":
-            return e.motor[EUMT_MOTOR_B].inertia
+            return e.motor[EUMOTORTYPE.EUMT_MOTOR_B].inertia
         if name == "motorB.v_stall":
-            return e.motor[EUMT_MOTOR_B].v_stall
+            return e.motor[EUMOTORTYPE.EUMT_MOTOR_B].v_stall
         if name == "motorB.v_start":
-            return e.motor[EUMT_MOTOR_B].v_start
+            return e.motor[EUMOTORTYPE.EUMT_MOTOR_B].v_start
         if name == "motorB.v_trip":
-            return e.motor[EUMT_MOTOR_B].v_trip
+            return e.motor[EUMOTORTYPE.EUMT_MOTOR_B].v_trip
         if name == "motorB.t_trip":
-            return e.motor[EUMT_MOTOR_B].t_trip
+            return e.motor[EUMOTORTYPE.EUMT_MOTOR_B].t_trip
 
         if name == "motorC.power":
-            return e.motor[EUMT_MOTOR_C].power
+            return e.motor[EUMOTORTYPE.EUMT_MOTOR_C].power
         if name == "motorC.impedance":
-            return e.motor[EUMT_MOTOR_C].impedance
+            return e.motor[EUMOTORTYPE.EUMT_MOTOR_C].impedance
         if name == "motorC.inertia":
-            return e.motor[EUMT_MOTOR_C].inertia
+            return e.motor[EUMOTORTYPE.EUMT_MOTOR_C].inertia
         if name == "motorC.v_stall":
-            return e.motor[EUMT_MOTOR_C].v_stall
+            return e.motor[EUMOTORTYPE.EUMT_MOTOR_C].v_stall
         if name == "motorC.v_start":
-            return e.motor[EUMT_MOTOR_C].v_start
+            return e.motor[EUMOTORTYPE.EUMT_MOTOR_C].v_start
         if name == "motorC.v_trip":
-            return e.motor[EUMT_MOTOR_C].v_trip
+            return e.motor[EUMOTORTYPE.EUMT_MOTOR_C].v_trip
         if name == "motorC.t_trip":
-            return e.motor[EUMT_MOTOR_C].t_trip
+            return e.motor[EUMOTORTYPE.EUMT_MOTOR_C].t_trip
 
         if name == "motorD.power":
-            return e.motor[EUMT_MOTOR_D].power
+            return e.motor[EUMOTORTYPE.EUMT_MOTOR_D].power
         if name == "motorD.impedance":
-            return e.motor[EUMT_MOTOR_D].impedance
+            return e.motor[EUMOTORTYPE.EUMT_MOTOR_D].impedance
         if name == "motorD.inertia":
-            return e.motor[EUMT_MOTOR_D].inertia
+            return e.motor[EUMOTORTYPE.EUMT_MOTOR_D].inertia
         if name == "motorD.v_stall":
-            return e.motor[EUMT_MOTOR_D].v_stall
+            return e.motor[EUMOTORTYPE.EUMT_MOTOR_D].v_stall
         if name == "motorD.v_start":
-            return e.motor[EUMT_MOTOR_D].v_start
+            return e.motor[EUMOTORTYPE.EUMT_MOTOR_D].v_start
         if name == "motorD.v_trip":
-            return e.motor[EUMT_MOTOR_D].v_trip
+            return e.motor[EUMOTORTYPE.EUMT_MOTOR_D].v_trip
         if name == "motorD.t_trip":
-            return e.motor[EUMT_MOTOR_D].t_trip
+            return e.motor[EUMOTORTYPE.EUMT_MOTOR_D].t_trip
 
         if name == "electronicA.power":
-            return e.electronic[EUMT_MOTOR_A].power
+            return e.electronic[EUMOTORTYPE.EUMT_MOTOR_A].power
         if name == "electronicA.inertia":
-            return e.electronic[EUMT_MOTOR_A].inertia
+            return e.electronic[EUMOTORTYPE.EUMT_MOTOR_A].inertia
         if name == "electronicA.v_trip":
-            return e.electronic[EUMT_MOTOR_A].v_trip
+            return e.electronic[EUMOTORTYPE.EUMT_MOTOR_A].v_trip
         if name == "electronicA.v_start":
-            return e.electronic[EUMT_MOTOR_A].v_start
+            return e.electronic[EUMOTORTYPE.EUMT_MOTOR_A].v_start
 
         if name == "electronicB.power":
-            return e.electronic[EUMT_MOTOR_B].power
+            return e.electronic[EUMOTORTYPE.EUMT_MOTOR_B].power
         if name == "electronicB.inertia":
-            return e.electronic[EUMT_MOTOR_B].inertia
+            return e.electronic[EUMOTORTYPE.EUMT_MOTOR_B].inertia
         if name == "electronicB.v_trip":
-            return e.electronic[EUMT_MOTOR_B].v_trip
+            return e.electronic[EUMOTORTYPE.EUMT_MOTOR_B].v_trip
         if name == "electronicB.v_start":
-            return e.electronic[EUMT_MOTOR_B].v_start
+            return e.electronic[EUMOTORTYPE.EUMT_MOTOR_B].v_start
 
-        return QNAN
+        return math.nan
 
 
     def enduse_create(self, data):
@@ -252,8 +268,8 @@ class Enduse:
         Create an enduse for debugging.
         """
 
+        global enduse_list, n_enduses
 
-        memset(data, 0, sizeof(enduse))
         data.next = enduse_list
         enduse_list = data
         n_enduses += 1
@@ -262,8 +278,8 @@ class Enduse:
         data.heatgain_fraction = 1.0
 
         # Enable debugging
-        if _DEBUG:
-            data.magic = enduse_magic
+        # if _DEBUG:
+        #     data.magic = enduse_magic
 
         return 1
 
@@ -287,10 +303,10 @@ class Enduse:
 
         e = enduse_list
         while e is not None:
-            if enduse_init(e) == 1:
-                return FAILED
+            if self.enduse_init(e) == 1:
+                return STATUS.FAILED
             e = e.next
-        return SUCCESS
+        return STATUS.SUCCESS
 
     def enduse_sync(self, e, passconfig, t1):
         """
@@ -313,13 +329,15 @@ class Enduse:
         len = 0
 
         def OUTPUT_NZ(X):
-            nonlocal len
+            string = ""
             if getattr(e, X) != 0:
-                len += len + sprintf(string + len, "%s%s: %f", "" if len > 0 else "; ", X, getattr(e, X))
+                string += "%s%s: %f".format("" if len > 0 else "; ", X, getattr(e, X))
+            return string
 
         def OUTPUT(X):
-            nonlocal len
-            len += sprintf(string + len, "%s%s: %f", "" if len > 0 else "; ", X, getattr(e, X))
+            string = ""
+            string += "%s%s: %f".format( "" if len > 0 else "; ", X, getattr(e, X))
+            return string
 
         OUTPUT_NZ("impedance_fraction")
         OUTPUT_NZ("current_fraction")
@@ -330,9 +348,9 @@ class Enduse:
 
         return len
 
-    def enduse_publish(self, oclass, struct_address, prefix):
+    def enduse_publish(self, owner_class, struct_address, prefix):
         """
-        Publish the enduse properties for a specific oclass and prefix.
+        Publish the enduse properties for a specific owner_class and prefix.
         """
         pass
 
@@ -357,18 +375,18 @@ class Enduse:
 
         test = [Test("TODO")]
 
-        output_test("\nBEGIN: enduse tests")
+        print("\nBEGIN: enduse tests")
 
         for p in test:
             pass
 
         if failed:
-            output_error("endusetest: %d enduse tests failed--see test.txt for more information" % failed)
-            output_test("!!! %d enduse tests failed, %d errors found" % (failed, errorcount))
+            print("endusetest: %d enduse tests failed--see test.txt for more information" % failed)
+            print("!!! %d enduse tests failed, %d errors found" % (failed, errorcount))
         else:
             output_verbose("%d enduse tests completed with no errors--see test.txt for details" % ok)
-            output_test("endusetest: %d schedule tests completed, %d errors found" % (ok, errorcount))
-        output_test("END: enduse tests")
+            print("endusetest: %d schedule tests completed, %d errors found" % (ok, errorcount))
+        print("END: enduse tests")
         return failed
 
     def enduse_syncproc(self, ptr):
@@ -377,7 +395,7 @@ class Enduse:
         """
         pass
 
-    def exec_clock(self):
+    def clock(self):
         """
         Execute the enduse clock function.
         """
@@ -399,20 +417,6 @@ class EnduseSyncData:
 
 
 
-
-
-
-class EUMOTORTYPE(Enum):
-    EUMT_MOTOR_A = auto()  #  /**< 3ph induction motors driving constant torque loads */
-    EUMT_MOTOR_B = auto()  #  /**< induction motors driving high inertia speed-squares torque loads */
-    EUMT_MOTOR_C = auto()  #  /**< induction motors driving low inertia loads speed-squared torque loads
-    EUMT_MOTOR_D = auto()  #  /**< 1ph induction motors driving constant torque loads */
-    _EUMT_COUNT = auto()   # /* must be last */
-
-class EUELECTRONICTYPE(Enum):
-    EUET_ELECTRONIC_A = auto()
-    EUET_ELECTRONIC_B = auto()
-    _EUET_COUNT = auto()
 
 
 class EUMOTOR:
@@ -495,12 +499,12 @@ class EUELECTRONIC:
 
         return output_string
 
-    def publish(self, oclass, struct_address, prefix):
+    def publish(self, owner_class, struct_address, prefix):
         """
         Publish properties of an enduse class.
 
         Args:
-            oclass (Class): The class to which properties are published.
+            owner_class (DynamicClass): The class to which properties are published.
             struct_address: The struct address.
             prefix (str): The prefix for property names.
 
@@ -519,43 +523,44 @@ class EUELECTRONIC:
                 self.flags = flags
 
         prop_list = [
-            PropItem(PROPERTYTYPE.PT_complex, "energy[kVAh]", PADDR(self.energy),
+            PropItem(PropertyType.PT_complex, "energy[kVAh]", PADDR(self.energy),
                      "the total energy consumed since the last meter reading", 0),
-            PropItem(PROPERTYTYPE.PT_complex, "power[kVA]", PADDR(self.total), "the total power consumption of the load", 0),
-            PropItem(PROPERTYTYPE.PT_complex, "peak_demand[kVA]", PADDR(self.demand),
+            PropItem(PropertyType.PT_complex, "power[kVA]", PADDR(self.total), "the total power consumption of the load", 0),
+            PropItem(PropertyType.PT_complex, "peak_demand[kVA]", PADDR(self.demand),
                      "the peak power consumption since the last meter reading", 0),
-            PropItem(PROPERTYTYPE.PT_double, "heatgain[Btu/h]", PADDR(self.heatgain),
+            PropItem(PropertyType.PT_double, "heatgain[Btu/h]", PADDR(self.heatgain),
                      "the heat transferred from the enduse to the parent", 0),
-            PropItem(PROPERTYTYPE.PT_double, "cumulative_heatgain[Btu]", PADDR(self.cumulative_heatgain),
+            PropItem(PropertyType.PT_double, "cumulative_heatgain[Btu]", PADDR(self.cumulative_heatgain),
                      "the cumulative heatgain from the enduse to the parent", 0),
-            PropItem(PROPERTYTYPE.PT_double, "heatgain_fraction[pu]", PADDR(self.heatgain_fraction),
+            PropItem(PropertyType.PT_double, "heatgain_fraction[pu]", PADDR(self.heatgain_fraction),
                      "the fraction of the heat that goes to the parent", 0),
-            PropItem(PROPERTYTYPE.PT_double, "current_fraction[pu]", PADDR(self.current_fraction),
+            PropItem(PropertyType.PT_double, "current_fraction[pu]", PADDR(self.current_fraction),
                      "the fraction of total power that is constant current", 0),
-            PropItem(PROPERTYTYPE.PT_double, "impedance_fraction[pu]", PADDR(self.impedance_fraction),
+            PropItem(PropertyType.PT_double, "impedance_fraction[pu]", PADDR(self.impedance_fraction),
                      "the fraction of total power that is constant impedance", 0),
-            PropItem(PROPERTYTYPE.PT_double, "power_fraction[pu]", PADDR(self.power_fraction),
+            PropItem(PropertyType.PT_double, "power_fraction[pu]", PADDR(self.power_fraction),
                      "the fraction of the total power that is constant power", 0),
-            PropItem(PROPERTYTYPE.PT_double, "power_factor", PADDR(self.power_factor), "the power factor of the load", 0),
-            PropItem(PROPERTYTYPE.PT_complex, "constant_power[kVA]", PADDR(self.power), "the constant power portion of the total load",
+            PropItem(PropertyType.PT_double, "power_factor", PADDR(self.power_factor), "the power factor of the load", 0),
+            PropItem(PropertyType.PT_complex, "constant_power[kVA]", PADDR(self.power), "the constant power portion of the total load",
                      0),
-            PropItem(PROPERTYTYPE.PT_complex, "constant_current[kVA]", PADDR(self.current),
+            PropItem(PropertyType.PT_complex, "constant_current[kVA]", PADDR(self.current),
                      "the constant current portion of the total load", 0),
-            PropItem(PROPERTYTYPE.PT_complex, "constant_admittance[kVA]", PADDR(self.admittance),
+            PropItem(PropertyType.PT_complex, "constant_admittance[kVA]", PADDR(self.admittance),
                      "the constant admittance portion of the total load", 0),
-            PropItem(PROPERTYTYPE.PT_double, "voltage_factor[pu]", PADDR(self.voltage_factor), "the voltage change factor", 0),
-            PropItem(PROPERTYTYPE.PT_double, "breaker_amps[A]", PADDR(self.breaker_amps), "the rated breaker amperage", 0),
-            PropItem(PROPERTYTYPE.PT_set, "configuration", PADDR(self.config), "the load configuration options", 0),
-            PropItem(PROPERTYTYPE.PT_KEYWORD, "IS110", "EUC_IS110", None, 0),
-            PropItem(PROPERTYTYPE.PT_KEYWORD, "IS220", "EUC_IS220", None, 0),
+            PropItem(PropertyType.PT_double, "voltage_factor[pu]", PADDR(self.voltage_factor), "the voltage change factor", 0),
+            PropItem(PropertyType.PT_double, "breaker_amps[A]", PADDR(self.breaker_amps), "the rated breaker amperage", 0),
+            PropItem(PropertyType.PT_set, "configuration", PADDR(self.config), "the load configuration options", 0),
+            PropItem(PropertyType.PT_KEYWORD, "IS110", "EUC_IS110", None, 0),
+            PropItem(PropertyType.PT_KEYWORD, "IS220", "EUC_IS220", None, 0),
         ]
 
-      # Publish the enduse load itself
-        prop = PROPERTY(PROPERTYTYPE.PT_enduse, oclass, "load" if prefix == "" else prefix, struct_address, None)
+        # Publish the enduse load itself
+        from gridlab.gldcore.Property import Property
+        prop = Property(PropertyType.PT_enduse, owner_class, "load" if prefix == "" else prefix, struct_address, None)
 
         prop.description = "the enduse load description"
         prop.flags = 0
-        Class.class_add_property(oclass, prop)
+        DynamicClass.class_add_property(owner_class, prop)
 
         last = None
         for p in prop_list:
@@ -565,39 +570,39 @@ class EUELECTRONIC:
             if prefix != "" and prefix is not None:
                 name = f"{prefix}.{p.name}"
 
-            if p.ptype < PROPERTYTYPE._PT_LAST:
-                prop = PROPERTY(p.ptype, oclass, name, p.addr + struct_address, None)
+            if p.ptype < PropertyType._PT_LAST:
+                prop = Property(p.ptype, owner_class, name, p.addr + struct_address, None)
                 prop.description = p.description
                 prop.flags = p.flags
-                Class.class_add_property(oclass, prop)
+                DynamicClass.class_add_property(owner_class, prop)
                 result += 1
             elif last is None:
-                output_error("PT_KEYWORD not allowed unless it follows another property specification")
+                print("PT_KEYWORD not allowed unless it follows another property specification")
                 """
                 The enduse_publish structure is not defined correctly. This is an internal error and cannot be corrected by
                 users. Contact technical support and report this problem.
                 """
                 return -result
-            elif p.ptype == PROPERTYTYPE.PT_KEYWORD:
-                if last.ptype == PROPERTYTYPE.PT_enumeration:
-                    if not Class.class_define_enumeration_member(oclass, lastname, p.name, p.ptype):
-                        output_error(f"unable to publish enumeration member '{p.name}' of enduse '{last.name}'")
+            elif p.ptype == PropertyType.PT_KEYWORD:
+                if last.ptype == PropertyType.PT_enumeration:
+                    if not DynamicClass.class_define_enumeration_member(owner_class, lastname, p.name, p.ptype):
+                        print(f"unable to publish enumeration member '{p.name}' of enduse '{last.name}'")
                         """
                         The enduse_publish structure is not defined correctly. This is an internal error and cannot be corrected by
                         users. Contact technical support and report this problem.
                         """
                         return -result
-                elif last.ptype == PROPERTYTYPE.PT_set:
-                    if not Class.class_define_set_member(oclass, lastname, p.name, int(p.addr)):
-                        output_error(f"unable to publish set member '{p.name}' of enduse '{last.name}'")
+                elif last.ptype == PropertyType.PT_set:
+                    if not DynamicClass.class_define_set_member(owner_class, lastname, p.name, int(p.addr)):
+                        print(f"unable to publish set member '{p.name}' of enduse '{last.name}'")
                         """
                         The enduse_publish structure is not defined correctly. This is an internal error and cannot be corrected by
                         users. Contact technical support and report this problem.
                         """
                         return -result
                 else:
-                    output_error(
-                        f"PT_KEYWORD not supported after property '{Class.class_get_property_typename(last.ptype)} {last.name}' in enduse.publish")
+                    print(
+                        f"PT_KEYWORD not supported after property '{DynamicClass.class_get_property_typename(last.ptype)} {last.name}' in enduse.publish")
 
     def test(self):
         failed = 0
@@ -617,7 +622,7 @@ class EUELECTRONIC:
             # Perform test
 
         if failed:
-            output_error("endusetest: %d enduse tests failed--see test.txt for more information", failed)
+            print("endusetest: %d enduse tests failed--see test.txt for more information", failed)
             print("!!! %d enduse tests failed, %d errors found" % (failed, error_count))
         else:
             output_verbose("%d enduse tests completed with no errors--see test.txt for details", ok)
@@ -659,7 +664,7 @@ class EUELECTRONIC:
             elif X == "D":
                 IND = EUMOTORTYPE.EUMT_MOTOR_D
             else:
-                raise Exception("wrong motor type")
+                raise Exception("wrong motor global_property_types")
             do_complex(self.motor[IND].power, "motor"+X+".power")
             do_complex(self.motor[IND].impedance, "motor"+X+".impedance")
             do_double(self.motor[IND].inertia, "motor"+X+".inertia")
@@ -679,7 +684,7 @@ class EUELECTRONIC:
             elif X == "D":
                 IND = EUMOTORTYPE.EUMT_MOTOR_D
             else:
-                raise Exception("wrong motor type")
+                raise Exception("wrong motor global_property_types")
             do_complex(self.electronic[IND].power, "electronic"+X+".power")
             do_double(self.electronic[IND].inertia, "electronic"+X+".inertia")
             do_double(self.electronic[IND].v_trip, "electronic"+X+".v_trip")
@@ -704,7 +709,7 @@ class EUELECTRONIC:
         do_motor("D")
         do_electronic("A")
         do_electronic("B")
-        return QNAN
+        return math.nan
 
 
 class EnduseSync:
@@ -773,7 +778,7 @@ class EnduseSync:
             print("passed donecount==0 condition")
             if next_t2_ed < t2:
                 t2 = next_t2_ed
-        enduse_synctime += exec_clock()
+        enduse_synctime += Enduse.clock()
         enduse_synctime -= ts
         return t2
 
@@ -781,7 +786,7 @@ class EnduseSync:
     def convert_from(self, string, size, data, prop):
         pass
 
-    def publish(self, oclass, struct_address, prefix):
+    def publish(self, owner_class, struct_address, prefix):
         pass
 
     def convert_to_struct(self, string, data, props):
@@ -793,10 +798,11 @@ class EnduseSync:
         token = None
         if string[0] == '{':
             unit = unit_find("kVA")
+            from gridlab.gldcore.Property import Property
             eus = [
-                PROPERTY(None, "total", PROPERTYTYPE.PT_complex, 0, 0, PROPERTYACCESS.PA_PUBLIC, unit, e.total, None, None, None, prop.next()),
-                PROPERTY(None, "energy", PROPERTYTYPE.PT_complex, 0, 0, PROPERTYACCESS.PA_PUBLIC, unit, e.energy, None, None, None, prop.next()),
-                PROPERTY(None, "demand", PROPERTYTYPE.PT_complex, 0, 0, PROPERTYACCESS.PA_PUBLIC, unit, e.demand, None, None, None, prop.next())
+                Property(None, "total", PropertyType.PT_complex, 0, 0, PropertyAccess.PA_PUBLIC, unit, e.total, None, None, None, prop.next()),
+                Property(None, "energy", PropertyType.PT_complex, 0, 0, PropertyAccess.PA_PUBLIC, unit, e.energy, None, None, None, prop.next()),
+                Property(None, "demand", PropertyType.PT_complex, 0, 0, PropertyAccess.PA_PUBLIC, unit, e.demand, None, None, None, prop.next())
             ]  
             return self.convert_to_struct(string, data, eus)
 

@@ -59,13 +59,13 @@ def http_create(s):
 
 def http_reset(http_cnx):
     http_cnx['status'] = None
-    http_cnx['type'] = None
+    http_cnx['global_property_types'] = None
 
 def http_status(http_cnx, status):
     http_cnx.status = status
 
 def http_type(http_cnx, type):
-    http_cnx.type = type
+    http_cnx.global_property_types = type
 
 
 def http_send(http):
@@ -73,12 +73,12 @@ def http_send(http):
     len = 0
     len += len(header[len:])
     header += "HTTP/1.1 {}".format(http.status if http.status else "HTTP_INTERNALSERVERERROR")
-    output_verbose("{} (len={}, mime={})".format(header, http.len, http.type if http.type else "none"))
+    output_verbose("{} (len={}, mime={})".format(header, http.len, http.global_property_types if http.global_property_types else "none"))
     len += len(header[len:])
     header += "\nContent-Length: {}\n".format(http.len)
-    if http.type and http.type[0] != '\0':
+    if http.global_property_types and http.global_property_types[0] != '\0':
         len += len(header[len:])
-        header += "Content-Type: {}\n".format(http.type)
+        header += "Content-Type: {}\n".format(http.global_property_types)
     len += len(header[len:])
     header += "Cache-Control: no-cache\n"
     len += len(header[len:])

@@ -3,6 +3,9 @@
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
 import errno
 
+from numpy.random import rand
+
+
 class ListItem:
     def __init__(self, data, prev=None, next=None):
         self.data = data
@@ -54,8 +57,6 @@ def list_shuffle(list):
     pass
 
 
-Here's the converted Python function using snake_case function names:
-
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
 import ctypes
 from ctypes.util import find_library
@@ -75,8 +76,6 @@ def list_create():
         errno = ctypes.get_errno()
         errno = ctypes.set_errno(errno)
     return list_
-```
-In this Python function, I used the `ctypes` library to represent the C `GLLIST` struct and to allocate memory for the struct using `malloc`. I also used `ctypes.cast` to convert the pointer to the `GLLIST` struct. I used `ctypes.get_errno` and `ctypes.set_errno` to handle the error case.
 
 def list_shuffle(list):
     if list is None:

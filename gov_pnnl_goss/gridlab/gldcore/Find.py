@@ -1,3 +1,4 @@
+import os
 from enum import Enum
 import re
 from typing import Union, List
@@ -86,6 +87,26 @@ class PgmConstFlags(Enum):
     CF_CONSTANT = 0x8000  # entire criteria is invariant
 
 
+class FindProgramNew:
+    def __init__(self, criteria):
+        self.criteria = criteria  # A dictionary of criteria used for filtering objects
+
+    def run(self, all_objects):
+        # Execute the find program on a list of all_objects and return the matching ones
+        return [obj for obj in all_objects if self.matches_criteria(obj)]
+
+    @staticmethod
+    def matches_criteria(obj):
+        # Placeholder for matching logic
+        # return all(getattr(obj, key) == value for key, value in obj.criteria.items())
+        # Placeholder for matching logic
+        try:
+            return all(getattr(obj, key) == value for key, value in obj.items())
+        except AttributeError as e:
+            return None
+
+    find_program = matches_criteria
+
 class FindPgm:
     def __init__(self, constflags: PgmConstFlags, op: CompareFunc, target: int, value: FindValue,
                  pos: FoundAction, neg: FoundAction, next_pgm):
@@ -134,20 +155,32 @@ class Find:
         pass
 
     @staticmethod
-    def find_runpgm(find_list: FindList, pgm: FindPgm):
-        pass
+    def find_runpgm(pgm: FindPgm)->FindList:
+        find_list = FindList()
+        return find_list  # find_list: FindList
+
 
     @staticmethod
     def find_mkpgm(search: str):
-        pass
+        # Placeholder for creating a find program from the parsed expression
+        # In actual implementation, this would involve querying an object database or similar
+        # Create a FindProgramNew object based on the parsed group expression
+        # return FindProgramNew(parsed_expression)
+        return None
 
     @staticmethod
     def find_pgmconstants(pgm: FindPgm):
         pass
 
     @staticmethod
-    def find_file(name: str, path: str, mode: int, buffer: str, len: int):
-        pass
+    def find_file(name: str, path: str, mode: int):
+        buffer = None
+        for root, dirs, files in os.walk(path):
+            if name in files:
+                buffer = os.path.join(root, name)
+                if not os.access(buffer, mode):
+                    buffer = None
+        return buffer
 
     @staticmethod
     def find_make_invariant(pgm: FindPgm, mode: int):
@@ -158,7 +191,7 @@ class ObjList:
         pass
 
     @staticmethod
-    def objlist_create(oclass, match_property, match_part, match_op, match_value1, match_value2):
+    def objlist_create(owner_class, match_property, match_part, match_op, match_value1, match_value2):
         pass
 
     @staticmethod

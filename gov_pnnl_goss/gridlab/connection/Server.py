@@ -39,7 +39,7 @@ def create_socket(type):
     elif type == "SOCK_DGRAM":  # udp
         local = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
     else:
-        gl_error("unsupported/unspecified socket type")
+        gl_error("unsupported/unspecified socket global_property_types")
         return 0
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
@@ -88,7 +88,7 @@ class Server:
         elif self.type == "SOCK_DGRAM":
             self.local = Socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)
         else:
-            gl_error("unsupported/unspecified socket type")
+            gl_error("unsupported/unspecified socket global_property_types")
             return 0
         
         self.local.set_family(AF_INET)
@@ -178,7 +178,7 @@ class Server:
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106 python
 def set_type(self, t):
-    if self.type != 0:
-        raise Exception("server::set_type(int): unable to set socket type after server is created")
-    self.type = t
+    if self.global_property_types != 0:
+        raise Exception("server::set_type(int): unable to set socket global_property_types after server is created")
+    self.global_property_types = t
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106 

@@ -463,7 +463,7 @@ def TechnologyParametersFunc(use_flags, TechToTest):
 
 		# waterheaters 1 = yes, 0 = no
 		data["use_wh"] = 1; 
-		# Meter data is from Itron type meters (Centrution vs. OpenWay)
+		# Meter data is from Itron global_property_types meters (Centrution vs. OpenWay)
 		if (data["meter_consumption"] == 1):
 			data["res_meter_cons"] = '1+7j'; # Electromechanical (VAr)
 		elif (data["meter_consumption"] == 2):
@@ -537,7 +537,7 @@ def TechnologyParametersFunc(use_flags, TechToTest):
 		data["c_ifrac"] = 0.4;
 		data["c_pfrac"] = 1 - data["c_zfrac"] - data["c_ifrac"];
 
-		# Meter data is from Itron type meters (Centrution vs. OpenWay)
+		# Meter data is from Itron global_property_types meters (Centrution vs. OpenWay)
 		if (data["meter_consumption"] == 1):
 			data["comm_meter_cons"] = '1+15j'; # Electromechanical (VAr)
 		elif (data["meter_consumption"] == 2):

@@ -1,3 +1,13 @@
+# Source Code Modules
+
+This is a conversion of GridLabD gldcore cpp code to python.
+
+The conversion is done to match the structure of the original code as closely as possible. Much of the code is 
+rewritten to use more pythonic data structures with Classes and Datatypes and built in memory management features. 
+The original code is available locally here: [**gldcore**](%USERNAME%\Documents\Git\GitHub\gridlab-d\gldcore)
+
+Here are the module definitions as deciphered by ChatGPT 4.0
+
 ## **aggregate.cpp**
 This C++ code appears to be a part of a larger system for aggregating object properties. It defines functions for
 creating and performing aggregations over properties of multiple objects.
@@ -23,10 +33,11 @@ The code is quite extensive and involves multiple functions and data structures.
 
 It seems to be part of a larger software system for managing and manipulating object-oriented data.
 
-If you have specific questions about certain parts of the code or need further explanation on particular functions, feel
-free to ask.
+This module maintains the registry of classes used within the GridAppsD application framework. In addition to the registry it 
+contains tools for adding, modifying and collecting classes dynamically within the framework.
 
 ## **cmdarg.cpp**
+
 The code provided is a C++ source file of a simulation framework called GridLAB-D.
 It includes a variety of functions related to command-line argument parsing, module loading, and utility functions for
 handling classes and properties.
@@ -2677,7 +2688,8 @@ multi-part simulations.
 This function captures a GNUplot script enclosed within curly braces. The script is associated with a GUI entity, likely
 for plotting or visualizing simulation data within the software's graphical user interface.
 
-### `gui_link_globalvar(PARSER, GLOBALVAR **var)`, `gui_entity_parameter(PARSER, GUIENTITY *entity)`, and related GUI parsing functions
+### `gui_link_globalvar(PARSER, GLOBALVAR **var)`,  `gui_entity_parameter(PARSER, GUIENTITY *entity)`
+   and related GUI parsing functions
 
 These functions are part of a GUI configuration parser, handling the definition of graphical interface elements that
 interact with the simulation. They allow the specification of various GUI widgets like inputs, tables, graphs, and

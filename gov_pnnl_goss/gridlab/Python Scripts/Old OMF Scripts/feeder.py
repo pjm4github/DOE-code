@@ -90,7 +90,7 @@ def fullyDeEmbed(glmTree):
 		lenDiff = len(glmTree) - currLen
 
 def attachRecorders(tree, recorderType, keyToJoin, valueToJoin):
-	''' Walk through a tree an and attach Gridlab recorders to the indicated type of node.'''
+	''' Walk through a tree an and attach Gridlab recorders to the indicated global_property_types of node.'''
 	# HACK: the biggestKey assumption only works for a flat tree or one that has a flat node for the last item...
 	biggestKey = sorted([int(key) for key in tree.keys()])[-1] + 1
 	# Types of recorders we can attach:
@@ -164,17 +164,17 @@ def treeToNxGraph(inTree):
 		item = inTree[key]
 		if 'name' in item.keys():
 			if 'parent' in item.keys():
-				outGraph.add_edge(item['name'],item['parent'], attr_dict={'type':'parentChild','phases':1})
-				outGraph.node[item['name']]['type']=item['object']
+				outGraph.add_edge(item['name'],item['parent'], attr_dict={'global_property_types':'parentChild','phases':1})
+				outGraph.node[item['name']]['global_property_types']=item['object']
 				outGraph.node[item['name']]['pos']=(float(item.get('latitude',0)),float(item.get('longitude',0)))
 			elif 'from' in item.keys():
 				myPhase = _phaseCount(item.get('phases','AN'))
-				outGraph.add_edge(item['from'],item['to'],attr_dict={'type':item['object'],'phases':myPhase})
+				outGraph.add_edge(item['from'],item['to'],attr_dict={'global_property_types':item['object'],'phases':myPhase})
 			elif item['name'] in outGraph:
 				# Edge already led to node'status addition, so just set the attributes:
-				outGraph.node[item['name']]['type']=item['object']
+				outGraph.node[item['name']]['global_property_types']=item['object']
 			else:
-				outGraph.add_node(item['name'],attr_dict={'type':item['object']})
+				outGraph.add_node(item['name'],attr_dict={'global_property_types':item['object']})
 			if 'latitude' in item.keys() and 'longitude' in item.keys():
 				outGraph.node.get(item['name'],{})['pos']=(float(item['latitude']),float(item['longitude']))
 	return outGraph
@@ -196,7 +196,7 @@ def latLonNxGraph(inGraph, labels=False, neatoLayout=False):
 		pos = {n:inGraph.node[n].get('pos',(0,0)) for n in inGraph}
 	# Draw all the edges.
 	for e in inGraph.edges():
-		eType = inGraph.edge[e[0]][e[1]]['type']
+		eType = inGraph.edge[e[0]][e[1]]['global_property_types']
 		ePhases = inGraph.edge[e[0]][e[1]]['phases']
 		standArgs = {'edgelist':[e],
 					 'edge_color':_obToCol(eType),
@@ -219,7 +219,7 @@ def latLonNxGraph(inGraph, labels=False, neatoLayout=False):
 	# Draw nodes and optional labels.
 	nx.draw_networkx_nodes(inGraph,pos,
 						   nodelist=pos.keys(),
-						   node_color=[_obToCol(inGraph.node[n]['type']) for n in inGraph],
+						   node_color=[_obToCol(inGraph.node[n]['global_property_types']) for n in inGraph],
 						   linewidths=0,
 						   node_size=40)
 	if labels:
@@ -424,7 +424,7 @@ def _phaseCount(phaseString):
 	return sum([phaseString.lower().count(x) for x in ['a','b','c']])
 
 def _obToCol(obStr):
-	''' Graph drawing helper to color by node/edge type. '''
+	''' Graph drawing helper to color by node/edge global_property_types. '''
 	obToColor = {'node':'gray',
 		'house':'#3366FF',
 		'load':'#3366FF',
@@ -447,7 +447,7 @@ def _tests():
 	tokens = ['clock','{','clockey','valley','}','object','house','{','name','myhouse',';',
 		'object','ZIPload','{','inductance','bigind',';','power','newpower','}','size','234sqft','}']
 	obType = type(_parseTokenList(tokens))
-	print 'Parsed tokens into object of type:', obType
+	print 'Parsed tokens into object of global_property_types:', obType
 	assert obType is dict
 	# Recorder Attachment Test
 	tree = _testImportTree('public/Olin Barre Geo')

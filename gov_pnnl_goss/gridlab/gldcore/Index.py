@@ -3,6 +3,9 @@
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
 import errno
 
+from gridlab.gldcore.Globals import FAILED, SUCCESS
+
+
 class Index:
     def __init__(self):
         self.next_index_id = 0
@@ -65,9 +68,9 @@ class INDEX:
     @staticmethod
     def insert(index, obj, rank):
         if index is None:
-            return Status.FAILED
+            return FAILED
 
         index['objects'].append({'object': obj, 'rank': rank})
-        return Status.SUCCESS
+        return SUCCESS
 
 

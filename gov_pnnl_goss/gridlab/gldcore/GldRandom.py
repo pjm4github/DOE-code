@@ -54,7 +54,7 @@ class RandomVar:
 #
 # class randomvar_struct:
 #     def __init__(self):
-#         self.type = RandomType.RT_INVALID  # RNG distribution
+#         self.global_property_types = RandomType.RT_INVALID  # RNG distribution
 #         self.value = None  # current value
 #         self.low = None  # RNG truncations limits
 #         self.high = None  # RNG truncations limits

@@ -53,7 +53,7 @@ busphases = {}
 qstr = CIMHubConfig.prefix + """SELECT ?bus WHERE { VALUES ?fdrid {\"""" + sys.argv[3] + """\"}
  ?fdr c:IdentifiedObject.mRID ?fdrid.
  ?status c:ConnectivityNode.ConnectivityNodeContainer ?fdr.
- ?status r:type c:ConnectivityNode.
+ ?status r:global_property_types c:ConnectivityNode.
  ?status c:IdentifiedObject.name ?bus.
 }
 ORDER by ?bus
@@ -67,7 +67,7 @@ for b in ret.bindings:
 #################### capacitors
 
 qstr = CIMHubConfig.prefix + """SELECT ?name ?bus ?phases ?eqid ?trmid WHERE {""" + fidselect + """
- ?status r:type c:LinearShuntCompensator.
+ ?status r:global_property_types c:LinearShuntCompensator.
  ?status c:IdentifiedObject.name ?name.
  ?status c:IdentifiedObject.mRID ?eqid. 
  ?t c:Terminal.ConductingEquipment ?status.
@@ -95,7 +95,7 @@ for b in ret.bindings:
 #################### regulators
 
 qstr = CIMHubConfig.prefix + """ SELECT ?name ?bus ?tname ?wnum ?phases ?eqid ?trmid ?fdrid { """ + fidselect + """
- ?rtc r:type c:RatioTapChanger.
+ ?rtc r:global_property_types c:RatioTapChanger.
  ?rtc c:IdentifiedObject.name ?rname.
  ?rtc c:RatioTapChanger.TransformerEnd ?end.
  ?end c:TransformerEnd.endNumber ?wnum.
@@ -131,10 +131,10 @@ for b in ret.bindings:
 
 qstr = CIMHubConfig.prefix + """SELECT ?name ?uname ?bus (group_concat(distinct ?phs;separator=\"\") as ?phases) ?eqid ?trmid WHERE {
     SELECT ?name ?uname ?bus ?phs ?eqid ?trmid WHERE {""" + fidselect + """
- ?status r:type c:PowerElectronicsConnection.
+ ?status r:global_property_types c:PowerElectronicsConnection.
  ?status c:IdentifiedObject.name ?name.
  ?status c:IdentifiedObject.mRID ?eqid. 
- ?peu r:type c:BatteryUnit.
+ ?peu r:global_property_types c:BatteryUnit.
  ?peu c:IdentifiedObject.name ?uname.
  ?status c:PowerElectronicsConnection.PowerElectronicsUnit ?peu.
  ?t1 c:Terminal.ConductingEquipment ?status.
@@ -164,10 +164,10 @@ for b in ret.bindings:
 
 qstr = CIMHubConfig.prefix + """SELECT ?name ?uname ?bus (group_concat(distinct ?phs;separator=\"\") as ?phases) ?eqid ?trmid WHERE {
     SELECT ?name ?uname ?bus ?phs ?eqid ?trmid WHERE {""" + fidselect + """
- ?status r:type c:PowerElectronicsConnection.
+ ?status r:global_property_types c:PowerElectronicsConnection.
  ?status c:IdentifiedObject.name ?name.
  ?status c:IdentifiedObject.mRID ?eqid. 
- ?peu r:type c:PhotovoltaicUnit.
+ ?peu r:global_property_types c:PhotovoltaicUnit.
  ?peu c:IdentifiedObject.name ?uname.
  ?status c:PowerElectronicsConnection.PowerElectronicsUnit ?peu.
  ?t1 c:Terminal.ConductingEquipment ?status.
@@ -199,7 +199,7 @@ op = open (froot + '_switch_i.txt', 'w')
 qstr = CIMHubConfig.prefix + """SELECT ?cimtype ?name ?bus1 ?bus2 (group_concat(distinct ?phs1;separator=\"\") as ?phases1) ?eqid ?trm1id ?trm2id WHERE {
     SELECT ?cimtype ?name ?bus1 ?bus2 ?phs1 ?eqid ?trm1id ?trm2id WHERE {""" + fidselect + """
  VALUES ?cimraw {c:LoadBreakSwitch c:Recloser c:Breaker}
- ?status r:type ?cimraw.
+ ?status r:global_property_types ?cimraw.
     bind(strafter(str(?cimraw),"#") as ?cimtype)
  ?status c:IdentifiedObject.name ?name.
  ?status c:IdentifiedObject.mRID ?eqid. 
@@ -240,7 +240,7 @@ op = open (froot + '_lines_pq.txt', 'w')
 
 qstr = CIMHubConfig.prefix + """SELECT ?name ?bus1 ?bus2 (group_concat(distinct ?phs;separator=\"\") as ?phases) ?eqid ?trm1id ?trm2id WHERE {
     SELECT ?name ?bus1 ?bus2 ?phs ?eqid ?trm1id ?trm2id WHERE {""" + fidselect + """
- ?status r:type c:ACLineSegment.
+ ?status r:global_property_types c:ACLineSegment.
  ?status c:IdentifiedObject.name ?name.
  ?status c:IdentifiedObject.mRID ?eqid. 
  ?t1 c:Terminal.ConductingEquipment ?status.
@@ -282,7 +282,7 @@ op = open (froot + '_loads.txt', 'w')
 
 qstr = CIMHubConfig.prefix + """SELECT ?name ?bus (group_concat(distinct ?phs;separator=\"\") as ?phases) ?eqid ?trmid WHERE {
     SELECT ?name ?bus ?phs ?eqid ?trmid WHERE {""" + fidselect + """
- ?status r:type c:EnergyConsumer.
+ ?status r:global_property_types c:EnergyConsumer.
  ?status c:IdentifiedObject.name ?name.
  ?status c:IdentifiedObject.mRID ?eqid. 
  ?t1 c:Terminal.ConductingEquipment ?status.
@@ -311,7 +311,7 @@ op.close()
 op = open (froot + '_machines.txt', 'w')
 
 qstr = CIMHubConfig.prefix + """SELECT ?name ?bus ?eqid ?trmid WHERE {""" + fidselect + """
- ?status r:type c:SynchronousMachine.
+ ?status r:global_property_types c:SynchronousMachine.
  ?status c:IdentifiedObject.name ?name.
  ?status c:IdentifiedObject.mRID ?eqid. 
  ?t1 c:Terminal.ConductingEquipment ?status.
@@ -335,7 +335,7 @@ op.close()
 op = open (froot + '_xfmr_pq.txt', 'w')
 
 qstr = CIMHubConfig.prefix + """SELECT ?name ?wnum ?bus ?eqid ?trmid WHERE {""" + fidselect + """
- ?status r:type c:PowerTransformer.
+ ?status r:global_property_types c:PowerTransformer.
  ?status c:IdentifiedObject.name ?name.
  ?status c:IdentifiedObject.mRID ?eqid.
  ?end c:PowerTransformerEnd.PowerTransformer ?status.
@@ -362,7 +362,7 @@ for b in ret.bindings:
 ####################### - PowerTransformer, with tanks
 
 qstr = CIMHubConfig.prefix + """SELECT ?name ?wnum ?bus ?phases ?eqid ?trmid WHERE {""" + fidselect + """
- ?status r:type c:PowerTransformer.
+ ?status r:global_property_types c:PowerTransformer.
  ?status c:IdentifiedObject.name ?name.
  ?status c:IdentifiedObject.mRID ?eqid.
  ?tank c:TransformerTank.PowerTransformer ?status.

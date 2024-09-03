@@ -12,7 +12,7 @@ def init(fntable, module, argc, argv):
     int_assert = gridlabd.IntAssert(module)
 
     # Always return the first class registered
-    return g_assert.oclass
+    return g_assert.owner_class
 
 def do_kill(ptr):
     # If global memory needs to be released, this is a good time to do it

@@ -6,17 +6,17 @@ import numpy as np
 import os
 
 from gov_pnnl_goss.gridlab.gldcore import Legal
-from gov_pnnl_goss.gridlab.gldcore.Class import Class
-from gov_pnnl_goss.gridlab.gldcore.Cmdarg import loadall
-from gov_pnnl_goss.gridlab.gldcore.Convert import convert_from_set, convert_to_object, convert_from_timestamp
-from gov_pnnl_goss.gridlab.gldcore.Exec import Exec, Object
+from gov_pnnl_goss.gridlab.gldcore.Class import DynamicClass
+from gov_pnnl_goss.gridlab.gldcore.Object import Object
+from gov_pnnl_goss.gridlab.gldcore.Convert import convert_to_object, convert_from_timestamp
+from gov_pnnl_goss.gridlab.gldcore.Exec import Exec
 from gov_pnnl_goss.gridlab.gldcore.Find import Find
 from gov_pnnl_goss.gridlab.gldcore.Globals import FAILED, global_create, SUCCESS, global_set_var
-from gov_pnnl_goss.gridlab.gldcore.Output import output_error, output_message, output_verbose, output_warning, \
-    output_raw
-from gov_pnnl_goss.gridlab.gldcore.Property import PROPERTYTYPE
-from gov_pnnl_goss.gridlab.gldcore.Object import object_name, object_flag_property
-from gov_pnnl_goss.gridlab.gldcore.Timestamp import timestamp_current_timezone
+
+from gov_pnnl_goss.gridlab.gldcore.PropertyHeader import PropertyType
+
+from gov_pnnl_goss.gridlab.gldcore.TimeStamp import timestamp_current_timezone
+from gridlab.gldcore.Module import Module
 
 # Constants
 RHOWATER = 61.82  # lb/cf
@@ -104,21 +104,21 @@ def cmex_getenv(nlhs, plhs, nrhs, prhs):
             if nlhs == 0:
                 value = os.getenv(name)
                 if value is None:
-                    output_error(f"{name} is not defined")
+                    print(f"{name} is not defined")
                 else:
-                    output_message(f"{name}='{value}'")
+                    print(f"{name}='{value}'")
             elif nlhs == 1:
                 value = os.getenv(name)
                 if value is None:
-                    output_error(f"{name} is not defined")
+                    print(f"{name} is not defined")
                 else:
                     plhs.append(value)
             else:
-                output_error("getenv does not return more than one value")
+                print("getenv does not return more than one value")
         else:
-            output_error("Variable name is not a string")
+            print("Variable name is not a string")
     else:
-        output_error("Environment variable name not specified")
+        print("Environment variable name not specified")
 
 
 def cmex_setenv(nlhs, plhs, nrhs, prhs):
@@ -128,17 +128,17 @@ def cmex_setenv(nlhs, plhs, nrhs, prhs):
             value = prhs[1]
 
             if nlhs > 0:
-                output_error("setenv does not return a value")
+                print("setenv does not return a value")
             else:
                 env = f"{name}={value}"
                 try:
                     os.environ[name] = value
                 except Exception as e:
-                    output_error(f"Unable to set environment variable: {str(e)}")
+                    print(f"Unable to set environment variable: {str(e)}")
         else:
-            output_error("Variable name or value is not a string")
+            print("Variable name or value is not a string")
     else:
-        output_error("Environment name and value not specified")
+        print("Environment name and value not specified")
 
 def cmex_printerr(format, *args):
     count = 0
@@ -154,18 +154,18 @@ def cmex_printerr(format, *args):
 
 def cmex_global(nlhs, plhs, nrhs, prhs):
     if nlhs != 0:
-        output_error("global does not return a value")
+        print("global does not return a value")
     elif nrhs != 2:
-        output_error("global requires a name (arg 1) and an array (arg 2)")
+        print("global requires a name (arg 1) and an array (arg 2)")
     elif not isinstance(prhs[0], str):
-        output_error("global name (arg 1) must be a string")
+        print("global name (arg 1) must be a string")
     else:
         name = prhs[0]
         array = prhs[1]
 
         if isinstance(array, str):
-            if global_create(name, PROPERTYTYPE.PT_char1024, array, PROPERTYTYPE.PT_SIZE, 1, None) is None:
-                output_error(f"unable to register string variable '{name}' in globals")
+            if global_create(name, PropertyType.PT_char1024, array, PropertyType.PT_SIZE, 1, None) is None:
+                print(f"unable to register string variable '{name}' in globals")
         elif isinstance(array, (list, np.ndarray)):
             size = np.prod(array.shape)
             if isinstance(array, np.ndarray) and array.dtype == np.complex128:
@@ -176,18 +176,18 @@ def cmex_global(nlhs, plhs, nrhs, prhs):
             else:
                 x = array.flatten().tolist()
 
-            if global_create(name, PROPERTYTYPE.PT_double, x, PROPERTYTYPE.PT_SIZE, size, None) is None:
-                output_error(f"unable to register double array variable '{name}' in globals")
+            if global_create(name, PropertyType.PT_double, x, PropertyType.PT_SIZE, size, None) is None:
+                print(f"unable to register double array variable '{name}' in globals")
         elif isinstance(array, complex):
             x = complex(array.real, array.imag)
-            if global_create(name, PROPERTYTYPE.PT_complex, x, PROPERTYTYPE.PT_SIZE, 1, None) is None:
-                output_error(f"unable to register complex variable '{name}' in globals")
+            if global_create(name, PropertyType.PT_complex, x, PropertyType.PT_SIZE, 1, None) is None:
+                print(f"unable to register complex variable '{name}' in globals")
         elif isinstance(array, (int, float)):
             x = array
-            if global_create(name, PROPERTYTYPE.PT_double, x, PROPERTYTYPE.PT_SIZE, 1, None) is None:
-                output_error(f"unable to register double variable '{name}' in globals")
+            if global_create(name, PropertyType.PT_double, x, PropertyType.PT_SIZE, 1, None) is None:
+                print(f"unable to register double variable '{name}' in globals")
         else:
-            output_error(f"array (arg 2) type is not supported")
+            print(f"array (arg 2) global_property_types is not supported")
 
 
 def cmex_object_list(nlhs, plhs, nrhs, prhs):
@@ -202,24 +202,24 @@ def cmex_object_list(nlhs, plhs, nrhs, prhs):
     try:
         search = Find.find_mkpgm(criteria)
         if search is None:
-            output_error("gl('list',type='object'): unable to run search '{}'".format(criteria))
+            print("gl('list',global_property_types='object'): unable to run search '{}'".format(criteria))
             return
     except Exception as e:
-        output_error("gl('list',type='object'): unable to read search criteria (arg 2)")
+        print("gl('list',global_property_types='object'): unable to read search criteria (arg 2)")
 
     try:
         if list is None:
             list = Find.find_objects(None, None)
         if list is None:
-            output_error("gl('list',type='object'): unable to obtain default list")
+            print("gl('list',global_property_types='object'): unable to obtain default list")
             return
     except Exception as e:
-        output_error("gl('list',type='object'): unable to search failed")
+        print("gl('list',global_property_types='object'): unable to search failed")
 
     try:
         result_list = np.empty(list.hit_count, dtype=[(field, 'U1024') for field in fields])
     except Exception as e:
-        output_error("gl('list',type='object'): unable to allocate memory for result list")
+        print("gl('list',global_property_types='object'): unable to allocate memory for result list")
         return
 
     n = 0
@@ -228,11 +228,11 @@ def cmex_object_list(nlhs, plhs, nrhs, prhs):
         try:
             data = np.empty(1, dtype=np.double)
             data[0] = obj.longitude
-            result_list[n]["name"] = object_name(obj)
-            result_list[n]["class"] = obj.oclass.name
-            result_list[n]["parent"] = object_name(obj.parent) if obj.parent else "NONE"
-            result_list[n]["flags"] = convert_from_set(
-                None, obj.flags, object_flag_property()) if obj.flags else "ERROR"
+            result_list[n]["name"] = Object.object_name(obj)
+            result_list[n]["class"] = obj.owner_class.name
+            result_list[n]["parent"] = Object.object_name(obj.parent) if obj.parent else "NONE"
+            result_list[n]["flags"] = Object.convert_from_set(
+                None, obj.flags, Object.object_flag_property()) if obj.flags else "ERROR"
             result_list[n]["location"] = data
             data = np.empty(1, dtype=np.double)
             data[0] = obj.in_svc / TS_SECOND, obj.out_svc / TS_SECOND
@@ -241,7 +241,7 @@ def cmex_object_list(nlhs, plhs, nrhs, prhs):
             data[0] = obj.rank
             result_list[n]["rank"] = data
             data = np.empty(1, dtype=np.double)
-            data[0] = obj.clock / TS_SECOND
+            data[0] = obj.exec_clock / TS_SECOND
             result_list[n]["clock"] = data
             result_list[n]["handle"] = make_handle(MEXHANDLETYPE.MH_OBJECT, obj)
         except Exception as e:
@@ -255,23 +255,23 @@ def cmex_object_list(nlhs, plhs, nrhs, prhs):
 def cmex_list(nlhs, plhs, nrhs, prhs):
     type = ""
     if nlhs > 1:
-        output_error("gl('list',type=...): returns only one value")
+        print("gl('list',global_property_types=...): returns only one value")
     elif nlhs < 1:
         return
     elif nrhs < 1:
-        output_error("gl('list',type=...): needs a type (arg 1)")
+        print("gl('list',global_property_types=...): needs a global_property_types (arg 1)")
     elif prhs[0].itemsize == 1:
-        output_error("gl('list',type=...): type (arg 1) should be a string")
+        print("gl('list',global_property_types=...): global_property_types (arg 1) should be a string")
     elif type == "object":
         cmex_object_list(nlhs, plhs, nrhs-1, prhs[1:])
     elif type == "global":
-        output_error("gl('list',type='{}'): type (arg 1) not implemented".format(type))
+        print("gl('list',global_property_types='{}'): global_property_types (arg 1) not implemented".format(type))
     elif type == "class":
-        output_error("gl('list',type='{}'): type (arg 1) not implemented".format(type))
+        print("gl('list',global_property_types='{}'): global_property_types (arg 1) not implemented".format(type))
     elif type == "module":
-        output_error("gl('list',type='{}'): type (arg 1) not implemented".format(type))
+        print("gl('list',global_property_types='{}'): global_property_types (arg 1) not implemented".format(type))
     else:
-        output_error("gl('list',type='{}'): type (arg 1) not recognized".format(type))
+        print("gl('list',global_property_types='{}'): global_property_types (arg 1) not recognized".format(type))
 
 def cmex_version(nlhs, plhs, nrhs, prhs):
     global global_version_major, global_version_minor
@@ -287,22 +287,22 @@ def cmex_version(nlhs, plhs, nrhs, prhs):
 
 def cmex_create(nlhs, plhs, nrhs, prhs):
     if nlhs > 1:
-        output_error("create only returns one struct")
+        print("create only returns one struct")
     elif nrhs < 3 or nrhs % 2 != 1:
-        output_error("incorrect number of input arguments")
+        print("incorrect number of input arguments")
     elif not isinstance(prhs[0], str):
-        output_error("class name (arg 1) must be a string")
+        print("class name (arg 1) must be a string")
     else:
         classname = prhs[0]
-        oclass = Class.class_get_class_from_classname(classname)
+        owner_class = DynamicClass.class_get_class_from_classname(classname)
 
-        if oclass is None:
-            output_error(f"class '{classname}' is not registered")
+        if owner_class is None:
+            print(f"class '{classname}' is not registered")
         else:
-            obj, result = oclass.create(None)
+            obj, result = owner_class.create(None)
 
             if result == FAILED:
-                output_error(f"unable to create object of class {classname}")
+                print(f"unable to create object of class {classname}")
             else:
                 num_properties = (nrhs - 1) // 2
                 i = 1
@@ -311,18 +311,18 @@ def cmex_create(nlhs, plhs, nrhs, prhs):
                     name = prhs[i]
 
                     if not isinstance(name, str):
-                        output_error(f"property name (arg {i}) must be a string")
+                        print(f"property name (arg {i}) must be a string")
                         return
 
                     value = prhs[i + 1]
                     value_str = str(value)
 
                     if value_str is None:
-                        output_error(f"property {name} (arg {i + 1}) value couldn't be converted")
+                        print(f"property {name} (arg {i + 1}) value couldn't be converted")
                         return
 
                     if Object.object_set_value_by_name(obj, name, value_str) == 0:
-                        output_error(f"property {name} (arg {i}) couldn't be set to '{value_str}'")
+                        print(f"property {name} (arg {i}) couldn't be set to '{value_str}'")
                         return
 
                     i += 2
@@ -333,38 +333,38 @@ def cmex_create(nlhs, plhs, nrhs, prhs):
                     if obj_data is not None:
                         plhs.append(obj_data)
                     else:
-                        output_error(f"couldn't get object data for {classname}")
+                        print(f"couldn't get object data for {classname}")
 
 
 
-def cmex_load(nlhs, plhs, nrhs, prhs):
-    if nrhs > 0:
-        fname = bytearray(1024)
-        if not prhs[0].dtype == 'str':
-            output_error("Model name is not a string")
-        elif nlhs > 0:
-            output_error("load does not return a value")
-        elif prhs[0].tostring(fname) != 0:
-            output_error("Model name too long")
-        elif loadall(fname) == FAILED:
-            output_error("Model load failed")
-        else:
-            output_message("Model %s loaded ok" % fname.decode())
-    else:
-        output_error("Module not specified")
+# def cmex_load(nlhs, plhs, nrhs, prhs):
+#     if nrhs > 0:
+#         fname = bytearray(1024)
+#         if not prhs[0].dtype == 'str':
+#             print("Model name is not a string")
+#         elif nlhs > 0:
+#             print("load does not return a value")
+#         elif prhs[0].tostring(fname) != 0:
+#             print("Model name too long")
+#         elif DynamicClass.get_loadmethod(fname) == FAILED:
+#             print("Model load failed")
+#         else:
+#             print("Model %s loaded ok" % fname.decode())
+#     else:
+#         print("Module not specified")
 
-
-def cmex_start(nlhs, plhs, nrhs, prhs):
-    global global_keep_progress
-    global_keep_progress = 1
-    result = Exec.exec_start()
-
-    if result == FAILED:
-        output_error("Simulation failed!")
-
-def module_find(fname):
-    # Your implementation here
-    return None  # Replace with the appropriate return value
+#
+# def cmex_start(nlhs, plhs, nrhs, prhs):
+#     global global_keep_progress
+#     global_keep_progress = 1
+#     result = Exec.exec_start()
+#
+#     if result == FAILED:
+#         print("Simulation failed!")
+#
+# def module_find(fname):
+#     # Your implementation here
+#     return None  # Replace with the appropriate return value
 
 def module_load(fname, i, none):
     # Your implementation here
@@ -414,9 +414,9 @@ def mxSetFieldByNumber(param, param1, param2, handle):
 #         if mod is None:
 #             mod = module_load(modulename, 0, None)
 #             if mod is None:
-#                 output_error("Module load failed")
+#                 print("Module load failed")
 #         if nlhs == 0:
-#             output_message("Module '{}({}.{})' loaded ok".format(mod.name, mod.major, mod.minor))
+#             print("Module '{}({}.{})' loaded ok".format(mod.name, mod.major, mod.minor))
 #         else:
 #             field_names = ["handle", "name", "major", "minor"]
 #             name = mxCreateString(mod.name)
@@ -452,7 +452,7 @@ def mxSetFieldByNumber(param, param1, param2, handle):
 #             for i in range(nFields - 4):
 #                 mxSetFieldByNumber(plhs[0], 0, i + 4, value[i + 4])
 #     else:
-#         output_error("Module not specified")
+#         print("Module not specified")
 #
 
 
@@ -465,15 +465,15 @@ def cmex_module(nlhs, plhs, nrhs, prhs):
         fname = ""
         mod = None
         if not mxIsChar(prhs[0]):
-            output_error("Module name is not a string")
+            print("Module name is not a string")
         elif nlhs > 1:
-            output_error("Only one return value is possible")
+            print("Only one return value is possible")
         elif mxGetString(prhs[0], fname, 1) != 0:
-            output_error("Module name too long")
-        elif (mod := module_find(fname)) is None and (mod := module_load(fname, 0, None)) is None:
-            output_error("Module load failed")
+            print("Module name too long")
+        elif (mod := Module.module_find(fname)) is None and (mod := module_load(fname, 0, None)) is None:
+            print("Module load failed")
         elif nlhs == 0:
-            output_message(f"Module '{mod.name}({mod.major}.{mod.minor})' loaded ok")
+            print(f"Module '{mod.name}({mod.major}.{mod.minor})' loaded ok")
         else:
             fnames = ["handle", "name", "major", "minor"]
             name = mxCreateString(mod.name)
@@ -494,7 +494,7 @@ def cmex_module(nlhs, plhs, nrhs, prhs):
             while module_getvar(mod, varname, None, 0):
                 buffer = ""
                 if module_getvar(mod, varname, buffer, 1) and nFields < len(fnames):
-                    output_verbose(f"module variable {varname} = '{buffer}'")
+                    print(f"module variable {varname} = '{buffer}'")
                     value[nFields] = mxCreateDoubleMatrix(1, 1, mxREAL)
                     pVal = mxGetPr(value[nFields])
                     pVal[0] = float(buffer)
@@ -513,7 +513,7 @@ def cmex_module(nlhs, plhs, nrhs, prhs):
                 mxSetFieldByNumber(plhs[0], 0, nFields, value[nFields])
 
     else:
-        output_error("Module not specified")
+        print("Module not specified")
     return
 
 
@@ -574,28 +574,28 @@ def cmex_set(nlhs, plhs, nrhs, prhs):
                 prop_name = prhs[1]
                 if object_get_property(obj, prop_name) is None:
                     print("property name (arg 1) {} not found in object {}:{}".format(
-                        prop_name, obj.oclass.name, obj.id))
+                        prop_name, obj.owner_class.name, obj.id))
                 elif isinstance(prhs[2], str):
                     value = prhs[2]
                     if object_set_value_by_name(obj, prop_name, value) == 0:
                         print("unable to set {}:{}/{} to {}".format(
-                            obj.oclass.name, obj.id, prop_name, value))
-                elif isinstance(prhs[2], float) and object_get_property(obj, prop_name).ptype == PROPERTYTYPE.PT_double:
+                            obj.owner_class.name, obj.id, prop_name, value))
+                elif isinstance(prhs[2], float) and object_get_property(obj, prop_name).ptype == PropertyType.PT_double:
                     value = prhs[2]
                     if object_set_double_by_name(obj, prop_name, value) == 0:
                         print("unable to set {}:{}/{} to {}".format(
-                            obj.oclass.name, obj.id, prop_name, value))
+                            obj.owner_class.name, obj.id, prop_name, value))
                 elif isinstance(prhs[2], (complex, float)):
                     real_value = prhs[2].real
                     imag_value = prhs[2].imag
                     value = "{}{:+g}i".format(real_value, imag_value)
                     if object_set_value_by_name(obj, prop_name, value) == 0:
                         print("unable to set {}:{}/{} to {}".format(
-                            obj.oclass.name, obj.id, prop_name, value))
+                            obj.owner_class.name, obj.id, prop_name, value))
                 else:
-                    print("value (arg 2) has an unsupported data type")
+                    print("value (arg 2) has an unsupported data global_property_types")
     else:
-        print("property or data (arg 1) type is not valid")
+        print("property or data (arg 1) global_property_types is not valid")
 
 def cmex_get(nlhs, plhs, nrhs, prhs):
     global global_clock
@@ -621,18 +621,18 @@ def cmex_get(nlhs, plhs, nrhs, prhs):
             elif name.startswith("property.") and nrhs > 1:
                 _, propname = name.split(".", 1)
                 classname, propname = propname.split(".", 1)
-                pClass = Class.class_get_class_from_classname(classname)
+                pClass = DynamicClass.class_get_class_from_classname(classname)
                 if pClass:
-                    pProp = Class.class_find_property(pClass, propname)
+                    pProp = DynamicClass.class_find_property(pClass, propname)
                     if pProp:
                         result = {
                             "class": classname,
                             "name": pProp.name,
-                            "type": Class.class_get_property_typename(pProp.ptype),
+                            "global_property_types": DynamicClass.class_get_property_typename(pProp.global_property_types),
                             "size": pProp.size if pProp.size else 1,
                             "access": "(na)",  # Implement access info if needed
                             "unit": pProp.unit.name,
-                            "delegation": pProp.delegation.oclass.name if pProp.delegation else "(none)",
+                            "delegation": pProp.delegation.owner_class.name if pProp.delegation else "(none)",
                             "keywords": "(na)",  # Implement keywords if needed
                         }
                         plhs[0] = result
@@ -677,46 +677,46 @@ def mexFunction(nlhs, plhs, nrhs, prhs):
         # exec_init()
 
     if nrhs < 1:
-        output_error("Use gl('help') for a list of commands.")
+        print("Use gl('help') for a list of commands.")
         return
 
     if not mxIsChar(prhs[0]):
-        output_error("token must be a string")
+        print("token must be a string")
         return
 
     if mxGetString(prhs[0], key, len(key)) != 0:
-        output_warning("GridLAB key string too long")
+        print("GridLAB key string too long")
 
     for i in range(len(CMDMAP)):
         if key == CMDMAP[i].name:
             if CMDMAP[i].call is None:
                 if nrhs == 1:
-                    output_raw("Available top-level commands\n")
+                    print("Available top-level commands\n")
                     for j in range(len(CMDMAP)):
-                        output_raw("\t{}\t{}\n".format(CMDMAP[j].name, CMDMAP[j].brief))
-                    output_raw("Use gl('help',command) for details\n")
+                        print("\t{}\t{}\n".format(CMDMAP[j].name, CMDMAP[j].brief))
+                    print("Use gl('help',command) for details\n")
                     return
                 elif mxIsChar(prhs[1]):
                     cmd = ""
                     if mxGetString(prhs[1], cmd, len(cmd)) != 0:
-                        output_warning("command string too long to read fully")
+                        print("command string too long to read fully")
 
                     for j in range(len(CMDMAP)):
                         if cmd == CMDMAP[j].name:
-                            output_raw("Help for command '{}'\n\n{}\n".format(cmd, CMDMAP[j].detail if CMDMAP[j].detail else "\tNo details available\n"))
+                            print("Help for command '{}'\n\n{}\n".format(cmd, CMDMAP[j].detail if CMDMAP[j].detail else "\tNo details available\n"))
                             return
 
-                    output_error("Command '{}' does not exist".format(cmd))
+                    print("Command '{}' does not exist".format(cmd))
                     return
                 else:
-                    output_error("command must be a string")
+                    print("command must be a string")
                     return
             else:
                 CMDMAP[i].call(nlhs, plhs, nrhs - 1, prhs + 1)
                 return
 
     nret = nlhs
-    output_error("unrecognized GridLAB operation--gl('help') for list")
+    print("unrecognized GridLAB operation--gl('help') for list")
     while nret > 0:
         mxREAL =1
         plhs[nret - 1] = mxCreateDoubleMatrix(0, 0, mxREAL)

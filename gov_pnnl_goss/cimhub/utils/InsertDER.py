@@ -48,7 +48,7 @@ crs_query = """SELECT DISTINCT ?name ?mrid WHERE {{
     ?loc c:PowerSystemResource.CoordinateSystem ?crs .
     ?crs c:IdentifiedObject.mRID ?mrid.
     ?crs c:IdentifiedObject.name ?name.
-# ?crs r:type c:CoordinateSystem.
+# ?crs r:global_property_types c:CoordinateSystem.
 # ?crs c:IdentifiedObject.mRID ?id.
 # ?crs c:IdentifiedObject.name ?name.
 }}

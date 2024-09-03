@@ -1,15 +1,13 @@
 import re
-import time
 import urllib
 
-from numpy.core.defchararray import encode
 
 from gov_pnnl_goss.gridlab.climate.Weather import Weather
 from gov_pnnl_goss.gridlab.climate.WeatherReader import WeatherReader
-from gov_pnnl_goss.gridlab.gldcore.Globals import PA_REFERENCE
+from gov_pnnl_goss.gridlab.gldcore.Globals import PropertyAccess
 from gov_pnnl_goss.gridlab.gldcore.GridLabD import gl_debug, gl_localtime, gl_error, TS_INVALID, TS_NEVER, gl_warning, \
-    gl_register_class, gl_publish_variable
-from gov_pnnl_goss.gridlab.gldcore.Property import PROPERTYTYPE
+    gl_register_class, gl_publish_variable, PADDR
+from gov_pnnl_goss.gridlab.gldcore.PropertyHeader import PropertyType
 
 from datetime import datetime
 from enum import Enum
@@ -19,16 +17,16 @@ class CSVSTATUS(Enum):
     CR_OPEN = 2
     CR_ERROR = 3
 
-TIMESTAMP = 0
 
 
-def gl_create_object(oclass):
+
+def gl_create_object(owner_class):
     pass
 
 
 def create_csv_reader(obj, parent):
     my = 0
-    obj[0] = gl_create_object(CsvReader.oclass)
+    obj[0] = gl_create_object(CsvReader.owner_class)
     if obj[0] != None:
         return 1
     # print("create_csv_reader")
@@ -50,7 +48,7 @@ def gl_mktime(then):
 
 
 
-def gl_find_property(oclass, name):
+def gl_find_property(owner_class, name):
     pass
 
 def ISLEAPYEAR(year):
@@ -59,7 +57,7 @@ def ISLEAPYEAR(year):
 
 
 class CsvReader(WeatherReader):
-    oclass = 0
+    owner_class = 0
 
     def __init__(self, module):
         super().__init__()
@@ -91,62 +89,62 @@ class CsvReader(WeatherReader):
         self.weather_last = None
         self.weather_root = None
 
-        if not hasattr(self, 'oclass'):
-            self.oclass = gl_register_class(module, "csv_reader", CsvReader.__sizeof__(), 0)
-            if not gl_publish_variable(self.oclass,
-                                       PROPERTYTYPE.PT_int32, "index", PADDR(self.index),
-                                       PROPERTYTYPE.PT_ACCESS, PA_REFERENCE,
-                                       PROPERTYTYPE.PT_char32, "city_name", PADDR(self.city_name),
-                                       PROPERTYTYPE.PT_char32, "state_name", PADDR(self.state_name),
-                                       PROPERTYTYPE.PT_double, "lat_deg", PADDR(self.lat_deg),
-                                       PROPERTYTYPE.PT_double, "lat_min", PADDR(self.lat_min),
-                                       PROPERTYTYPE.PT_double, "long_deg", PADDR(self.long_deg),
-                                       PROPERTYTYPE.PT_double, "long_min", PADDR(self.long_min),
-                                       PROPERTYTYPE.PT_double, "low_temp", PADDR(self.low_temp),
-                                       PROPERTYTYPE.PT_ACCESS, PA_REFERENCE,
-                                       PROPERTYTYPE.PT_double, "high_temp", PADDR(self.high_temp),
-                                       PROPERTYTYPE.PT_ACCESS, PA_REFERENCE,
-                                       PROPERTYTYPE.PT_double, "peak_solar", PADDR(self.peak_solar),
-                                       PROPERTYTYPE.PT_ACCESS, PA_REFERENCE,
-                                       PROPERTYTYPE.PT_int32, "elevation", PADDR(self.elevation),
-                                       PROPERTYTYPE.PT_enumeration, "status", PADDR(self.status),
-                                       PROPERTYTYPE.PT_ACCESS, PA_REFERENCE,
-                                       PROPERTYTYPE.PT_KEYWORD, "INIT", CSVSTATUS.CR_INIT,
-                                       PROPERTYTYPE.PT_KEYWORD, "OPEN", CSVSTATUS.CR_OPEN,
-                                       PROPERTYTYPE.PT_KEYWORD, "ERROR", CSVSTATUS.CR_ERROR,
-                                       PROPERTYTYPE.PT_char32, "timefmt", PADDR(self.timefmt),
-                                       PROPERTYTYPE.PT_char32, "timezone", PADDR(self.timezone),
-                                       PROPERTYTYPE.PT_double, "timezone_offset", PADDR(self.tz_numval),
-                                       PROPERTYTYPE.PT_char256, "columns", PADDR(self.columns_str),
-                                       PROPERTYTYPE.PT_char256, "filename", PADDR(self.filename),
+        if not hasattr(self, 'owner_class'):
+            self.owner_class = gl_register_class(module, "csv_reader", CsvReader.__sizeof__(), 0)
+            if not gl_publish_variable(self.owner_class,
+                                       PropertyType.PT_int32, "index", PADDR(self.index),
+                                       PropertyType.PT_ACCESS, PropertyAccess.PA_REFERENCE,
+                                       PropertyType.PT_char32, "city_name", PADDR(self.city_name),
+                                       PropertyType.PT_char32, "state_name", PADDR(self.state_name),
+                                       PropertyType.PT_double, "lat_deg", PADDR(self.lat_deg),
+                                       PropertyType.PT_double, "lat_min", PADDR(self.lat_min),
+                                       PropertyType.PT_double, "long_deg", PADDR(self.long_deg),
+                                       PropertyType.PT_double, "long_min", PADDR(self.long_min),
+                                       PropertyType.PT_double, "low_temp", PADDR(self.low_temp),
+                                       PropertyType.PT_ACCESS, PropertyAccess.PA_REFERENCE,
+                                       PropertyType.PT_double, "high_temp", PADDR(self.high_temp),
+                                       PropertyType.PT_ACCESS, PropertyAccess.PA_REFERENCE,
+                                       PropertyType.PT_double, "peak_solar", PADDR(self.peak_solar),
+                                       PropertyType.PT_ACCESS, PropertyAccess.PA_REFERENCE,
+                                       PropertyType.PT_int32, "elevation", PADDR(self.elevation),
+                                       PropertyType.PT_enumeration, "status", PADDR(self.status),
+                                       PropertyType.PT_ACCESS, PA_REFERENCE,
+                                       PropertyType.PT_KEYWORD, "INIT", CSVSTATUS.CR_INIT,
+                                       PropertyType.PT_KEYWORD, "OPEN", CSVSTATUS.CR_OPEN,
+                                       PropertyType.PT_KEYWORD, "ERROR", CSVSTATUS.CR_ERROR,
+                                       PropertyType.PT_char32, "timefmt", PADDR(self.timefmt),
+                                       PropertyType.PT_char32, "timezone", PADDR(self.timezone),
+                                       PropertyType.PT_double, "timezone_offset", PADDR(self.tz_numval),
+                                       PropertyType.PT_char256, "columns", PADDR(self.columns_str),
+                                       PropertyType.PT_char256, "filename", PADDR(self.filename),
                                        None) < 1:
                 raise Exception(f"unable to publish properties in {__name__}")
 
     # # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
     # def initialize_csv_reader(self):
-    #     if self.oclass is None:
-    #         self.oclass = gl_register_class(module, "csv_reader", sizeof(csv_reader), 0)
-    #         if gl_publish_variable(self.oclass,
-    #             PROPERTYTYPE.PT_int32, "index", PADDR(index), PROPERTYTYPE.PT_ACCESS, PA_REFERENCE,
-    #             PROPERTYTYPE.PT_char32, "city_name", PADDR(city_name),
-    #             PROPERTYTYPE.PT_char32, "state_name", PADDR(state_name),
-    #             PROPERTYTYPE.PT_double, "lat_deg", PADDR(lat_deg),
-    #             PROPERTYTYPE.PT_double, "lat_min", PADDR(lat_min),
-    #             PROPERTYTYPE.PT_double, "long_deg", PADDR(long_deg),
-    #             PROPERTYTYPE.PT_double, "long_min", PADDR(long_min),
-    #             PROPERTYTYPE.PT_double, "low_temp", PADDR(low_temp), PROPERTYTYPE.PT_ACCESS, PA_REFERENCE,
-    #             PROPERTYTYPE.PT_double, "high_temp", PADDR(high_temp), PROPERTYTYPE.PT_ACCESS, PA_REFERENCE,
-    #             PROPERTYTYPE.PT_double, "peak_solar", PADDR(peak_solar), PROPERTYTYPE.PT_ACCESS, PA_REFERENCE,
-    #             PROPERTYTYPE.PT_int32, "elevation", PADDR(elevation),
-    #             PROPERTYTYPE.PT_enumeration, "status", PADDR(status), PROPERTYTYPE.PT_ACCESS, PA_REFERENCE,
-    #                 PROPERTYTYPE.PT_KEYWORD, "INIT", CR_INIT,
-    #                 PROPERTYTYPE.PT_KEYWORD, "OPEN", CR_OPEN,
-    #                 PROPERTYTYPE.PT_KEYWORD, "ERROR", CR_ERROR,
-    #             PROPERTYTYPE.PT_char32, "timefmt", PADDR(timefmt),
-    #             PROPERTYTYPE.PT_char32, "timezone", PADDR(timezone),
-    #             PROPERTYTYPE.PT_double, "timezone_offset", PADDR(tz_numval),
-    #             PROPERTYTYPE.PT_char256, "columns", PADDR(columns_str),
-    #             PROPERTYTYPE.PT_char256, "filename", PADDR(filename),
+    #     if self.owner_class is None:
+    #         self.owner_class = gl_register_class(module, "csv_reader", sizeof(csv_reader), 0)
+    #         if gl_publish_variable(self.owner_class,
+    #             PropertyType.PT_int32, "index", PADDR(index), PropertyType.PT_ACCESS, PA_REFERENCE,
+    #             PropertyType.PT_char32, "city_name", PADDR(city_name),
+    #             PropertyType.PT_char32, "state_name", PADDR(state_name),
+    #             PropertyType.PT_double, "lat_deg", PADDR(lat_deg),
+    #             PropertyType.PT_double, "lat_min", PADDR(lat_min),
+    #             PropertyType.PT_double, "long_deg", PADDR(long_deg),
+    #             PropertyType.PT_double, "long_min", PADDR(long_min),
+    #             PropertyType.PT_double, "low_temp", PADDR(low_temp), PropertyType.PT_ACCESS, PA_REFERENCE,
+    #             PropertyType.PT_double, "high_temp", PADDR(high_temp), PropertyType.PT_ACCESS, PA_REFERENCE,
+    #             PropertyType.PT_double, "peak_solar", PADDR(peak_solar), PropertyType.PT_ACCESS, PA_REFERENCE,
+    #             PropertyType.PT_int32, "elevation", PADDR(elevation),
+    #             PropertyType.PT_enumeration, "status", PADDR(status), PropertyType.PT_ACCESS, PA_REFERENCE,
+    #                 PropertyType.PT_KEYWORD, "INIT", CR_INIT,
+    #                 PropertyType.PT_KEYWORD, "OPEN", CR_OPEN,
+    #                 PropertyType.PT_KEYWORD, "ERROR", CR_ERROR,
+    #             PropertyType.PT_char32, "timefmt", PADDR(timefmt),
+    #             PropertyType.PT_char32, "timezone", PADDR(timezone),
+    #             PropertyType.PT_double, "timezone_offset", PADDR(tz_numval),
+    #             PropertyType.PT_char256, "columns", PADDR(columns_str),
+    #             PropertyType.PT_char256, "filename", PADDR(filename),
     #             None) < 1:
     #             GL_THROW("unable to publish properties in %s", __FILE__)
     #         memset(self, 0, sizeof(csv_reader))
@@ -234,29 +232,29 @@ class CsvReader(WeatherReader):
             gl_error("csv_reader::read_prop ~ error reading property & value")
             return 0
 
-        prop = self.gl_find_property(self.oclass, propstr)
+        prop = self.gl_find_property(self.owner_class, propstr)
         if prop == 0:
             gl_error("csv_reader::read_prop ~ unrecognized csv_reader property '%s'" % propstr)
             return 0
 
         addr = (self + prop.addr)
-        if prop.ptype == PROPERTYTYPE.PT_double:
+        if prop.global_property_types == PropertyType.PT_double:
             try:
                 setattr(addr, 'double', float(valstr))
             except ValueError:
                 gl_error("csv_reader::read_prop ~ unable to set property '%s' to '%s'" % (propstr, valstr))
                 return 0
-        elif prop.ptype == PROPERTYTYPE.PT_char32:
+        elif prop.global_property_types == PropertyType.PT_char32:
             addr.char32 = valstr[:32]
 
-        elif prop.ptype == PROPERTYTYPE.PT_int32:
+        elif prop.global_property_types == PropertyType.PT_int32:
             try:
                 setattr(addr, 'int', int(valstr))
             except ValueError:
                 gl_error("csv_reader::read_prop ~ unable to set property '%s' to '%s'" % (propstr, valstr))
                 return 0
         else:
-            gl_error("csv_reader::read_prop ~ unable to convert property '%s' due to type restrictions" % propstr)
+            gl_error("csv_reader::read_prop ~ unable to convert property '%s' due to global_property_types restrictions" % propstr)
             return 0
         return 1
 
@@ -314,7 +312,7 @@ class CsvReader(WeatherReader):
         columns = [None] * column_ct
         i = 0
         while temp is not None and i < column_ct:
-            temp.column = gl_find_property(self.weather.oclass, temp.name)
+            temp.column = gl_find_property(self.weather.owner_class, temp.name)
             if temp.column is None:
                 gl_error("csv_reader::read_header ~ unable to find column property '%s'", urllib.parse.quote(temp))
                 return 0
@@ -366,10 +364,10 @@ class CsvReader(WeatherReader):
                 sample.month, sample.day, sample.hour, sample.minute, sample.second = map(int, match.groups())
 
         else:
-            match = re.match(self.timefmt.get_"", token)
+            match = re.match(self.timefmt.get_string(), token)
             if not match:
                 gl_error(R"(csv_reader::read_line ~ unable to read time string '%s' with format '%s')" % (
-                token, self.timefmt.get_""))
+                token, self.timefmt.get_string()))
                 sample = None
                 return 0
             else:
@@ -388,7 +386,7 @@ class CsvReader(WeatherReader):
         while token:
             if col >= self.column_ct:
                 break
-            if self.columns[col].ptype == PROPERTYTYPE.PT_double:
+            if self.columns[col].global_property_types == PropertyType.PT_double:
                 self.dptr = float(self.columns[col].addr + sample)
                 try:
                     self.dptr = float(token)

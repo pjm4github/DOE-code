@@ -218,7 +218,7 @@ class DistCapacitor(DistComponent):
                 dOn /= 1000.0
                 dOff /= 1000.0
             nterm = 1  # TODO: need to search for this
-            buf += f"new CapControl.{self.name} capacitor={self.name} type={self.dss_cap_mode(self.mode)}"
+            buf += f"new CapControl.{self.name} capacitor={self.name} property_type={self.dss_cap_mode(self.mode)}"
             buf += f" on={round(dOn, 2)} off={round(dOff, 2)} delay={round(self.delay, 2)} delayoff={round(self.delay, 2)}"
             buf += f" element={dssClass}.{self.moneq} terminal={nterm} ptratio=1 ptphase={self.first_dss_phase(self.monphs)}"
             buf += "\n"

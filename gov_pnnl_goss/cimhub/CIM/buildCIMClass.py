@@ -26,7 +26,7 @@ class GptCodeConverter():
         self.model_name = model
         self.language = language
         self.results = ''
-        self.system_instructions = """Create an example rdf model of the given CIM type using only the rdf, rdfs and cim schemas using the Common Information Model (CIM) prepared by the Technical Committee 57 of the IEC as a reference"""
+        self.system_instructions = """Create an example rdf model of the given CIM global_property_types using only the rdf, rdfs and cim schemas using the Common Information Model (CIM) prepared by the Technical Committee 57 of the IEC as a reference"""
     def create_rdf(self,  instructions):
         """
         Convert the given code snippet using GPT-3.
@@ -88,11 +88,11 @@ if __name__ == "__main__":
                 # regexp to remove all these
                 # line = line.replace("^^xsd:boolean", "").replace("^^xsd:float","").replace("^^xsd:int", "").\
                 #             replace("^^xsd:complex", "").replace("^^xsd:integer", "").replace("^^xsd:double", "").\
-                #             replace("^^xsd:string", "").replace("^^xsd:dateTime", "")  # .replace("rdf:type", "a"))
+                #             replace("^^xsd:string", "").replace("^^xsd:dateTime", "")  # .replace("rdf:global_property_types", "a"))
 
                 # new_lines.append(line.replace("^^rdf:boolean", "").replace("^^rdf:float","").
                 #                  replace("^^rdf:int", "").replace("^^rdf:complex", "").replace("^^rdf:integer", "").
-                #                  replace("^^rdf:double", "").replace("^^rdf:string", ""))  # .replace("rdf:type", "a"))
+                #                  replace("^^rdf:double", "").replace("^^rdf:string", ""))  # .replace("rdf:global_property_types", "a"))
 
                 r2 = re.sub(r"""(\^\^[a-zA-Z0-9]*)\:([a-zA-Z0-0]*)""", "", r)
                 if r2.find("@en")>0:

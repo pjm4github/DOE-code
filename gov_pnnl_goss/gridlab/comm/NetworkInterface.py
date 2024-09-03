@@ -2,14 +2,14 @@ import time
 from enum import Enum
 
 from gov_pnnl_goss.gridlab.climate.Climate import OBJECTDATA
-from gov_pnnl_goss.gridlab.climate.CsvReader import PADDR
+#from gov_pnnl_goss.gridlab.climate.CsvReader import PADDR
 from gov_pnnl_goss.gridlab.comm.MpiNetwork import gl_set_parent
 from gov_pnnl_goss.gridlab.comm.Network import Network
 from gov_pnnl_goss.gridlab.comm.NetworkMessage import NetworkMessage
 from gov_pnnl_goss.gridlab.gldcore.Globals import PA_REFERENCE
 from gov_pnnl_goss.gridlab.gldcore.GridLabD import TS_NEVER, gl_create_object, gl_error, PC_BOTTOMUP, PC_POSTTOPDOWN, \
-    PC_PRETOPDOWN, gl_localtime, gl_register_class, gl_publish_variable, gl_globalclock
-from gov_pnnl_goss.gridlab.gldcore.Property import PROPERTYTYPE
+    PC_PRETOPDOWN, gl_localtime, gl_register_class, gl_publish_variable, gl_globalclock, PADDR
+from gov_pnnl_goss.gridlab.gldcore.PropertyHeader import PropertyType
 
 
 class DXM(Enum):
@@ -32,11 +32,11 @@ class NIS(Enum):
     NIS_FAILED = 6
 
 class NetworkInterface:
-    oclass = None
+    owner_class = None
 
     def __init__(self, mod=None):
-        if NetworkInterface.oclass is None:
-            NetworkInterface.oclass = self.register_class(mod)
+        if NetworkInterface.owner_class is None:
+            NetworkInterface.owner_class = self.register_class(mod)
 
         self.bandwidth_used = 0.0
         self.bandwidth_used_MB_per_s = 0.0
@@ -74,47 +74,47 @@ class NetworkInterface:
         self.write_msg = False
 
     def register_class(self, mod):
-        self.oclass = {
+        self.owner_class = {
             "name": "network_interface",
             "size": 0,
             "parent_class": PC_PRETOPDOWN | PC_BOTTOMUP | PC_POSTTOPDOWN
         }
-        oclass = gl_register_class(mod)
-        if oclass is None:
+        owner_class = gl_register_class(mod)
+        if owner_class is None:
             gl_error("unable to register object class implemented by %s" % __name__)
-        if gl_publish_variable(oclass,
-            PROPERTYTYPE.PT_enumeration, "duplex_mode", PADDR("duplex_mode"),
-                PROPERTYTYPE.PT_KEYWORD, "FULL_DUPLEX", DXM.DXM_FULL_DUPLEX,
-                PROPERTYTYPE.PT_KEYWORD, "HALF_DUPLEX", DXM.DXM_HALF_DUPLEX,
-                PROPERTYTYPE.PT_KEYWORD, "TRANSMIT_ONLY", DXM.DXM_XMIT_ONLY,
-                PROPERTYTYPE.PT_KEYWORD, "RECEIVE_ONLY", DXM.DXM_RECV_ONLY,
-            PROPERTYTYPE.PT_object, "to", PADDR("to"),
-            PROPERTYTYPE.PT_object, "destination", PADDR("destination"),
-            PROPERTYTYPE.PT_double, "size_MB", PADDR("size_MB"),
-            PROPERTYTYPE.PT_double, "send_rate_MB_per_s", PADDR("send_rate_MB_per_s"),
-            PROPERTYTYPE.PT_double, "recv_rate_MB_per_s", PADDR("recv_rate_MB_per_s"),
-            PROPERTYTYPE.PT_int64, "update_rate", PADDR("update_rate"),
-            PROPERTYTYPE.PT_enumeration, "status", PADDR("status"), PROPERTYTYPE.PT_ACCESS, PA_REFERENCE,
-                PROPERTYTYPE.PT_KEYWORD, "NONE", NIS.NIS_NONE,
-                PROPERTYTYPE.PT_KEYWORD, "QUEUED", NIS.NIS_QUEUED,
-                PROPERTYTYPE.PT_KEYWORD, "REJECTED", NIS.NIS_REJECTED,
-                PROPERTYTYPE.PT_KEYWORD, "SENDING", NIS.NIS_SENDING,
-                PROPERTYTYPE.PT_KEYWORD, "COMPLETE", NIS.NIS_COMPLETE,
-                PROPERTYTYPE.PT_KEYWORD, "FAILED", NIS.NIS_FAILED,
-            PROPERTYTYPE.PT_double, "bandwidth_used_MB_per_s", PADDR("bandwidth_used_MB_per_s"), PROPERTYTYPE.PT_ACCESS, PA_REFERENCE,
-            PROPERTYTYPE.PT_double, "send_rate_used_MB_per_s", PADDR("send_rate_used_MB_per_s"), PROPERTYTYPE.PT_ACCESS, PA_REFERENCE,
-            PROPERTYTYPE.PT_double, "recv_rate_used_MB_per_s", PADDR("recv_rate_used_MB_per_s"), PROPERTYTYPE.PT_ACCESS, PA_REFERENCE,
-            PROPERTYTYPE.PT_int32, "buffer_size", PADDR("buffer_size"),
-            PROPERTYTYPE.PT_char1024, "buffer", PADDR("data_buffer"),
-            PROPERTYTYPE.PT_char32, "property", PADDR("prop_str"), PROPERTYTYPE.PT_DESCRIPTION, "the name of the property to write incoming messages to",
-            PROPERTYTYPE.PT_bool, "ignore_size", PADDR("ignore_size"), PROPERTYTYPE.PT_DESCRIPTION, "informs the model that the size of the target property may not represent the number of bytes available for writing",
-            PROPERTYTYPE.PT_enumeration, "send_mode", PADDR("send_message_mode"), PROPERTYTYPE.PT_DESCRIPTION, "determines when the interface will write the data buffer into a message and send it",
-                PROPERTYTYPE.PT_KEYWORD, "UPDATE", NSM.NSM_UPDATE,
-                PROPERTYTYPE.PT_KEYWORD, "INTERVAL", NSM.NSM_INTERVAL,
-                PROPERTYTYPE.PT_KEYWORD, "UPDATE_PERIOD", NSM.NSM_UPDATE_PERIOD,
-            None) < 1:
+        if gl_publish_variable(owner_class,
+                               PropertyType.PT_enumeration, "duplex_mode", PADDR("duplex_mode"),
+                               PropertyType.PT_KEYWORD, "FULL_DUPLEX", DXM.DXM_FULL_DUPLEX,
+                               PropertyType.PT_KEYWORD, "HALF_DUPLEX", DXM.DXM_HALF_DUPLEX,
+                               PropertyType.PT_KEYWORD, "TRANSMIT_ONLY", DXM.DXM_XMIT_ONLY,
+                               PropertyType.PT_KEYWORD, "RECEIVE_ONLY", DXM.DXM_RECV_ONLY,
+                               PropertyType.PT_object, "to", PADDR("to"),
+                               PropertyType.PT_object, "destination", PADDR("destination"),
+                               PropertyType.PT_double, "size_MB", PADDR("size_MB"),
+                               PropertyType.PT_double, "send_rate_MB_per_s", PADDR("send_rate_MB_per_s"),
+                               PropertyType.PT_double, "recv_rate_MB_per_s", PADDR("recv_rate_MB_per_s"),
+                               PropertyType.PT_int64, "update_rate", PADDR("update_rate"),
+                               PropertyType.PT_enumeration, "status", PADDR("status"), PropertyType.PT_ACCESS, PA_REFERENCE,
+                               PropertyType.PT_KEYWORD, "NONE", NIS.NIS_NONE,
+                               PropertyType.PT_KEYWORD, "QUEUED", NIS.NIS_QUEUED,
+                               PropertyType.PT_KEYWORD, "REJECTED", NIS.NIS_REJECTED,
+                               PropertyType.PT_KEYWORD, "SENDING", NIS.NIS_SENDING,
+                               PropertyType.PT_KEYWORD, "COMPLETE", NIS.NIS_COMPLETE,
+                               PropertyType.PT_KEYWORD, "FAILED", NIS.NIS_FAILED,
+                               PropertyType.PT_double, "bandwidth_used_MB_per_s", PADDR("bandwidth_used_MB_per_s"), PropertyType.PT_ACCESS, PA_REFERENCE,
+                               PropertyType.PT_double, "send_rate_used_MB_per_s", PADDR("send_rate_used_MB_per_s"), PropertyType.PT_ACCESS, PA_REFERENCE,
+                               PropertyType.PT_double, "recv_rate_used_MB_per_s", PADDR("recv_rate_used_MB_per_s"), PropertyType.PT_ACCESS, PA_REFERENCE,
+                               PropertyType.PT_int32, "buffer_size", PADDR("buffer_size"),
+                               PropertyType.PT_char1024, "buffer", PADDR("data_buffer"),
+                               PropertyType.PT_char32, "property", PADDR("prop_str"), PropertyType.PT_DESCRIPTION, "the name of the property to write incoming messages to",
+                               PropertyType.PT_bool, "ignore_size", PADDR("ignore_size"), PropertyType.PT_DESCRIPTION, "informs the model that the size of the target property may not represent the number of bytes available for writing",
+                               PropertyType.PT_enumeration, "send_mode", PADDR("send_message_mode"), PropertyType.PT_DESCRIPTION, "determines when the interface will write the data buffer into a message and send it",
+                               PropertyType.PT_KEYWORD, "UPDATE", NSM.NSM_UPDATE,
+                               PropertyType.PT_KEYWORD, "INTERVAL", NSM.NSM_INTERVAL,
+                               PropertyType.PT_KEYWORD, "UPDATE_PERIOD", NSM.NSM_UPDATE_PERIOD,
+                               None) < 1:
             gl_error("unable to publish properties in %s" % __name__)
-        return oclass
+        return owner_class
 
     def get_size(self):
         return self.curr_buffer_size
@@ -143,7 +143,7 @@ class NetworkInterface:
         if self.target is None:
             raise ValueError(f"Network interface parent does not contain property '{self.prop_str}'")
 
-        # Note that there is no type-checking on this; the target property can be of various types.
+        # Note that there is no global_property_types-checking on this; the target property can be of various types.
         # All the interface does is copy data to where it's told. Note that this is "dangerous."
 
         self.bandwidth_used = 0.0
@@ -327,7 +327,7 @@ class NetworkInterface:
 
 
 def create_network_interface(obj, parent):
-    obj[0] = gl_create_object(NetworkInterface.oclass)
+    obj[0] = gl_create_object(NetworkInterface.owner_class)
     if obj[0] is not None:
         my = OBJECTDATA(obj[0], NetworkInterface)
         gl_set_parent(obj[0], parent)
@@ -336,7 +336,7 @@ def create_network_interface(obj, parent):
         except Exception as e:
             gl_error(
                 "%s::%s.create(OBJECT **self={name='%s', id=%d},...): %s" %
-                (obj[0].oclass.module.name, obj[0].oclass.name, obj[0].name, obj[0].id, str(e))
+                (obj[0].owner_class.module.name, obj[0].owner_class.name, obj[0].name, obj[0].id, str(e))
             )
             return 0
         return 1
@@ -350,7 +350,7 @@ def init_network_interface(obj):
     except Exception as e:
         gl_error(
             "%s::%s.init(OBJECT *self={name='%s', id=%d}): %s" %
-            (obj.oclass.module.name, obj.oclass.name, obj.name, obj.id, str(e))
+            (obj.owner_class.module.name, obj.owner_class.name, obj.name, obj.id, str(e))
         )
         return 0
 
@@ -371,19 +371,19 @@ def sync_network_interface(obj, t1, pass_config):
     try:
         t2 = TS_NEVER
         if pass_config == PC_BOTTOMUP:
-            t2 = my.sync(obj.clock, t1)
+            t2 = my.sync(obj.exec_clock, t1)
         elif pass_config == PC_POSTTOPDOWN:
             pass  # Add your PC_POSTTOPDOWN logic here
         elif pass_config == PC_PRETOPDOWN:
-            t2 = my.presync(obj.clock, t1)
-        obj.clock = t1
+            t2 = my.presync(obj.exec_clock, t1)
+        obj.exec_clock = t1
         return t2
     except Exception as e:
         dt = time.time_ns()
-        ts = "TIMESTAMP t1='{0}'".format(obj.clock)
+        ts = "TIMESTAMP t1='{0}'".format(obj.exec_clock)
         gl_localtime(t1, dt)
         ts = gl_strtime(dt, ts, len(ts))
-        gl_error("{0}::{1}.init(OBJECT **self={{name='{2}', id={3}}},{4}): {5}".format(obj.oclass.module.name, obj.oclass.name, obj.name, obj.id, ts, str(e)))
+        gl_error("{0}::{1}.init(OBJECT **self={{name='{2}', id={3}}},{4}): {5}".format(obj.owner_class.module.name, obj.owner_class.name, obj.name, obj.id, ts, str(e)))
         return 0
 
 def commit_network_interface(obj, t1, t2):
@@ -393,5 +393,5 @@ def commit_network_interface(obj, t1, t2):
     except Exception as e:
         dt = time.time_ns()
         ts = "TIMESTAMP t1='{0}', t2='{1}'".format(t1, t2)
-        gl_error("{0}::{1}.init(OBJECT *self={{name='{2}', id={3}}},{4}): {5}".format(obj.oclass.module.name, obj.oclass.name, obj.name, obj.id, ts, str(e)))
+        gl_error("{0}::{1}.init(OBJECT *self={{name='{2}', id={3}}},{4}): {5}".format(obj.owner_class.module.name, obj.owner_class.name, obj.name, obj.id, ts, str(e)))
         return 0

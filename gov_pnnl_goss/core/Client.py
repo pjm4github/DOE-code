@@ -65,7 +65,7 @@ class Client:
 
     def get_protocol(self):
         """
-        Gets the type of protocol that the client will use to connect with.
+        Gets the global_property_types of protocol that the client will use to connect with.
 
         Returns:
             The client protocol as a ClientProtocol enum value.

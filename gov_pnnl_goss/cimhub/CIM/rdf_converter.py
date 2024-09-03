@@ -324,7 +324,7 @@ if __name__ == "__main__":
     
     cim:CoolantType_12345 a cim:CoolantType ;
     cim:IdentifiedObject.name "ExampleCoolantType" ;
-    cim:IdentifiedObject.description "A complex coolant type" ;
+    cim:IdentifiedObject.description "A complex coolant global_property_types" ;
     cim:CoolantType.temperatureRange "-20°C to 100°C" ;
     cim:CoolantType.dielectricConstant 2.5 ;
     cim:CoolantType.conductivity 0.001 ;

@@ -1,21 +1,51 @@
+"""
+This code is part of a module that handles the conversion between object properties and strings in
+GridLAB-D, an open-source power distribution system simulation and analysis tool. The code defines a series of
+functions for converting various data types to and from string representations. These conversions are used when
+reading and writing property values from files, user input, or other external sources.
+
+Here's a summary of the key components:
+
+Includes: Standard headers for character type checks, mathematical operations, and standard I/O are included,
+along with GridLAB-D specific headers for output handling, global definitions, conversion utilities,
+object management, and loading utilities.
+Type Definitions: A conditional compilation block checks for the presence of stdint.h and defines uint32 as an alias
+for uint32_t if available, or unsigned int otherwise.
+Conversion Functions: A set of functions (convert_from_* and convert_to_*) are defined for various data types
+including void, double, complex, enumeration, set, int16, int32, int64, char8, char32, char256, char1024, object,
+delegated, boolean, double_array, complex_array, and struct. Each function has a specific role:
+convert_from_*: Converts a property value to a string representation.
+convert_to_*: Parses a string and converts it to the appropriate property value.
+Utility Functions: Additional utility functions are provided for tasks such as converting a string to a double with a
+given unit (convert_unit_double) and converting between struct objects and strings (convert_from_struct and
+convert_to_struct).
+
+Method Conversion Functions: Two functions, convert_from_method and convert_to_method, are defined to handle
+conversion for properties that use custom methods for their conversion logic.
+Each conversion function takes parameters such as a buffer for the string representation, the size of the buffer,
+The data being converted, and a pointer to the property metadata (PROPERTY). The functions return the
+number of characters written to the buffer or an indication of success/failure of the conversion.
+
+This module is essential for GridLAB-D's ability to interact with various data types through text-based interfaces,
+such as configuration files (GLM files), command-line arguments, and interactive sessions. It ensures that property
+values can be accurately represented as strings and that string inputs can be correctly interpreted as property
+values within the simulation environment.
+"""
 import math
 import re
 from typing import List
 
 import numpy as np
 
-from gov_pnnl_goss.gridlab.climate.sccanfMaker import sscanf
-from gridlab.gldcore.Aggregate import class_find_property
-
+from gridlab.gldcore.Class import ClassRegistry
 from gridlab.gldcore.Converted import timestamp
-from gridlab.gldcore.Globals import global_object_format
-from gridlab.gldcore.Load import load_get_current_object
-from gridlab.gldcore.Object import Object, Property
-from gridlab.gldcore.Platform import strnicmp
-from gridlab.gldcore.Property import PROPERTYFLAGS, PROPERTYSPEC
-from gridlab.gldcore.Unit import Unit
 
-#from gov_pnnl_goss.gridlab.gldcore.Property import PF_CHARSET
+from gridlab.gldcore.Output import output_error
+
+from gridlab.gldcore.PropertyHeader import PropertSpec, PropertyMap
+
+from gridlab.gldcore.Unit import Unit, unit_find
+
 
 # Global variables
 global_double_format = "%.17g"
@@ -28,99 +58,80 @@ class CNOTATION:
     POLAR_DEG = 'polar_deg'
     POLAR_RAD = 'polar_rad'
 
-class gld_complex:
-    def __init__(self, re=0.0, im=0.0):
-        self.re = re
-        self.im = im
+# class gld_complex:
+#     def __init__(self, re=0.0, im=0.0):
+#         self.re = re
+#         self.im = im
+#
+#     def Mag(self):
+#         return math.sqrt(self.re**2 + self.im**2)
+#
+#     def Arg(self):
+#         return math.atan2(self.im, self.re)
+#
+#     def Notation(self):
+#         return CNOTATION.RECT
 
-    def Mag(self):
-        return math.sqrt(self.re**2 + self.im**2)
+# class PROPERTY:
+#     def __init__(self, name, unit=None, owner_class=None):
+#         self.name = name
+#         self.unit = unit
+#         self.owner_class = owner_class
+#
+# def unit_convert_ex(from_unit, to_unit, scale):
+#     # Define your unit conversion logic here
+#     # Return 0 on failure, or update the 'scale' argument and return 1 on success
+#     pass
 
-    def Arg(self):
-        return math.atan2(self.im, self.re)
 
-    def Notation(self):
-        return CNOTATION.RECT
-
-class PROPERTY:
-    def __init__(self, name, unit=None, oclass=None):
-        self.name = name
-        self.unit = unit
-        self.oclass = oclass
-
-def unit_convert_ex(from_unit, to_unit, scale):
-    # Define your unit conversion logic here
-    # Return 0 on failure, or update the 'scale' argument and return 1 on success
-    pass
-
-def output_error(msg):
-    # Define your error message handling logic here
-    pass
-
-def convert_from_void(buffer, size, data, prop):
-    if size < 7:
-        return 0
-    buffer[:7] = "(void)"
-    return 6
+def convert_from_void(data, prop):
+    return "(void)"
 
 def convert_to_void(buffer, data, prop):
     return 1
 
-def convert_from_double(buffer, size, data, prop):
+def convert_from_double(data, prop):
     temp = ""
     count = 0
 
     scale = 1.0
     if prop.unit is not None:
-        ptmp = prop if prop.oclass is None else class_find_property(prop.oclass, prop.name)
+        ptmp = prop if prop.owner_class is None else ClassRegistry.find_property(prop.owner_class, prop.name)
         scale = data
         if prop.unit != ptmp.unit and ptmp.unit is not None:
-            if unit_convert_ex(ptmp.unit, prop.unit, scale) == 0:
-                output_error(f"convert_from_double(): unable to convert unit '{ptmp.unit.name}' to '{prop.unit.name}' for property '{prop.name}' (tape experiment error)")
-                return 0
-            else:
-                temp = f"{scale:.17g}"
+            temp = f"{scale:.17g}"
         else:
             temp = f"{data:.17g}"
     else:
         temp = f"{data:.17g}"
 
-    count = len(temp)
-    if count < size + 1:
-        buffer[:count] = temp
-        buffer[count] = '\0'
-        return count
-    else:
-        return 0
+    return temp
 
 def convert_to_double(buffer, data, prop):
     unit = ""
-    n = sscanf(buffer, "%lg%s", data, unit)
-    if n > 1:
+    # n = sscanf(buffer, "%lg%s", data, unit)
+    pattern = r"\s*([\d\.]+)\s+(\S+)"
+
+    match = re.match(pattern, buffer)
+    if match:
+        data = float(match.group(1))  # Convert the first captured group to a float
+        unit = match.group(2)  # The second captured group is the unit
+        print(f"Data: {data}, Unit: '{unit}'")
+
         if prop.unit is not None:
             from_unit = unit_find(unit)
-            if from_unit != prop.unit and unit_convert_ex(from_unit, prop.unit, data) == 0:
+            if from_unit != prop.unit:
                 output_error(f"convert_to_double(): unit conversion failed")
                 return 0
         else:
             output_error(f"convert_to_double(): conversion failed")
             return 0
-    return n
+    return 2
 
-def convert_from_complex(buffer, size, data, prop):
-    temp = ""
-    count = 0
-    v = data
-    cplex_output_type = CNOTATION.RECT
-
+def convert_from_complex(data: complex, prop):
     scale = 1.0
     if prop.unit is not None:
-        ptmp = prop if prop.oclass is None else class_find_property(prop.oclass, prop.name)
-        if prop.unit != ptmp.unit:
-            if unit_convert_ex(ptmp.unit, prop.unit, scale) == 0:
-                output_error(f"convert_from_complex(): unable to convert unit '{ptmp.unit.name}' to '{prop.unit.name}' for property '{prop.name}' (tape experiment error)")
-                scale = 1.0
-
+        ptmp = prop if prop.owner_class is None else ClassRegistry.find_property(prop.owner_class, prop.name)
     if global_complex_output_format == CNOTATION.RECT:
         cplex_output_type = CNOTATION.RECT
     elif global_complex_output_format == CNOTATION.POLAR_DEG:
@@ -128,35 +139,24 @@ def convert_from_complex(buffer, size, data, prop):
     elif global_complex_output_format == CNOTATION.POLAR_RAD:
         cplex_output_type = CNOTATION.POLAR_RAD
     else:
-        cplex_output_type = v.Notation()
+        cplex_output_type = CNOTATION.RECT
 
     if cplex_output_type == CNOTATION.POLAR_DEG:
-        m = v.Mag() * scale
-        a = v.Arg()
+        m = abs(data) * scale
+        a = math.atan2(data.imag , data.real)
         if a > math.pi:
             a -= (2 * math.pi)
         temp = global_complex_format % (m, a * 180 / math.pi, 'A')
     elif cplex_output_type == CNOTATION.POLAR_RAD:
-        m = v.Mag() * scale
-        a = v.Arg()
+        m = abs(data) * scale
+        a = math.atan2(data.imag , data.real)
         if a > math.pi:
             a -= (2 * math.pi)
         temp = global_complex_format % (m, a, 'R')
     else:
-        temp = global_complex_format % (v.re * scale, v.im * scale, cplex_output_type if cplex_output_type else 'i')
+        temp = global_complex_format % (data.real * scale, data.imag * scale, cplex_output_type if cplex_output_type else 'i')
 
-    count = len(temp)
-    if count < size - 1:
-        buffer[:count] = temp
-        buffer[count] = '\0'
-        return count
-    else:
-        return 0
-
-
-def unit_find(unit):
-    pass
-
+    return temp
 
 
 def convert_to_complex(buffer, data, prop):
@@ -165,7 +165,7 @@ def convert_to_complex(buffer, data, prop):
     variable `global_complex_format` to perform the conversion.
 
     :param buffer: A pointer to the string buffer.
-    :param data: A pointer to the data.
+    :param data: The data.
     :param prop: A pointer to keywords that are supported.
     :return: 1 when only real is read, 2 when the imaginary part is also read,
              3 when notation is also read, 0 on failure, -1 if the conversion was incomplete.
@@ -203,7 +203,7 @@ def convert_to_complex(buffer, data, prop):
     if n > 3 and prop.unit is not None:  # Unit given and unit allowed
         from_unit = unit_find(unit)
         scale = 1.0
-        if from_unit != prop.unit and unit_convert_ex(from_unit, prop.unit, scale) == 0:
+        if from_unit != prop.unit:
             output_error(f"convert_to_double(buffer='{buffer}', data=0x{data:0p}, prop={{name='{prop.name}',...}}): unit conversion failed")
             return 0
         v.real *= scale
@@ -212,15 +212,12 @@ def convert_to_complex(buffer, data, prop):
     return 1
 
 
-def convert_from_enumeration(buffer, size, data, prop):
+def convert_from_enumeration(data, prop):
     """
     Converts an enumeration property to a string.
-
-    :param buffer: Pointer to the string buffer.
-    :param size: Size of the string buffer.
-    :param data: A pointer to the data.
+    :param data: The data.
     :param prop: A pointer to keywords that are supported.
-    :return: The number of characters written to the string.
+    :return: The string.
     """
     keys = prop.keywords
     count = 0
@@ -235,29 +232,20 @@ def convert_from_enumeration(buffer, size, data, prop):
         if keys.value == value:
             # Use the keyword
             temp = keys.name
-            count = len(temp)
             break
         keys = keys.next
 
     # No keyword found, return the numeric value instead
     if count == 0:
         temp = str(value)
-        count = len(temp)
-
-    if count < size - 1:
-        buffer[:count] = temp
-        buffer[count] = '\0'
-        return count
-    else:
-        return 0
-
+    return temp
 
 def convert_to_enumeration(buffer, data, prop):
     """
     Converts a string to an enumeration property.
 
     :param buffer: A pointer to the string buffer.
-    :param data: A pointer to the data.
+    :param data: The data.
     :param prop: A pointer to keywords that are supported.
     :return: 1 on success, 0 on failure, -1 if conversion was incomplete.
     """
@@ -276,9 +264,10 @@ def convert_to_enumeration(buffer, data, prop):
         return 1
 
     if buffer.startswith("0x"):
-        return sscanf(buffer[2:], "%x", data)
+        data = int(buffer[2:], 16)
+        return data
     if buffer.isdigit():
-        return sscanf(buffer, "%d", data)
+        return int(data)
     elif buffer == "":
         return 0  # Empty string, do nothing
 
@@ -286,113 +275,14 @@ def convert_to_enumeration(buffer, data, prop):
     return 0
 
 
-def convert_from_set(buffer, size, data, prop):
-    """
-    Converts a set property to a string.
-
-    :param buffer: Pointer to the string buffer.
-    :param size: Size of the string buffer.
-    :param data: A pointer to the data.
-    :param prop: A pointer to keywords that are supported.
-    :return: The number of characters written to the string.
-    """
-    SETDELIM = "|"
-    keys = prop.keywords
-    value = data
-    count = 0
-    ISZERO = (value == 0)
-    buffer = ""
-
-    for keys in prop.keywords:
-        if (not ISZERO and keys.value != 0 and (keys.value & value) == keys.value) or (keys.value == 0 and ISZERO):
-            len_ = len(keys.name)
-            value &= ~keys.value
-
-            if size > count + len_ + 1:
-                if buffer != "":
-                    if not (prop.flags & PROPERTYFLAGS.PF_CHARSET):
-                        count += 1
-                        buffer += SETDELIM
-
-                count += len_
-                buffer += keys.name
-            else:
-                return 0
-
-    return count
-
-
-def convert_to_set(buffer, data, prop):
-    """
-    Converts a string to a set property.
-
-    :param buffer: A pointer to the string buffer.
-    :param data: A pointer to the data.
-    :param prop: A pointer to keywords that are supported.
-    :return: Number of values read on success, 0 on failure, -1 if conversion was incomplete.
-    """
-    SETDELIM = "|"
-    keys = prop.keywords
-    temp = ""
-    ptr = ""
-    value = 0
-    count = 0
-
-    if buffer.startswith("0x"):
-        return sscanf(buffer[2:], "0x%x", data)
-    elif buffer.isdigit():
-        return sscanf(buffer, "%d", data)
-
-    if len(buffer) > len(temp) - 1:
-        return 0
-
-    temp = buffer
-
-    if (prop.flags & PROPERTYFLAGS.PF_CHARSET) and "|" not in buffer:
-        for ptr in buffer:
-            found = False
-            for key in keys:
-                if ptr == key.name[0]:
-                    value |= key.value
-                    count += 1
-                    found = True
-                    break
-            if not found:
-                output_error(f"set member '{ptr}' is not a keyword of property {prop.name}")
-                return 0
-    else:
-        parts = temp.split(SETDELIM)
-        for ptr in parts:
-            found = False
-            for key in keys:
-                if ptr == key.name:
-                    value |= key.value
-                    count += 1
-                    found = True
-                    break
-            if not found:
-                output_error(f"set member '{ptr}' is not a keyword of property {prop.name}")
-                return 0
-
-    data = value
-    return count
-
-
-def convert_from_int16(buffer, size, data, prop):
+def convert_from_int16(data):
     """
     Converts an int16 property to a string.
 
-    :param buffer: Pointer to the string buffer.
-    :param size: Size of the string buffer.
-    :param data: A pointer to the data.
-    :param prop: A pointer to keywords that are supported.
-    :return: The number of characters written to the string.
+    :param data: The data.
+    :return: The string.
     """
-    try:
-        temp = f"{data: hd}"
-        return len(temp), temp
-    except ValueError as e:
-        return 0, ""
+    return str(data)
 
 
 def convert_to_int16(buffer, data, prop):
@@ -400,7 +290,7 @@ def convert_to_int16(buffer, data, prop):
     Converts a string to an int16 property.
 
     :param buffer: A pointer to the string buffer.
-    :param data: A pointer to the data.
+    :param data: The data.
     :param prop: A pointer to keywords that are supported.
     :return: 1 on success, 0 on failure, -1 if conversion was incomplete.
     """
@@ -410,22 +300,14 @@ def convert_to_int16(buffer, data, prop):
         return 0, 0
 
 
-def convert_from_int32(buffer, size, data, prop):
+def convert_from_int32(data):
     """
     Converts an int32 property to a string.
 
-    :param buffer: Pointer to the string buffer.
-    :param size: Size of the string buffer.
-    :param data: A pointer to the data.
-    :param prop: A pointer to keywords that are supported.
-    :return: The number of characters written to the string.
+    :param data: The data.
+    :return: The string.
     """
-    try:
-        temp = f"{data: d}"
-        count = len(temp)
-        return count, temp
-    except ValueError as e:
-        return 0, ""
+    return str(data)
 
 
 def convert_to_int32(buffer, data, prop):
@@ -433,7 +315,7 @@ def convert_to_int32(buffer, data, prop):
     Converts a string to an int32 property.
 
     :param buffer: A pointer to the string buffer.
-    :param data: A pointer to the data.
+    :param data: The data.
     :param prop: A pointer to keywords that are supported.
     :return: 1 on success, 0 on failure, -1 if conversion was incomplete.
     """
@@ -449,26 +331,17 @@ def convert_from_int64(buffer, size, data, prop):
     """
     Converts an int64 property to a string.
 
-    :param buffer: Pointer to the string buffer.
-    :param size: Size of the string buffer.
-    :param data: A pointer to the data.
-    :param prop: A pointer to keywords that are supported.
-    :return: The number of characters written to the string.
+    :param data: The data.
+    :return: The string.
     """
-    try:
-        temp = f"{data:{FMT_INT64}}"
-        count = len(temp)
-        return count, temp
-    except ValueError as e:
-        return 0, ""
-
+    return str(data)
 
 def convert_to_int64(buffer, data, prop):
     """
     Converts a string to an int64 property.
 
     :param buffer: A pointer to the string buffer.
-    :param data: A pointer to the data.
+    :param data: The data.
     :param prop: A pointer to keywords that are supported.
     :return: 1 on success, 0 on failure, -1 if conversion was incomplete.
     """
@@ -479,27 +352,13 @@ def convert_to_int64(buffer, data, prop):
         return 0, np.nan
 
 
-def convert_from_char8(buffer, size, data, prop):
+def convert_from_char8(data):
     """
     Converts a char8 property to a string.
-
-    :param buffer: Pointer to the string buffer.
-    :param size: Size of the string buffer.
-    :param data: A pointer to the data.
-    :param prop: A pointer to keywords that are supported.
-    :return: The number of characters written to the string.
+    :param data: The data.
+    :return: The string.
     """
-    format_str = "%s"
-    if ' ' in data or ';' in data or data=="":
-        format_str = '"%s"'
-    try:
-
-        temp = f"{data:{format}}"
-        count = len(temp)  #sprintf(temp, format, data)
-
-        return count, temp
-    except ValueError as e:
-        return 0, ""
+    return str(data)
 
 
 def convert_to_char8(buffer, data, prop):
@@ -507,7 +366,7 @@ def convert_to_char8(buffer, data, prop):
     Converts a string to a char8 property.
 
     :param buffer: A pointer to the string buffer.
-    :param data: A pointer to the data.
+    :param data: The data.
     :param prop: A pointer to keywords that are supported.
     :return: 1 on success, 0 on failure, -1 if conversion was incomplete.
     """
@@ -529,31 +388,17 @@ def convert_to_char8(buffer, data, prop):
 def convert_from_char32(buffer, size, data, prop):
     """
     Converts a char32 property to a string.
-
-    :param buffer: Pointer to the string buffer.
-    :param size: Size of the string buffer.
-    :param data: A pointer to the data.
-    :param prop: A pointer to keywords that are supported.
-    :return: The number of characters written to the string.
+    :param data: The data.
+    :return: The string.
     """
-    format_str = "%s"
-    if ' ' in data or ';' in data or data=="":
-        format_str = '"%s"'
-    try:
-
-        temp = f"{data:{format}}"
-        count = len(temp)  #sprintf(temp, format, data)
-
-        return count, temp
-    except ValueError as e:
-        return 0, ""
+    return str(data)
 
 def convert_to_char32(buffer, data, prop):
     """
     Converts a string to a char32 property.
 
     :param buffer: A pointer to the string buffer.
-    :param data: A pointer to the data.
+    :param data: The data.
     :param prop: A pointer to keywords that are supported.
     :return: 1 on success, 0 on failure, -1 if conversion was incomplete.
     """
@@ -574,36 +419,20 @@ def convert_to_char32(buffer, data, prop):
 
 
 
-def convert_from_char256(size, data):
+def convert_from_char256(size, data)->str:
     """
     Converts a char256 property to a string.
-
-    :param buffer: Pointer to the string buffer.
-    :param size: Size of the string buffer.
-    :param data: A pointer to the data.
-    :return: The number of characters written to the string.
+    :param data: The data.
+    :return: The string.
     """
-    format_str = "%s"
-    if ' ' in data or ';' in data or len(data)==0:
-        format_str = "\"%s\""
-
-    temp = format_str.format(data)
-    count = len(temp)
-
-    if count > size - 1:
-        return None
-    else:
-        buffer = temp[:count]
-        return buffer
-
+    return str(data)
 
 def convert_to_char256(buffer):
     """
     Converts a string to a char256 property.
 
     :param buffer: A pointer to the string buffer.
-    :param data: A pointer to the data.
-    :return: 1 on success, 0 on failure, -1 if conversion was incomplete.
+    :return: 1 on success, 0 on failure, -1 if conversion was incomplete and the converted string
     """
     try:
         if buffer == "":
@@ -623,25 +452,10 @@ def convert_to_char256(buffer):
 def convert_from_char1024(size, data):
     """
     Converts a char1024 property to a string.
-
-    :param size: Size of the string buffer.
-    :param data: A pointer to the data.
-    :return: The number of characters written to the string.
+    :param data: The data.
+    :return: The string.
     """
-    temp = ""
-    format_str = "%s"
-    count = 0
-
-    if ' ' in data or ';' in data or data[0] == '\0':
-        format_str = "\"%s\""
-
-    temp =format_str.format(data)
-    count = len(temp)
-    if count > size - 1:
-        return 0, ""
-    else:
-        buffer = temp[:count]
-        return count, buffer
+    return str(data)
 
 
 def object_current_namespace():
@@ -653,7 +467,7 @@ def convert_to_char1024(buffer: str, data: str, prop) -> (int, str):
     Converts a string to a char1024 property.
 
     :param buffer: A pointer to the string buffer.
-    :param data: A pointer to the data.
+    :param data: The data.
     :param prop: A pointer to keywords that are supported.
     :return: 1 on success, 0 on failure, -1 if conversion was incomplete.
     """
@@ -682,7 +496,7 @@ def convert_from_object(buffer, size, data, prop):
 
     :param buffer: Pointer to the string buffer.
     :param size: Size of the string buffer.
-    :param data: A pointer to the data.
+    :param data: The data.
     :param prop: A pointer to keywords that are supported.
     :return: The number of characters written to the string.
     """
@@ -704,8 +518,9 @@ def convert_from_object(buffer, size, data, prop):
         return 1
 
     # Construct the object'status name
-    temp = global_object_format.format(obj.oclass.name, obj.id)
-    if obj.oclass is not None and len(temp) < size:
+    global_object_format = "%s:%d"
+    temp = global_object_format.format(obj.owner_class.name, obj.id)
+    if obj.owner_class is not None and len(temp) < size:
         buffer += temp
     else:
         return 0
@@ -726,106 +541,90 @@ def convert_to_object(buffer, data, prop):
     Converts a string to an object property.
 
     :param buffer: A pointer to the string buffer.
-    :param data: A pointer to the data.
+    :param data: The data.
     :param prop: A pointer to keywords that are supported.
     :return: 1 on success, 0 on failure, -1 if conversion was incomplete.
     """
-    oname = ""
-    cname = ""
     id = None
     target = None
+    count = 0
     if not buffer:
         target = None
-        return 1
+        count = 1
+    else:
+        matches_in_quotes = re.findall(r'"([^"]*)"', buffer)
+        num_of_matches = len(matches_in_quotes)
+        found_a_colin = buffer.find(':')>-1
+        # This looks for anything before a ':' and an integer after the :
+        scan2_parts = re.match(r'([^:]*):\s*(-?\d+)*', buffer)
+        cname=scan2_parts[0].strip()
+        if scan2_parts[1]:
+            id = int(scan2_parts[1])
 
-    matches_in_quotes = re.findall(r'"([^"]*)"', buffer)
-    num_of_matches = len(matches_in_quotes)
-    found_a_colin = buffer.find(':')>-1
-    # This looks for anything before a ':' and an integer after the :
-    scan2_parts = re.match(r'([^:]*):\s*(-?\d+)*', buffer)
-    cname=scan2_parts[0].strip()
-    if scan2_parts[1]:
-        id = int(scan2_parts[1])
 
+        if num_of_matches == 1 or not found_a_colin:
 
-    # elif sscanf(buffer, "\"%[^\"]\"", oname) == 1 or (':' not in buffer and strncpy(oname, buffer, sizeof(oname))):
-    if num_of_matches == 1 or not found_a_colin:
+            oname = buffer[:min(len(buffer),256)]
+            from gridlab.gldcore.Object import Object
+            target = Object.object_find_name(data, oname)
+            count = 1
+        elif id:
+            from gridlab.gldcore.Object import Object
+            obj = Object.object_find_by_id(data, id)
+            if obj is None:
+                target = None
+                count = 0
+            elif obj and obj.owner_class.name == cname:
+                target = obj
+                count = 1
 
-        oname = buffer[:min(len(buffer),256)]
-        target = object_find_name(oname)
-        return 1
-    # elif sscanf(buffer, global_object_scan, cname, id) == 2:
-    if id:
-        obj = object_find_by_id(id)
-        if obj is None:
-            target = None
-            return 0
-        if obj and obj.oclass.name == cname:
-            target = obj
-            return 1
-
-    return 0, target
+    return count, target
 
 def convert_from_delegated(buffer, size, data, prop):
     """
-    Converts a delegated data type reference to a string.
+    Converts a delegated data global_property_types reference to a string.
 
     :param buffer: Pointer to the string buffer.
     :param size: Size of the string buffer.
-    :param data: A pointer to the data.
+    :param data: The data.
     :param prop: A pointer to keywords that are supported.
     :return: The number of characters written to the string.
     """
     value = data[0]
-    if not (value and value.type and value.type.to_string):
+    if not (value and value.global_property_types and value.global_property_types.to_string):
         return 0
     else:
-        return value.type.to_string(value.data, buffer, size)
+        return value.global_property_types.to_string(value.data, buffer, size)
 
 def convert_to_delegated(buffer, data, prop):
     """
-    Converts a string to a delegated data type property.
+    Converts a string to a delegated data global_property_types property.
 
     :param buffer: A pointer to the string buffer.
-    :param data: A pointer to the data.
+    :param data: The data.
     :param prop: A pointer to keywords that are supported.
     :return: 1 on success, 0 on failure, -1 if conversion was incomplete.
     """
     value = data[0]
-    if not (value and value.type and value.type.from_string):
+    if not (value and value.global_property_types and value.global_property_types.from_string):
         return 0
     else:
-        return value.type.from_string(value.data, buffer)
+        return value.global_property_types.from_string(value.data, buffer)
 
-def convert_from_boolean(buffer, size, data, prop):
+def convert_from_boolean(data):
     """
-    Converts a boolean data type reference to a string.
-
-    :param buffer: Pointer to the string buffer.
-    :param size: Size of the string buffer.
-    :param data: A pointer to the data.
-    :param prop: A pointer to keywords that are supported.
-    :return: The number of characters written to the string.
+    Converts a boolean data global_property_types reference to a string.
+    :param data: The data.
+    :return: The string.
     """
-    b = data[0]
-    if buffer is None or data is None or prop is None:
-        return 0
-    b = data[0]
-    if b == 1 and size > 4:
-        buffer = "TRUE"
-        return buffer
-    if b == 0 and size > 5:
-        buffer = "FALSE"
-        return buffer
-    return 0
-
+    return "True" if data else "False"
 
 def convert_to_boolean(buffer, data):
     """
-    Converts a string to a boolean data type property.
+    Converts a string to a boolean data global_property_types property.
 
     :param buffer: A pointer to the string buffer.
-    :param data: A pointer to the data.
+    :param data: The data.
     :param prop: A pointer to keywords that are supported.
     :return: 1 on success, 0 on failure, -1 if conversion was incomplete.
     """
@@ -866,8 +665,6 @@ def convert_to_timestamp(item: [str, timestamp]):
         convert_to_timestamp_stub()
 
 
-
-
 def convert_to_timestamp_delta(string):
     # Implement based on your specific requirements
     pass
@@ -875,34 +672,30 @@ def convert_to_timestamp_delta(string):
 
 def convert_from_timestamp(timestamp):
     # Implement based on your specific requirements
-    pass
+    return str(timestamp)
 
 
 def convert_from_deltatime_timestamp(timestamp):
     # Implement based on your specific requirements
-    pass
+    return str(timestamp)
 
 
 
-def convert_from_timestamp_stub(buffer, size, data, prop):
+def convert_from_timestamp_stub(data):
     """
     Converts a timestamp stub reference to a string.
-
-    :param buffer: Pointer to the string buffer.
-    :param size: Size of the string buffer.
-    :param data: A pointer to the data.
-    :param prop: A pointer to keywords that are supported.
+    :param data: The data.
     :return: The number of characters written to the string.
     """
     ts = data[0]
-    return convert_from_timestamp(ts, buffer, size)
+    return convert_from_timestamp(ts)
 
 def convert_to_timestamp_stub(buffer, data, prop):
     """
     Converts a string to a timestamp stub property.
 
     :param buffer: A pointer to the string buffer.
-    :param data: A pointer to the data.
+    :param data: The data.
     :param prop: A pointer to keywords that are supported.
     :return: 1 on success, 0 on failure, -1 if conversion was incomplete.
     """
@@ -926,24 +719,13 @@ def convert_from_double_array(data):
     :param data: 2D list of doubles
     :return: The string representation of the array
     """
-    buffer = ""
-    for n, row in enumerate(data):
-        for m, val in enumerate(row):
-            if val != val:  # Check for NaN
-                buffer += "NAN"
-            else:
-                buffer += str(val)  # Assuming direct conversion, or call your convert_from_double equivalent here
-            if m < len(row) - 1:
-                buffer += " "
-        if n < len(data) - 1:
-            buffer += ";"
-    return buffer
+    return str(data)
 
 
 
 def convert_to_double_array(buffer):
     """
-    Converts a string to a double array data type property.
+    Converts a string to a double array data global_property_types property.
 
     :param buffer: A pointer to the string buffer.
     :return: 1, data on success, 0, None on failure, -1, None if conversion was incomplete.
@@ -1009,7 +791,7 @@ def convert_from_complex_array(data):
         # Example usage
         data = [
             [complex(1, 2), complex(3, 4)],
-            [complex(5, 6), float('nan')]  # Python's complex type doesn't directly support NaN, this is for illustration
+            [complex(5, 6), float('nan')]  # Python's complex global_property_types doesn't directly support NaN, this is for illustration
         ]
         result = convert_from_complex_array(data)
         print(result)
@@ -1122,14 +904,14 @@ def convert_unit_double(buffer, to_unit):
         return 0, None
 
 
-def convert_from_struct(properties: Property):
+def convert_from_struct(properties: PropertyMap):
     """
-    Convert a list of Property objects to a string representation.
+    Convert a list of PropertyMap objects to a string representation.
 
         # Example usage
-        prop3 = Property("height", "5.9")
-        prop2 = Property("age", "30", prop3)
-        prop1 = Property("name", "John Doe", prop2)
+        prop3 = PropertyMap("height", "5.9")
+        prop2 = PropertyMap("age", "30", prop3)
+        prop1 = PropertyMap("name", "John Doe", prop2)
 
         length, result = convert_from_struct(prop1)
         if length > 0:
@@ -1138,18 +920,18 @@ def convert_from_struct(properties: Property):
             print("Conversion failed or empty")
 
     Assuming that the properties if a class object like this:
-        class Property:
+        class PropertyMap:
         def __init__(self, name, value, next_prop=None):
             self.name = name
             self.value = value
             self.next = next_prop
 
         def data_to_string(self):
-            # This is a placeholder. Actual implementation would depend on property type.
+            # This is a placeholder. Actual implementation would depend on property global_property_types.
             return str(self.value)
 
 
-    :param properties: List of Property objects.
+    :param properties: List of PropertyMap objects.
     :return: The length of the string on success, 0 for empty, <0 for failure.
     """
     if not properties:
@@ -1164,15 +946,15 @@ def convert_from_struct(properties: Property):
 
     buffer.append("}")
     result = "".join(buffer)
-    return len(result), result
+    return result
 
 
 def convert_to_struct(buffer, structure: List[dict]):
     """
         # Example usage
         structure = [
-            Property("name", "string"),
-            Property("age", "int"),
+            PropertyMap("name", "string"),
+            PropertyMap("age", "int"),
         ]
 
         buffer = "{ name John Doe; age 30; }"
@@ -1187,9 +969,9 @@ def convert_to_struct(buffer, structure: List[dict]):
 
     :param buffer:
     :param structure:
-    :return:
+    :return: prop
     """
-
+    prop = {}
 
     if not buffer.startswith('{'):
         return -1
@@ -1217,14 +999,13 @@ def convert_to_struct(buffer, structure: List[dict]):
         if prop is None:
             return -len_value  # No matching property found
 
-        prop.value = PROPERTYSPEC.string_to_data(value, prop)
+        prop.value = float(value)
         len_value += len(value)
 
-    return len_value if not len_value == 0 else -1  # Return -1 if no properties were found/updated
+    return prop
 
 
-
-def convert_from_method(buffer, data, prop:Property):
+def convert_from_method(buffer, data, prop:PropertyMap):
     """
     Convert from a method.
 
@@ -1234,7 +1015,7 @@ def convert_from_method(buffer, data, prop:Property):
             print(f"Called example_method with buffer='{buffer}' and size={size}")
             return 0  # Simulate success
 
-        prop = Property("example", example_method)
+        prop = PropertyMap("example", example_method)
         obj = Object()
 
         # Simulate calling these functions
@@ -1243,7 +1024,7 @@ def convert_from_method(buffer, data, prop:Property):
         print(f"convert_from_method returned {result}")
 
     :param buffer: A pointer to the string buffer.
-    :param data: A pointer to the data.
+    :param data: The data.
     :param prop: A pointer to keywords that are supported.
     :return: -1 on error.
     """
@@ -1272,7 +1053,7 @@ def convert_to_method(buffer, data, prop):
             return 0  # Simulate success
 
 
-        prop = Property("example", example_method)
+        prop = PropertyMap("example", example_method)
         obj = Object()
 
         # Simulate calling these functions
@@ -1303,6 +1084,37 @@ def convert_to_method(buffer, data, prop):
 
     # Assuming prop.method is a callable that can handle buffer being None or empty
     return prop.method(data, buffer, 0)
+
+
+def convert_from_enduse(buffer, data, prop):
+    pass
+
+def convert_to_enduse(buffer, data, prop):
+    pass
+
+def enduse_create(buffer, data, prop):
+    pass
+
+def convert_from_loadshape(buffer, data, prop):
+    pass
+
+def convert_to_loadshape(buffer, data, prop):
+    pass
+
+def loadshape_create(buffer, data, prop):
+    pass
+
+def convert_from_randomvar(buffer, data, prop):
+    pass
+
+def convert_to_randomvar(buffer, data, prop):
+    pass
+
+def randomvar_create(buffer, data, prop):
+    pass
+
+def convert_to_enduse(buffer, data, prop):
+    pass
 
 
 # Define your other functions and classes as needed

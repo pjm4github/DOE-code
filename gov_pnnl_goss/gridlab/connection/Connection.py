@@ -1,19 +1,23 @@
 from gov_pnnl_goss.gridlab.gldcore.GridLabD import gl_error, gl_warning, gl_debug
 import ctypes
 
-# Define missing variables and functions as needed
+from gov_pnnl_goss.gridlab.connection.Cache import Cache
+from gov_pnnl_goss.gridlab.connection.Client import Client
+#from gridlab.connection.FncsMsg import gld_property
+from gov_pnnl_goss.gridlab.connection.Server import Server
+from gov_pnnl_goss.gridlab.connection.Transport import CONNECTIONTRANSPORT
+
+import re
+import sys
+from enum import Enum
+import traceback
+
 seqnum = 0
 xlate_out = None
 xlate_in = None
 read_cache = None
 write_cache = None
 transport = None
-
-
-import re
-import sys
-from enum import Enum
-import traceback
 
 # Define constants
 ET_MATCHONLY = 0
@@ -46,18 +50,18 @@ class DeltaClockUpdateList:
 
 # Define message flags as an enum
 class MESSAGEFLAG(Enum):
-    MSG_CONTINUE = 0x01
-    MSG_INITIATE = 0x02
-    MSG_COMPLETE = 0x04
-    MSG_TAG = 0x08
-    MSG_SCHEMA = 0x10
-    MSG_STRING = 0x20
-    MSG_REAL = 0x40
-    MSG_INTEGER = 0x80
-    MSG_DATA = 0x100
-    MSG_OPEN = 0x200
-    MSG_CLOSE = 0x400
-    MSG_CRITICAL = 0x800
+    MSG_CONTINUE = 0x01  # msg part of a group of message (automatically new if first in group)
+    MSG_INITIATE = 0x02  # open a new message group (if current group exists then gives warning/error)
+    MSG_COMPLETE = 0x04  # closes current message group
+    MSG_TAG = 0x08  # element tag (followed by tag name)
+    MSG_SCHEMA = 0x10  # group element is a schema (followed by VARMAP*)
+    MSG_STRING = 0x20  # group element is a string (followed by "name",maxsize,"value")
+    MSG_REAL = 0x40  # group element is a double (e.g. "name","%wfmt","%rfmt",ptr)
+    MSG_INTEGER = 0x80  # group element is an int64 (e.g. "name","%wfmt","%rfmt",ptr)
+    MSG_DATA = 0x100  # group element is gridlabd data (followed by VARMAP*)
+    MSG_OPEN = 0x200  # open a subgroup (followed by "name")
+    MSG_CLOSE = 0x400  # close a subgroup (nothing follows)
+    MSG_CRITICAL = 0x800  # flag message as critical (must preceded MSG_INITIATE to affect incoming traffic)
 
 
 # Define connection security levels as an enum
@@ -77,6 +81,10 @@ class CONNECTIONMODETYPE(Enum):
     CM_CLIENT = 2
 
 
+class CONNECTIONTYPE(Enum):
+    CM_NONE = 0
+    CM_UDP = 1
+    CM_TCP = 2
 
 
 class DATAEXCHANGEDIRECTION(Enum):
@@ -113,7 +121,7 @@ def convert_to_python_function(count, write_cache, tag, read_cache, varlist, dxd
         count = 0
         v = varlist.getfirst()
         while v is not None:
-            if not update(v, DATAEXCHANGEDIRECTION.DXD_READ, xlate):
+            if not self.update(v, DATAEXCHANGEDIRECTION.DXD_READ, xlate):
                 return -1
             else:
                 count += 1
@@ -170,28 +178,23 @@ class ConnectionMode:
         self.seqnum = 0
 
     ############################################################
-    def exchange(self, xlate, critical: bool) -> int:
-        pass
-    
-    def exchange(self, xlate) -> int:
+    def exchange(self, xlate, *args):
+        # no arguments
+        if len(args)==0:
+            self.exchange_none(xlate)
+        if len(args)==1:
+            arg_type = type(args[0])
+            match arg_type:
+                case type(bool()):
+                    self.exchange_bool(xlate, args[0])
+                case type(int()):
+                    self.exchange_id(xlate, args[0])
+
+
+    def exchange_bool(self, xlate, critical: bool) -> int:
         pass
 
-    def exchange(self, xlate, id: int) -> int:
-        pass
-
-    def exchange(self, xlate, tag: str, value: str) -> int:
-        pass
-
-    def exchange(self, xlate, tag: str, len: int, value: str) -> int:
-        pass
-
-    def exchange(self, xlate, tag: str, real: float) -> int:
-        pass
-
-    def exchange(self, xlate, tag: str, integer: int) -> int:
-        pass
-
-    def exchange(self, xlate):
+    def exchange_none(self, xlate) -> int:
         if not self.transport.message_continue():
             self.error("message queue continued with none open")
             return -1
@@ -199,7 +202,25 @@ class ConnectionMode:
             self.debug(9, "message queue control: MSG_CONTINUE")
         return 0
 
-    def exchange(self, xlate, id: int):
+
+
+
+    def exchange_integer(self, xlate, tag, integer=None):
+        """
+        Exchanges an integer value, optionally based on a tag.
+        """
+        # Implement the logic for exchanging an integer here
+        if integer is not None:
+            self.debug(f"Exchanging integer for tag {tag}: {integer}")
+            # Convert integer to string if necessary and call xlate
+
+
+
+    #
+    # def exchange_int(self, xlate, id: int) -> int:
+    #     pass
+
+    def exchange_id(self, xlate, id: int):
         self._exchange(xlate, "id", self.seqnum)
         if id is not None:
             id[0] = self.seqnum
@@ -212,28 +233,44 @@ class ConnectionMode:
             self.debug(9, "message queue control: MSG_COMPLETE (id=%lld)" % id[0])
             return 0  # ok
 
-    def exchange(self, exchange_translator, tag, value):
+
+    # def exchange(self, xlate, tag: str, value: str) -> int:
+    #     pass
+
+    def exchange_tag_value(self, exchange_translator, tag:str, value:str)-> int:
         return exchange_translator(transport, tag, value, 0, ETO_QUOTES)
 
-    def exchange(self, xlate, tag, len, value):
+
+    #
+    # def exchange(self, xlate, tag: str, len: int, value: str) -> int:
+    #     pass
+
+    def exchange_tag_len_value(self, xlate, tag: str, len: int, value: str) -> int:
         return xlate(transport, tag, value, len, ETO_QUOTES)
 
-    def exchange(self, exchange_translator, tag, real):
+
+    #
+    # def exchange(self, xlate, tag: str, real: float) -> int:
+    #     pass
+
+    def exchange_tag_real(self, exchange_translator, tag: str, real: float) -> int:
         temp = str(real)
         status = exchange_translator(transport, tag, temp, len(temp), ETO_NONE)
         if status > 0:
             status = float(temp)
         return status
 
-    def exchange(self, xlate, tag, integer):
-        temp = bytearray(1024)
-        length = f'{temp}, "%lld", {integer}'
+    #
+    # def exchange(self, xlate, tag: str, integer: int) -> int:
+    #     pass
+    def exchange_tag_integer(self, xlate, tag: str, integer: int) -> int:
+        temp = ""
         status = xlate(transport, tag, temp, len(temp), ETO_NONE)
         if status > 0:
-            status = sscanf(temp, "%lld", integer)
+            status = integer
         return status
 
-    def exchange(self, xlate, critical):
+    def exchange_critical(self, xlate, critical):
         if not self.transport.message_open():
             self.error("new message queue opened with unsent messages pending")
             return -1
@@ -245,6 +282,25 @@ class ConnectionMode:
         return 0
 
     ##################################
+
+    def exchange_string(self, xlate, tag, value=None):
+        """
+        Exchanges a string value, optionally based on a tag.
+        """
+        # Implement the logic for exchanging a string value here
+        self.debug(f"Exchanging string for tag {tag}: {value}")
+        # Call xlate as needed
+
+
+    def exchange_real(self, xlate, tag, real=None):
+        """
+        Exchanges a real (float) value, optionally based on a tag.
+        """
+        # Implement the logic for exchanging a real number here
+        if real is not None:
+            self.debug(f"Exchanging real number for tag {tag}: {real}")
+            # Convert real to string if necessary and call xlate
+
 
     def exchange_schema(self, xlate, list):
         status = 0
@@ -285,11 +341,7 @@ class ConnectionMode:
     def set_translators(self, out, in_, data):
         self.xlate_out = out
         self.xlate_in = in_
-    
-    def error(self, fmt, *args):
-        msg = ctypes.create_string_buffer(1024)
-        libc.vsnprintf(msg, 1024, fmt, args)
-        gl_error("connection/{}: {}".format(self.get_mode_name(), msg.value))
+
     
     def get_mode(self, tag):
         if tag == "CM_SERVER":
@@ -317,7 +369,7 @@ class ConnectionMode:
                     print(f"connection_mode::new_instance(char *options='{options}'): unknown connection mode '{tag}'")
                     return None
             elif self.transport is None:
-                self.set_transport(get_transport(tag))
+                self.set_transport(self.get_transport(tag))
             else:
                 cmd, arg = re.split(r'[ =]+', tag)
                 if cmd == "on_error":
@@ -339,399 +391,441 @@ class ConnectionMode:
             self.set_transport(CT_UDP)
         return connection
 
+    # def server_response(self, flag, *args):
+    #     critical = flag == MESSAGEFLAG.MSG_CRITICAL
+    #     count = None
+    #     msgcount = 0
+    #     id = None
+    #     stop = False
+    #     if self.get_mode() == CONNECTIONMODETYPE.CM_CLIENT:
+    #         if self.recv() > 0:
+    #             print(f"receiving message: length=[{self.transport.get_position()}] buffer=[{self.transport.get_input()}]")
+    #             while not stop:
+    #                 msgcount += 1
+    #                 if flag == MESSAGEFLAG.MSG_CRITICAL:
+    #                     critical = True
+    #                     print("connection_mode::exchange() message is critical")
+    #                     new_flag = args.pop(0)
+    #                     if new_flag == 0:
+    #                         stop = True
+    #                     else:
+    #                         flag = new_flag
+    #                     continue
+    #                 elif flag == MESSAGEFLAG.MSG_INITIATE:
+    #                     if self.exchange(xlate_in, critical) < 0:
+    #                         print("connection_mode::exchange(): transport status control error")
+    #                         count = -msgcount
+    #                         stop = True
+    #                     new_flag = args.pop(0)
+    #                     if new_flag == 0:
+    #                         stop = True
+    #                     else:
+    #                         flag = new_flag
+    #                     continue
+    #                 elif flag == MESSAGEFLAG.MSG_CONTINUE:
+    #                     if self.exchange(xlate_in) < 0:
+    #                         print("connection_mode::exchange(): transport status control error")
+    #                         count = -msgcount
+    #                         stop = True
+    #                     new_flag = args.pop(0)
+    #                     if new_flag == 0:
+    #                         stop = True
+    #                     else:
+    #                         flag = new_flag
+    #                     continue
+    #                 elif flag == MESSAGEFLAG.MSG_COMPLETE:
+    #                     id = args.pop(0)
+    #                     if self.exchange(xlate_in, id) < 0:
+    #                         print("connection_mode::exchange(): transport status control error")
+    #                         count = -msgcount
+    #                         stop = True
+    #                     msgcount = 0
+    #                     count = msgcount
+    #                     stop = True
+    #                     continue
+    #                 elif flag == MESSAGEFLAG.MSG_SCHEMA:
+    #                     dir = args.pop(0)
+    #                     print(f"connection_mode::exchange(...) MSG_SCHEMA('{dir}',cache=0x{hex(read_cache) if dir == DATAEXCHANGEDIRECTION.DXD_READ else hex(write_cache)})")
+    #                     if dir == DATAEXCHANGEDIRECTION.DXD_READ:
+    #                         if self.exchange_schema(xlate_out, read_cache) < 0:
+    #                             print("exchange(): schema exchange failed")
+    #                             count = -msgcount
+    #                             stop = True
+    #                     elif dir == DATAEXCHANGEDIRECTION.DXD_WRITE:
+    #                         if self.exchange_schema(xlate_out, write_cache) < 0:
+    #                             print("exchange(): schema exchange failed")
+    #                             count = -msgcount
+    #                             stop = True
+    #                     else:
+    #                         print("exchange(): schema exchange failed, invalid data direction supplied")
+    #                         count = -msgcount
+    #                         stop = True
+    #                     new_flag = args.pop(0)
+    #                     if new_flag == 0:
+    #                         stop = True
+    #                     else:
+    #                         flag = new_flag
+    #                     continue
+    #                 elif flag == MESSAGEFLAG.MSG_TAG:
+    #                     tag = args.pop(0)
+    #                     value = args.pop(0)
+    #                     print(f"connection_mode::exchange(...) MSG_TAG('{tag}','{value}')")
+    #                     if self.exchange(xlate_in, tag, value) < 0:
+    #                         print(f"connection_mode::exchange(): tagged value exchange failed for ('{tag}','{value}')")
+    #                         count = -msgcount
+    #                         stop = True
+    #                     new_flag = args.pop(0)
+    #                     if new_flag == 0:
+    #                         stop = True
+    #                     else:
+    #                         flag = new_flag
+    #                     continue
+    #                 elif flag == MESSAGEFLAG.MSG_STRING:
+    #                     tag = args.pop(0)
+    #                     length = args.pop(0)
+    #                     buf = args.pop(0)
+    #                     print(f"client_initiated(...) MSG_STRING('{tag}', {length}, '{buf}')")
+    #                     if self.exchange(xlate_in, tag, length, buf) < 0:
+    #                         print(f"connection_mode::exchange(): string value exchange failed for ('{tag}', {length}, '{buf}')")
+    #                         count = -msgcount
+    #                         stop = True
+    #                     new_flag = args.pop(0)
+    #                     if new_flag == 0:
+    #                         stop = True
+    #                     else:
+    #                         flag = new_flag
+    #                     continue
+    #                 elif flag == MESSAGEFLAG.MSG_REAL:
+    #                     tag = args.pop(0)
+    #                     data = args.pop(0)
+    #                     print(f"exchange(...) MSG_REAL('{tag}', 0x{hex(data)}={data})")
+    #                     if self.exchange(xlate_in, tag, data) < 0:
+    #                         print(f"connection_mode::exchange(): double value exchange failed for ('{tag}', 0x{hex(data)}={data})")
+    #                         count = -msgcount
+    #                         stop = True
+    #                     new_flag = args.pop(0)
+    #                     if new_flag == 0:
+    #                         stop = True
+    #                     else:
+    #                         flag = new_flag
+    #                     continue
+    #                 elif flag == MESSAGEFLAG.MSG_INTEGER:
+    #                     tag = args.pop(0)
+    #                     data = args.pop(0)
+    #                     print(f"connection_mode::exchange(...) MSG_INTEGER('{tag}', 0x{hex(data)}={data})")
+    #                     if self.exchange(xlate_in, tag, data) < 0:
+    #                         print(f"connection_mode::exchange(): double value exchange failed for ('{tag}', 0x{hex(data)}={data})")
+    #                         count = -msgcount
+    #                         stop = True
+    #                     new_flag = args.pop(0)
+    #                     if new_flag == 0:
+    #                         stop = True
+    #                     else:
+    #                         flag = new_flag
+    #                     continue
+    #                 elif flag == MESSAGEFLAG.MSG_DATA:
+    #                     data_list = args.pop(0)
+    #                     print(f"connection_mode::exchange(...) MSG_DATA(cache=0x{hex(data_list)})")
+    #                     if self.exchange_data(xlate_in, data_list) < 0:
+    #                         print(f"connection_mode::exchange(): data exchange failed")
+    #                         count = -msgcount
+    #                         stop = True
+    #                     new_flag = args.pop(0)
+    #                     if new_flag == 0:
+    #                         stop = True
+    #                     else:
+    #                         flag = new_flag
+    #                     continue
+    #                 elif flag == MESSAGEFLAG.MSG_OPEN:
+    #                     tag = args.pop(0)
+    #                     print(f"connection_mode::exchange(...) MSG_OPEN('{tag}')")
+    #                     if self.exchange_open(xlate_in, tag) < 0:
+    #                         print(f"connection_mode::exchange(): start group '{tag}' exchange failed")
+    #                         count = -msgcount
+    #                         stop = True
+    #                     new_flag = args.pop(0)
+    #                     if new_flag == 0:
+    #                         stop = True
+    #                     else:
+    #                         flag = new_flag
+    #                     continue
+    #                 elif flag == MESSAGEFLAG.MSG_CLOSE:
+    #                     print(f"connection_mode::exchange(...) MSG_CLOSE")
+    #                     if self.exchange_close(xlate_in) < 0:
+    #                         print(f"connection_mode::exchange(): end group exchange failed")
+    #                         count = -msgcount
+    #                         stop = True
+    #                     new_flag = args.pop(0)
+    #                     if new_flag == 0:
+    #                         stop = True
+    #                     else:
+    #                         flag = new_flag
+    #                     continue
+    #                 else:
+    #                     print(f"connection_mode::exchange(...) unrecognized message control flag {flag} was ignored")
+    #                     new_flag = args.pop(0)
+    #                     if new_flag == 0:
+    #                         stop = True
+    #                     else:
+    #                         flag = new_flag
+    #
+    #             if msgcount != 0:
+    #                 count = msgcount if msgcount > 0 else -1
+    #
+    #             if count == 0:
+    #                 print(f"sending message: length=[{self.transport.get_position()}] buffer=[{self.transport.get_input()}]")
+    #                 return self.send() == self.transport.get_position()
+    #
+    #             return -1 if count < 0 and critical else 0
+    #     elif self.get_mode() == CONNECTIONMODETYPE.CM_SERVER:
+    #         while not stop:
+    #             msgcount += 1
+    #             if flag == MESSAGEFLAG.MSG_CRITICAL:
+    #                 critical = True
+    #                 print("connection_mode::exchange() message is critical")
+    #                 new_flag = args.pop(0)
+    #                 if new_flag == 0:
+    #                     stop = True
+    #                 else:
+    #                     flag = new_flag
+    #                 continue
+    #             elif flag == MESSAGEFLAG.MSG_INITIATE:
+    #                 seqnum += 1
+    #                 if self.exchange(xlate_out, critical) < 0:
+    #                     print("connection_mode::exchange(): transport status control error")
+    #                     count = -msgcount
+    #                     stop = True
+    #                 new_flag = args.pop(0)
+    #                 if new_flag == 0:
+    #                     stop = True
+    #                 else:
+    #                     flag = new_flag
+    #                 continue
+    #             elif flag == MESSAGEFLAG.MSG_CONTINUE:
+    #                 if self.exchange(xlate_out) < 0:
+    #                     print("connection_mode::exchange(): transport status control error")
+    #                     count = -msgcount
+    #                     stop = True
+    #                 new_flag = args.pop(0)
+    #                 if new_flag == 0:
+    #                     stop = True
+    #                 else:
+    #                     flag = new_flag
+    #                 continue
+    #             elif flag == MESSAGEFLAG.MSG_COMPLETE:
+    #                 id = args.pop(0)
+    #                 if self.exchange(xlate_out, id) < 0:
+    #                     print("connection_mode::exchange(): transport status control error")
+    #                     count = -msgcount
+    #                     stop = True
+    #                 msgcount = 0
+    #                 count = msgcount
+    #                 stop = True
+    #                 continue
+    #             elif flag == MESSAGEFLAG.MSG_SCHEMA:
+    #                 dir = args.pop(0)
+    #                 print(f"connection_mode::exchange(...) MSG_SCHEMA('{dir}',cache=0x{hex(read_cache) if dir == DATAEXCHANGEDIRECTION.DXD_READ else hex(write_cache)})")
+    #                 if dir == DATAEXCHANGEDIRECTION.DXD_READ:
+    #                     if self.exchange_schema(xlate_out, read_cache) < 0:
+    #                         print("exchange(): schema exchange failed")
+    #                         count = -msgcount
+    #                         stop = True
+    #                 elif dir == DATAEXCHANGEDIRECTION.DXD_WRITE:
+    #                     if self.exchange_schema(xlate_out, write_cache) < 0:
+    #                         print("exchange(): schema exchange failed")
+    #                         count = -msgcount
+    #                         stop = True
+    #                 else:
+    #                     print("exchange(): schema exchange failed, invalid data direction supplied")
+    #                     count = -msgcount
+    #                     stop = True
+    #                 new_flag = args.pop(0)
+    #                 if new_flag == 0:
+    #                     stop = True
+    #                 else:
+    #                     flag = new_flag
+    #                 continue
+    #             elif flag == MESSAGEFLAG.MSG_TAG:
+    #                 tag = args.pop(0)
+    #                 value = args.pop(0)
+    #                 print(f"connection_mode::exchange(...) MSG_TAG('{tag}','{value}')")
+    #                 if self.exchange(xlate_out, tag, value) < 0:
+    #                     print(f"connection_mode::exchange(): tagged value exchange failed for ('{tag}','{value}')")
+    #                     count = -msgcount
+    #                     stop = True
+    #                 new_flag = args.pop(0)
+    #                 if new_flag == 0:
+    #                     stop = True
+    #                 else:
+    #                     flag = new_flag
+    #                 continue
+    #             elif flag == MESSAGEFLAG.MSG_STRING:
+    #                 tag = args.pop(0)
+    #                 length = args.pop(0)
+    #                 buf = args.pop(0)
+    #                 print(f"client_initiated(...) MSG_STRING('{tag}', {length}, '{buf}')")
+    #                 if self.exchange(xlate_out, tag, length, buf) < 0:
+    #                     print(f"connection_mode::exchange(): string value exchange failed for ('{tag}', {length}, '{buf}')")
+    #                     count = -msgcount
+    #                     stop = True
+    #                 new_flag = args.pop(0)
+    #                 if new_flag== 0:
+    #                     stop = True
+    #                 else:
+    #                     flag = new_flag
+    #                 continue
+    #             elif flag == MESSAGEFLAG.MSG_REAL:
+    #                 tag = args.pop(0)
+    #                 data = args.pop(0)
+    #                 print(f"exchange(...) MSG_REAL('{tag}', 0x{hex(data)}={data})")
+    #                 if self.exchange(xlate_out, tag, data) < 0:
+    #                     print(f"connection_mode::exchange(): double value exchange failed for ('{tag}', 0x{hex(data)}={data})")
+    #                     count = -msgcount
+    #                     stop = True
+    #                 new_flag = args.pop(0)
+    #                 if new_flag == 0:
+    #                     stop = True
+    #                 else:
+    #                     flag = new_flag
+    #                 continue
+    #             elif flag == MESSAGEFLAG.MSG_INTEGER:
+    #                 tag = args.pop(0)
+    #                 data = args.pop(0)
+    #                 print(f"connection_mode::exchange(...) MSG_INTEGER('{tag}', 0x{hex(data)}={data})")
+    #                 if self.exchange(xlate_out, tag, data) < 0:
+    #                     print(f"connection_mode::exchange(): double value exchange failed for ('{tag}', 0x{hex(data)}={data})")
+    #                     count = -msgcount
+    #                     stop = True
+    #                 new_flag = args.pop(0)
+    #                 if new_flag == 0:
+    #                     stop = True
+    #                 else:
+    #                     flag = new_flag
+    #                 continue
+    #             elif flag == MESSAGEFLAG.MSG_DATA:
+    #                 data_list = args.pop(0)
+    #                 print(f"connection_mode::exchange(...) MSG_DATA(cache=0x{hex(data_list)})")
+    #                 if self.exchange_data(xlate_out, data_list) < 0:
+    #                     print(f"connection_mode::exchange(): data exchange failed")
+    #                     count = -msgcount
+    #                     stop = True
+    #                 new_flag = args.pop(0)
+    #                 if new_flag == 0:
+    #                     stop = True
+    #                 else:
+    #                     flag = new_flag
+    #                 continue
+    #             elif flag == MESSAGEFLAG.MSG_OPEN:
+    #                 tag = args.pop(0)
+    #                 print(f"connection_mode::exchange(...) MSG_OPEN('{tag}')")
+    #                 if self.exchange_open(xlate_out, tag) < 0:
+    #                     print(f"connection_mode::exchange(): start group '{tag}' exchange failed")
+    #                     count = -msgcount
+    #                     stop = True
+    #                 new_flag = args.pop(0)
+    #                 if new_flag == 0:
+    #                     stop = True
+    #                 else:
+    #                     flag = new_flag
+    #                 continue
+    #             elif flag == MESSAGEFLAG.MSG_CLOSE:
+    #                 print(f"connection_mode::exchange(...) MSG_CLOSE")
+    #                 if self.exchange_close(xlate_out) < 0:
+    #                     print(f"connection_mode::exchange(): end group exchange failed")
+    #                     count = -msgcount
+    #                     stop = True
+    #                 new_flag = args.pop(0)
+    #                 if new_flag == 0:
+    #                     stop = True
+    #                 else:
+    #                     flag = new_flag
+    #             else:
+    #                 print(f"connection_mode::exchange(...) unrecognized message control flag {flag} was ignored")
+    #                 new_flag = args.pop(0)
+    #                 if new_flag == 0:
+    #                     stop = True
+    #                 else:
+    #                     flag = new_flag
+    #
+    #         if msgcount != 0:
+    #             count = msgcount if msgcount > 0 else -1
+    #
+    #         if count == 0:
+    #             print(f"sending message: length=[{self.transport.get_position()}] buffer=[{self.transport.get_input()}]")
+    #             return self.send() == self.transport.get_position()
+    #
+    #         return -1 if count < 0 and critical else 0
+
     def server_response(self, flag, *args):
-        critical = flag == MESSAGEFLAG.MSG_CRITICAL
-        count = None
+        critical = flag == "MSG_CRITICAL"
+        count = 0
         msgcount = 0
         id = None
         stop = False
-        if self.get_mode() == CONNECTIONMODETYPE.CM_CLIENT:
-            if self.recv() > 0:
-                print(f"receiving message: length=[{self.transport.get_position()}] buffer=[{self.transport.get_input()}]")
-                while not stop:
-                    msgcount += 1
-                    if flag == MESSAGEFLAG.MSG_CRITICAL:
-                        critical = True
-                        print("connection_mode::exchange() message is critical")
-                        new_flag = args.pop(0)
-                        if new_flag == 0:
-                            stop = True
-                        else:
-                            flag = new_flag
-                        continue
-                    elif flag == MESSAGEFLAG.MSG_INITIATE:
-                        if self.exchange(xlate_in, critical) < 0:
-                            print("connection_mode::exchange(): transport status control error")
-                            count = -msgcount
-                            stop = True
-                        new_flag = args.pop(0)
-                        if new_flag == 0:
-                            stop = True
-                        else:
-                            flag = new_flag
-                        continue
-                    elif flag == MESSAGEFLAG.MSG_CONTINUE:
-                        if self.exchange(xlate_in) < 0:
-                            print("connection_mode::exchange(): transport status control error")
-                            count = -msgcount
-                            stop = True
-                        new_flag = args.pop(0)
-                        if new_flag == 0:
-                            stop = True
-                        else:
-                            flag = new_flag
-                        continue
-                    elif flag == MESSAGEFLAG.MSG_COMPLETE:
-                        id = args.pop(0)
-                        if self.exchange(xlate_in, id) < 0:
-                            print("connection_mode::exchange(): transport status control error")
-                            count = -msgcount
-                            stop = True
-                        msgcount = 0
-                        count = msgcount
-                        stop = True
-                        continue
-                    elif flag == MESSAGEFLAG.MSG_SCHEMA:
-                        dir = args.pop(0)
-                        print(f"connection_mode::exchange(...) MSG_SCHEMA('{dir}',cache=0x{hex(read_cache) if dir == DATAEXCHANGEDIRECTION.DXD_READ else hex(write_cache)})")
-                        if dir == DATAEXCHANGEDIRECTION.DXD_READ:
-                            if self.exchange_schema(xlate_out, read_cache) < 0:
-                                print("exchange(): schema exchange failed")
-                                count = -msgcount
-                                stop = True
-                        elif dir == DATAEXCHANGEDIRECTION.DXD_WRITE:
-                            if self.exchange_schema(xlate_out, write_cache) < 0:
-                                print("exchange(): schema exchange failed")
-                                count = -msgcount
-                                stop = True
-                        else:
-                            print("exchange(): schema exchange failed, invalid data direction supplied")
-                            count = -msgcount
-                            stop = True
-                        new_flag = args.pop(0)
-                        if new_flag == 0:
-                            stop = True
-                        else:
-                            flag = new_flag
-                        continue
-                    elif flag == MESSAGEFLAG.MSG_TAG:
-                        tag = args.pop(0)
-                        value = args.pop(0)
-                        print(f"connection_mode::exchange(...) MSG_TAG('{tag}','{value}')")
-                        if self.exchange(xlate_in, tag, value) < 0:
-                            print(f"connection_mode::exchange(): tagged value exchange failed for ('{tag}','{value}')")
-                            count = -msgcount
-                            stop = True
-                        new_flag = args.pop(0)
-                        if new_flag == 0:
-                            stop = True
-                        else:
-                            flag = new_flag
-                        continue
-                    elif flag == MESSAGEFLAG.MSG_STRING:
-                        tag = args.pop(0)
-                        length = args.pop(0)
-                        buf = args.pop(0)
-                        print(f"client_initiated(...) MSG_STRING('{tag}', {length}, '{buf}')")
-                        if self.exchange(xlate_in, tag, length, buf) < 0:
-                            print(f"connection_mode::exchange(): string value exchange failed for ('{tag}', {length}, '{buf}')")
-                            count = -msgcount
-                            stop = True
-                        new_flag = args.pop(0)
-                        if new_flag == 0:
-                            stop = True
-                        else:
-                            flag = new_flag
-                        continue
-                    elif flag == MESSAGEFLAG.MSG_REAL:
-                        tag = args.pop(0)
-                        data = args.pop(0)
-                        print(f"exchange(...) MSG_REAL('{tag}', 0x{hex(data)}={data})")
-                        if self.exchange(xlate_in, tag, data) < 0:
-                            print(f"connection_mode::exchange(): double value exchange failed for ('{tag}', 0x{hex(data)}={data})")
-                            count = -msgcount
-                            stop = True
-                        new_flag = args.pop(0)
-                        if new_flag == 0:
-                            stop = True
-                        else:
-                            flag = new_flag
-                        continue
-                    elif flag == MESSAGEFLAG.MSG_INTEGER:
-                        tag = args.pop(0)
-                        data = args.pop(0)
-                        print(f"connection_mode::exchange(...) MSG_INTEGER('{tag}', 0x{hex(data)}={data})")
-                        if self.exchange(xlate_in, tag, data) < 0:
-                            print(f"connection_mode::exchange(): double value exchange failed for ('{tag}', 0x{hex(data)}={data})")
-                            count = -msgcount
-                            stop = True
-                        new_flag = args.pop(0)
-                        if new_flag == 0:
-                            stop = True
-                        else:
-                            flag = new_flag
-                        continue
-                    elif flag == MESSAGEFLAG.MSG_DATA:
-                        data_list = args.pop(0)
-                        print(f"connection_mode::exchange(...) MSG_DATA(cache=0x{hex(data_list)})")
-                        if self.exchange_data(xlate_in, data_list) < 0:
-                            print(f"connection_mode::exchange(): data exchange failed")
-                            count = -msgcount
-                            stop = True
-                        new_flag = args.pop(0)
-                        if new_flag == 0:
-                            stop = True
-                        else:
-                            flag = new_flag
-                        continue
-                    elif flag == MESSAGEFLAG.MSG_OPEN:
-                        tag = args.pop(0)
-                        print(f"connection_mode::exchange(...) MSG_OPEN('{tag}')")
-                        if self.exchange_open(xlate_in, tag) < 0:
-                            print(f"connection_mode::exchange(): start group '{tag}' exchange failed")
-                            count = -msgcount
-                            stop = True
-                        new_flag = args.pop(0)
-                        if new_flag == 0:
-                            stop = True
-                        else:
-                            flag = new_flag
-                        continue
-                    elif flag == MESSAGEFLAG.MSG_CLOSE:
-                        print(f"connection_mode::exchange(...) MSG_CLOSE")
-                        if self.exchange_close(xlate_in) < 0:
-                            print(f"connection_mode::exchange(): end group exchange failed")
-                            count = -msgcount
-                            stop = True
-                        new_flag = args.pop(0)
-                        if new_flag == 0:
-                            stop = True
-                        else:
-                            flag = new_flag
-                        continue
-                    else:
-                        print(f"connection_mode::exchange(...) unrecognized message control flag {flag} was ignored")
-                        new_flag = args.pop(0)
-                        if new_flag == 0:
-                            stop = True
-                        else:
-                            flag = new_flag
-
-                if msgcount != 0:
-                    count = msgcount if msgcount > 0 else -1
-
-                if count == 0:
-                    print(f"sending message: length=[{self.transport.get_position()}] buffer=[{self.transport.get_input()}]")
-                    return self.send() == self.transport.get_position()
-
-                return -1 if count < 0 and critical else 0
-        elif self.get_mode() == CONNECTIONMODETYPE.CM_SERVER:
+        args_iter = iter(args)
+        try:
             while not stop:
                 msgcount += 1
-                if flag == MESSAGEFLAG.MSG_CRITICAL:
+                if flag == "MSG_CRITICAL":
                     critical = True
-                    print("connection_mode::exchange() message is critical")
-                    new_flag = args.pop(0)
-                    if new_flag == 0:
-                        stop = True
-                    else:
-                        flag = new_flag
-                    continue
-                elif flag == MESSAGEFLAG.MSG_INITIATE:
-                    seqnum += 1
-                    if self.exchange(xlate_out, critical) < 0:
-                        print("connection_mode::exchange(): transport status control error")
-                        count = -msgcount
-                        stop = True
-                    new_flag = args.pop(0)
-                    if new_flag == 0:
-                        stop = True
-                    else:
-                        flag = new_flag
-                    continue
-                elif flag == MESSAGEFLAG.MSG_CONTINUE:
-                    if self.exchange(xlate_out) < 0:
-                        print("connection_mode::exchange(): transport status control error")
-                        count = -msgcount
-                        stop = True
-                    new_flag = args.pop(0)
-                    if new_flag == 0:
-                        stop = True
-                    else:
-                        flag = new_flag
-                    continue
-                elif flag == MESSAGEFLAG.MSG_COMPLETE:
-                    id = args.pop(0)
-                    if self.exchange(xlate_out, id) < 0:
-                        print("connection_mode::exchange(): transport status control error")
-                        count = -msgcount
-                        stop = True
-                    msgcount = 0
-                    count = msgcount
-                    stop = True
-                    continue
-                elif flag == MESSAGEFLAG.MSG_SCHEMA:
-                    dir = args.pop(0)
-                    print(f"connection_mode::exchange(...) MSG_SCHEMA('{dir}',cache=0x{hex(read_cache) if dir == DATAEXCHANGEDIRECTION.DXD_READ else hex(write_cache)})")
-                    if dir == DATAEXCHANGEDIRECTION.DXD_READ:
-                        if self.exchange_schema(xlate_out, read_cache) < 0:
-                            print("exchange(): schema exchange failed")
-                            count = -msgcount
-                            stop = True
-                    elif dir == DATAEXCHANGEDIRECTION.DXD_WRITE:
-                        if self.exchange_schema(xlate_out, write_cache) < 0:
-                            print("exchange(): schema exchange failed")
-                            count = -msgcount
-                            stop = True
-                    else:
-                        print("exchange(): schema exchange failed, invalid data direction supplied")
-                        count = -msgcount
-                        stop = True
-                    new_flag = args.pop(0)
-                    if new_flag == 0:
-                        stop = True
-                    else:
-                        flag = new_flag
-                    continue
-                elif flag == MESSAGEFLAG.MSG_TAG:
-                    tag = args.pop(0)
-                    value = args.pop(0)
-                    print(f"connection_mode::exchange(...) MSG_TAG('{tag}','{value}')")
-                    if self.exchange(xlate_out, tag, value) < 0:
-                        print(f"connection_mode::exchange(): tagged value exchange failed for ('{tag}','{value}')")
-                        count = -msgcount
-                        stop = True
-                    new_flag = args.pop(0)
-                    if new_flag == 0:
-                        stop = True
-                    else:
-                        flag = new_flag
-                    continue
-                elif flag == MESSAGEFLAG.MSG_STRING:
-                    tag = args.pop(0)
-                    length = args.pop(0)
-                    buf = args.pop(0)
-                    print(f"client_initiated(...) MSG_STRING('{tag}', {length}, '{buf}')")
-                    if self.exchange(xlate_out, tag, length, buf) < 0:
-                        print(f"connection_mode::exchange(): string value exchange failed for ('{tag}', {length}, '{buf}')")
-                        count = -msgcount
-                        stop = True
-                    new_flag = args.pop(0)
-                    if new_flag== 0:
-                        stop = True
-                    else:
-                        flag = new_flag
-                    continue
-                elif flag == MESSAGEFLAG.MSG_REAL:
-                    tag = args.pop(0)
-                    data = args.pop(0)
-                    print(f"exchange(...) MSG_REAL('{tag}', 0x{hex(data)}={data})")
-                    if self.exchange(xlate_out, tag, data) < 0:
-                        print(f"connection_mode::exchange(): double value exchange failed for ('{tag}', 0x{hex(data)}={data})")
-                        count = -msgcount
-                        stop = True
-                    new_flag = args.pop(0)
-                    if new_flag == 0:
-                        stop = True
-                    else:
-                        flag = new_flag
-                    continue
-                elif flag == MESSAGEFLAG.MSG_INTEGER:
-                    tag = args.pop(0)
-                    data = args.pop(0)
-                    print(f"connection_mode::exchange(...) MSG_INTEGER('{tag}', 0x{hex(data)}={data})")
-                    if self.exchange(xlate_out, tag, data) < 0:
-                        print(f"connection_mode::exchange(): double value exchange failed for ('{tag}', 0x{hex(data)}={data})")
-                        count = -msgcount
-                        stop = True
-                    new_flag = args.pop(0)
-                    if new_flag == 0:
-                        stop = True
-                    else:
-                        flag = new_flag
-                    continue
-                elif flag == MESSAGEFLAG.MSG_DATA:
-                    data_list = args.pop(0)
-                    print(f"connection_mode::exchange(...) MSG_DATA(cache=0x{hex(data_list)})")
-                    if self.exchange_data(xlate_out, data_list) < 0:
-                        print(f"connection_mode::exchange(): data exchange failed")
-                        count = -msgcount
-                        stop = True
-                    new_flag = args.pop(0)
-                    if new_flag == 0:
-                        stop = True
-                    else:
-                        flag = new_flag
-                    continue
-                elif flag == MESSAGEFLAG.MSG_OPEN:
-                    tag = args.pop(0)
-                    print(f"connection_mode::exchange(...) MSG_OPEN('{tag}')")
-                    if self.exchange_open(xlate_out, tag) < 0:
-                        print(f"connection_mode::exchange(): start group '{tag}' exchange failed")
-                        count = -msgcount
-                        stop = True
-                    new_flag = args.pop(0)
-                    if new_flag == 0:
-                        stop = True
-                    else:
-                        flag = new_flag
-                    continue
-                elif flag == MESSAGEFLAG.MSG_CLOSE:
-                    print(f"connection_mode::exchange(...) MSG_CLOSE")
-                    if self.exchange_close(xlate_out) < 0:
-                        print(f"connection_mode::exchange(): end group exchange failed")
-                        count = -msgcount
-                        stop = True
-                    new_flag = args.pop(0)
-                    if new_flag == 0:
-                        stop = True
-                    else:
-                        flag = new_flag
+                    self.debug(9, "message is critical")
+                    flag = next(args_iter, None)
+                elif flag == "MSG_INITIATE":
+                    # Handle message initiation
+                    if self.get_mode() == "CM_CLIENT":
+                        if self.recv() > 0:
+                            self.handle_client_recv()
+                            flag = next(args_iter, None)
+                    elif self.get_mode() == "CM_SERVER":
+                        # Server specific initiation logic here
+                        flag = next(args_iter, None)
+                elif flag == "MSG_CONTINUE":
+                    # Handle message continuation
+                    flag = next(args_iter, None)
+                elif flag == "MSG_COMPLETE":
+                    # Finalize message handling
+                    id = next(args_iter, None)
+                    flag = next(args_iter, None)
+                # Additional cases (MSG_SCHEMA, MSG_TAG, etc.) as per original C++ method
                 else:
-                    print(f"connection_mode::exchange(...) unrecognized message control flag {flag} was ignored")
-                    new_flag = args.pop(0)
-                    if new_flag == 0:
-                        stop = True
-                    else:
-                        flag = new_flag
+                    self.warning("Unrecognized message control flag", flag)
+                    flag = next(args_iter, None)
+                if flag is None:
+                    stop = True
+        except StopIteration:
+            # Handle iteration stopping, implying args were exhausted
+            pass
 
-            if msgcount != 0:
-                count = msgcount if msgcount > 0 else -1
+        # Additional logic to finalize the server response
+        return count
 
-            if count == 0:
-                print(f"sending message: length=[{self.transport.get_position()}] buffer=[{self.transport.get_input()}]")
-                return self.send() == self.transport.get_position()
+    def debug(self, level, message, args):
+        # Implement debug logging
+        msg = "connection/{}: {}".format(self.get_mode_name(), message)
+        for a in args:
+            msg += " {}".format(a)
+        print(f"{level}:{msg}")
 
-            return -1 if count < 0 and critical else 0
+    def warning(self, message, args):
+        # Implement warning logging
+        msg = "connection/{}: {}".format(self.get_mode_name(), message.value)
+        for a in args:
+            msg += " {}".format(a)
+        print(msg)
 
-
-
-
-    
-    def warning(self, fmt, *args):
-        msg = ctypes.create_string_buffer(1024)
-        fmt = ctypes.c_char_p(fmt)
-        args = (ctypes.c_char_p(arg) for arg in args)
-        ctypes.cdll.msvcrt.vsprintf(msg, fmt, args)
-        gl_warning("connection/{}: {}".format(self.get_mode_name(), msg.value))
+    def error(self, fmt, args):
+        msg = fmt.format(args)
+        print("connection/{}: {}".format(self.get_mode_name(), msg.value))
 
     def get_mode_name(self):
         pass
     
 
-    def info(self, fmt, *args):
-        msg = bytearray(1024)
-        va_list = list(args)
-        vsprintf(msg, fmt, va_list)
-        gl_output("connection/{}: {}".format(self.get_mode_name(), msg))
-
-
-    def debug(self, level, fmt, *args):
-        msg = [0] * 1024
-        vsprintf(msg, fmt, args)
-        gl_debug("connection/{}: {}".format(self.get_mode_name(), msg))
-
-
+    def info(self, fmt, args):
+        msg="connection/{}:".format(self.get_mode_name())
+        for a in args:
+            msg += " {}".format(a)
+        print(msg)
 
     def exception(self, fmt, *args):
         msg_len = ctypes.c_int()

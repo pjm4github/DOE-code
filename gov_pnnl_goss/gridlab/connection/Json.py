@@ -2,7 +2,7 @@ from gov_pnnl_goss.gridlab.connection.Connection import ET_GROUPOPEN, ET_GROUPCL
 from gov_pnnl_goss.gridlab.connection.Native import Native
 from gov_pnnl_goss.gridlab.gldcore.GridLabD import PC_PRETOPDOWN, PC_BOTTOMUP, PC_POSTTOPDOWN, gl_debug, gl_error, \
     gl_publish_variable, gl_warning
-from gov_pnnl_goss.gridlab.gldcore.Property import PROPERTYTYPE
+from gov_pnnl_goss.gridlab.gldcore.PropertyHeader import PropertyType
 
 
 class JSONTYPE:
@@ -213,12 +213,12 @@ def json_new_sublist(parent):
 
 
 def json_read_number(item):
-    if item.type == JSONTYPE.JT_REAL:
+    if item.global_property_types == JSONTYPE.JT_REAL:
         item.real = float(item.string)
-    elif item.type == JSONTYPE.JT_INTEGER:
+    elif item.global_property_types == JSONTYPE.JT_INTEGER:
         item.integer = int(item.string)
     else:
-        gl_warning("json_read_number(JSONLIST item={string:'%s',...}): ignoring attempt to read non-number type" % item.string)
+        gl_warning("json_read_number(JSONLIST item={string:'%s',...}): ignoring attempt to read non-number global_property_types" % item.string)
 
 
 def json_dump(item, indent=0):
@@ -258,14 +258,14 @@ class Json(Native):
             self.oclass.trl = TRL_UNKNOWN
         self.defaults = self
         if gl_publish_variable(self.oclass,
-                              PROPERTYTYPE.PT_INHERIT,
+                               PropertyType.PT_INHERIT,
                               "native",
-                              PROPERTYTYPE.PT_double,
+                               PropertyType.PT_double,
                               "version",
-                              get_version_offset(),
-                              PROPERTYTYPE.PT_DESCRIPTION,
+                               get_version_offset(),
+                               PropertyType.PT_DESCRIPTION,
                               "json version",
-                              None) < 1:
+                               None) < 1:
             raise Exception("connection/json::__init__: unable to publish properties of connection:json")
         if not gl_publish_load_method(self.oclass, "link", loadmethod_json_link):
             raise Exception("connection/json::__init__: unable to publish link method of connection:json")
@@ -472,15 +472,15 @@ class Json(Native):
     #                 pass
     #             elif p == '"':
     #                 state = "STRING"
-    #                 tail.type = "JT_STRING"
+    #                 tail.global_property_types = "JT_STRING"
     #             elif p.isdigit() or p == '-' or p == '+' or p == '.':
     #                 t += p
     #                 state = "NUMBER"
-    #                 tail.type = "JT_INTEGER"
+    #                 tail.global_property_types = "JT_INTEGER"
     #             elif p == '{':
     #                 nest += 1
     #                 state = "TAG0"
-    #                 tail.type = "JT_LIST"
+    #                 tail.global_property_types = "JT_LIST"
     #                 tail = json_new_sublist(tail)
     #             else:
     #                 Syntax()
@@ -497,9 +497,9 @@ class Json(Native):
     #                 p -= 1
     #                 state = "COMMA"
     #                 json_read_number(tail)
-    #             elif tail.type == "JT_INTEGER" and p == '.':
+    #             elif tail.global_property_types == "JT_INTEGER" and p == '.':
     #                 t += p
-    #                 tail.type = "JT_REAL"
+    #                 tail.global_property_types = "JT_REAL"
     #             elif p.isdigit():
     #                 t += p
     #             else:
@@ -549,9 +549,9 @@ class Json(Native):
             return new_sublist
 
         def json_read_number(item):
-            if item.type == JSONTYPE.JT_INTEGER:
+            if item.global_property_types == JSONTYPE.JT_INTEGER:
                 item.integer = int(item.string)
-            elif item.type == JSONTYPE.JT_REAL:
+            elif item.global_property_types == JSONTYPE.JT_REAL:
                 item.real = float(item.string)
 
         while p < len(buffer):
@@ -666,7 +666,7 @@ class Json(Native):
 
     def destroy(self, json_list):
         if json_list is not None:
-            if json_list.type == JSONTYPE.JT_LIST:
+            if json_list.global_property_types == JSONTYPE.JT_LIST:
                 self.destroy(json_list.list)
             self.destroy(json_list.next)
             del json_list

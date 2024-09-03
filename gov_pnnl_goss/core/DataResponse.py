@@ -1,6 +1,6 @@
 
 import json
-from json import JSONEncoder, JSONDecoder
+from json import JSONDecoder
 from typing import Any
 
 from gov_pnnl_goss.core.DataError import DataError
@@ -78,10 +78,10 @@ class InterfaceAdapter:
             return json_element
         else:
             json_object = json_element
-            class_name = json_object.get(self.CLASSNAME).getAs""
+            class_name = json_object.get(self.CLASSNAME).getAs()
 
             if "java.lang.String" == class_name:
-                return json_object.get(self.DATA).getAs""
+                return json_object.get(self.DATA).getAs()
             else:
                 klass = self.get_object_class(class_name)
                 return json_deserialization_context.deserialize(json_object.get(self.DATA), klass)
@@ -94,6 +94,6 @@ class InterfaceAdapter:
 
     def serialize(self, json_element, _, json_serialization_context):
         json_object = globals().get(json_element, {})
-        json_object.addProperty(self.CLASSNAME, json_element.__class__.__name__)
-        json_object.add(self.DATA, json_serialization_context.serialize(json_element))
+        json_object[self.CLASSNAME] = json_element.__class__.__name__
+        json_object[self.DATA] = json_serialization_context.serialize(json_element)
         return json_object

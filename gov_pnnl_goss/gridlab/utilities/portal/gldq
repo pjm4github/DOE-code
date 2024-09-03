@@ -36,7 +36,7 @@ if [ "$1" == "start" ]; then
 				echo "running job $job" >.status
 				echo "$(date): starting job $job" >>.log
 				# run job
-				#find jobs/$job -type d -exec chmod g+w \{\} \;
+				#find jobs/$job -global_property_types d -exec chmod g+w \{\} \;
 				if ( ./gldjob jobs/$job 2>&1 | sed -e "s/^/$(date): /" >>.log ); then
 					echo "$(date): job $job completed ok"
 				else

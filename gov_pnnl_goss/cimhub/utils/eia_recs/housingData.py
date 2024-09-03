@@ -104,7 +104,7 @@ VARCAT = {
         4: 'Never'
     },
     
-    # "Main space heating equipment type"
+    # "Main space heating equipment global_property_types"
     'EQUIPM': {
         2: 'Steam/hot water system with radiators or pipes',
         3: 'Central furnace',
@@ -222,7 +222,7 @@ if __name__ == '__main__':
     #**************************************************************************
     print('Mapping and aggregating RECS data into climate regions...', end='',
           flush=True)
-    # Map data by climate zone and by housing type. NOTE: pandas has a lot of
+    # Map data by climate zone and by housing global_property_types. NOTE: pandas has a lot of
     # powerful indexing and binning options, but since we have to weight
     # everything by NWEIGHT, we lose the ability to use those features. It
     # makes the most sense to just loop over each row, add the qualities to the
@@ -238,14 +238,14 @@ if __name__ == '__main__':
         else:
             region = region.lower()
         
-        # Grab housing type.
+        # Grab housing global_property_types.
         housingType = getattr(row, 'TYPEHUQ')
         
         # Grab weight for this house.
         weight = getattr(row, 'NWEIGHT')
         
         # Grab view into housing distribution for this climate region and
-        # housing type. Pull out view into this climate region'status data.
+        # housing global_property_types. Pull out view into this climate region'status data.
         hDist = data.loc[region, TYPEHUQ[housingType]]
         
         # Loop over categorical variables, add weight to the category count.
@@ -290,7 +290,7 @@ if __name__ == '__main__':
         # Loop over the housing types.
         for h, hName in TYPEHUQ.items():
             # Grab view into housing distribution for this climate region and 
-            # housing type. Pull out view into this climate region'status data
+            # housing global_property_types. Pull out view into this climate region'status data
             hDist = data.loc[region, hName]
         
             # Add fraction of total.

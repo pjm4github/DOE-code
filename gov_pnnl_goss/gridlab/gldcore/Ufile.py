@@ -1,28 +1,29 @@
 
-
+UFT_HTTP = 0
+UFT_FILE = 1
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
 class Ufile:
     def uopen(self, fname, arg):
         rp = None
         errno = 0
         if fname[:7] == "http://":
-            http = hopen(fname, int(arg))
+            http = open(fname, int(arg))
             if http is None:
                 return None
             rp = Ufile()
             if rp is None:
-                hclose(http)
+                http.close()
                 return None
             rp.type = UFT_HTTP
             rp.handle = http
             return rp
         else:
-            fp = fopen(fname, str(arg))
+            fp = open(fname, str(arg))
             if fp is None:
                 return None
             rp = Ufile()
             if rp is None:
-                fclose(fp)
+                fp.close()
                 return None
             rp.type = UFT_FILE
             rp.handle = fp
@@ -33,9 +34,11 @@ class Ufile:
 
 
 def u_read(buffer, count, rp):
-    if rp.type == UFT_HTTP:
-        return h_read(buffer, count, rp.handle)
-    elif rp.type == UFT_FILE:
-        return fread(buffer, 1, count, rp.handle)
+    if rp.global_property_types == UFT_HTTP:
+        buffer = rp.handle(count)
+        return buffer
+    elif rp.global_property_types == UFT_FILE:
+        buffer = rp.handle(count)
+        return buffer
     else:
         return -1

@@ -25,7 +25,7 @@ def linkage_create_writer(inst, fromobj, fromvar, toobj, tovar):
         output_error("unable to allocate memory for linkage %s:%s -> %s:%s", fromobj, fromvar, toobj, tovar)
         return 0
     memset(lnk, 0, sizeof(linkage))
-    lnk.type = LT_MASTERTOSLAVE
+    lnk.global_property_types = LT_MASTERTOSLAVE
 
     # copy local info
     lnk.local.obj = fromobj

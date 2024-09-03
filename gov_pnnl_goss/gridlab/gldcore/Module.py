@@ -6,15 +6,15 @@ import os
 from typing import Any
 
 from gov_pnnl_goss.gridlab.gldcore import Property
-from gov_pnnl_goss.gridlab.gldcore.Class import Class
-from gov_pnnl_goss.gridlab.gldcore.Globals import SUCCESS, SIGINT, global_start_time, global_stop_time
+# from gov_pnnl_goss.gridlab.gldcore.Class import DynamicClass
+from gov_pnnl_goss.gridlab.gldcore.Globals import *  # SUCCESS, SIGINT, global_start_time, global_stop_time, EINVAL, MAINLOOPSTATE
 from gov_pnnl_goss.gridlab.gldcore.Output import output_debug, output_message, output_error, output_verbose, \
     output_fatal, output_warning
+from gov_pnnl_goss.gridlab.gldcore.Load import load_java_module, load_python_module
 
-from gridlab.gldcore import Load, Globals
 from gridlab.gldcore.Find import Find
 from gridlab.gldcore.GridLabD import global_setvar, DLSYM
-from gridlab.gldcore.Transform import Transform
+
 from gridlab.gldcore.Version import Version
 
 MAGIC = 0x012BB0B9
@@ -28,15 +28,15 @@ cc_verbose = 0
 cc_debug = 0
 cc_clean = 0
 cc_keepwork = 0
-#
+
 # class MODULE:
-#     def __init__(self, hLib, id, name, oclass, major, minor, getvar, setvar, import_file, export_file, check,
+#     def __init__(self, hLib, id, name, owner_class, major, minor, getvar, setvar, import_file, export_file, check,
 #                  deltadesired, preupdate, interupdate, deltaClockUpdate, postupdate, clockupdate, cmdargs,
 #                  kmldump, test, subload, globals, term, stream, next):
 #         self.hLib = hLib
 #         self.id = id
 #         self.name = name
-#         self.oclass = oclass
+#         self.owner_class = owner_class
 #         self.major = major
 #         self.minor = minor
 #         self.getvar = getvar
@@ -92,7 +92,7 @@ class GLDPROCINFO:
     start = None			# wall time of start */
 
 
-process_map = GLDPROCINFO() # global process map */
+process_map = [GLDPROCINFO()] # global process map */
 
 class MYPROCINFO:
     n_procs= 0  # number of processors used by this process */
@@ -177,39 +177,91 @@ def LIBINIT(param):
 
 
 class Module:
-    def __init__(self, *args: Any, **kw: Any):
-        super().__init__(*args, **kw)
-        self.hLib = None
-        self.id: int = 0
-        self.name: str = ""
-        self.oclass: Class = Class()
-        self.major: int = 0
-        self.minor: int = 0
-        self.getvar = None
-        self.setvar = None
-        self.import_file = None
-        self.export_file = None
-        self.check = None
-        self.deltadesired = None
-        self.preupdate = None
-        self.interupdate = None
-        self.deltaClockUpdate = None
-        self.deltadesired = None # a parameter deltadesired
-        self.postupdate = None
-        self.clockupdate = None
-        self.cmdargs = None
-        self.kmldump = None
-        self.test = None
-        self.subload = None
-        self.globals = None
-        self.term = None
-        self.stream = io.BytesIO()
-        self.next = None
+    """
+    Modules in GridAPPS-D
+    In the context of GridAPPS-D, a Module refers to a self-contained package of code that performs a specific set of
+    functions or provides specific capabilities within the platform. Modules in GridAPPS-D can be thought of as
+    components or plugins that interact with the platform's core services through well-defined APIs. They can be
+    developed independently and integrated into the GridAPPS-D environment to extend its functionality.
+
+    Functions of Modules
+    Modules in GridAPPS-D serve various functions, including but not limited to:
+
+     - Simulation and Modeling: Some modules are designed to simulate power systems and grid operations. They can model
+       the physical and electrical characteristics of power networks, including generation, transmission, distribution,
+       and consumption.
+
+     - Data Management and Integration: These modules handle data exchange between GridAPPS-D and external systems,
+       databases, or applications. They ensure that data is correctly formatted, transmitted, received, and stored,
+       facilitating interoperability and data-driven decision-making.
+
+     - Application Development Support: Modules may provide libraries, APIs, and tools that support the development of
+       new grid applications. These can include functions for data analysis, visualization, or algorithm implementation
+       that developers can use to build applications more efficiently.
+
+     - Grid Services: Some modules offer services directly related to grid operations, such as voltage regulation,
+       fault detection, demand response management, or renewable energy integration. These services use data from the
+       grid and simulations to make operational decisions.
+
+     - User Interface (UI) and Visualization: Modules in this category provide graphical interfaces and visualization
+       tools for monitoring and managing grid operations, analyzing simulation results, or configuring system parameters.
+
+    Modular Architecture Benefits
+    The modular architecture of GridAPPS-D offers several benefits:
+
+     - Flexibility: Users can select which modules to deploy based on their specific needs, allowing for a customized
+       platform setup.
+
+     - Scalability: New functionalities can be added as separate modules without disrupting existing operations,
+       facilitating gradual system growth.
+
+     - Interoperability: Well-defined interfaces between modules and the core platform ensure that components developed
+       by different teams or organizations can work together seamlessly.
+
+     - Innovation: The modular approach encourages the development and testing of new algorithms, applications,
+       and services by providing a common platform where these can be easily integrated and evaluated.
+
+    In summary, modules are a fundamental aspect of GridAPPS-D's design, enabling it to serve as a versatile and
+    expandable platform for grid modernization efforts.
+    """
+
+
+    def __init__(self, hLib=None, id=0, name="", owner_class=None, major=0, minor=0, getvar=None, setvar=None,
+                 import_file=None, export_file=None, check=None, deltadesired=None, preupdate=None,
+                 interupdate=None, deltaClockUpdate=None, postupdate=None, clockupdate=None, cmdargs=None,
+                 kmldump=None, test=None, subload=None, globals=None, term=None, stream=None, next=None):
+
         self.callbacks = SCallbacks()
-        self.module_count = 0
-        self.first_module: Module = None
-        self.last_module: Module = None
+        self.check = check
+        self.clockupdate = clockupdate
+        self.cmdargs = cmdargs
+        self.deltaClockUpdate = deltaClockUpdate
+        self.deltadesired = deltadesired # a parameter delta desired
         self.errno = 0
+        self.export_file = export_file
+        self.first_module: [None, Module] = None
+        self.getvar = getvar
+        self.globals = globals
+        self.hLib = hLib
+        self.id: int = id
+        self.import_file = import_file
+        self.interupdate = interupdate
+        self.kmldump = kmldump
+        self.last_module: [None, Module] = None
+        self.major: int = major
+        self.minor: int = minor
+        self.module_count = 0
+        self.name: str = name
+        self.next = next
+        self.next: [None, Module] = None
+        self.owner_class = owner_class  # DynamicClass
+        self.postupdate = postupdate
+        self.preupdate = preupdate
+        self.setvar = setvar
+        self.stream = stream # io.BytesIO()
+        self.subload = subload
+        self.term = term
+        self.test = test
 
     def module_callbacks(self, ):
         return self.callbacks
@@ -264,7 +316,7 @@ class Module:
             return 0
         return mod.export_file(filename)
 
-    def module_find(self, modname):
+    def module_find(self, modname: str):
         mod = None
         mod = self.first_module
         while mod is not None:
@@ -305,7 +357,8 @@ class Module:
         item = external_function_list
         while item is not None:
             if item.fname == function:
-                item.call = Transform.TRANSFORMFUNCTION()
+                from gridlab.gldcore.Transform import TransformFunction
+                item.call = TransformFunction()
                 return item.call
             item = item.next
         self.errno = ENOENT
@@ -346,7 +399,7 @@ class Module:
             parent_mod = self.module_find(fmod)
             if parent_mod is None:
                 parent_mod = self.module_load(fmod, 0, None)
-            previous = Class.class_get_last_class()
+            previous = self.owner_class.class_get_last_class()  # DynamicClass.class_get_last_class()
             if parent_mod is not None and parent_mod.subload is not None:
                 if self.module_find(fmod) is None:
                     self.module_load(fmod, 0, None)
@@ -363,13 +416,14 @@ class Module:
                     # if we want to register another module
                     self.last_module.next = mod
                     self.last_module = mod
-                    mod.oclass = previous.next if previous else Class.class_get_first_class()
-                return self.last_module
+                    mod.owner_class = previous.next if previous else self.owner_class.class_get_first_class()
+                    # DynamicClass.class_get_first_class
+                    return self.last_module
             else:
                 fmap = [
                     {"name": b"matlab", "loader": None},
-                    {"name": b"java", "loader": Load.load_java_module},
-                    {"name": b"python", "loader": Load.load_python_module},
+                    {"name": b"java", "loader": load_java_module},
+                    {"name": b"python", "loader": load_python_module},
                     {"name": None, "loader": None},
                 ]
                 p = None
@@ -467,11 +521,11 @@ class Module:
             return None
 
         errno = 0
-        mod.oclass = init(self.callbacks, mod, argc, argv)
-        if mod.oclass is None and errno != 0:
+        mod.owner_class = Module(self.callbacks, mod, argc, argv)
+        if mod.owner_class is None and errno != 0:
             return None
 
-        for c in mod.oclass:
+        for c in mod.owner_class:
             fname = ""
 
             map = [
@@ -513,7 +567,7 @@ class Module:
                 if m[0] is None and not m[2]:
                     output_fatal(
                         f"intrinsic {fname.decode('utf-8')} is not defined in class {file.decode('utf-8')}")
-                    errno = Globals.EINVAL
+                    errno = EINVAL
                     return None
                 elif not m[2]:
                     output_verbose(
@@ -611,7 +665,7 @@ class Sched:
         for t in range(my_proc.n_procs):
             n = my_proc.list[t]
             n.sched_lock()
-            process_map[n].status = Globals.MLS_DONE
+            process_map[n].status = MAINLOOPSTATE.MLS_DONE
             n.sched_unlock()
 
     def sched_controller(self,void):

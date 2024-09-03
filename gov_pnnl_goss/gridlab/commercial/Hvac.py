@@ -20,7 +20,7 @@ def create_hvac(obj, parent):
 
 def sync_hvac(obj, t0):
     t1 = obj.hvac.sync(t0)
-    obj.clock = t0
+    obj.exec_clock = t0
     return t1
 
 

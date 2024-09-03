@@ -69,7 +69,7 @@ class GptCodeConverter():
             Step 3) Replace the c-code standard string library e.g. sprints(), etc with python equivalent builtin methods. 
             Step 4) Replace the case statements with if and elif statements. 
             Step 5) Keep the comments create in-line comments in teh python code. 
-            Step 6) Add function return values for all c-code pointer type arguments.
+            Step 6) Add function return values for all c-code pointer global_property_types arguments.
         """
         self.add_function_instructions = f"Given this code convert it to python:"
         self.add_class_instructions = f"Given this code, convert it to python:"

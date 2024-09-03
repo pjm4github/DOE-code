@@ -15,7 +15,6 @@ class RegExpMatcher:
         pass
 
 
-We can convert the given CPP function to Python using snake_case function names as shown below:
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
 def match(regexp, text):
@@ -28,9 +27,6 @@ def match(regexp, text):
             break
         text = text[1:]
     return 0
-```
-
-In this Python version, the `match` function calls another function called `match_here`, and the 'do-while' loop structure is replaced with a 'while True' loop.
 
 def match_here(regexp, text):
     force = 0

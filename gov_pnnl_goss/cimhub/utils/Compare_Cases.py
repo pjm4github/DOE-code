@@ -168,7 +168,7 @@ def load_taps(fname):
     return vtap
 
 # Summary information - we want the last row
-# DateTime, CaseName, Status, Mode, Number, 
+# TimeStamp, CaseName, Status, Mode, Number,
 # LoadMult, NumDevices, NumBuses, NumNodes, Iterations, 
 # ControlMode, ControlIterations, MostIterationsDone, Year, Hour, 
 # MaxPuVoltage, MinPuVoltage, TotalMW, TotalMvar, MWLosses, 

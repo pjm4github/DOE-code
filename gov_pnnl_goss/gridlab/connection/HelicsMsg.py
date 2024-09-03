@@ -2,7 +2,7 @@ import math
 
 from gov_pnnl_goss.gridlab.gldcore.Class import PASSCONFIG
 from gov_pnnl_goss.gridlab.gldcore.GridLabD import gl_verbose, gl_error
-from gov_pnnl_goss.gridlab.gldcore.Property import PROPERTYTYPE
+from gov_pnnl_goss.gridlab.gldcore.PropertyHeader import PropertyType
 
 
 def clocks_update(ptr, t1):
@@ -69,30 +69,30 @@ class HelicsMsg:
         
         if gl_publish_variable(
             self.oclass,
-            PROPERTYTYPE.PT_double, 
+            PropertyType.PT_double,
             "version", 
             get_version_offset(), 
-            PROPERTYTYPE.PT_DESCRIPTION, 
+            PropertyType.PT_DESCRIPTION,
             "helics_msg version",
-            PROPERTYTYPE.PT_enumeration, 
+            PropertyType.PT_enumeration,
             "message_type", 
             PADDR(message_type), 
-            PROPERTYTYPE.PT_DESCRIPTION, 
-            "set the type of message format you wish to construct",
-            PROPERTYTYPE.PT_KEYWORD, 
+            PropertyType.PT_DESCRIPTION,
+            "set the global_property_types of message format you wish to construct",
+            PropertyType.PT_KEYWORD,
             "GENERAL", 
             enumeration(HMT_GENERAL), 
-            PROPERTYTYPE.PT_DESCRIPTION, 
+            PropertyType.PT_DESCRIPTION,
             "use this for sending a general HELICS topic/value pair.",
-            PROPERTYTYPE.PT_KEYWORD, 
+            PropertyType.PT_KEYWORD,
             "JSON", 
             enumeration(HMT_JSON), 
-            PROPERTYTYPE.PT_DESCRIPTION, 
+            PropertyType.PT_DESCRIPTION,
             "use this for want to send a bundled json formatted messag in a single topic.",
-            PROPERTYTYPE.PT_int32, 
+            PropertyType.PT_int32,
             "publish_period", 
             PADDR(publish_period), 
-            PROPERTYTYPE.PT_DESCRIPTION, 
+            PropertyType.PT_DESCRIPTION,
             "use this with json bundling to set the period [s] at which data is published.",
             None
         ) < 1:
@@ -422,12 +422,12 @@ class HelicsMsg:
                         gl_verbose(f"helics_msg: Calling getInteger on subscription {sub.target}")
                         property_type = sub.p_object_property.get_type()
                         integer_temp = sub.HelicsSubscription.getInteger()
-                        if property_type == PROPERTYTYPE.PT_int64:
+                        if property_type == PropertyType.PT_int64:
                             sub.p_object_property.setp(integer_temp)
-                        elif property_type == PROPERTYTYPE.PT_int32:
+                        elif property_type == PropertyType.PT_int32:
                             int32_temp = ctypes.c_int32(integer_temp).value
                             sub.p_object_property.setp(int32_temp)
-                        elif property_type == PROPERTYTYPE.PT_int16:
+                        elif property_type == PropertyType.PT_int16:
                             int16_temp = ctypes.c_int16(integer_temp).value
                             sub.p_object_property.setp(int16_temp)
                     elif sub.p_object_property.is_double():
@@ -477,17 +477,17 @@ class HelicsMsg:
                             property_name = p.name()
                             buf_obj = object_name.encode('utf-8')
                             buf_prop = property_name.encode('utf-8')
-                            gld_property = gld.Property(buf_obj, buf_prop)
+                            gld_property = gld.PropertyMap(buf_obj, buf_prop)
                             if gld_property.is_valid():
                                 if gld_property.is_integer():
                                     itmp = json_message[object_name][property_name].asInt64()
                                     property_type = gld_property.get_type()
-                                    if property_type == PROPERTYTYPE.PT_int64:
+                                    if property_type == PropertyType.PT_int64:
                                         gld_property.setp(itmp)
-                                    elif property_type == PROPERTYTYPE.PT_int32:
+                                    elif property_type == PropertyType.PT_int32:
                                         int32_temp = ctypes.c_int32(itmp).value
                                         gld_property.setp(int32_temp)
-                                    elif property_type == PROPERTYTYPE.PT_int16:
+                                    elif property_type == PropertyType.PT_int16:
                                         int16_temp = ctypes.c_int16(itmp).value
                                         gld_property.setp(int16_temp)
                                 elif gld_property.is_double():
@@ -520,17 +520,17 @@ class HelicsMsg:
                             property_name = p.name()
                             buf_obj = object_name.encode('utf-8')
                             buf_prop = property_name.encode('utf-8')
-                            gld_property = gld.Property(buf_obj, buf_prop)
+                            gld_property = gld.PropertyMap(buf_obj, buf_prop)
                             if gld_property.is_valid():
                                 if gld_property.is_integer():
                                     itmp = json_message[object_name][property_name].asInt64()
                                     property_type = gld_property.get_type()
-                                    if property_type == PROPERTYTYPE.PT_int64:
+                                    if property_type == PropertyType.PT_int64:
                                         gld_property.setp(itmp)
-                                    elif property_type == PROPERTYTYPE.PT_int32:
+                                    elif property_type == PropertyType.PT_int32:
                                         int32_temp = ctypes.c_int32(itmp).value
                                         gld_property.setp(int32_temp)
-                                    elif property_type == PROPERTYTYPE.PT_int16:
+                                    elif property_type == PropertyType.PT_int16:
                                         int16_temp = ctypes.c_int16(itmp).value
                                         gld_property.setp(int16_temp)
                                 elif gld_property.is_double():
@@ -666,12 +666,12 @@ class HelicsMsg:
                                             itmp = json_data[object_name][property_name].asInt64()
                                             property_type = gld_property.get_type()
     
-                                            if property_type == PROPERTYTYPE.PT_int64:
+                                            if property_type == PropertyType.PT_int64:
                                                 gld_property.setp(itmp)
-                                            elif property_type == PROPERTYTYPE.PT_int32:
+                                            elif property_type == PropertyType.PT_int32:
                                                 int32_temp = int(itmp)
                                                 gld_property.setp(int32_temp)
-                                            elif property_type == PROPERTYTYPE.PT_int16:
+                                            elif property_type == PropertyType.PT_int16:
                                                 int16_temp = int(itmp)
                                                 gld_property.setp(int16_temp)
                                         elif gld_property.is_double():
@@ -702,12 +702,12 @@ class HelicsMsg:
                                             itmp = json_data[object_name][property_name].asInt64()
                                             property_type = gld_property.get_type()
     
-                                            if property_type == PROPERTYTYPE.PT_int64:
+                                            if property_type == PropertyType.PT_int64:
                                                 gld_property.setp(itmp)
-                                            elif property_type == PROPERTYTYPE.PT_int32:
+                                            elif property_type == PropertyType.PT_int32:
                                                 int32_temp = int(itmp)
                                                 gld_property.setp(int32_temp)
-                                            elif property_type == PROPERTYTYPE.PT_int16:
+                                            elif property_type == PropertyType.PT_int16:
                                                 int16_temp = int(itmp)
                                                 gld_property.setp(int16_temp)
                                         elif gld_property.is_double():
@@ -755,12 +755,12 @@ class HelicsMsg:
                                             itmp = json_data[object_name][property_name].asInt64()
                                             property_type = gld_property.get_type()
     
-                                            if property_type == PROPERTYTYPE.PT_int64:
+                                            if property_type == PropertyType.PT_int64:
                                                 gld_property.setp(itmp)
-                                            elif property_type == PROPERTYTYPE.PT_int32:
+                                            elif property_type == PropertyType.PT_int32:
                                                 int32_temp = int(itmp)
                                                 gld_property.setp(int32_temp)
-                                            elif property_type == PROPERTYTYPE.PT_int16:
+                                            elif property_type == PropertyType.PT_int16:
                                                 int16_temp = int(itmp)
                                                 gld_property.setp(int16_temp)
                                         elif gld_property.is_double():
@@ -791,12 +791,12 @@ class HelicsMsg:
                                             itmp = json_data[object_name][property_name].asInt64()
                                             property_type = gld_property.get_type()
     
-                                            if property_type == PROPERTYTYPE.PT_int64:
+                                            if property_type == PropertyType.PT_int64:
                                                 gld_property.setp(itmp)
-                                            elif property_type == PROPERTYTYPE.PT_int32:
+                                            elif property_type == PropertyType.PT_int32:
                                                 int32_temp = int(itmp)
                                                 gld_property.setp(int32_temp)
-                                            elif property_type == PROPERTYTYPE.PT_int16:
+                                            elif property_type == PropertyType.PT_int16:
                                                 int16_temp = int(itmp)
                                                 gld_property.setp(int16_temp)
                                         elif gld_property.is_double():

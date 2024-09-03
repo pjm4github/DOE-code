@@ -23,7 +23,7 @@ class RequestUploadHandler(RequestHandlerInterface):
         Handle the upload of data and return a response
         
         Args:
-            data_type (str): The type of the data
+            data_type (str): The global_property_types of the data
             data (Serializable): The data to be uploaded
         
         Returns:

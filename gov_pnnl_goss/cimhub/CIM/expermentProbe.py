@@ -38,11 +38,11 @@ import requests
 #         class_property_relations[subj].append(pred)
 #
 # # Print class-property relationships
-# print("\nClass-Property Relationships:")
+# print("\nClass-PropertyMap Relationships:")
 # for cls, properties in class_property_relations.items():
 #     print(f"Class: {cls}")
 #     for prop in properties:
-#         print(f"  Property: {prop}")
+#         print(f"  PropertyMap: {prop}")
 #
 
 def pull_raw():

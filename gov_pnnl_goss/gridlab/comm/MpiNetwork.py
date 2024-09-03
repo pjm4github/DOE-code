@@ -9,7 +9,7 @@ from gov_pnnl_goss.gridlab.climate.CsvReader import PADDR
 from gov_pnnl_goss.gridlab.gldcore.Globals import PA_REFERENCE
 from gov_pnnl_goss.gridlab.gldcore.GridLabD import gl_error, gl_publish_variable, gl_register_class, PC_BOTTOMUP, \
     gl_globalclock
-from gov_pnnl_goss.gridlab.gldcore.Property import PROPERTYTYPE
+from gov_pnnl_goss.gridlab.gldcore.PropertyHeader import PropertyType
 
 
 def gl_set_parent(obj, parent):
@@ -17,7 +17,7 @@ def gl_set_parent(obj, parent):
 
 
 def create_mpi_network(obj, parent):
-    obj = MpiNetwork.oclass()
+    obj = MpiNetwork.owner_class()
     if obj is not None:
         my = obj
         gl_set_parent(obj, parent)
@@ -48,19 +48,19 @@ def isa_mpi_network(obj, classname):
 def sync_mpi_network(obj, t1):
     my = type(obj).__name__
     try:
-        t2 = my.sync(obj.clock, t1)
+        t2 = my.sync(obj.exec_clock, t1)
         return t2
     except Exception as msg:
         dt = time.localtime(t1)
         ts = time.strftime('%Y-%m-%d %H:%M:%S', dt)
         error_msg = "({}: {}) {}: {}"
-        print(error_msg.format(obj.oclass.module.name, obj.oclass.name, obj.name, obj.id, ts, msg))
+        print(error_msg.format(obj.owner_class.module.name, obj.owner_class.name, obj.name, obj.id, ts, msg))
         return 0
 
 def commit_mpi_network(obj, t1, t2):
     my = type(obj).__name__
     rv = my.commit(t1, t2)
-    obj.clock = gl_globalclock
+    obj.exec_clock = gl_globalclock
     return rv
 
 def notify_mpi_network(obj, update_mode, prop):
@@ -69,11 +69,11 @@ def notify_mpi_network(obj, update_mode, prop):
 
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
-def register_class_definition(oclass, mod, class_name, size, policy):
-    if oclass is None:
+def register_class_definition(owner_class, mod, class_name, size, policy):
+    if owner_class is None:
         # register the class definition
-        oclass = gl_register_class(mod, class_name, size, policy)
-        if oclass is None:
+        owner_class = gl_register_class(mod, class_name, size, policy)
+        if owner_class is None:
             raise Exception("unable to register object class implemented by %s" % __file__)
             # TROUBLESHOOT
             # The registration for the class failed.   This is usually caused
@@ -81,8 +81,8 @@ def register_class_definition(oclass, mod, class_name, size, policy):
             # Please report this error to the developers.
 
         # publish the class properties
-        if gl_publish_variable(oclass, PROPERTYTYPE.PT_int64, "interval", PADDR(oclass.interval), PROPERTYTYPE.PT_int32, "mpi_target", PADDR(oclass.mpi_target),
-                               PROPERTYTYPE.PT_int64, "reply_time", PADDR(oclass.reply_time), PROPERTYTYPE.PT_ACCESS, PA_REFERENCE, None) < 1:
+        if gl_publish_variable(owner_class, PropertyType.PT_int64, "interval", PADDR(owner_class.interval), PropertyType.PT_int32, "mpi_target", PADDR(owner_class.mpi_target),
+                               PropertyType.PT_int64, "reply_time", PADDR(owner_class.reply_time), PropertyType.PT_ACCESS, PA_REFERENCE, None) < 1:
             raise Exception("unable to publish properties in %s" % __file__)
             # TROUBLESHOOT
             # The registration for the network properties failed.   This is usually caused
@@ -103,7 +103,7 @@ class MPI_Recv:
 
 
 class MpiNetwork:
-    oclass = None
+    owner_class = None
 
     def __init__(self, mod):
 
@@ -115,20 +115,20 @@ class MpiNetwork:
         self.next_time = 0
         self.their_time = 0
 
-        if MpiNetwork.oclass is None:
-            MpiNetwork.oclass = gl_register_class(mod, "mpi_network", MpiNetwork.__sizeof__(), PC_BOTTOMUP)
-            if MpiNetwork.oclass is None:
+        if MpiNetwork.owner_class is None:
+            MpiNetwork.owner_class = gl_register_class(mod, "mpi_network", MpiNetwork.__sizeof__(), PC_BOTTOMUP)
+            if MpiNetwork.owner_class is None:
                 raise Exception("unable to register object class implemented by {}".format(__name__))
                 # TROUBLESHOOT
                 # The registration for the mpi_network class failed. This is usually caused
                 # by a coding error in the core implementation of classes or the module implementation.
                 # Please report this error to the developers.
 
-            if gl_publish_variable(MpiNetwork.oclass,
-                                   PROPERTYTYPE.PT_int64, "interval", PADDR(MpiNetwork.interval),
-                                   PROPERTYTYPE.PT_int32, "mpi_target", PADDR(MpiNetwork.mpi_target),
-                                   PROPERTYTYPE.PT_int64, "reply_time", PADDR(MpiNetwork.reply_time),
-                                   PROPERTYTYPE.PT_ACCESS, PA_REFERENCE,
+            if gl_publish_variable(MpiNetwork.owner_class,
+                                   PropertyType.PT_int64, "interval", PADDR(MpiNetwork.interval),
+                                   PropertyType.PT_int32, "mpi_target", PADDR(MpiNetwork.mpi_target),
+                                   PropertyType.PT_int64, "reply_time", PADDR(MpiNetwork.reply_time),
+                                   PropertyType.PT_ACCESS, PA_REFERENCE,
                                    None) < 1:
                 raise Exception("unable to publish properties in {}".format(__name__))
                 # TROUBLESHOOT
@@ -194,7 +194,7 @@ class MpiNetwork:
 
     def commit(self, t1, t2):
         obj = self.objecthdr()
-        t0 = obj.clock
+        t0 = obj.exec_clock
         return None
 
     def notify(self, update_mode, prop):

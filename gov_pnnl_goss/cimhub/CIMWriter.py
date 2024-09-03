@@ -55,7 +55,7 @@ class CIMWriter:
     SELECT ?name ?voltage_id WHERE {
      ?fdr c:IdentifiedObject.mRID ?fdrid.
      ?status c:ConnectivityNode.ConnectivityNodeContainer ?fdr.
-     ?status r:type c:ConnectivityNode.
+     ?status r:global_property_types c:ConnectivityNode.
      ?status c:IdentifiedObject.name ?name.
      bind(strafter(str(?status),"#") as ?voltage_id).
     } ORDER by ?name

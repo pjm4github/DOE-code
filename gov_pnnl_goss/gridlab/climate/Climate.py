@@ -1,4 +1,5 @@
 import csv
+import sys
 from datetime import datetime
 from datetime import timedelta as dt
 import math
@@ -10,7 +11,9 @@ import numpy as np
 
 from gov_pnnl_goss.gridlab.climate.SolarAngles import SolarAngles
 from gov_pnnl_goss.gridlab.gldcore.Find import FindType
-from gov_pnnl_goss.gridlab.gldcore.GridLabD import gl_warning, gl_error, gl_name, gl_lerp, gl_globalclock
+from gov_pnnl_goss.gridlab.gldcore.GridLabD import gl_name, gl_lerp
+
+# from gov_pnnl_goss.gridlab.gldcore.GridLabD import print("Warning:" + , gl_error, gl_name, gl_lerp, gl_globalclock
 
 _CLIMATE_H = True
 
@@ -332,7 +335,7 @@ class TMY2Reader:
             pos = 0
 
         if file is None:
-            gl_error(f"tmy2_reader::open() -- fopen failed on \"{file}\"")
+            print(sys.stderr, f"tmy2_reader::open() -- fopen failed on \"{file}\"")
             return False
         try:
             self.fp =  open(file, "r")
@@ -364,7 +367,7 @@ class TMY2Reader:
                         self.long_degrees = int(match.group("long_degrees"))
                         self.long_minutes = int(match.group("long_minutes"))
                         self.elevation = int(match.group("elevation"))
-                    gl_warning("Daylight saving time (DST) is not handled correctly when using TMY2 datasets; "
+                    print("Warning:" + "Daylight saving time (DST) is not handled correctly when using TMY2 datasets; "
                                "please use TMY3 for DST-corrected weather data.")
                     self.is_TMY2 = True
                 elif s == "tmy3":
@@ -410,11 +413,11 @@ class TMY2Reader:
                 if temp_long_hem.lower() == 'W':
                     self.long_degrees = -self.long_degrees
             else:
-                gl_error("tmy2_reader::open() -- first readline read nothing")
+                print(sys.stderr, "tmy2_reader::open() -- first readline read nothing")
                 return False
 
         except FileNotFoundError:
-            gl_error(f"tmy2_reader::open() -- file not found: {file}")
+            print(sys.stderr, f"tmy2_reader::open() -- file not found: {file}")
             return False
 
     def next(self):
@@ -674,17 +677,25 @@ def gl_find_next(items, param):
 
 
 class Climate:
-    oclass = None
+    owner_class = None
     defaults = None
 
     def __init__(self, parent=None):
-
+        global global_clock
         # data not shared with classes in this module (no locks needed)
         # get_/set_ accessors for classes in this module only (non-atomic data need locks on access)
+        self.global_clock = global_clock
+
         self.MAX_LAT = 0.0
         self.MAX_LAT_INDEX = 0
         self.MIN_LAT = 0.0
         self.MIN_LAT_INDEX = 0
+
+        self.MAX_LON = 0.0
+        self.MAX_LON_INDEX = 0
+        self.MIN_LON = 0.0
+        self.MIN_LON_INDEX = 0
+
         self.city = ""
         self.cloud_aerosol_transmissivity = 0.95 # Attenuation factor of no-cloud (clear-sky) radiation due to aerosols
         self.cloud_alpha = 400  # Determines the distance between the shading layers of the normalized patterns.
@@ -749,18 +760,18 @@ class Climate:
         self.wind_speed = 0.0  # wind speed (mph)
 
 
-        if Climate.oclass is None:
-            Climate.oclass = self.create_class(parent)
+        if Climate.owner_class is None:
+            Climate.owner_class = self.create_class(parent)
         if Climate.defaults is None:
             Climate.defaults = self
 
     def create_class(self, module):
         # Create and return the class
-        oclass = Climate(module)  # gl_register_class(module, "climate", PC_PRETOPDOWN | PC_AUTOLOCK)
-        if oclass is None:
+        owner_class = Climate(module)  # gl_register_class(module, "climate", PC_PRETOPDOWN | PC_AUTOLOCK)
+        if owner_class is None:
             raise Exception("Unable to register class climate")
 
-        # gl_publish_variable(oclass,
+        # gl_publish_variable(owner_class,
         #     PT_double, "solar_elevation", self.get_offset("solar_elevation"),
         #     PT_double, "solar_azimuth", self.get_offset("solar_azimuth"),
         #     PT_double, "solar_zenith", self.get_offset("solar_zenith"),
@@ -818,7 +829,7 @@ class Climate:
         #     PT_double, "update_time", self.get_offset("update_time"),
         #     None)
 
-        return oclass
+        return owner_class
 
     def create(self):
         defaults = Climate.defaults
@@ -894,7 +905,7 @@ class Climate:
         # Ignore "" files ~ manual climate control is a feature
         if self.tmyfile == "":
             print("Manual or FNCS/HELICS climate control; initializing to the starttime")
-            self.presync(gl_globalclock)
+            self.presync(global_clock)
             return 1
 
         # Open access to the TMY file
@@ -1079,34 +1090,34 @@ class Climate:
             if hoy >= 0 and hoy < 8760:
                 # pre-conversion of solar data from W/multiplicities^2 to W/sf
                 if 0 == gl_convert("W/multiplicities^2", "W/sf", self.dnr):
-                    gl_error("climate::init unable to gl_convert() 'W/multiplicities^2' to 'W/sf'!")
+                    print(sys.stderr, "climate::init unable to gl_convert() 'W/multiplicities^2' to 'W/sf'!")
                     return 0
 
                 if 0 == gl_convert("W/multiplicities^2", "W/sf", self.dhr):
-                    gl_error("climate::init unable to gl_convert() 'W/multiplicities^2' to 'W/sf'!")
+                    print(sys.stderr, "climate::init unable to gl_convert() 'W/multiplicities^2' to 'W/sf'!")
                     return 0
 
                 if 0 == gl_convert("W/multiplicities^2", "W/sf", self.ghr):
-                    gl_error("climate::init unable to gl_convert() 'W/multiplicities^2' to 'W/sf'!")
+                    print(sys.stderr, "climate::init unable to gl_convert() 'W/multiplicities^2' to 'W/sf'!")
                     return 0
 
                 if 0 == gl_convert("W/multiplicities^2", "W/sf", self.extra_dni):
-                    gl_error("climate::init unable to gl_convert() 'W/multiplicities^2' to 'W/sf'!")
+                    print(sys.stderr, "climate::init unable to gl_convert() 'W/multiplicities^2' to 'W/sf'!")
                     return 0
 
                 if 0 == gl_convert("W/multiplicities^2", "W/sf", self.extra_ghi):
-                    gl_error("climate::init unable to gl_convert() 'W/multiplicities^2' to 'W/sf'!")
+                    print(sys.stderr, "climate::init unable to gl_convert() 'W/multiplicities^2' to 'W/sf'!")
                     return 0
 
                 if 0 == gl_convert("mps", "mph", self.wspeed):
-                    gl_error("climate::init unable to gl_convert() 'multiplicities/status' to 'miles/h'!")
+                    print(sys.stderr, "climate::init unable to gl_convert() 'multiplicities/status' to 'miles/h'!")
                     return 0
 
                 self.tmy[hoy].temp_raw = self.temperature
                 self.tmy[hoy].temp = self.temperature
                 # post-conversion of copy of temperature from C to F
                 if 0 == gl_convert("degC", "degF", self.tmy[hoy].temp):
-                    gl_error("climate::init unable to gl_convert() 'degC' to 'degF'!")
+                    print(sys.stderr, "climate::init unable to gl_convert() 'degC' to 'degF'!")
                     return 0
 
                 self.tmy[hoy].windspeed = self.wspeed
@@ -1153,19 +1164,19 @@ class Climate:
                         self.record.low = self.tmy[hoy].temp
                         self.record.low_day = doy
                 else:
-                    gl_error("%status(%d): day %d, hour %d is out of allowed range 0-8759 hours", self.tmyfile.get_"", line,
+                    print(sys.stderr, "%status(%d): day %d, hour %d is out of allowed range 0-8759 hours", self.tmyfile.get_string(), line,
                              day, hour)
 
                 line += 1
         self.file.close()
 
-        self.presync(self.gl_globalclock)
+        self.presync(self.global_clock)
 
         # 	/* enable forecasting if specified */
         # #if 0
         # 	if ( strcmp(forecast_spec,"")!=0 && gl_forecast_create(my(),forecast_spec)==NULL )
         # 	{
-        # 		gl_error("%status: forecast '%status' is not valid", get_name(), forecast_spec.get_"");
+        # 		print(sys.stderr, "%status: forecast '%status' is not valid", get_name(), forecast_spec.get_string());
         # 		return 0;
         # 	}
         # 	else if (get_forecast()!=NULL)

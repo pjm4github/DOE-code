@@ -22,7 +22,7 @@ class DefaultClientListener:
     def on_message(self, message):
         try:
             if isinstance(message, ObjectMessage):
-                self.logger.debug("message of type: %s received" % message.__class__)
+                self.logger.debug("message of global_property_types: %s received" % message.__class__)
                 object_message = message
                 if isinstance(object_message.get_object(), Response):
                     response = object_message.get_object()

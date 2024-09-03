@@ -9,7 +9,7 @@ from gov_pnnl_goss.gridlab.connection.Native import Native
 from gov_pnnl_goss.gridlab.connection.Socket import Socket
 from gov_pnnl_goss.gridlab.gldcore.Globals import EINVAL, SIMULATIONMODE, DT_INFINITY, DT_INVALID
 from gov_pnnl_goss.gridlab.gldcore.GridLabD import gl_error, Callback
-from gov_pnnl_goss.gridlab.gldcore.Property import PROPERTYTYPE
+from gov_pnnl_goss.gridlab.gldcore.PropertyHeader import PropertyType
 
 
 connection_lockout = 0.0
@@ -74,23 +74,23 @@ class Init:
         Socket.init(module)
 
         gl_global_create("connection::security",
-                         PROPERTYTYPE.PT_enumeration, CONNECTIONSECURITY.CS_STANDARD,
-                         PROPERTYTYPE.PT_DESCRIPTION, "default connection security level",
-                         PROPERTYTYPE.PT_KEYWORD, "NONE", CONNECTIONSECURITY.CS_NONE,
-                         PROPERTYTYPE.PT_KEYWORD, "LOW", CONNECTIONSECURITY.CS_LOW,
-                         PROPERTYTYPE.PT_KEYWORD, "STANDARD", CONNECTIONSECURITY.CS_STANDARD,
-                         PROPERTYTYPE.PT_KEYWORD, "HIGH", CONNECTIONSECURITY.CS_HIGH,
-                         PROPERTYTYPE.PT_KEYWORD, "EXTREME", CONNECTIONSECURITY.CS_EXTREME,
-                         PROPERTYTYPE.PT_KEYWORD, "PARANOID", CONNECTIONSECURITY.CS_PARANOID,
+                         PropertyType.PT_enumeration, CONNECTIONSECURITY.CS_STANDARD,
+                         PropertyType.PT_DESCRIPTION, "default connection security level",
+                         PropertyType.PT_KEYWORD, "NONE", CONNECTIONSECURITY.CS_NONE,
+                         PropertyType.PT_KEYWORD, "LOW", CONNECTIONSECURITY.CS_LOW,
+                         PropertyType.PT_KEYWORD, "STANDARD", CONNECTIONSECURITY.CS_STANDARD,
+                         PropertyType.PT_KEYWORD, "HIGH", CONNECTIONSECURITY.CS_HIGH,
+                         PropertyType.PT_KEYWORD, "EXTREME", CONNECTIONSECURITY.CS_EXTREME,
+                         PropertyType.PT_KEYWORD, "PARANOID", CONNECTIONSECURITY.CS_PARANOID,
                          None)
 
-        gl_global_create("connection::lockout", PROPERTYTYPE.PT_double, connection_lockout,
-                         PROPERTYTYPE.PT_UNITS, "s",
-                         PROPERTYTYPE.PT_DESCRIPTION, "default connection security lockout time",
+        gl_global_create("connection::lockout", PropertyType.PT_double, connection_lockout,
+                         PropertyType.PT_UNITS, "s",
+                         PropertyType.PT_DESCRIPTION, "default connection security lockout time",
                          None)
 
-        gl_global_create("connection::enable_subsecond_models", PROPERTYTYPE.PT_bool, enable_subsecond_models,
-                         PROPERTYTYPE.PT_DESCRIPTION, "Enable deltamode capabilities within the connection module",
+        gl_global_create("connection::enable_subsecond_models", PropertyType.PT_bool, enable_subsecond_models,
+                         PropertyType.PT_DESCRIPTION, "Enable deltamode capabilities within the connection module",
                          None)
 
         # These will register the various objects

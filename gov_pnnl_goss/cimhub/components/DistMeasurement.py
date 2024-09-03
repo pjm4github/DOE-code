@@ -12,7 +12,7 @@ class DistMeasurement(DistComponent):
             self.name = self.safe_name(soln.get("?name").to"")
             self.eq_name = self.safe_name(soln.get("?eqname").to"")
             self.eq_type = self.safe_name(soln.get("?eqtype").to"")
-            self.meas_type = self.safe_name(soln.get("?type").to"")
+            self.meas_type = self.safe_name(soln.get("?global_property_types").to"")
             self.meas_class = self.safe_name(soln.get("?class").to"")
             self.id = soln.get("?voltage_id").to""
             self.eq_id = soln.get("?eqid").to""

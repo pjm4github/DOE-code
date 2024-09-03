@@ -1,9 +1,11 @@
 # stream.py
-from gov_pnnl_goss.gridlab.gldcore.Class import Class, PROPERTYNAME
-from gov_pnnl_goss.gridlab.gldcore.Globals import global_getnext, global_get_count, global_get_var, global_set_var
+from gov_pnnl_goss.gridlab.gldcore.Class import DynamicClass
+from gov_pnnl_goss.gridlab.gldcore.Globals import global_get_count, global_get_var, global_set_var, global_get_next
 from gov_pnnl_goss.gridlab.gldcore.Output import output_debug, output_error
 from gridlab.gldcore.Module import Module
 from gridlab.gldcore.Object import Object
+import struct
+
 
 SF_IN = 0x0001
 SF_OUT = 0x0002
@@ -15,11 +17,17 @@ STREAM_VERSION = 2
 fp = None
 count = 0
 
+# Global variables
+
 stream_name = STREAM_NAME
 stream_version = STREAM_VERSION
 stream_wordsize = None
 stream_pos = 0
 flags = 0x00
+
+
+#stream_wordsize = struct.calcsize("P")
+_DEBUG = True
 
 
 class TOKEN(str):
@@ -28,8 +36,6 @@ class TOKEN(str):
 
 class PROPERTY:
     pass
-
-
 
 
 class Streamer:
@@ -94,13 +100,44 @@ class Streamer:
 
         self.stream("/MOD")
 
-    def stream_property(self, oclass, prop):
+    def stream_property(self, owner_class, prop):
         # Handle property streaming
         pass
 
     def stream_class(self, oclass):
-        # Handle class streaming
-        pass
+        global stream_pos
+        self.stream("RTC")
+
+        # Simulate getting the runtime count for the class
+        count = DynamicClass.class_get_runtimecount(oclass)
+        self.stream(count)
+        for n in range(count):
+            # Assuming oclass has attributes like 'name', 'size', 'passconfig'
+            # and methods like 'register', 'get_next_runtime', etc.
+            name = oclass.name if oclass else ""
+            self.stream(name, len(name))
+
+            size = oclass.size if oclass else 0
+            self.stream(size)
+
+            passconfig = oclass.passconfig if oclass else 0
+            self.stream(passconfig)
+
+            if flags & SF_IN:
+                # Register or load class as needed
+                oclass = DynamicClass.class_register(None, name, size, passconfig) if oclass else None
+
+            # Stream properties or other related data
+            self.stream_properties(oclass)
+
+            if flags & SF_OUT:
+                oclass = DynamicClass.class_get_next_runtime(oclass) if oclass else None
+
+            if flags & SF_IN:
+                # Load module or perform additional actions required for input streaming
+                Module.module_load(oclass.name, 0, None) if oclass else None
+
+        self.stream("/RTC")
 
     def stream_object(self, obj):
         # Handle object streaming
@@ -110,117 +147,28 @@ class Streamer:
         # Handle global variable streaming
         pass
 
-    # Additional methods to support streaming of various types (MODULE, CLASS, OBJECT, GLOBALVAR)
-    # ...
 
-
-    # Implement other specific methods as needed based on the C++ code
-
-    # def stream(self, s, max=0):
-    #     t = s[:1024]
-    #     self.stream(t, max if max else len(s), True, s)
-    #
-    #
-    # def stream(self, v):
-    #     self.stream(v, len(v))
-    #
-    # def stream(self, ptr, len_, is_str, match):
-    #     if flags & SF_OUT:
-    #         if is_str:
-    #             len_ = len(ptr)
-    #         fp =f"{len_:d}"
-    #         a = len(fp)
-    #         if a < 0:
-    #             pass
-    #         for i in range(len_):
-    #             b = 0
-    #             c = ptr[i]
-    #             if not is_str or c < 32 or c > 126 or c == '\\':
-    #                 fp = f"{c:02x}"
-    #                 b = len(fp)
-    #             a += b
-    #         fp += "\n"
-    #         b = len(fp)
-    #         if b < 0:
-    #             pass
-    #         a += b
-    #         self.stream_pos += a
-    #         return a
-    #     if flags & SF_IN:
-    #         a = 0
-    #         a = fscanf(fp, "%d", a)
-    #         if a < 1:
-    #             raise
-    #         if a > len:
-    #             raise
-    #         if fgetc(fp) != ' ':
-    #             raise "FMT"
-    #         (c_char * len).from_buffer(ptr).value = 0
-    #         for i in range(a):
-    #             b = fgetc(fp)
-    #             if b == '\\' and fscanf(fp, "%02x", b) < 1:
-    #                 raise
-    #             cast(ptr, POINTER(c_char))[i] = c_char(b)
-    #         while fgetc(fp) != '\n':
-    #             pass
-    #         if match is not None and memcmp(ptr, match, a):
-    #             raise 0
-    #         b = (log(float(a)) + 2) + a * 3
-    #         stream_pos += b
-    #         return b
-    #     raise
-    #
-    #
-    # def stream(self, oclass):
-    #     self.stream("RTC")
-    #
-    #     count = Class.class_get_runtime_count()
-    #     self.stream(count)
-    #     for n in range(count):
-    #         name = oclass.name if oclass else ""
-    #         self.stream(name, len(name))
-    #
-    #         size = oclass.size if oclass else 0
-    #         self.stream(size)
-    #
-    #         passconfig = oclass.passconfig if oclass else None
-    #         self.stream(passconfig)
-    #
-    #         if flags & SF_IN:
-    #             oclass = Class.register(None, name, size, passconfig)
-    #
-    #         self.stream(oclass, oclass.pmap)
-    #
-    #         if flags & SF_OUT:
-    #             oclass = Class.get_next_runtime(oclass)
-    #         if flags & SF_IN:
-    #             Module.module_load(oclass.name, 0, None)
-    #     self.stream("/RTC")
-
-    # def stream_type(self, T):
-    #     def stream_T(ptr, len, prop):
-    #         return self.stream(cast(ptr, POINTER(T)), len)
 
     def stream_type(self, T):
         def stream_type_impl(data, size, property):
-            # Your implementation of the stream type function for a specific type T here
+            # Your implementation of the stream global_property_types function for a specific global_property_types T here
             pass
         return stream_type_impl
     
     # Define stream functions for various types
     @stream_type(int)
     def stream_int(self, data, size, property):
-        # Your implementation for int type
+        # Your implementation for int global_property_types
         pass
     
     @stream_type(float)
     def stream_float(self, data, size, property):
-        # Your implementation for float type
+        # Your implementation for float global_property_types
         pass
     
     @stream_type(str)
     def stream_str(self, data, size, property):
-        # Your implementation for str type
+        # Your implementation for str global_property_types
         pass
 
     def stream_context(self, ):
@@ -401,157 +349,427 @@ class Streamer:
         self.stream_register(self.stream_float)
         self.stream_register(self.stream_str)
 
-    def stream_v(self, v):
-        pass
-    
-    def stream_oc(self, oclass, prop):
-        pass
 
-    def stream_o(self, oclass):
-        pass
-        
-    def stream_obj(self, obj):
-        self.stream("OBJ")
-        count = Object.object_get_count()
-        self.stream(count)
-        for n in range(count):
-            pass
-        self.stream("/OBJ")
-
-    def stream_gvar(self, var):
-        pass
-
-    def stream_file(self, file_ptr, opts):
-        self.file_ptr = file_ptr
-        self.flags = opts
-        stream_pos = 0
-        fp = self.file_ptr
-        flags = opts
-        output_debug("starting stream on file %d with options %x", fp, flags)
-        try:
-            self.stream("GLD30")
-            try:
-                self.stream(Class.class_get_first_runtime())
-            except:
-                pass
-            try:
-                self.stream(Module.module_get_first())
-            except:
-                pass
-            try:
-                self.stream(Object.object_get_first(None))
-            except:
-                pass
-            try:
-                self.stream(global_getnext(None))
-            except:
-                pass
-            s = self.stream_list
-            while s != None:
-                pass
-            output_debug("done processing stream on file %d with options %x", fp, flags)
-            return stream_pos
-        except Exception as e:
-            if isinstance(e, str):
-                pass
+    def stream(ptr, len, is_str, match=None):
+        global stream_pos
+        if flags & SF_OUT:
+            if _DEBUG:
+                if is_str:
+                    len = len(ptr)
+                a = print(f"{len} ", end="")
+                if a < 0:
+                    raise Exception("Error writing to stream")
+                for i in range(len):
+                    c = ptr[i]
+                    b = 1
+                    if not is_str or c < 32 or c > 126 or c == '\\':
+                        b = print(f"\\{c:02x}", end="")
+                    else:
+                        try:
+                            print(chr(c), end="")
+                        except EOFError:
+                            b = -1
+                    if b == -1:
+                        raise Exception("Error writing to stream")
+                    a += b
+                print()
+                stream_pos += a
+                return a
             else:
-                output_error("stream() failed as offset %lld", int(stream_pos))
-                return -1
-    
+                # Simplified write operation
+                if is_str:
+                    len = len(ptr)
+                with open("stream_file", "wb") as f:
+                    a = f.write(struct.pack("I", len))
+                    b = f.write(ptr.encode('utf-8') if isinstance(ptr, str) else ptr)
+                    stream_pos += a + b
+                    return a + b
+        elif flags & SF_IN:
+            # Reading from stream
+            raise NotImplementedError("Stream reading functionality is not implemented yet.")
 
+    def stream_overload(self, s, max=0):
+        t = s[:1024]
+        self.stream(t, max if max else len(s), True, s)
 
-    def stream_values(self, oclass, prop):
-        self.stream("RTC")
-    
-        count = Class.class_get_extended_count(oclass)
+    def stream_module(self, mod):
+        self.stream("MOD")
+        count = Module.module_getcount()
         self.stream(count)
         for n in range(count):
-            name = "" if prop is None else prop.name
-            self.stream(name, len(name))
-    
-            ptype = None if prop is None else prop.ptype
-            self.stream(ptype)
-    
-            unit = "" if prop is None else prop.unit.name if prop.unit else ""
-            self.stream(unit, 64)
-    
-            width = 0 if prop is None else prop.width
-            self.stream(width)
-    
+            name = mod.name if mod else ""
+            self.stream(name, 1024)
             if flags & SF_OUT:
-                prop = prop.next
+                mod = mod.next
             if flags & SF_IN:
-                Class.class_add_extended_property(oclass, name, ptype, unit)
-    
-        self.stream("/RTC")
-    
-    def stream_var(self, var):
-        self.stream("VAR")
-    
-        count = global_get_count()
-        self.stream(count)
-        for n in range(count):
-            name = PROPERTYNAME()
-            if var:
-                name = var.prop.name
-            self.stream(name, len(name))
-    
-            value = ""
-            if var:
-                value = global_get_var(name, 1024)
-            self.stream(value, 1024)
-    
-            if flags & SF_OUT:
-                var = var.next
-            if flags & SF_IN:
-                global_set_var(name, value)
-    
-        self.stream("/VAR")
+                Module.module_load(name, 0, None)
+        self.stream("/MOD")
 
-    # def stream(self, ptr, length, is_str, match=None):
-    #     # This method needs to be implemented based on the specific requirements of streaming
+    # Additional functions for CLASS, PROPERTY, OBJECT, GLOBALVAR streaming need to be defined here
+    # ...
+
+    def stream_file(self, fileptr, opts):
+        global stream_pos, flags
+        stream_pos = 0
+        flags = opts
+        # Assuming file operations and additional streaming functionalities are implemented
+        # This function will orchestrate the overall streaming process similar to the C++ version
+
+    # def stream_v(self, v):
     #     pass
+    #
+    # def stream_oc(self, oclass, prop):
+    #     pass
+    #
+    # def stream_o(self, oclass):
+    #     pass
+    #
+    # def stream_obj(self, obj):
+    #     self.stream("OBJ")
+    #     count = Object.object_get_count()
+    #     self.stream(count)
+    #     for n in range(count):
+    #         pass
+    #     self.stream("/OBJ")
+    #
+    # def stream_gvar(self, var):
+    #     pass
+    #
+    # def stream_file(self, file_ptr, opts):
+    #     self.file_ptr = file_ptr
+    #     self.flags = opts
+    #     stream_pos = 0
+    #     fp = self.file_ptr
+    #     flags = opts
+    #     output_debug("starting stream on file %d with options %x", fp, flags)
+    #     try:
+    #         self.stream("GLD30")
+    #         try:
+    #             self.stream(DynamicClass.class_get_first_runtime())
+    #         except:
+    #             pass
+    #         try:
+    #             self.stream(Module.module_get_first())
+    #         except:
+    #             pass
+    #         try:
+    #             self.stream(Object.object_get_first(None))
+    #         except:
+    #             pass
+    #         try:
+    #             self.stream(global_get_next(None))
+    #         except:
+    #             pass
+    #         s = self.stream_list
+    #         while s != None:
+    #             pass
+    #         output_debug("done processing stream on file %d with options %x", fp, flags)
+    #         return stream_pos
+    #     except Exception as e:
+    #         if isinstance(e, str):
+    #             pass
+    #         else:
+    #             output_error("stream() failed as offset %lld", int(stream_pos))
+    #             return -1
+    #
+    #
+    #
+    # def stream_values(self, oclass, prop):
+    #     self.stream("RTC")
+    #
+    #     count = DynamicClass.class_get_extended_count(oclass)
+    #     self.stream(count)
+    #     for n in range(count):
+    #         name = "" if prop is None else prop.name
+    #         self.stream(name, len(name))
+    #
+    #         global_property_types = None if prop is None else prop.global_property_types
+    #         self.stream(global_property_types)
+    #
+    #         unit = "" if prop is None else prop.unit.name if prop.unit else ""
+    #         self.stream(unit, 64)
+    #
+    #         width = 0 if prop is None else prop.width
+    #         self.stream(width)
+    #
+    #         if flags & SF_OUT:
+    #             prop = prop.next
+    #         if flags & SF_IN:
+    #             DynamicClass.class_add_extended_property(oclass, name, global_property_types, unit)
+    #
+    #     self.stream("/RTC")
+    #
+    # def stream_var(self, var):
+    #     self.stream("VAR")
+    #
+    #     count = global_get_count()
+    #     self.stream(count)
+    #     for n in range(count):
+    #         name = ""
+    #         if var:
+    #             name = var.prop.name
+    #         self.stream(name, len(name))
+    #
+    #         value = ""
+    #         if var:
+    #             value = global_get_var(name, 1024)
+    #         self.stream(value, 1024)
+    #
+    #         if flags & SF_OUT:
+    #             var = var.next
+    #         if flags & SF_IN:
+    #             global_set_var(name, value)
+    #
+    #     self.stream("/VAR")
+    #
+    # # def stream(self, ptr, length, is_str, match=None):
+    # #     # This method needs to be implemented based on the specific requirements of streaming
+    # #     pass
+    #
+    # def stream_runtime_count(self, data, is_str=False, match=None):
+    #     oclass: DynamicClass = data
+    #     self.stream("RTC")
+    #
+    #     count = DynamicClass.class_get_runtime_count()
+    #     self.stream(count)
+    #     for n in range(count):
+    #         name = oclass.name if oclass else ""
+    #         self.stream(name, len(name))
+    #
+    #         size = oclass.size if oclass else 0
+    #         self.stream(size)
+    #
+    #         passconfig = oclass.passconfig if oclass else None
+    #         self.stream(passconfig)
+    #
+    #         if flags & SF_IN:
+    #             oclass = DynamicClass.register(None, name, size, passconfig)
+    #
+    #         self.stream(oclass, oclass.pmap)
+    #
+    #         if flags & SF_OUT:
+    #             oclass = DynamicClass.get_next_runtime(oclass)
+    #         if flags & SF_IN:
+    #             Module.module_load(oclass.name, 0, None)
+    #     self.stream("/RTC")
+    #
+    # def stream(self, data, is_str=False, match=None):
+    #     """
+    #     Stream data to/from a file.
+    #     - data: Data to be written or buffer for data to be read.
+    #     - is_str: Flag indicating if the data is a string.
+    #     - match: Optional match when reading (mismatch causes an exception).
+    #     """
+    #     if self.flags & self.SF_OUT:
+    #         return self._write_to_stream(data, is_str)
+    #     elif self.flags & self.SF_IN:
+    #         return self._read_from_stream(data, is_str, match)
+    #     else:
+    #         raise ValueError("Invalid stream flag.")
 
-    def stream_runtime_count(self, data, is_str=False, match=None):
-        oclass: OClass = data
-        self.stream("RTC")
+    # Additional methods to support streaming of various types (MODULE, CLASS, OBJECT, GLOBALVAR)
+    # ...
 
-        count = Class.class_get_runtime_count()
-        self.stream(count)
-        for n in range(count):
-            name = oclass.name if oclass else ""
-            self.stream(name, len(name))
+    # Implement other specific methods as needed based on the C++ code
 
-            size = oclass.size if oclass else 0
-            self.stream(size)
+    # def stream(self, s, max=0):
+    #     t = s[:1024]
+    #     self.stream(t, max if max else len(s), True, s)
+    #
+    #
+    # def stream(self, v):
+    #     self.stream(v, len(v))
+    #
+    # def stream(self, ptr, len_, is_str, match):
+    #     if flags & SF_OUT:
+    #         if is_str:
+    #             len_ = len(ptr)
+    #         fp =f"{len_:d}"
+    #         a = len(fp)
+    #         if a < 0:
+    #             pass
+    #         for i in range(len_):
+    #             b = 0
+    #             c = ptr[i]
+    #             if not is_str or c < 32 or c > 126 or c == '\\':
+    #                 fp = f"{c:02x}"
+    #                 b = len(fp)
+    #             a += b
+    #         fp += "\n"
+    #         b = len(fp)
+    #         if b < 0:
+    #             pass
+    #         a += b
+    #         self.stream_pos += a
+    #         return a
+    #     if flags & SF_IN:
+    #         a = 0
+    #         a = fscanf(fp, "%d", a)
+    #         if a < 1:
+    #             raise
+    #         if a > len:
+    #             raise
+    #         if fgetc(fp) != ' ':
+    #             raise "FMT"
+    #         (c_char * len).from_buffer(ptr).value = 0
+    #         for i in range(a):
+    #             b = fgetc(fp)
+    #             if b == '\\' and fscanf(fp, "%02x", b) < 1:
+    #                 raise
+    #             cast(ptr, POINTER(c_char))[i] = c_char(b)
+    #         while fgetc(fp) != '\n':
+    #             pass
+    #         if match is not None and memcmp(ptr, match, a):
+    #             raise 0
+    #         b = (log(float(a)) + 2) + a * 3
+    #         stream_pos += b
+    #         return b
+    #     raise
+    #
+    #
+    # def stream(self, owner_class):
+    #     self.stream("RTC")
+    #
+    #     count = DynamicClass.class_get_runtime_count()
+    #     self.stream(count)
+    #     for n in range(count):
+    #         name = owner_class.name if owner_class else ""
+    #         self.stream(name, len(name))
+    #
+    #         size = owner_class.size if owner_class else 0
+    #         self.stream(size)
+    #
+    #         passconfig = owner_class.passconfig if owner_class else None
+    #         self.stream(passconfig)
+    #
+    #         if flags & SF_IN:
+    #             owner_class = DynamicClass.register(None, name, size, passconfig)
+    #
+    #         self.stream(owner_class, owner_class.pmap)
+    #
+    #         if flags & SF_OUT:
+    #             owner_class = DynamicClass.get_next_runtime(owner_class)
+    #         if flags & SF_IN:
+    #             Module.module_load(owner_class.name, 0, None)
+    #     self.stream("/RTC")
 
-            passconfig = oclass.passconfig if oclass else None
-            self.stream(passconfig)
+    # def stream_type(self, T):
+    #     def stream_T(ptr, len, prop):
+    #         return self.stream(cast(ptr, POINTER(T)), len)
 
-            if flags & SF_IN:
-                oclass = Class.register(None, name, size, passconfig)
 
-            self.stream(oclass, oclass.pmap)
+    # Other forms of the stream method
+    # def stream(s, max=0):
+    #     t = ctypes.create_string_buffer(s, 1024)
+    #     if max:
+    #         stream(t, max, True, s)
+    #     else:
+    #         stream(t, len(s), True, s)
 
-            if flags & SF_OUT:
-                oclass = Class.get_next_runtime(oclass)
-            if flags & SF_IN:
-                Module.module_load(oclass.name, 0, None)
-        self.stream("/RTC")
+    # def stream(s, max=0):
+    #     if max == 0:
+    #         max = len(s)
+    #     stream(s, max, True)
 
-    def stream(self, data, is_str=False, match=None):
-        """
-        Stream data to/from a file.
-        - data: Data to be written or buffer for data to be read.
-        - is_str: Flag indicating if the data is a string.
-        - match: Optional match when reading (mismatch causes an exception).
-        """
-        if self.flags & self.SF_OUT:
-            return self._write_to_stream(data, is_str)
-        elif self.flags & self.SF_IN:
-            return self._read_from_stream(data, is_str, match)
-        else:
-            raise ValueError("Invalid stream flag.")
+    # def stream(v):
+    #     stream(v, sizeof(v))
+
+    # def stream(mod):
+    #     stream("MOD")
+    #
+    #     count = module_getcount()
+    #     stream(str(count))
+    #
+    #     for n in range(count):
+    #         name = ""
+    #         if mod:
+    #             name = mod.name
+    #         stream(name)
+    #
+    #         if flags & SF_OUT:
+    #             mod = mod.next
+    #         if flags & SF_IN:
+    #             module_load(name, 0, None)
+    #
+    #     stream("/MOD")
+
+    # def stream(oclass, prop):
+    #     stream("RTC")
+    #
+    #     count = class_get_extendedcount(oclass)
+    #     stream(count)
+    #     for n in range(count):
+    #         name = prop.name if prop else ""
+    #         stream(name, len(name))
+    #
+    #         global_property_types = prop.global_property_types if prop else ""
+    #         stream(global_property_types)
+    #
+    #         unit = prop.unit.name if prop and prop.unit else ""
+    #         stream(unit, 64)
+    #
+    #         width = prop.width if prop else 0
+    #         stream(width)
+    #
+    #         if (flags & SF_OUT):
+    #             prop = prop.next
+    #         if (flags & SF_IN):
+    #             class_add_extended_property(oclass, name, global_property_types, unit)
+    #
+    #     stream("/RTC")
+
+    # def stream(oclass):
+    #     stream("RTC")
+    #
+    #     count = class_get_runtimecount()
+    #     stream(count)
+    #     for n in range(count):
+    #         name = oclass.name if oclass else ""
+    #         stream(name, len(name))
+    #
+    #         size = oclass.size if oclass else 0
+    #         stream(size)
+    #
+    #         passconfig = oclass.passconfig if oclass else None
+    #         stream(passconfig)
+    #
+    #         if flags & SF_IN:
+    #             oclass = ClassRegistry.register_class(None, name, None)
+    #
+    #         stream(oclass, oclass.pmap)
+    #
+    #         if flags & SF_OUT:
+    #             oclass = class_get_next_runtime(oclass)
+    #         if flags & SF_IN:
+    #             module_load(oclass.name, 0, None)
+    #
+    #     stream("/RTC")
+
+    # def stream(var):
+    #     print("VAR")
+    #
+    #     count = global_getcount()
+    #     print(count)
+    #
+    #     for n in range(count):
+    #         name = ""
+    #         if var:
+    #             name = var.prop.name
+    #         print(name)
+    #
+    #         value = ""
+    #         if var:
+    #             value = global_getvar(name, 1024)
+    #         print(value)
+    #
+    #         if flags & SF_OUT:
+    #             var = var.next
+    #         if flags & SF_IN:
+    #             global_setvar(name, value)
+    #
+    #     print("/VAR")
+
+
 
     def _write_to_stream(self, data, is_str):
         if is_str:

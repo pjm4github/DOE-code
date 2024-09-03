@@ -15,7 +15,7 @@ import json
 
 class SchematicType:
     """
-        SchematicType contains three constants which represent the model type: UNKNOWN, TRANSMISSION, DISTRIBUTION
+        SchematicType contains three constants which represent the model global_property_types: UNKNOWN, TRANSMISSION, DISTRIBUTION
     """
     UNKNOWN = "UNKNOWN" 
     TRANSMISSION = "TRANSMISSION"
@@ -23,7 +23,7 @@ class SchematicType:
     
 class MapType:
     """
-        MapType contains two constants which represent the global_map type: BLANK, POLITICAL
+        MapType contains two constants which represent the global_map global_property_types: BLANK, POLITICAL
     """
     BLANK = "BLANK"
     POLITICAL = "POLITICAL"

@@ -3,25 +3,19 @@ import re
 from enum import Enum
 from math import sqrt, log, atan, pi
 
+from typing import Optional
+
+from gridlab.gldcore import Convert
+from gridlab.gldcore.Class import ClassRegistry
+from gridlab.gldcore.Find import FindList, FindProgramNew
+from gridlab.gldcore.Find import Find
+from gridlab.gldcore.PropertyHeader import PropertyType
+from gridlab.gldcore.Unit import unit_find
 
 AF_ABS = 0x01
 global_clock = 0  # Placeholder for the actual global clock variable
 
 
-# The FindProgram class should be defined elsewhere
-class FindProgram:
-    def __init__(self, criteria):
-        self.criteria = criteria  # A dictionary of criteria used for filtering objects
-
-    def run(self, all_objects):
-        # Execute the find program on a list of all_objects and return the matching ones
-        return [obj for obj in all_objects if self.matches_criteria(obj)]
-
-    @staticmethod
-    def matches_criteria(obj):
-        # Placeholder for matching logic
-        # Example: return all(getattr(self, key) == value for key, value in self.criteria.items())
-        pass
 
 # The SimulationEnvironment should eb defined elsewhere
 class SimulationEnvironment:
@@ -43,21 +37,7 @@ class SimulationEnvironment:
 global_simulation_environment = SimulationEnvironment()
 
 
-def create_find_program(parsed_expression):
-    # Placeholder for creating a find program from the parsed expression
-    # In actual implementation, this would involve querying an object database or similar
-    # Create a FindProgram object based on the parsed group expression
-    return FindProgram(parsed_expression)
 
-
-def class_find_property(obj, aggrval):
-    # Assuming self is a dictionary-like object with properties
-    # Find property info (pinfo) in the object's class based on aggrval
-    pinfo = obj.get('oclass', {}).get(aggrval, None)
-    if pinfo is None:
-        raise ValueError(f"Property '{aggrval}' not found in the objects satisfying search criteria")
-    return pinfo
-4
 class AGGREGATOR(Enum):
     """
     AGGREGATOR; /**< the aggregation method to use */
@@ -82,12 +62,35 @@ class AGGRPART(Enum):
     """
     AGGRPART; /**< the part of complex values to aggregate */
     """
-    AP_NONE = 0
-    AP_REAL = 1
-    AP_IMAG = 2
-    AP_MAG = 3
-    AP_ANG = 4
-    AP_ARG = 5
+    # Constants representing different parts of a complex number (example values)
+    AP_NONE = 0x00  # No part specified
+    AP_REAL = 0x01  # Real part
+    AP_IMAG = 0x02  # Imaginary part
+    AP_MAG = 0x04   # Magnitude
+    AP_ANG = 0x08   # Angle in radians
+    AP_ARG = 0x10   # Argument (angle in radians)
+
+
+
+
+class AGGREGATION:
+    """
+    Represents an aggregation with various properties and references to other
+    structures and types for handling aggregation operations.
+    """
+    def __init__(self, op: 'AGGREGATOR', group: Optional[FindList],
+                 pinfo: 'PROPERTY', punit: 'UNIT', scale: float,
+                 part: 'AGGRPART', flags: int, last: 'Optional[FindList]',
+                 next: 'Optional[AGGREGATION]'):
+        self.flags = flags  # aggregation flags (e.g., AF_ABS)
+        self.group = group  # the find program used to build the aggregation
+        self.last = last  # the result of the last run
+        self.next = next  # the next aggregation in the core's list of aggregators
+        self.op = op  # the aggregation operator (min, max, etc.)
+        self.part = part  # the property part (complex only)
+        self.pinfo = pinfo  # the property over which the aggregation is done
+        self.punit = punit  # the unit we want to output the property in
+        self.scale = scale  # the scalar to convert from the old units to the desired units
 
 
 class Aggregate:
@@ -102,19 +105,21 @@ class Aggregate:
     This is used primarily by the collector object in the tape module to define groups
     (see the \p group property in aggregate_mkgroupthe collector object). The \p group can defined
     by specifying a boolean series are relationship of object properties, e.g.,
-    \verbatim class=node and parent=root \endverbatim.
+
+        \verbatim class=node and parent=root \endverbatim.
 
     Aggregations also must specify the property that is to be aggregated. Most common
     aggregations and some uncommon ones are supported.  In addition, if the aggregation is
     over a complex quantity, the aggregation must specific how a double is to be obtained
     from it, e.g., magnitude, angle, real, imaginary.  Some examples aggregate \p property
     definitions are
-    \verbatim
-    sum(cost)
-    max(power.angle)
-    mean(energy.mag)
-    std(price)
-    \endverbatim
+
+        \verbatim
+        sum(cost)
+        max(power.angle)
+        mean(energy.mag)
+        std(price)
+        \endverbatim
 
     @bug Right now, not all allowed aggregations are invariant (meaning that the members of the group
     do not change over time). However, the collector object requires invariant aggregations. Using
@@ -129,96 +134,266 @@ class Aggregate:
     CF_CONSTANT = 0x01
     CF_CLASS = 0x02
 
-
-    # Constants representing different parts of a complex number (example values)
-    AP_NONE = 0x00  # No part specified
-    AP_REAL = 0x01  # Real part
-    AP_IMAG = 0x02  # Imaginary part
-    AP_MAG = 0x04   # Magnitude
-    AP_ANG = 0x08   # Angle in radians
-    AP_ARG = 0x10   # Argument (angle in radians)
-
-
-    def __init__(self, aggregator, group_expression):
+    def __init__(self, aggregator: str, group_expression: str):
         self.aggregator = aggregator
-        self.group_expression = group_expression
-        self.op = None
-        self.result = None
-        self.group = None
-        self.pinfo = None
-        self.part = None
-        self.last = None
-        self.flags = 0x00
         self.from_unit = None
-        self.to_unit = None
-        self.scale = 1.0
+        self.group_expression = group_expression
+        self.aggregation = AGGREGATION(
+            op=AGGREGATOR.AGGR_NOP,
+            group=None,
+            pinfo=None,
+            punit=None,
+            scale=1.0,
+            part=AGGRPART.AP_NONE,
+            flags=0,
+            last=None,
+            next=None)
         self.aggregate_mkgroup()
 
     def aggregate_mkgroup(self):
+        aggregate_op, aggregate_value, aggregate_unit = self.parse_aggregator()
 
-        # Parse the aggregator to determine the operation
-        op, aggrval, aggrunit = self.parse_aggregator()
-        self.op = op
-        # Parse the group expression to create a find program (pgm)
-        pgm = create_find_program(self.group_expression)
-        # pgm = self.parse_group_expression()
+        # Parse the group expression to create a find program (program)
+        # program = Find.find_mkpgm(self.group_expression)
+        obj = None
+        program = self.parse_group_expression()
+        aggregtate_part = ""
+        list_of_objects = None
+        if program is not None:
+            # Run the program and get a list of results
+            # Assuming we have a list of objects that match the group expression
+            list_of_objects = Find.find_runpgm(program)
+            if list_of_objects is not None:
+                # Attempt to get the first object from the list
+                obj = Find.find_first(list_of_objects)
+                if obj is not None:
+                    # Try to find the property within the object's class
+                    self.pinfo = ClassRegistry.find_property(obj.oclass, aggregate_value)
+                    if self.pinfo is None:
+                        # Attempt to split the aggregate value and part, if specified
+                        aggregate_part_position = aggregate_value.rfind('.')
+                        aggregate_parts = aggregate_value.split('.')
+                        aggregate_value = aggregate_parts[0]
+                        if len(aggregate_parts) > 1:
+                            aggregtate_part = aggregate_parts[1]
+                        else:
+                            aggregtate_part = ""
+                    else:
+                        aggregtate_part = ""  # No part given
 
-        # Assuming we have a list of objects that match the group expression
-        list_of_objects = self.find_runpgm(pgm)
-
-        # Find property information (pinfo) based on aggrval
-        obj = list_of_objects[0]
-        self.pinfo = class_find_property(obj, aggrval)  # Example using the first object
-
+        # aggprop, aggunit = self.extract_units(aggregate_value)
         # Handle units and get scale factor
-        property_name, unit, scale = self.handle_units(aggrval)
-        flags = self.extract_flags(pgm)
-        part = self.determine_part(aggrval)
 
-        # Build the aggregation unit
-        self.result = self.build_aggregation_unit(self.op, pgm, self.pinfo, part, list_of_objects, flags, unit, scale)
-        self.from_unit = self.pinfo.unit
-        self.to_unit = self.extract_units(aggrunit)
+        base_unit, aggrprop_value = self.extract_units(aggregate_unit)
+        # Placeholder for unit conversion logic
+        # In actual implementation, this would involve converting units
+        scale = self.aggregation.scale  # Replace with actual scale after unit conversion
+        # Return the base unit. If aggregate_unit = M^3 then unit_file will return M
+        self.to_unit = unit_find(base_unit)  #self.extract_units(aggregate_unit)
+        # Assuming `unit_find`, `output_error`, and the variables
+        # `aggregate_unit`, `aggregate_value`, and `aggrprop` are properly defined or imported
+        # self.to_unit = unit_find(aggregate_unit)
+        if self.to_unit is None:
+            # Simulate the output_error function, perhaps by raising an exception or logging an error
+            raise ValueError(
+                f"Aggregate group '{aggregate_value}' has invalid units ({aggregate_unit}). Check your aggregations and make sure all the units are defined.")
+            # Alternatively, if you're logging instead of raising an exception:
+            # output_error(f"Aggregate group '{aggregate_value}' has invalid units ({aggregate_unit}).")
+
+        if aggregate_op != AGGREGATOR.AGGR_NOP:
+            # part = self.determine_part(aggregate_value)
+            part = AGGRPART.AP_NONE
+
+            if program is None:
+                raise ValueError(f"Aggregate group expression '{self.group_expression}' failed")
+            else:
+                flags = Find.find_pgmconstants(program)
+
+                if not (flags & self.CF_CLASS == self.CF_CLASS):
+                    raise ValueError(
+                        f"Aggregate group expression '{self.group_expression}' does not result in a set with a fixed class")
+                elif list is None:
+                    raise ValueError(
+                        f"Aggregate group expression '{self.group_expression}' does not result is a usable object list")
+                elif obj is None:
+                    raise ValueError(f"Aggregate group expression '{self.group_expression}' results is an empty object list")
+                else:
+                    self.pinfo = ClassRegistry.find_property(obj.oclass, aggregate_value)
+                    if self.pinfo is None:
+                        raise ValueError(
+                            f"Aggregate group property '{aggregate_value}' is not found in the objects satisfying search criteria '{self.group_expression}'")
+
+                    if self.pinfo.ptype in [PropertyType.PT_double, PropertyType.PT_random, PropertyType.PT_loadshape] and aggregtate_part != "":
+                        raise ValueError(f"Aggregate group property '{aggregate_value}' cannot have part '{aggregtate_part}'")
+                    elif self.pinfo.ptype in [PropertyType.PT_complex, PropertyType.PT_enduse]:
+                        if aggregtate_part == "real":
+                            part = AGGRPART.AP_REAL
+                        # Add other parts as elif branches
+                        else:
+                            raise ValueError(f"Aggregate group property '{aggregate_value}' cannot have part '{aggregtate_part}'")
+                    else:
+                        raise ValueError(f"Aggregate group property '{aggregate_value}' cannot be aggregated")
+
+                    self.from_unit = self.pinfo.unit
+                    if self.to_unit is not None and self.from_unit is None:
+                        raise ValueError(f"Aggregate group property '{aggregate_value}' is unitless and cannot be converted")
+                    if self.from_unit and self.to_unit and not Convert.unit_convert_ex(self.from_unit, self.to_unit, scale):
+                        raise ValueError(f"Aggregate group property '{aggregate_value}' cannot use units '{aggregate_unit}'")
+
+                # build aggregation unit
+                # self.result = self.build_aggregation_unit(self.aggregation.op, program, self.pinfo, part, list_of_objects, flags, self.to_unit, scale)
+                self.result = AGGREGATION(self.aggregation.op, program, self.pinfo, self.to_unit, scale, part, flags, list_of_objects, None)
+
+        else:
+            self.result = None
+        return self.result
+
+    def aggregate_value(self):
+        numerator = 0
+        denominator = 0
+        secondary = 0
+        # third = 0
+        # fourth = 0
+        # scale = self.scale if self.to_unit else 1.0
+        if (self.aggregation.group.constflags & self.CF_CONSTANT) != self.CF_CONSTANT:
+            self.last = self.find_runpgm(self.aggregation.group)
+        for obj in self.last:  # Assuming self.last is a list of objects to aggregate
+
+            # Assuming self is a dictionary-like object with properties
+            if obj['in_svc'] >= global_clock or obj['out_svc'] <= global_clock:
+                continue
+
+            value = self.get_value_from_object(obj)  # Placeholder for actual value retrieval method
+
+            if self.aggregation.flags & AF_ABS:
+                value = abs(value)
+
+            if self.aggregation.op == AGGREGATOR.AGGR_MIN:
+                if value < numerator or denominator == 0:
+                    numerator = value
+                denominator = 1
+
+            elif self.aggregation.op == AGGREGATOR.AGGR_MAX:
+                if value > numerator or denominator == 0:
+                    numerator = value
+                denominator = 1
+
+            elif self.aggregation.op == AGGREGATOR.AGGR_COUNT:
+                numerator += 1
+                denominator = 1
+
+            elif self.aggregation.op == AGGREGATOR.AGGR_MBE:
+                denominator += 1
+                numerator += value
+                secondary += (value - secondary) / denominator
+
+            elif self.aggregation.op == AGGREGATOR.AGGR_AVG or self.aggregation.op == AGGREGATOR.AGGR_MEAN:
+                numerator += value
+                denominator += 1
+
+            elif self.aggregation.op == AGGREGATOR.AGGR_SUM:
+                numerator += value
+                denominator = 1
+
+            elif self.aggregation.op == AGGREGATOR.AGGR_PROD:
+                numerator *= value
+                denominator = 1
+
+            elif self.aggregation.op == AGGREGATOR.AGGR_GAMMA:
+                denominator += log(value)
+                if numerator == 0 or secondary > value:
+                    secondary = value
+                numerator += 1
+
+            elif self.aggregation.op == AGGREGATOR.AGGR_STD or self.aggregation.op == AGGREGATOR.AGGR_VAR:
+                denominator += 1
+                delta = value - secondary
+                secondary += delta / denominator
+                numerator += delta * (value - secondary)
+            elif self.aggregation.op == AGGREGATOR.AGGR_SKEW or self.aggregation.op == AGGREGATOR.AGGR_KUR:
+                # Additional cases like AGGR_SKEW and AGGR_KUR would be added here
+                pass
+            else:
+                pass
+
+        # Finalize the aggregation based on self.op
+        if self.aggregation.op == AGGREGATOR.AGGR_GAMMA:
+            return 1 + numerator / (denominator - numerator * log(secondary))
+
+        elif self.aggregation.op == AGGREGATOR.AGGR_STD:
+            return sqrt(numerator / (denominator - 1)) # * scale
+
+        elif self.aggregation.op == AGGREGATOR.AGGR_MBE:
+            return numerator / denominator - secondary
+
+        # Additional finalizations for other operations like AGGR_SKEW and AGGR_KUR
+
+        elif self.aggregation.op == 'AGGR_SKEW':
+            # 		/** @todo implement skewness aggregate (no ticket) */
+            # 		throw_exception("skewness aggregation is not implemented");
+            # 		/* TROUBLESHOOT
+            # 			An attempt to use the skew aggregator failed because it is not implemented yet.
+            # 			Remove or replace the reference to the skew aggregate and try again.
+            # 		 */
+            raise NotImplemented
+        elif self.aggregation.op == 'AGGR_KUR':
+            # 		/** @todo implement kurtosis aggregate (no ticket) */
+            # 		throw_exception("kurtosis aggregation is not implemented");
+            # 		/* TROUBLESHOOT
+            # 			An attempt to use the kurtosis aggregator failed because it is not implemented yet.
+            # 			Remove or replace the reference to the
+            # 		 */
+            raise NotImplemented
+
+        else:
+            return numerator / denominator # * scale
+
+    # def build_aggregation_unit(self, op, pgm, pinfo, part, list, flags, to_unit, scale):
+    #     # Build the aggregation unit based on provided parameters
+    #     # result = {
+    #     #     'op': op,
+    #     #     'group': pgm,
+    #     #     'pinfo': pinfo,
+    #     #     'part': part,
+    #     #     'last': list,
+    #     #     'flags': flags,
+    #     #     'punit': to_unit,
+    #     #     'scale': scale
+    #     # }
+    #     result = AGGREGATION(op, pgm, pinfo, to_unit, scale, part, flags, list, None)
+    #     return result
 
 
-    def parse_aggregator(self):
-        # Parse aggregator and group_expression
-        match = re.match(r'\s*(\w+)\(([\w.]+)\)', self.aggregator)
-        if not match:
-            raise ValueError("Invalid aggregator syntax")
+    def determine_part(self, aggrval):
+        # This method determines the part of the property to be aggregated.
+        if 'complex' in self.pinfo['global_property_types'] or 'enduse' in self.pinfo['global_property_types']:
+            # Complex properties must specify a part
+            match = re.search(r'.(\w+)$', aggrval)
+            if match:
+                part_name = match.group(1)
+                part_switcher = {
+                    'real': AGGRPART.AP_REAL,
+                    'imag': AGGRPART.AP_IMAG,
+                    'mag': AGGRPART.AP_MAG,
+                    'ang': AGGRPART.AP_ANG,
+                    'arg': AGGRPART.AP_ARG
+                }
+                aggrpart = part_switcher.get(part_name.lower())
+                if aggrpart is None:
+                    raise ValueError(f"Unknown part '{part_name}' for property '{aggrval}'")
+            else:
+                raise ValueError(f"Complex property '{aggrval}' must specify a part (e.g., real, imag)")
+        elif 'double' in self.pinfo['global_property_types'] or 'random' in self.pinfo['global_property_types'] or 'loadshape' in self.pinfo['global_property_types']:
+            # These types cannot have parts
+            if '.' in aggrval:
+                raise ValueError(f"Property '{aggrval}' cannot have a part specified")
+            aggrpart = AGGRPART.AP_NONE  # self.aggregation.part # AP_NONE
+        else:
+            raise ValueError(f"Property '{aggrval}' cannot be aggregated")
 
-        aggrop, aggrval = match.groups()
-        # Parse property and unit
-        prop_match = re.match(r'(\w+)([(\w+)])?', aggrval)
-        aggrunit = None
-        if prop_match:
-            aggrprop, _, aggrunit = prop_match.groups()
+        return aggrpart
 
-        # Map aggregator string to operation
-        ops = {
-            'min': 'AGGR_MIN',
-            'max': 'AGGR_MAX',
-            'avg': 'AGGR_AVG',
-            'std': 'AGGR_STD',
-            'sum': 'AGGR_SUM',
-            'prod': 'AGGR_PROD',
-            'mbe': 'AGGR_MBE',
-            'mean': 'AGGR_MEAN',
-            'var': 'AGGR_VAR',
-            'skew': 'AGGR_SKEW',
-            'kur': 'AGGR_KUR',
-            'count': 'AGGR_COUNT',
-            'gamma': 'AGGR_GAMMA'
-        }
-        op = ops.get(aggrop.lower())
-
-        if op is None:
-            raise ValueError("Unknown aggregator")
-
-        return op, aggrval, aggrunit
-
-
-    def extract_flags(self, pgm: FindProgram):
+    def extract_flags(self, pgm: FindProgramNew):
         # This method should extract flags from the program (pgm).
         # Since the actual flag extraction logic depends on the simulation environment,
         # this is a placeholder for the actual implementation.
@@ -233,7 +408,50 @@ class Aggregate:
 
         return flags
 
-    def get_pgm_constants(self, pgm: [FindProgram, dict]):
+    @staticmethod
+    def extract_units(aggrval):
+        modifier = ""
+        base_unit = None
+
+        if aggrval:
+            # Extract property name and units from aggrval
+            p = r"\[([\w]+)([\^\w]*)\]"  # matches ''[m^3]' or '[M]'
+
+            # this string '100[M^3]' will parse into 100 for property_value and M^3 for aggrunit
+            # the units must be enclosed in [] brackets without a space between the bracket and no spaces in the bracket
+            prop_match = re.match(p, aggrval)
+            if prop_match:
+                base_unit, modifier = prop_match.groups()
+
+        return base_unit, modifier
+
+    def find_runpgm(self, pgm):
+        # This method runs the search program (pgm) to find matching objects.
+        # The actual implementation would depend on the simulation environment and object model.
+
+        # Placeholder: list of all available objects in the simulation environment
+        all_objects = self.get_all_objects()
+
+        # Placeholder: list to store objects that match the search criteria
+        matching_objects = []
+
+        # Iterate over all objects and select those that match the criteria defined in pgm
+        for obj in all_objects:
+            if self.matches_criteria(obj, pgm):
+                matching_objects.append(obj)
+
+        return matching_objects
+
+    def get_all_objects(self):
+        # This method retrieves all available objects in the simulation environment.
+        # It's a placeholder for the actual implementation.
+        # Example implementation could be:
+        # return environment.get_all_objects()
+
+        # Retrieve all objects from the global simulation environment.
+        return global_simulation_environment.get_all_objects()
+
+    def get_pgm_constants(self, pgm: [FindProgramNew, dict]):
         # This method retrieves the constant flags associated with the program (pgm).
         # It's a placeholder for the actual implementation.
         # Example implementation could be:
@@ -253,22 +471,27 @@ class Aggregate:
         else:
             raise AttributeError("The program does not contain constant flags information.")
 
-    def find_runpgm(self, pgm):
-        # This method runs the search program (pgm) to find matching objects.
-        # The actual implementation would depend on the simulation environment and object model.
+    def get_value_from_object(self, obj):
+        # Retrieve the property value based on the property global_property_types
+        if self.pinfo['global_property_types'] in ['PT_complex', 'PT_enduse']:
+            pcomplex = obj[self.pinfo['name']]
+            if pcomplex is not None:
+                part_switcher = {
+                    AGGRPART.AP_REAL: pcomplex.real,
+                    AGGRPART.AP_IMAG: pcomplex.imag,
+                    AGGRPART.AP_MAG: abs(pcomplex),
+                    AGGRPART.AP_ARG: math.atan2(pcomplex.imag, pcomplex.real),
+                    AGGRPART.AP_ANG: math.degrees(math.atan2(pcomplex.imag, pcomplex.real))
+                }
+                return part_switcher.get(self.aggregation.part, None)
 
-        # Placeholder: list of all available objects in the simulation environment
-        all_objects = self.get_all_objects()
+        elif self.pinfo['global_property_types'] in ['PT_double', 'PT_loadshape', 'PT_random']:
+            pdouble = obj[self.pinfo['name']]
+            if pdouble is not None:
+                return pdouble
 
-        # Placeholder: list to store objects that match the search criteria
-        matching_objects = []
-
-        # Iterate over all objects and select those that match the criteria defined in pgm
-        for obj in all_objects:
-            if self.matches_criteria(obj, pgm):
-                matching_objects.append(obj)
-
-        return matching_objects
+        # Handle other property types if necessary
+        return None
 
     def matches_criteria(self, obj, pgm):
         # This method checks if an object matches the search criteria defined in pgm.
@@ -277,17 +500,83 @@ class Aggregate:
         # return all(getattr(self, key) == value for key, value in pgm.items())
         pass
 
-    # Assume __init__ and other methods are defined above
+    def parse_aggregator(self):
+        # Parse aggregator
+        # self.op = aggrop
+        # Parse the aggregator to determine the operation
+        # Regular expressions for the patterns
 
-    def get_all_objects(self):
-        # This method retrieves all available objects in the simulation environment.
-        # It's a placeholder for the actual implementation.
-        # Example implementation could be:
-        # return environment.get_all_objects()
+        # match = re.match(r'\s*(\w+)\(([\w.]+)\)', self.aggregator)  # matches 'sum(length)'
+        # if not match:
+        #     raise ValueError("Invalid aggregator syntax")
+        #
+        # aggrop, aggrval = match.groups()
+        #
+        # aggrprop, aggrunit = self.extract_units(aggrval)
+        #
+        # # Map aggregator string to operation
+        # ops = {
+        #     'min': AGGREGATOR.AGGR_MIN,
+        #     'max': AGGREGATOR.AGGR_MAX,
+        #     'avg': AGGREGATOR.AGGR_AVG,
+        #     'std': AGGREGATOR.AGGR_STD,
+        #     'sum': AGGREGATOR.AGGR_SUM,
+        #     'prod': AGGREGATOR.AGGR_PROD,
+        #     'mbe': AGGREGATOR.AGGR_MBE,
+        #     'mean': AGGREGATOR.AGGR_MEAN,
+        #     'var': AGGREGATOR.AGGR_VAR,
+        #     'skew': AGGREGATOR.AGGR_SKEW,
+        #     'kur': AGGREGATOR.AGGR_KUR,
+        #     'count': AGGREGATOR.AGGR_COUNT,
+        #     'gamma': AGGREGATOR.AGGR_GAMMA
+        # }
+        # op = ops.get(aggrop.lower())
+        aggregator_string = self.aggregator.strip()
 
-        # Retrieve all objects from the global simulation environment.
-        return global_simulation_environment.get_all_objects()
+        p = r"(\w+)\(([\w.^]+)(\[[\w.^]+\])*\)"
+        # will match
+        #     sum(price.real)
+        #     sum(price.real[W])
+        #     sum(price.50^10[W^3])
+        #     sum(power.real[A])
+        match = re.match(p, aggregator_string)
+        if match:
+            aggregate_property, aggregate_value, aggregate_unit = match.groups()
+        else:
+            p = r"(\w+)[\(|]([\w.^]+)(\[[\w.^]+\])*[\)|]"
+            # Set the flag and try the second pattern if the first fails
+            match = re.match(p, aggregator_string)
+            if match:
+                self.aggregation.flags |= AF_ABS
+                aggregate_property, aggregate_value, aggregate_unit = match.groups()
+            else:
+                # Handle the error case
+                raise ValueError(
+                    f"Aggregate group '{aggregator_string}' is not valid. \n"
+                    f"An aggregation expression does not have the required syntax, e.g., <i>aggregation</i>(<i>value</i>[.<i>part</i>])."
+                    f"Check the aggregation's syntax and make sure it conforms to the required syntax.")
+                # In actual code, instead of raising an exception, you might log an error or handle it differently based on your application's needs
 
+        # aggrprop, aggrunit = self.extract_units(aggrval)
+
+        ops = {
+            'min': AGGREGATOR.AGGR_MIN,
+            'max': AGGREGATOR.AGGR_MAX,
+            'avg': AGGREGATOR.AGGR_AVG,
+            'std': AGGREGATOR.AGGR_STD,
+            'sum': AGGREGATOR.AGGR_SUM,
+            'prod': AGGREGATOR.AGGR_PROD,
+            'mbe': AGGREGATOR.AGGR_MBE,
+            'mean': AGGREGATOR.AGGR_MEAN,
+            'var': AGGREGATOR.AGGR_VAR,
+            'skew': AGGREGATOR.AGGR_SKEW,
+            'kur': AGGREGATOR.AGGR_KUR,
+            'count': AGGREGATOR.AGGR_COUNT,
+            'gamma': AGGREGATOR.AGGR_GAMMA
+        }
+        op = ops.get(aggregate_property.lower(), AGGREGATOR.AGGR_NOP)
+
+        return op, aggregate_value, aggregate_unit
 
     def parse_group_expression(self):
         # Parse the group expression and create a program (pgm) to find objects
@@ -296,195 +585,46 @@ class Aggregate:
             key, value = map(str.strip, condition.split('='))
             parsed_expression[key] = value
         # Placeholder for creating a program to find objects based on parsed_expression
-        pgm = create_find_program(parsed_expression)
+        pgm = FindProgramNew.find_program(parsed_expression)
         return pgm
 
 
-    def handle_units(self, aggrval):
-        # Handle unit conversion if necessary
-        property_name, unit = self.extract_units(aggrval)
-        # Placeholder for unit conversion logic
-        # In actual implementation, this would involve converting units
-        scale = self.scale  # Replace with actual scale after unit conversion
-        return property_name, unit, scale
-
-    def extract_units(self, aggrval):
-        # Extract property name and units from aggrval
-        match = re.match(r'(\w+)[(\w+)]', aggrval)
-        if match:
-            property_name, unit = match.groups()
-        else:
-            property_name, unit = aggrval, None
-        return property_name, unit
-
-    def build_aggregation_unit(self, op, pgm, pinfo, part, list, flags, to_unit, scale):
-        # Build the aggregation unit based on provided parameters
-        result = {
-            'op': op,
-            'group': pgm,
-            'pinfo': pinfo,
-            'part': part,
-            'last': list,
-            'flags': flags,
-            'punit': to_unit,
-            'scale': scale
-        }
-        return result
-
-    def aggregate_value(self):
-        numerator = 0
-        denominator = 0
-        secondary = 0
-        # third = 0
-        # fourth = 0
-        # scale = self.scale if self.to_unit else 1.0
-        if (self.group.constflags & self.CF_CONSTANT) != self.CF_CONSTANT:
-            self.last = self.find_runpgm(self.group)
-        for obj in self.last:  # Assuming self.last is a list of objects to aggregate
-
-            # Assuming self is a dictionary-like object with properties
-            if obj['in_svc'] >= global_clock or obj['out_svc'] <= global_clock:
-                continue
-
-            value = self.get_value_from_object(obj)  # Placeholder for actual value retrieval method
-
-            if self.flags & AF_ABS:
-                value = abs(value)
-
-            if self.op == 'AGGR_MIN':
-                if value < numerator or denominator == 0:
-                    numerator = value
-                denominator = 1
-
-            elif self.op == 'AGGR_MAX':
-                if value > numerator or denominator == 0:
-                    numerator = value
-                denominator = 1
-
-            elif self.op == 'AGGR_COUNT':
-                numerator += 1
-                denominator = 1
-
-            elif self.op == 'AGGR_MBE':
-                denominator += 1
-                numerator += value
-                secondary += (value - secondary) / denominator
-
-            elif self.op == 'AGGR_AVG' or self.op == 'AGGR_MEAN':
-                numerator += value
-                denominator += 1
-
-            elif self.op == 'AGGR_SUM':
-                numerator += value
-                denominator = 1
-
-            elif self.op == 'AGGR_PROD':
-                numerator *= value
-                denominator = 1
-
-            elif self.op == 'AGGR_GAMMA':
-                denominator += log(value)
-                if numerator == 0 or secondary > value:
-                    secondary = value
-                numerator += 1
-
-            elif self.op == 'AGGR_STD' or self.op == 'AGGR_VAR':
-                denominator += 1
-                delta = value - secondary
-                secondary += delta / denominator
-                numerator += delta * (value - secondary)
-            elif self.op == 'AGGR_SKEW' or self.op == 'AGGR_KUR':
-                # Additional cases like AGGR_SKEW and AGGR_KUR would be added here
-                pass
-            else:
-                pass
-
-        # Finalize the aggregation based on self.op
-        if self.op == 'AGGR_GAMMA':
-            return 1 + numerator / (denominator - numerator * log(secondary))
-
-        elif self.op == 'AGGR_STD':
-            return sqrt(numerator / (denominator - 1)) # * scale
-
-        elif self.op == 'AGGR_MBE':
-            return numerator / denominator - secondary
-
-        # Additional finalizations for other operations like AGGR_SKEW and AGGR_KUR
-
-        elif self.op == 'AGGR_SKEW':
-            # 		/** @todo implement skewness aggregate (no ticket) */
-            # 		throw_exception("skewness aggregation is not implemented");
-            # 		/* TROUBLESHOOT
-            # 			An attempt to use the skew aggregator failed because it is not implemented yet.
-            # 			Remove or replace the reference to the skew aggregate and try again.
-            # 		 */
-            raise NotImplemented
-        elif self.op == 'AGGR_KUR':
-            # 		/** @todo implement kurtosis aggregate (no ticket) */
-            # 		throw_exception("kurtosis aggregation is not implemented");
-            # 		/* TROUBLESHOOT
-            # 			An attempt to use the kurtosis aggregator failed because it is not implemented yet.
-            # 			Remove or replace the reference to the
-            # 		 */
-            raise NotImplemented
-
-        else:
-            return numerator / denominator # * scale
-
-    def get_value_from_object(self, obj):
-        # Retrieve the property value based on the property type
-        if self.pinfo['ptype'] in ['PT_complex', 'PT_enduse']:
-            pcomplex = obj[self.pinfo['name']]
-            if pcomplex is not None:
-                part_switcher = {
-                    'AP_REAL': pcomplex.real,
-                    'AP_IMAG': pcomplex.imag,
-                    'AP_MAG': abs(pcomplex),
-                    'AP_ARG': math.atan2(pcomplex.imag, pcomplex.real),
-                    'AP_ANG': math.degrees(math.atan2(pcomplex.imag, pcomplex.real))
-                }
-                return part_switcher.get(self.part, None)
-
-        elif self.pinfo['ptype'] in ['PT_double', 'PT_loadshape', 'PT_random']:
-            pdouble = obj[self.pinfo['name']]
-            if pdouble is not None:
-                return pdouble
-
-        # Handle other property types if necessary
-        return None
-
-    def determine_part(self, aggrval):
-        # This method determines the part of the property to be aggregated.
-        if 'complex' in self.pinfo['ptype'] or 'enduse' in self.pinfo['ptype']:
-            # Complex properties must specify a part
-            match = re.search(r'.(\w+)$', aggrval)
-            if match:
-                part_name = match.group(1)
-                part_switcher = {
-                    'real': self.AP_REAL,
-                    'imag': self.AP_IMAG,
-                    'mag': self.AP_MAG,
-                    'ang': self.AP_ANG,
-                    'arg': self.AP_ARG
-                }
-                aggrpart = part_switcher.get(part_name.lower())
-                if aggrpart is None:
-                    raise ValueError(f"Unknown part '{part_name}' for property '{aggrval}'")
-            else:
-                raise ValueError(f"Complex property '{aggrval}' must specify a part (e.g., real, imag)")
-        elif 'double' in self.pinfo['ptype'] or 'random' in self.pinfo['ptype'] or 'loadshape' in self.pinfo['ptype']:
-            # These types cannot have parts
-            if '.' in aggrval:
-                raise ValueError(f"Property '{aggrval}' cannot have a part specified")
-            aggrpart = self.AP_NONE
-        else:
-            raise ValueError(f"Property '{aggrval}' cannot be aggregated")
-
-        return aggrpart
-
 if __name__ == "__main__":
     # Test the AGGREGATOR class
-    aggregator = Aggregate("sum(cost)", "class=node and parent=root")
-    if aggregator:
-        result = Aggregate.aggregate_value(aggregator)
-        print("Aggregate Result:", result)
+    try:
+        test_aggregator = "sum(length[m])"
+        aggregator = Aggregate(test_aggregator, "class=node and parent=root")
+        if aggregator:
+            result = Aggregate.aggregate_value(aggregator)
+            print("Aggregate Result:", result)
+    except ValueError as e:
+        print(e)
+
+    try:
+        test_aggregator ="max(power.angle[deg])"
+        aggregator = Aggregate(test_aggregator, "class=node and parent=root")
+        if aggregator:
+            result = Aggregate.aggregate_value(aggregator)
+            print("Aggregate Result:", result)
+    except ValueError as e:
+        print(e)
+
+    try:
+
+        test_aggregator = "mean(energy.mag[W])"
+        aggregator = Aggregate(test_aggregator, "class=node and parent=root")
+        if aggregator:
+            result = Aggregate.aggregate_value(aggregator)
+            print("Aggregate Result:", result)
+    except ValueError as e:
+        print(e)
+
+    try:
+        test_aggregator = "std(price[$])"
+        aggregator = Aggregate(test_aggregator, "class=node and parent=root")
+        if aggregator:
+            result = Aggregate.aggregate_value(aggregator)
+            print("Aggregate Result:", result)
+    except ValueError as e:
+        print(e)
+

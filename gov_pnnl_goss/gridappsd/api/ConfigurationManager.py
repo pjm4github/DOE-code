@@ -33,11 +33,11 @@ class ConfigurationManager(ABC):
 
     @abstractmethod
     def register_configuration_handler(self, type: str, handler: 'ConfigurationHandler'):
-        # void registerConfigurationHandler(String type, ConfigurationHandler handler);
+        # void registerConfigurationHandler(String global_property_types, ConfigurationHandler handler);
         pass
 
     @abstractmethod
     def generate_configuration(self, type: str, parameters: Dict, out: StringIO, process_id: str, username: str):
-        # void generateConfiguration(String type, Properties parameters, PrintWriter out,
+        # void generateConfiguration(String global_property_types, Properties parameters, PrintWriter out,
         # String processId, String username) throws Exception;
         pass

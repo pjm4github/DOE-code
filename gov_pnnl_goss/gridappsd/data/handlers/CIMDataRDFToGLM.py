@@ -1886,7 +1886,7 @@ class CIMDataRDFToGLM:
 
             q_prefix = functions"PREFIX r: <{self.ns_rdf}> PREFIX c: <{self.ns_cim}> "
             ptName = model.getProperty(self.ns_cim, "IdentifiedObject.name")
-            ptType = model.getProperty(self.ns_rdf, "type")
+            ptType = model.getProperty(self.ns_rdf, "global_property_types")
             ptOpen = model.getProperty(self.ns_cim, "Switch.normalOpen")
 
             ptEqBaseV = model.getProperty(self.ns_cim, "ConductingEquipment.BaseVoltage")
@@ -1898,7 +1898,7 @@ class CIMDataRDFToGLM:
             # Dump all the GeoLocation references
             #
             # pt_geo = rdflib.URIRef(self.ns_cim + "PowerSystemResource.GeoLocation")
-            # query = functions"{q_prefix}select ?status where {{?status r:type c:GeoLocation}}"
+            # query = functions"{q_prefix}select ?status where {{?status r:global_property_types c:GeoLocation}}"
             # results = model.query(query)
             # for row in results:
             #     id = row[0].toPython()
@@ -1906,13 +1906,13 @@ class CIMDataRDFToGLM:
             #     name = self.safe_res_name(res, ptName)
             #     it = model.subjects(pt_geo, res)
             #     for rEq in it:
-            #         s_type = rEq.value(model.predicate(self.ns_rdf + "type")).toPython()
+            #         s_type = rEq.value(model.predicate(self.ns_rdf + "global_property_types")).toPython()
             #         writer_bus.writerow(["// " + name + "==>" + s_type + ":" + self.safe_res_name(rEq, ptName)])
             # writer_bus.writerow()
             #
 
             # ConnectivityNode ==> bus coordinate CSV
-            query = functions"{q_prefix}select ?status where {{?status r:type c:ConnectivityNode}}"
+            query = functions"{q_prefix}select ?status where {{?status r:global_property_types c:ConnectivityNode}}"
             results = model.query(query)
             for row in results:
                 id = row[0].toPython()
@@ -1929,7 +1929,7 @@ class CIMDataRDFToGLM:
             # EnergySource ==> Circuit
             NumCircuits = 0
             NumSources = 0
-            query = functions"{q_prefix}select ?status ?name ?v ?ckt where {{?status r:type c:EnergySource. " \
+            query = functions"{q_prefix}select ?status ?name ?v ?ckt where {{?status r:global_property_types c:EnergySource. " \
                     functions"?status c:IdentifiedObject.name ?name;" \
                     functions" c:EnergySource.voltageMagnitude ?v;" \
                     functions" c:Equipment.EquipmentContainer ?ckt" \
@@ -1968,7 +1968,7 @@ class CIMDataRDFToGLM:
                 elif name == "source":
                     name = "_" + name
             if NumCircuits < 1:  # // try the first breaker
-                query = functions"{q_prefix}select ?status where {{?status r:type c:Breaker}}"
+                query = functions"{q_prefix}select ?status where {{?status r:global_property_types c:Breaker}}"
                 results = model.query(query)
                 for row in results:
                     id = row[0].toPython()
@@ -1982,7 +1982,7 @@ class CIMDataRDFToGLM:
 
             # SynchronousMachine ==> Generator
             writer.writerow()
-            query = functions"{q_prefix}select ?status where {{?status r:type c:SynchronousMachine}}"
+            query = functions"{q_prefix}select ?status where {{?status r:global_property_types c:SynchronousMachine}}"
             results = model.query(query)
             ptGenS = rdflib.URIRef(self.ns_cim + "GeneratingUnit.ratedNetMaxP")
             ptGenP = rdflib.URIRef(self.ns_cim + "GeneratingUnit.initialP")
@@ -2019,7 +2019,7 @@ class CIMDataRDFToGLM:
             # EnergyConsumer ==> Load
             total_load_w = 0.0
             out.write("\n")
-            query = QueryFactory.create(self.qPrefix + "select ?status where {?status r:type c:EnergyConsumer}")
+            query = QueryFactory.create(self.qPrefix + "select ?status where {?status r:global_property_types c:EnergyConsumer}")
             qexec = QueryExecutionFactory.create(query, model)
             results = qexec.execSelect()
             ptP = model.getProperty(self.ns_cim, "EnergyConsumer.pfixed")
@@ -2079,7 +2079,7 @@ class CIMDataRDFToGLM:
 
             # LinearShuntCompensator ==> Capacitor
             out.write("\n")
-            query = QueryFactory.create(self.qPrefix + "select ?status ?name where {?status r:type c:LinearShuntCompensator. " +
+            query = QueryFactory.create(self.qPrefix + "select ?status ?name where {?status r:global_property_types c:LinearShuntCompensator. " +
                                         "?status c:IdentifiedObject.name ?name" +
                                         "}")
             qexec = QueryExecutionFactory.create(query, model)
@@ -2148,7 +2148,7 @@ class CIMDataRDFToGLM:
             # the secondary nodes and carry primary phasing down to them
             # Transformer Codes
             out.write("\n")
-            query = QueryFactory.create(self.qPrefix + "select ?status ?name where {?status r:type c:TransformerTankInfo. " +
+            query = QueryFactory.create(self.qPrefix + "select ?status ?name where {?status r:global_property_types c:TransformerTankInfo. " +
                                         "?status c:IdentifiedObject.name ?name" +
                                         "}")
             qexec = QueryExecutionFactory.create(query, model)
@@ -2164,7 +2164,7 @@ class CIMDataRDFToGLM:
 
             # Transformers
             out.write("\n")
-            query = QueryFactory.create(self.qPrefix + "select ?status ?name where {?status r:type c:PowerTransformer. " +
+            query = QueryFactory.create(self.qPrefix + "select ?status ?name where {?status r:global_property_types c:PowerTransformer. " +
                                         "?status c:IdentifiedObject.name ?name" +
                                         "}")
             qexec = QueryExecutionFactory.create(query, model)
@@ -2187,7 +2187,7 @@ class CIMDataRDFToGLM:
 
             # WireData
             out.write("\n")
-            query = QueryFactory.create(self.qPrefix + "select ?status where {?status r:type c:OverheadWireInfo}")
+            query = QueryFactory.create(self.qPrefix + "select ?status where {?status r:global_property_types c:OverheadWireInfo}")
             qexec = QueryExecutionFactory.create(query, model)
             results = qexec.execSelect()
             while results.hasNext():
@@ -2200,7 +2200,7 @@ class CIMDataRDFToGLM:
                 # out.write ("new WireData." + name  + GetWireData (model, res))
 
             out.write("\n")
-            query = QueryFactory.create(self.qPrefix + "select ?status where {?status r:type c:TapeShieldCableInfo}")
+            query = QueryFactory.create(self.qPrefix + "select ?status where {?status r:global_property_types c:TapeShieldCableInfo}")
             qexec = QueryExecutionFactory.create(query, model)
             results = qexec.execSelect()
             ptLap = model.getProperty(self.ns_cim, "TapeShieldCableInfo.tapeLap")
@@ -2222,7 +2222,7 @@ class CIMDataRDFToGLM:
                 # " tapeLayer=" + String.format("%6g", tapeThickness) + " tapeLap=" + String.format("%6g", tapeLap))
 
             out.write("\n")
-            query = QueryFactory.create(self.qPrefix + "select ?status where {?status r:type c:ConcentricNeutralCableInfo}")
+            query = QueryFactory.create(self.qPrefix + "select ?status where {?status r:global_property_types c:ConcentricNeutralCableInfo}")
             qexec = QueryExecutionFactory.create(query, model)
             results = qexec.execSelect()
             ptOverNeutral = model.getProperty(self.ns_cim, "ConcentricNeutralCableInfo.diameterOverNeutral")
@@ -2248,7 +2248,7 @@ class CIMDataRDFToGLM:
                 # " DiaStrand=" + String.format("%6g", 2 * cnRadius) + " Rstrand=" + String.format("%6g", cnRes))
 
             out.write("\n")
-            query = QueryFactory.create(self.qPrefix + "select ?status ?name where {?status r:type c:WireSpacingInfo. " +
+            query = QueryFactory.create(self.qPrefix + "select ?status ?name where {?status r:global_property_types c:WireSpacingInfo. " +
                                        "?status c:IdentifiedObject.name ?name" +
                                        "}")
             qexec = QueryExecutionFactory.create(query, model)
@@ -2353,7 +2353,7 @@ class CIMDataRDFToGLM:
             NumLineCodes = 0
             out.write("\n")
             query = QueryFactory.create(self.qPrefix +
-                                        "select ?status ?name where {?status r:type c:PerLengthPhaseImpedance. " +
+                                        "select ?status ?name where {?status r:global_property_types c:PerLengthPhaseImpedance. " +
                                        "?status c:IdentifiedObject.name ?name" +
                                        "}")
             qexec = QueryExecutionFactory.create(query, model)
@@ -2373,7 +2373,7 @@ class CIMDataRDFToGLM:
                 if res.hasProperty(ptCount):
                     out.write(self.get_impedance_matrix(model, name, ptCount, res, bWantSec) + "\n")
 
-            query = QueryFactory.create(self.qPrefix + "select ?status ?name where {?status r:type c:PerLengthSequenceImpedance. " +
+            query = QueryFactory.create(self.qPrefix + "select ?status ?name where {?status r:global_property_types c:PerLengthSequenceImpedance. " +
                                        "?status c:IdentifiedObject.name ?name" +
                                        "}")
             qexec = QueryExecutionFactory.create(query, model)
@@ -2410,7 +2410,7 @@ class CIMDataRDFToGLM:
                 out.write(self.get_sequence_line_configurations(name, sqR1, sqX1, sqC1, sqR0, sqX0, sqC0) + "\n")
 
             out.write("\n")
-            query = QueryFactory.create(self.qPrefix + "select ?status ?name ?len where {?status r:type c:ACLineSegment. " +
+            query = QueryFactory.create(self.qPrefix + "select ?status ?name ?len where {?status r:global_property_types c:ACLineSegment. " +
                                        "?status c:IdentifiedObject.name ?name;" +
                                        "	 c:Conductor.length ?len" +
                                        "}")
@@ -2500,7 +2500,7 @@ class CIMDataRDFToGLM:
                     out.write(self.get_impedance_matrix(model, name, ptCount, res, bWantSec) + "\n")
 
             query = QueryFactory.create(self.qPrefix +
-                                        "select ?status ?name where {?status r:type c:PerLengthSequenceImpedance. " +
+                                        "select ?status ?name where {?status r:global_property_types c:PerLengthSequenceImpedance. " +
                                        "?status c:IdentifiedObject.name ?name" +
                                        "}")
             qexec = QueryExecutionFactory.create(query, model)
@@ -2537,7 +2537,7 @@ class CIMDataRDFToGLM:
                 out.write(self.get_sequence_line_configurations(name, sqR1, sqX1, sqC1, sqR0, sqX0, sqC0) + "\n")
 
             out.write("\n")
-            query = QueryFactory.create(self.qPrefix + "select ?status ?name ?len where {?status r:type c:ACLineSegment. " +
+            query = QueryFactory.create(self.qPrefix + "select ?status ?name ?len where {?status r:global_property_types c:ACLineSegment. " +
                                        "?status c:IdentifiedObject.name ?name;" +
                                        "	 c:Conductor.length ?len" +
                                        "}")
@@ -2615,7 +2615,7 @@ class CIMDataRDFToGLM:
                     out.write("}" + "\n")
 
             # LoadBreakSwitch ==> Line switch=y
-            query = QueryFactory.create(q_prefix + "select ?status ?name ?open where {?status r:type c:LoadBreakSwitch. "
+            query = QueryFactory.create(q_prefix + "select ?status ?name ?open where {?status r:global_property_types c:LoadBreakSwitch. "
                                         "?status c:IdentifiedObject.name ?name;"
                                         "c:Switch.normalOpen ?open"
                                         "}")
@@ -2653,7 +2653,7 @@ class CIMDataRDFToGLM:
                     out.write("  status OPEN;" + "\n")
 
             # Fuse ==> Line switch=y
-            query = QueryFactory.create(q_prefix + "select ?status ?name ?open where {?status r:type c:Fuse. "
+            query = QueryFactory.create(q_prefix + "select ?status ?name ?open where {?status r:global_property_types c:Fuse. "
                                         "?status c:IdentifiedObject.name ?name;"
                                         "c:Switch.normalOpen ?open"
                                         "}")
@@ -2683,7 +2683,7 @@ class CIMDataRDFToGLM:
                 nd2.add_phases(phs)
 
             # Breaker ==> Line switch=y (NOTE: a source may be attached to the first instance)
-            query = QueryFactory.create(q_prefix + "select ?status ?name where {?status r:type c:Breaker. "
+            query = QueryFactory.create(q_prefix + "select ?status ?name where {?status r:global_property_types c:Breaker. "
                                         "?status c:IdentifiedObject.name ?name}")
             qexec = QueryExecutionFactory.create(query, model)
             results = qexec.execSelect()
@@ -2711,7 +2711,7 @@ class CIMDataRDFToGLM:
                 nd2.add_phases(phs)
 
             # Disconnector ==> Line switch=y
-            query = QueryFactory.create(q_prefix + "select ?status ?name where {?status r:type c:Disconnector. "
+            query = QueryFactory.create(q_prefix + "select ?status ?name where {?status r:global_property_types c:Disconnector. "
                                         "?status c:IdentifiedObject.name ?name}")
             qexec = QueryExecutionFactory.create(query, model)
             results = qexec.execSelect()
@@ -2740,7 +2740,7 @@ class CIMDataRDFToGLM:
 
             # unsupported stuff - TODO - add Jumper and Disconnector
             out.write("\n")
-            query = QueryFactory.create(q_prefix + "select ?status where {?status r:type c:Junction}")
+            query = QueryFactory.create(q_prefix + "select ?status where {?status r:global_property_types c:Junction}")
             qexec = QueryExecutionFactory.create(query, model)
             results = qexec.execSelect()
             while results.hasNext():
@@ -2749,7 +2749,7 @@ class CIMDataRDFToGLM:
                 res = model.getResource(id)
                 name = self.safe_res_name(res, self.pt_name)
 
-            query = QueryFactory.create(q_prefix + "select ?status where {?status r:type c:BusbarSection}")
+            query = QueryFactory.create(q_prefix + "select ?status where {?status r:global_property_types c:BusbarSection}")
             qexec = QueryExecutionFactory.create(query, model)
             results = qexec.execSelect()
             while results.hasNext():
@@ -2758,7 +2758,7 @@ class CIMDataRDFToGLM:
                 res = model.getResource(id)
                 name = self.safe_res_name(res, self.pt_name)
 
-            query = QueryFactory.create(q_prefix + "select ?status where {?status r:type c:Bay}")
+            query = QueryFactory.create(q_prefix + "select ?status where {?status r:global_property_types c:Bay}")
             qexec = QueryExecutionFactory.create(query, model)
             results = qexec.execSelect()
             while results.hasNext():

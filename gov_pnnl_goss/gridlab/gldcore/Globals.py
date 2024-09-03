@@ -9,20 +9,45 @@ import sys
 import os
 from enum import Enum
 
-from gov_pnnl_goss.gridlab.gldcore.Convert import output_error
-from gov_pnnl_goss.gridlab.gldcore.GridLabD import TS_ZERO, TS_NEVER, WRITELOCK, WRITEUNLOCK
-from gov_pnnl_goss.gridlab.gldcore.Output import output_warning, output_debug
-from gov_pnnl_goss.gridlab.gldcore.Property import PROPERTYTYPE, PROPERTYACCESS, KEYWORD, property_size
-from gov_pnnl_goss.gridlab.gldcore import Class
-from gov_pnnl_goss.gridlab.gldcore.Class import Class
-from gov_pnnl_goss.gridlab.gldcore.Version import version_major, version_minor, version_patch, version_build, version_branch, Version
+
+
+# from gov_pnnl_goss.gridlab.gldcore.Class import DynamicClass
+from gov_pnnl_goss.gridlab.gldcore.Version import version_major, version_minor, version_patch, version_build, \
+    version_branch, Version
+# from gridlab.gldcore.Exec import CheckpointType
+from gov_pnnl_goss.gridlab.gldcore.PropertyHeader import PropertyType, PropertyAccess, Keyword
+##################################################
+# PROPERTIES
+
+
+
+TS_NEVER = -1
+TS_INVALID = -1
+TS_ZERO = 0
+TS_MAX = math.inf
+MIN_YEAR = 1970
+MAX_YEAR = 2969
+
+PI = 3.1415926535897932384626433832795
+E = 2.71828182845905
+NM_PREUPDATE = 0
+NM_POSTUPDATE = 1
+NM_RESET = 2
+OF_NONE = 0
+OF_HASPLC = 1
+OF_LOCKED = 2
+OF_RECALC = 8
+OF_FOREIGN = 16
+OF_SKIPSAFE = 32
+OF_RERANK = 16384
 
 random_init = random.seed
 
 # Constants
-DT_INFINITY = math.inf
-DT_INVALID = -1
-DT_SECOND = 1.0
+# See the TimeStamp module
+# DT_INFINITY = math.inf
+# DT_INVALID = -1
+# DT_SECOND = 1.0
 EINVAL = 22  # Invalid argument
 
 HOMEVAR = "HOMEVAR"
@@ -36,7 +61,6 @@ SIGTRAP = 0x05
 # SUCCESS = "SUCCESS"
 FAILED = -1
 SUCCESS = 0
-
 
 TEMP = "TEMP"
 USERVAR = "USERVAR"
@@ -63,10 +87,23 @@ env_delim = ":"
 env_delim_char = ':'
 env_pathsep = "/"
 
-
-
 lastvar = None  # Assuming lastvar is a global variable
 technology_readiness_level = None  # TODO fix this
+
+TIMESTAMP = 0
+
+class SIGNALS:
+    SIGABRT= 6
+    SIGFPE = 8
+    SIGILL = 4
+    SIGINT = 2
+    SIGSEGV = 11
+    SIGTERM = 15
+
+class CheckpointType:
+    WALL = 1
+    SIM = 2
+    NONE = 3
 
 
 class STATUS(Enum):
@@ -81,11 +118,11 @@ class GLOBALVAR:
         self.callback = None  # this function will be called whenever the globalvar is set
         self.lock = False
         # self.prop_type = prop_type
-        # self.prop_addr = addr
-        # self.prop_access = access
-        # self.prop_description = description
-        # self.prop_units = units
-        # self.prop_keys = keys
+        # self.addr = addr
+        # self.prop = access
+        # self.description = description
+        # self.units = units
+        # self.keys = keys
 
 # class GLOBALVAR:
 #     def __init__(self):
@@ -95,32 +132,23 @@ class GLOBALVAR:
 #         self.callback = None  # this function will be called whenever the globalvar is set
 #         self.lock = 0
 
+
+global_streaming_io_enabled = 0
 def global_autoclean():
     pass
+
 
 def global_bigranks():
     pass
 
+
 def global_check_version():
     pass
 
-def global_checkpoint_file():
-    pass
-
-def global_checkpoint_interval():
-    pass
-
-def global_checkpoint_keepall():
-    pass
-
-def global_checkpoint_seqnum():
-    pass
-
-def global_checkpoint_type():
-    pass
 
 def global_client_allowed():
     pass
+
 
 def global_compileonly():
     pass
@@ -133,23 +161,30 @@ def global_deltamode_iteration_limit():
 def global_deltamode_updateorder():
     pass
 
+
 def global_exit_code():
     pass
+
 
 def global_hostaddr():
     pass
 
+
 def global_hostname():
     pass
+
 
 def global_infourl():
     pass
 
+
 def global_init_max_defer():
     pass
 
+
 def global_inline_block_size():
     pass
+
 
 def global_mainlooppauseat():
     pass
@@ -158,8 +193,10 @@ def global_mainlooppauseat():
 def global_master():
     pass
 
+
 def global_master_port():
     pass
+
 
 def global_module_compiler_flags():
     pass
@@ -168,99 +205,119 @@ def global_module_compiler_flags():
 def global_multirun_connection():
     pass
 
+
 def global_randomnumbergenerator():
     pass
+
 
 def global_reinclude():
     pass
 
+
 def global_relax_naming_rules():
     pass
+
 
 def global_return_code():
     pass
 
+
 def global_run_power_world():
     pass
+
 
 def global_sanitize_index():
     pass
 
+
 def global_sanitize_offset():
     pass
+
 
 def global_sanitize_options():
     pass
 
+
 def global_sanitize_prefix():
     pass
+
 
 def global_server_port_num():
     pass
 
+
 def global_server_quit_on_close():
     pass
+
 
 def global_show_progress():
     pass
 
-def global_signal_timeout():
-    pass
+
+global_signal_timeout = 100.0
+
 
 def global_simulation_mode():
     pass
 
+
 def global_slave_id():
     pass
+
 
 def global_slave_port():
     pass
 
-def global_streaming_io_enabled():
-    pass
+
+
 
 def global_svn_root():
     pass
 
+
 def global_sync_dumpfile():
     pass
 
+
 def global_validate_options():
     pass
+
+
 
 def global_wget_options():
     pass
 
 
 class DATEFORMAT(Enum):
-    DF_ISO=0
-    DF_US=1
-    DF_EURO=2
-
+    DF_ISO = 0
+    DF_US = 1
+    DF_EURO = 2
 
 
 class INITSEQ(Enum):
-    IS_CREATION=0
-    IS_DEFERRED=1
-    IS_BOTTOMUP=2
-    IS_TOPDOWN=3
+    IS_CREATION = 0
+    IS_DEFERRED = 1
+    IS_BOTTOMUP = 2
+    IS_TOPDOWN = 3
+
 
 class TECHNOLOGYREADINESSLEVEL(Enum):
-    TRL_UNKNOWN			= 0
-    TRL_PRINCIPLE		= 1
-    TRL_CONCEPT			= 2
-    TRL_PROOF			= 3
-    TRL_STANDALONE		= 4
-    TRL_INTEGRATED		= 5
-    TRL_DEMONSTRATED	= 6
-    TRL_PROTOTYPE		= 7
-    TRL_QUALIFIED		= 8
-    TRL_PROVEN			= 9
+    TRL_UNKNOWN = 0
+    TRL_PRINCIPLE = 1
+    TRL_CONCEPT = 2
+    TRL_PROOF = 3
+    TRL_STANDALONE = 4
+    TRL_INTEGRATED = 5
+    TRL_DEMONSTRATED = 6
+    TRL_PROTOTYPE = 7
+    TRL_QUALIFIED = 8
+    TRL_PROVEN = 9
 
-class CHECKPOINTTYPE(Enum): #checkpoint type determines how checkpoint intervals are used
+
+class CHECKPOINTTYPE(Enum):  # checkpoint global_property_types determines how checkpoint intervals are used
     CPT_NONE = 0  # **< checkpoints is not enabled */
     CPT_WALL = 1  # **< checkpoints run on wall clock interval */
-    CPT_SIM = 2   # **< checkpoints run on sim clock interval */
+    CPT_SIM = 2  # **< checkpoints run on sim clock interval */
 
 
 class COMPLEXCONVERFORMAT(Enum):
@@ -270,99 +327,77 @@ class COMPLEXCONVERFORMAT(Enum):
     CNF_POLAR_RAD = 3
 
 
-class RANDOMNUMBERGENERATOR(Enum): # identifies the type of random number generator used
-    RNG2=2  # **< random numbers generated using pre-V3 method */
-    RNG3=3  # **< random numbers generated using post-V2 method */
+class RANDOMNUMBERGENERATOR(Enum):  # identifies the global_property_types of random number generator used
+    RNG2 = 2  # **< random numbers generated using pre-V3 method */
+    RNG3 = 3  # **< random numbers generated using post-V2 method */
 
 
-class MAINLOOPSTATE(Enum): # identifies the main loop state
+class MAINLOOPSTATE(Enum):  # identifies the main loop state
     MLS_INIT = 0  # main loop initializing
     MLS_RUNNING = 1  # main loop is running
     MLS_PAUSED = 2  # main loop is paused (waiting)
-    MLS_DONE = 3  #  main loop is done (steady)
-    MLS_LOCKED = 4  #  main loop is locked (possible deadlock)
+    MLS_DONE = 3  # main loop is done (steady)
+    MLS_LOCKED = 4  # main loop is locked (possible deadlock)
 
 
 class SIMULATIONMODE(Enum):  # simulation mode values, delta mode support
-    SM_INIT			= 0x00  # initial state of simulation
-    SM_EVENT		= 0x01  # event driven simulation mode
-    SM_DELTA		= 0x02  # finite difference simulation mode
-    SM_DELTA_ITER	= 0x03  # Iteration of finite difference simulation mode
-    SM_ERROR		= 0xff  # simulation mode error
+    SM_INIT = 0x00  # initial state of simulation
+    SM_EVENT = 0x01  # event driven simulation mode
+    SM_DELTA = 0x02  # finite difference simulation mode
+    SM_DELTA_ITER = 0x03  # Iteration of finite difference simulation mode
+    SM_ERROR = 0xff  # simulation mode error
 
 
 class DELTAMODEFLAGS(Enum):  # /**< delta mode flags */
-    DMF_NONE		= 0x00  #	/**< no flags */
-    DMF_SOFTEVENT	= 0x01  # /**< event is soft */
+    DMF_NONE = 0x00  # /**< no flags */
+    DMF_SOFTEVENT = 0x01  # /**< event is soft */
 
 
-class MULTIRUNMODE(Enum):  # determines the type of run */
+class MULTIRUNMODE(Enum):  # determines the global_property_types of run */
     MRM_STANDALONE = 0  # /**< multirun is not enabled (standalone run) */
-    MRM_MASTER = 1  #   /**< multirun is enabled and this run is the master run */
-    MRM_SLAVE = 2  #    /**< multirun is enabled and this run is the slace run */
+    MRM_MASTER = 1  # /**< multirun is enabled and this run is the master run */
+    MRM_SLAVE = 2  # /**< multirun is enabled and this run is the slace run */
 
 
-class MULTIRUNCONNECTION(Enum):  #	/**< determines the connection mode for a slave run */
-    MRC_NONE = 0  # 	/**< isn't actually connected upwards */
-    MRC_MEM = 1  # 	/**< use shared mem or the like */
+class MULTIRUNCONNECTION(Enum):  # /**< determines the connection mode for a slave run */
+    MRC_NONE = 0  # /**< isn't actually connected upwards */
+    MRC_MEM = 1  # /**< use shared mem or the like */
     MRC_SOCKET = 2  # **< use a socket */
 
 
 class MODULECOMPILEFLAGS(Enum):  # ;/* module compile flags */
-    MC_NONE     = 0x00  # < no module compiler flags */
-    MC_CLEAN    = 0x01  # < clean build */
+    MC_NONE = 0x00  # < no module compiler flags */
+    MC_CLEAN = 0x01  # < clean build */
     MC_KEEPWORK = 0x02  # < keep intermediate files */
-    MC_DEBUG    = 0x04  # < debug build */
-    MC_VERBOSE  = 0x08  # < verbose output */
+    MC_DEBUG = 0x04  # < debug build */
+    MC_VERBOSE = 0x08  # < verbose output */
 
-
-# This should move to the Validatre module.
-class VALIDATEOPTIONS(Enum):
-    VO_NONE		=0x0000  # < run no tests (just go through motions)
-
-    # tests
-    VO_TSTRUN	=0x0001  # < run passing tests
-    VO_TSTERR	=0x0002  # < run error tests
-    VO_TSTEXC	=0x0004  # < run exception tests
-    VO_TSTSTD	=0x0007  # < run normal validation tests (run+err+exc)
-    VO_TSTOPT	=0x0008  # < run optional tests
-    VO_TSTALL	=0x000f  # < run all tests
-
-    # test override
-    VO_TSTREQ	=0x0010  # < make all tests required (not supported yet)
-    VO_TSTOPTREQ=0x0018  # < make optional test required (not supported yet)
-    VO_TSTALLREQ=0x001f  # < run all test with optionals required (not supported yet)
-
-    # reports
-    VO_RPTDIR   =0x0100  # < report includes individual directories search results
-    VO_RPTGLM	=0x0200  # < report includes individual run results
-    VO_RPTALL	=0x0300  # < report includes everything
-
-    VO_DEFAULT	= 0x000f |  0x0300  #  VALIDATEOPTIONS.VO_TSTALL or VALIDATEOPTIONS.VO_RPTALL
 
 
 # this should move to the Sanitize module when ready
 class SANITIZEOPTIONS(Enum):
-    SO_ERASE		= 0x0001  # < option to erase/reset to default instead of obfuscate
-    SO_NAMES		= 0x0010  # < option to sanitize names
-    SO_LATITUDE		= 0x0020  # < option to sanitize latitude
-    SO_LONGITUDE	= 0x0040  # < option to sanitize longitude
-    SO_GEOCOORDS	= 0x0060  # < option to sanitize	lat/lon
-    SO_CITY			= 0x0080  # < option to sanitize city
-    SO_TIME			= 0x0100  # < option to sanitize times (start/stop/in/out)
-    SO_DATE			= 0x0200  # < option to sanitize date (start/stop/in/out)
-    SO_TIMEZONE		= 0x0800  # < option to sanitize timezone
-    SO_SPATIAL		= 0x00f0  # < option to sanitize all spatial info
-    SO_TEMPORAL		= 0x0f00  # < option to sanitize all temporal info
-    SO_ALL			= 0x0ff0  # < option to sanitize all info
+    SO_ERASE = 0x0001  # < option to erase/reset to default instead of obfuscate
+    SO_NAMES = 0x0010  # < option to sanitize names
+    SO_LATITUDE = 0x0020  # < option to sanitize latitude
+    SO_LONGITUDE = 0x0040  # < option to sanitize longitude
+    SO_GEOCOORDS = 0x0060  # < option to sanitize	lat/lon
+    SO_CITY = 0x0080  # < option to sanitize city
+    SO_TIME = 0x0100  # < option to sanitize times (start/stop/in/out)
+    SO_DATE = 0x0200  # < option to sanitize date (start/stop/in/out)
+    SO_TIMEZONE = 0x0800  # < option to sanitize timezone
+    SO_SPATIAL = 0x00f0  # < option to sanitize all spatial info
+    SO_TEMPORAL = 0x0f00  # < option to sanitize all temporal info
+    SO_ALL = 0x0ff0  # < option to sanitize all info
 
 
-
-
-# Global Variables
-# Global variables (you need to define them appropriately)
+# Global variables
 global_autostartgui = True
 global_browser = "your_browser_executable"
+global_checkpoint_file = ""
+global_checkpoint_interval = 3600
+global_checkpoint_keepall = 0
+global_checkpoint_seqnum = 0
+global_checkpoint_type = CheckpointType.WALL
 global_clock = TS_ZERO
 global_command_line = ""
 global_complex_format = "%+lg%+lg%c"
@@ -400,6 +435,7 @@ global_mainloopstate = ""
 global_maximum_synctime = 60
 global_minimum_timestep = 1
 global_modelname = ""
+global_ms_per_second = 1000
 global_mt_analysis = 0
 global_multirun_mode = False
 global_next_time = TS_ZERO
@@ -410,7 +446,7 @@ global_object_format = "%s:%d"
 global_object_scan = "%[^:]:%d"
 global_pauseatexit = 0
 global_pidfile = ""
-global_platform = "WINDOWS" if sys.platform == 'win32' else "MACOSX" if sys.platform ==  'darwin' else "LINUX"
+global_platform = "WINDOWS" if sys.platform == 'win32' else "MACOSX" if sys.platform == 'darwin' else "LINUX"
 global_process_id = 0
 global_profiler = 0
 global_quiet_mode = False
@@ -426,11 +462,12 @@ global_stoptime = 0
 global_strictnames = True  # Initialize global_strictnames with the desired value
 global_suppress_deprecated_messages = False
 global_suppress_repeat_messages = True
+global_sync_dumpfile = ""  # Provide the file path for debug purposes
 global_test_mode = False
 global_testoutputfile = "test.txt"
 global_thread_count = 1
 global_threadcount = 0
-global_tmp = "C:\\WINDOWS\\TEMP" if sys.platform == 'win32' else "/tmp"   # Assuming global_tmp is a global variable
+global_tmp = "C:\\WINDOWS\\TEMP" if sys.platform == 'win32' else "/tmp"  # Assuming global_tmp is a global variable
 global_trace = ""
 global_urlbase = "./" if global_debug_mode else "https://www.gridlabd.org/"
 global_value = ""
@@ -446,122 +483,135 @@ global_workdir = "."
 global_xml_encoding = 8
 global_xmlstrict = True
 
-
-
 if global_debug_mode:
     global_sync_dumpfile = ""
 
 
+# This should move to the Validatre module.
+class VALIDATEOPTIONS(Enum):
+    VO_NONE = 0x0000  # < run no tests (just go through motions)
+
+    # tests
+    VO_TSTRUN = 0x0001  # < run passing tests
+    VO_TSTERR = 0x0002  # < run error tests
+    VO_TSTEXC = 0x0004  # < run exception tests
+    VO_TSTSTD = 0x0007  # < run normal validation tests (run+err+exc)
+    VO_TSTOPT = 0x0008  # < run optional tests
+    VO_TSTALL = 0x000f  # < run all tests
+
+    # test override
+    VO_TSTREQ = 0x0010  # < make all tests required (not supported yet)
+    VO_TSTOPTREQ = 0x0018  # < make optional test required (not supported yet)
+    VO_TSTALLREQ = 0x001f  # < run all test with optionals required (not supported yet)
+
+    # reports
+    VO_RPTDIR = 0x0100  # < report includes individual directories search results
+    VO_RPTGLM = 0x0200  # < report includes individual run results
+    VO_RPTALL = 0x0300  # < report includes everything
+
+    VO_DEFAULT = 0x000f | 0x0300  # VALIDATEOPTIONS.VO_TSTALL or VALIDATEOPTIONS.VO_RPTALL
+
+
+
+
 # Keyword lists
-cnf_keys = []
-cnf_keys += [
-    {"DEFAULT": COMPLEXCONVERFORMAT.CNF_DEFAULT, "next": cnf_keys[1]},
-    {"RECT": COMPLEXCONVERFORMAT.CNF_RECT, "next": cnf_keys[2]},
-    {"POLAR_DEG": COMPLEXCONVERFORMAT.CNF_POLAR_DEG, "next": cnf_keys[3]},
-    {"POLAR_RAD": COMPLEXCONVERFORMAT.CNF_POLAR_RAD, "next": None},
+
+cnf_keys = [
+    {"DEFAULT": COMPLEXCONVERFORMAT.CNF_DEFAULT},
+    {"RECT": COMPLEXCONVERFORMAT.CNF_RECT},
+    {"POLAR_DEG": COMPLEXCONVERFORMAT.CNF_POLAR_DEG},
+    {"POLAR_RAD": COMPLEXCONVERFORMAT.CNF_POLAR_RAD},
 ]
 
-df_keys = []
-df_keys += [
-    {"ISO": DATEFORMAT.DF_ISO, "next": df_keys[1]},
-    {"US": DATEFORMAT.DF_US, "next": df_keys[2]},
-    {"EURO": DATEFORMAT.DF_EURO, "next": None},
+df_keys = [
+    {"ISO": DATEFORMAT.DF_ISO},
+    {"US": DATEFORMAT.DF_US},
+    {"EURO": DATEFORMAT.DF_EURO},
 ]
 
-trl_keys = []
-trl_keys += [
-    {"PRINCIPLE": TECHNOLOGYREADINESSLEVEL.TRL_PRINCIPLE, "next": trl_keys[1]},
-    {"CONCEPT": TECHNOLOGYREADINESSLEVEL.TRL_CONCEPT, "next": trl_keys[2]},
-    {"PROOF": TECHNOLOGYREADINESSLEVEL.TRL_PROOF, "next": trl_keys[3]},
-    {"STANDALONE": TECHNOLOGYREADINESSLEVEL.TRL_STANDALONE, "next": trl_keys[4]},
-    {"INTEGRATED": TECHNOLOGYREADINESSLEVEL.TRL_INTEGRATED, "next": trl_keys[5]},
-    {"DEMONSTRATED": TECHNOLOGYREADINESSLEVEL.TRL_DEMONSTRATED, "next": trl_keys[6]},
-    {"PROTOTYPE": TECHNOLOGYREADINESSLEVEL.TRL_PROTOTYPE, "next": trl_keys[7]},
-    {"QUALIFIED": TECHNOLOGYREADINESSLEVEL.TRL_QUALIFIED, "next": trl_keys[8]},
-    {"PROVEN": TECHNOLOGYREADINESSLEVEL.TRL_PROVEN, "next": trl_keys[9]},
-    {"UNKNOWN": TECHNOLOGYREADINESSLEVEL.TRL_UNKNOWN, "next": None},
+trl_keys = [
+    {"PRINCIPLE": TECHNOLOGYREADINESSLEVEL.TRL_PRINCIPLE},
+    {"CONCEPT": TECHNOLOGYREADINESSLEVEL.TRL_CONCEPT},
+    {"PROOF": TECHNOLOGYREADINESSLEVEL.TRL_PROOF},
+    {"STANDALONE": TECHNOLOGYREADINESSLEVEL.TRL_STANDALONE},
+    {"INTEGRATED": TECHNOLOGYREADINESSLEVEL.TRL_INTEGRATED},
+    {"DEMONSTRATED": TECHNOLOGYREADINESSLEVEL.TRL_DEMONSTRATED},
+    {"PROTOTYPE": TECHNOLOGYREADINESSLEVEL.TRL_PROTOTYPE},
+    {"QUALIFIED": TECHNOLOGYREADINESSLEVEL.TRL_QUALIFIED},
+    {"PROVEN": TECHNOLOGYREADINESSLEVEL.TRL_PROVEN},
+    {"UNKNOWN": TECHNOLOGYREADINESSLEVEL.TRL_UNKNOWN},
 ]
 
-cpt_keys = []
-cpt_keys += [
-    {"NONE": CHECKPOINTTYPE.CPT_NONE, "next": cpt_keys[1]},
-    {"WALL": CHECKPOINTTYPE.CPT_WALL, "next": cpt_keys[2]},
-    {"SIM": CHECKPOINTTYPE.CPT_SIM, "next": None},
+cpt_keys = [
+    {"NONE": CHECKPOINTTYPE.CPT_NONE},
+    {"WALL": CHECKPOINTTYPE.CPT_WALL},
+    {"SIM": CHECKPOINTTYPE.CPT_SIM},
 ]
 
-rng_keys = []
-rng_keys += [
-    {"RNG2": RANDOMNUMBERGENERATOR.RNG2, "next": rng_keys[1]},
-    {"RNG3": RANDOMNUMBERGENERATOR.RNG3, "next": None},
+rng_keys = [
+    {"RNG2": RANDOMNUMBERGENERATOR.RNG2},
+    {"RNG3": RANDOMNUMBERGENERATOR.RNG3},
 ]
 
-mls_keys = []
-mls_keys += [
-    {"INIT": MAINLOOPSTATE.MLS_INIT, "next": mls_keys[1]},
-    {"RUNNING": MAINLOOPSTATE.MLS_RUNNING, "next": mls_keys[2]},
-    {"PAUSED": MAINLOOPSTATE.MLS_PAUSED, "next": mls_keys[3]},
-    {"DONE": MAINLOOPSTATE.MLS_DONE, "next": mls_keys[4]},
-    {"LOCKED": MAINLOOPSTATE.MLS_LOCKED, "next": None},
+mls_keys = [
+    {"INIT": MAINLOOPSTATE.MLS_INIT},
+    {"RUNNING": MAINLOOPSTATE.MLS_RUNNING},
+    {"PAUSED": MAINLOOPSTATE.MLS_PAUSED},
+    {"DONE": MAINLOOPSTATE.MLS_DONE},
+    {"LOCKED": MAINLOOPSTATE.MLS_LOCKED},
 ]
 
-mrm_keys = []
-mrm_keys += [
-    {"STANDALONE": MULTIRUNMODE.MRM_STANDALONE, "next": mrm_keys[1]},
-    {"MASTER": MULTIRUNMODE.MRM_MASTER, "next": mrm_keys[2]},
-    {"SLAVE": MULTIRUNMODE.MRM_SLAVE, "next": None},
+mrm_keys = [
+    {"STANDALONE": MULTIRUNMODE.MRM_STANDALONE},
+    {"MASTER": MULTIRUNMODE.MRM_MASTER},
+    {"SLAVE": MULTIRUNMODE.MRM_SLAVE},
 ]
 
-mrc_keys = []
-mrc_keys += [
-    {"NONE": MULTIRUNCONNECTION.MRC_NONE, "next": mrc_keys[1]},
-    {"MEMORY": MULTIRUNCONNECTION.MRC_MEM, "next": mrc_keys[2]},
-    {"SOCKET": MULTIRUNCONNECTION.MRC_SOCKET, "next": None},
+mrc_keys = [
+    {"NONE": MULTIRUNCONNECTION.MRC_NONE},
+    {"MEMORY": MULTIRUNCONNECTION.MRC_MEM},
+    {"SOCKET": MULTIRUNCONNECTION.MRC_SOCKET},
 ]
 
-isc_keys = []
-isc_keys += [
-    {"CREATION": INITSEQ.IS_CREATION, "next": isc_keys[1]},
-    {"DEFERRED": INITSEQ.IS_DEFERRED, "next": isc_keys[2]},
-    {"BOTTOMUP": INITSEQ.IS_BOTTOMUP, "next": isc_keys[3]},
-    {"TOPDOWN": INITSEQ.IS_TOPDOWN, "next": None},
+isc_keys = [
+    {"CREATION": INITSEQ.IS_CREATION},
+    {"DEFERRED": INITSEQ.IS_DEFERRED},
+    {"BOTTOMUP": INITSEQ.IS_BOTTOMUP},
+    {"TOPDOWN": INITSEQ.IS_TOPDOWN},
 ]
 
-mcf_keys = []
-mcf_keys += [
-    {"NONE": MODULECOMPILEFLAGS.MC_NONE, "next": mcf_keys[1]},
-    {"CLEAN": MODULECOMPILEFLAGS.MC_CLEAN, "next": mcf_keys[2]},
-    {"KEEPWORK": MODULECOMPILEFLAGS.MC_KEEPWORK, "next": mcf_keys[3]},
-    {"DEBUG": MODULECOMPILEFLAGS.MC_DEBUG, "next": mcf_keys[4]},
-    {"VERBOSE": MODULECOMPILEFLAGS.MC_VERBOSE, "next": None},
+mcf_keys = [
+    {"NONE": MODULECOMPILEFLAGS.MC_NONE},
+    {"CLEAN": MODULECOMPILEFLAGS.MC_CLEAN},
+    {"KEEPWORK": MODULECOMPILEFLAGS.MC_KEEPWORK},
+    {"DEBUG": MODULECOMPILEFLAGS.MC_DEBUG},
+    {"VERBOSE": MODULECOMPILEFLAGS.MC_VERBOSE},
 ]
 
-vo_keys = []
-vo_keys += [
-    {"NONE": VALIDATEOPTIONS.VO_NONE, "next": vo_keys[1]},
-    {"TSTD": VALIDATEOPTIONS.VO_TSTSTD, "next": vo_keys[2]},
-    {"TALL": VALIDATEOPTIONS.VO_TSTALL, "next": vo_keys[3]},
-    {"TRUN": VALIDATEOPTIONS.VO_TSTRUN, "next": vo_keys[4]},
-    {"TERR": VALIDATEOPTIONS.VO_TSTERR, "next": vo_keys[5]},
-    {"TEXC": VALIDATEOPTIONS.VO_TSTEXC, "next": vo_keys[6]},
-    {"TOPT": VALIDATEOPTIONS.VO_TSTOPT, "next": vo_keys[7]},
-    {"RALL": VALIDATEOPTIONS.VO_RPTALL, "next": vo_keys[8]},
-    {"RDIR": VALIDATEOPTIONS.VO_RPTDIR, "next": vo_keys[9]},
-    {"RGLM": VALIDATEOPTIONS.VO_RPTGLM, "next": None},
+vo_keys = [
+    {"NONE": VALIDATEOPTIONS.VO_NONE},
+    {"TSTD": VALIDATEOPTIONS.VO_TSTSTD},
+    {"TALL": VALIDATEOPTIONS.VO_TSTALL},
+    {"TRUN": VALIDATEOPTIONS.VO_TSTRUN},
+    {"TERR": VALIDATEOPTIONS.VO_TSTERR},
+    {"TEXC": VALIDATEOPTIONS.VO_TSTEXC},
+    {"TOPT": VALIDATEOPTIONS.VO_TSTOPT},
+    {"RALL": VALIDATEOPTIONS.VO_RPTALL},
+    {"RDIR": VALIDATEOPTIONS.VO_RPTDIR},
+    {"RGLM": VALIDATEOPTIONS.VO_RPTGLM},
 ]
 
-so_keys = []
-so_keys += [
-    {"NAMES": SANITIZEOPTIONS.SO_NAMES, "next": so_keys[1]},
-    {"POSITIONS": SANITIZEOPTIONS.SO_GEOCOORDS, "next": None},
+so_keys = [
+    {"NAMES": SANITIZEOPTIONS.SO_NAMES},
+    {"POSITIONS": SANITIZEOPTIONS.SO_GEOCOORDS},
 ]
 
-sm_keys = []
-sm_keys += [
-    {"INIT": SIMULATIONMODE.SM_INIT, "next": sm_keys[1]},
-    {"EVENT": SIMULATIONMODE.SM_EVENT, "next": sm_keys[2]},
-    {"DELTA": SIMULATIONMODE.SM_DELTA, "next": sm_keys[3]},
-    {"DELTA_ITER": SIMULATIONMODE.SM_DELTA_ITER, "next": sm_keys[4]},
-    {"ERROR": SIMULATIONMODE.SM_ERROR, "next": None},
+sm_keys = [
+    {"INIT": SIMULATIONMODE.SM_INIT},
+    {"EVENT": SIMULATIONMODE.SM_EVENT},
+    {"DELTA": SIMULATIONMODE.SM_DELTA},
+    {"DELTA_ITER": SIMULATIONMODE.SM_DELTA_ITER},
+    {"ERROR": SIMULATIONMODE.SM_ERROR},
 ]
 
 
@@ -605,14 +655,15 @@ def global_init():
     global_version_build = version_build()
     global_version_branch = version_branch()[:len(global_version_branch)]
 
+
     for i in range(len(global_map)):
         p = global_map[i]
-        var = global_create(p["name"], p["type"], p["addr"], PROPERTYTYPE.PT_ACCESS, p["access"],
+        var = global_create(p["name"], p["global_property_types"], p["addr"], PropertyType.PT_ACCESS, p["access"],
                             p["description"] if "description" in p else 0,
                             p["description"] if "description" in p else None,
-                            PROPERTYTYPE.PT_UNITS if "units" in p else 0, p["units"] if "units" in p else None, None)
+                            PropertyType.PT_UNITS if "units" in p else 0, p["units"] if "units" in p else None, None)
         if var is None:
-            output_error("global_init(): global variable '%s' registration failed" % p["name"])
+            print(sys.stderr, "global_init(): global variable '%s' registration failed" % p["name"])
             # TROUBLESHOOT
             # The global variable initialization process was unable to register
             # the indicated global variable. This error usually follows a more
@@ -643,6 +694,7 @@ def global_get_next(previous):
     else:
         return previous.next
 
+
 # Function to create a user-defined global variable
 def global_create(name, *args):
     va_args = list(args)
@@ -656,52 +708,53 @@ def global_create(name, *args):
         prop_type_arg = va_args.pop(0)
         if prop_type_arg == 0:
             break
-        if prop_type_arg == PROPERTYTYPE.PT_KEYWORD:
+        if prop_type_arg == PropertyType.PT_KEYWORD:
             keyword = va_args.pop(0)
             keyvalue = va_args.pop(0)
-            key = KEYWORD(keyword, keyvalue)
-            if prop_type == PROPERTYTYPE.PT_enumeration :
+            key = Keyword(keyword, keyvalue)
+            if prop_type == PropertyType.PT_enumeration:
                 if keys is None:
                     keys = [key]
                 else:
                     keys.append(key)
-            elif prop_type == PROPERTYTYPE.PT_set:
+            elif prop_type == PropertyType.PT_set:
                 if keys is None:
                     keys = [(key.name, key.value)]
                 else:
                     keys.append((key.name, key.value))
-        elif prop_type_arg == PROPERTYTYPE.PT_ACCESS:
+        elif prop_type_arg == PropertyType.PT_ACCESS:
             access_arg = va_args.pop(0)
-            if access_arg in [PROPERTYACCESS.PA_PUBLIC, PROPERTYACCESS.PA_REFERENCE, PROPERTYACCESS.PA_PROTECTED, PROPERTYACCESS.PA_PRIVATE, PROPERTYACCESS.PA_HIDDEN]:
+            if access_arg in [PropertyAccess.PA_PUBLIC, PropertyAccess.PA_REFERENCE, PropertyAccess.PA_PROTECTED,
+                              PropertyAccess.PA_PRIVATE, PropertyAccess.PA_HIDDEN]:
                 access = access_arg
             else:
                 errno = EINVAL
-                output_error("global_create(): unrecognized property access code (PROPERTYACCESS=%d)" % access_arg)
+                print(sys.stderr, "global_create(): unrecognized property access code (PropertyAccess=%d)" % access_arg)
                 # TROUBLESHOOT
                 # The specific property access code is not recognized. Correct the access code and try again.
-        elif prop_type_arg == PROPERTYTYPE.PT_SIZE:
+        elif prop_type_arg == PropertyType.PT_SIZE:
             size = va_args.pop(0)
             if size > 0:
                 addr = [None] * size  # Assuming this is a valid way to initialize an array with None
             else:
-                output_error("global_create(): property size must be greater than 0 to allocate memory")
+                print(sys.stderr, "global_create(): property size must be greater than 0 to allocate memory")
                 # TROUBLESHOOT
                 # The size of the property must be positive.
-        elif prop_type_arg == PROPERTYTYPE.PT_UNITS:
+        elif prop_type_arg == PropertyType.PT_UNITS:
             units = va_args.pop(0)
-        elif prop_type_arg == PROPERTYTYPE.PT_DESCRIPTION:
+        elif prop_type_arg == PropertyType.PT_DESCRIPTION:
             description = va_args.pop(0)
-        elif prop_type_arg == PROPERTYTYPE.PT_DEPRECATED:
+        elif prop_type_arg == PropertyType.PT_DEPRECATED:
             pass  # Do nothing for deprecated properties
         else:
-            output_error("global_create(): property extension code not recognized (PROPERTYTYPE=%d)" % prop_type_arg)
+            print(sys.stderr, "global_create(): property extension code not recognized (PropertyType=%d)" % prop_type_arg)
             # TROUBLESHOOT
             # The property extension code used is not valid. This is probably a bug and should be reported.
 
     # Check for duplicate entries
     if global_find(name):
         errno = EINVAL
-        output_error("tried to create global variable '%s' a second time" % name)
+        print(sys.stderr, "tried to create global variable '%s' a second time" % name)
         # TROUBLESHOOT
         # An attempt to create a global variable failed because the
         # indicated variable already exists. Find out what is attempting
@@ -723,7 +776,7 @@ def global_create(name, *args):
     var.prop = None
     var.next = None
 
-    # # Link global_map to oclass if not yet done
+    # # Link global_map to owner_class if not yet done
     # if lastvar is not None:
     #     lastvar.next = var
     # else:
@@ -732,19 +785,19 @@ def global_create(name, *args):
     # 	/* read the property args */
     # 	va_start(arg, name);
     #
-    # //	while ((proptype = va_arg(arg,PROPERTYTYPE)) != 0){
+    # //	while ((proptype = va_arg(arg,PropertyType)) != 0){
     #     uint64 prop_buffer;
     #     while ((prop_buffer = va_arg(arg, uint64)) != 0) {
-    #         proptype = PROPERTYTYPE(prop_buffer);
+    #         proptype = PropertyType(prop_buffer);
     #         if (proptype > _PT_LAST) {
     #             if (prop == NULL) {
     #                 throw_exception(
     #                         "global_create(char *name='%s',...): property keyword not specified after an enumeration property definition",
     #                         name);
-    #             } else if (proptype == PROPERTYTYPE.PT_KEYWORD && prop->ptype == PROPERTYTYPE.PT_enumeration) {
+    #             } else if (proptype == PropertyType.PT_KEYWORD && prop->global_property_types == PropertyType.PT_enumeration) {
     #                 char *keyword = va_arg(arg, char *);
     #                 int32 keyvalue = va_arg(arg, int32);
-    #                 KEYWORD *key = (KEYWORD *) malloc(sizeof(KEYWORD));
+    #                 Keyword *key = (Keyword *) malloc(sizeof(Keyword));
     #                 if (key == NULL) {
     #                     throw_exception("global_create(char *name='%s',...): property keyword could not be stored" % name);
     #                     /* TROUBLESHOOT
@@ -755,10 +808,10 @@ def global_create(name, *args):
     #                 strncpy(key->name, keyword, sizeof(key->name));
     #                 key->value = keyvalue;
     #                 prop->keywords = key;
-    #             } else if (proptype == PROPERTYTYPE.PT_KEYWORD && prop->ptype == PROPERTYTYPE.PT_set) {
+    #             } else if (proptype == PropertyType.PT_KEYWORD && prop->global_property_types == PropertyType.PT_set) {
     #                 char *keyword = va_arg(arg, char *);
     #                 unsigned int64 keyvalue = va_arg(arg, uint64);
-    #                 KEYWORD *key = (KEYWORD *) malloc(sizeof(KEYWORD));
+    #                 Keyword *key = (Keyword *) malloc(sizeof(Keyword));
     #                 if (key == NULL) {
     #                     throw_exception("global_create(char *name='%s',...): property keyword could not be stored" % name);
     #                     /* TROUBLESHOOT
@@ -769,28 +822,28 @@ def global_create(name, *args):
     #                 strncpy(key->name, keyword, sizeof(key->name));
     #                 key->value = keyvalue;
     #                 prop->keywords = key;
-    #             } else if (proptype == PROPERTYTYPE.PT_ACCESS) {
+    #             } else if (proptype == PropertyType.PT_ACCESS) {
     #                 prop_buffer = va_arg(arg, uint64);
-    #                 PROPERTYACCESS pa = PROPERTYACCESS(prop_buffer);
+    #                 PropertyAccess pa = PropertyAccess(prop_buffer);
     #                 switch (pa) {
-    #                     case PROPERTYACCESS.PA_PUBLIC:
-    #                     case PROPERTYACCESS.PA_REFERENCE:
-    #                     case PROPERTYACCESS.PA_PROTECTED:
-    #                     case PROPERTYACCESS.PA_PRIVATE:
-    #                     case PROPERTYACCESS.PA_HIDDEN:
+    #                     case PropertyAccess.PA_PUBLIC:
+    #                     case PropertyAccess.PA_REFERENCE:
+    #                     case PropertyAccess.PA_PROTECTED:
+    #                     case PropertyAccess.PA_PRIVATE:
+    #                     case PropertyAccess.PA_HIDDEN:
     #                         prop->access = pa;
     #                         break;
     #                     default:
     #                         errno = EINVAL;
     #                         throw_exception(
-    #                                 "global_create(char *name='%s',...): unrecognized property access code (PROPERTYACCESS=%d)",
+    #                                 "global_create(char *name='%s',...): unrecognized property access code (PropertyAccess=%d)",
     #                                 name, pa);
     #                         /* TROUBLESHOOT
     #                             The specific property access code is not recognized.  Correct the access code and try again.
     #                          */
     #                         break;
     #                 }
-    #             } else if (proptype == PROPERTYTYPE.PT_SIZE) {
+    #             } else if (proptype == PropertyType.PT_SIZE) {
     #                 prop->size = va_arg(arg, uint32);
     #                 if (prop->addr == 0) {
     #                     if (prop->size > 0) {
@@ -804,7 +857,7 @@ def global_create(name, *args):
     #                          */
     #                     }
     #                 }
-    #             } else if (proptype == PROPERTYTYPE.PT_UNITS) {
+    #             } else if (proptype == PropertyType.PT_UNITS) {
     #                 char *unitspec = va_arg(arg, char *);
     #                 if ((prop->unit = unit_find(unitspec)) == NULL) {
     #                     output_warning("global_create(char *name='%s',...): property %s unit '%s' is not recognized" % name,
@@ -814,13 +867,13 @@ def global_create(name, *args):
     #                         If you wish to define a new unit, try adding it to <code>.../etc/unitfile.txt</code>.
     #                      */
     #                 }
-    #             } else if (proptype == PROPERTYTYPE.PT_DESCRIPTION) {
+    #             } else if (proptype == PropertyType.PT_DESCRIPTION) {
     #                 prop->description = va_arg(arg, char*);
-    #             } else if (proptype == PROPERTYTYPE.PT_DEPRECATED) {
+    #             } else if (proptype == PropertyType.PT_DEPRECATED) {
     #                 prop->flags |= PF_DEPRECATED;
     #             } else {
     #                 throw_exception(
-    #                         "global_create(char *name='%s',...): property extension code not recognized (PROPERTYTYPE=%d)",
+    #                         "global_create(char *name='%s',...): property extension code not recognized (PropertyType=%d)",
     #                         name, proptype);
     #                 /* TROUBLESHOOT
     #                     The property extension code used is not valid.  This is probably a bug and should be reported.
@@ -847,14 +900,14 @@ def global_create(name, *args):
     #             if (var->prop == NULL)
     #                 var->prop = prop;
     #
-    #             /* link global_map to oclass if not yet done */
+    #             /* link global_map to owner_class if not yet done */
     #             if (lastprop != NULL)
     #                 lastprop->next = prop;
     #             else
     #                 lastprop = prop;
     #
     #             /* save enum property in case keywords come up */
-    #             if (prop->ptype > _PT_LAST)
+    #             if (prop->global_property_types > _PT_LAST)
     #                 prop = NULL;
     #         }
     #     }
@@ -868,7 +921,6 @@ def global_create(name, *args):
     # 		lastvar->next = var;
     # 		lastvar = var;
     # 	}
-
 
     return var
 
@@ -892,7 +944,7 @@ def global_set_var(def_str, *args):
         if v is not None:
             value = v
             # if value != v:
-            #     output_error("global_setvar(char *name='%s',...): value is too long to store")
+            #     print(sys.stderr, "global_setvar(char *name='%s',...): value is too long to store")
             #     return FAILED
 
     if name != "":
@@ -901,28 +953,28 @@ def global_set_var(def_str, *args):
 
         if var is None:
             if global_strictnames:
-                output_error("strict naming prevents implicit creation of %s" % name)
+                print(sys.stderr, "strict naming prevents implicit creation of %s" % name)
                 return FAILED
 
-            var = global_create(name, PROPERTYTYPE.PT_char1024, None,
-                                PROPERTYTYPE.PT_SIZE, 1, PROPERTYTYPE.PT_ACCESS, PROPERTYACCESS.PA_PUBLIC, None)
+            var = global_create(name, PropertyType.PT_char1024, None,
+                                PropertyType.PT_SIZE, 1, PropertyType.PT_ACCESS, PropertyAccess.PA_PUBLIC, None)
             if var is None:
-                output_error("unable to implicitly create the global variable '%s'" % name)
+                print(sys.stderr, "unable to implicitly create the global variable '%s'" % name)
                 return FAILED
 
-        WRITELOCK(globalvar_lock)
+        # WRITELOCK(globalvar_lock)
         retval = class_string_to_property(var.prop, var.prop.prop_addr, value)
-        WRITEUNLOCK(globalvar_lock)
+        # WRITEUNLOCK(globalvar_lock)
 
         if retval == 0:
-            output_error("global_setvar(): unable to set %s to %s" % (name, value))
+            print(sys.stderr, "global_setvar(): unable to set %s to %s" % (name, value))
             return FAILED
         elif var.callback:
             var.callback(var.prop.name)
 
         return SUCCESS
     else:
-        output_error("global variable definition '%s' not formatted correctly" % def_str)
+        print(sys.stderr, "global variable definition '%s' not formatted correctly" % def_str)
         return FAILED
 
 
@@ -946,7 +998,7 @@ def global_guid(buffer, size):
 
         return buffer
     else:
-        output_error("global_guid(...): buffer too small")
+        print(sys.stderr, "global_guid(...): buffer too small")
         return None
 
 
@@ -968,11 +1020,14 @@ def global_run(size):
 def global_now(size):
     if size > 32:
         now = time.time()
+        # tmbuf = datetime.datetime.utcfromtimestamp(now)
+        # buffer = tmbuf.strftime('%Y%m%d-%H%M%S')
+
         tmbuf = time.gmtime(now)
         buffer = time.strftime("%Y%m%d-%H%M%S", tmbuf)
         return buffer
     else:
-        output_error("global_now(...): buffer too small")
+        print(sys.stderr, "global_now(...): buffer too small")
         return None
 
 
@@ -982,7 +1037,7 @@ def global_true(size):
         buffer = True
         return buffer
     else:
-        output_error("global_now(...): buffer too small")
+        print(sys.stderr, "global_now(...): buffer too small")
         return None
 
 
@@ -998,27 +1053,28 @@ def global_seq(buffer, size, name):
         var = global_find(seq)
 
         if var is not None:
-            output_warning("global_seq(char *name='%s'): sequence is already initialized" % seq)
+            print(f"global_seq(char *name='{seq}'): sequence is already initialized")
             return None
         else:
             addr = [0]
-            var = global_create(seq, PROPERTYTYPE.PT_int32, addr, PROPERTYTYPE.PT_ACCESS, PROPERTYACCESS.PA_PUBLIC, None)
+            var = global_create(seq, PropertyType.PT_int32, addr, PropertyType.PT_ACCESS, PropertyAccess.PA_PUBLIC,
+                                None)
             addr[0] = 0
             return global_get_var(seq, buffer, size)
     elif opt == "INC":
         var = global_find(seq)
         addr = None
 
-        if var is None or var.prop.ptype != PROPERTYTYPE.PT_int32:
-            output_error("global_seq(char *name='%s'): sequence name is missing or not an int32 variable" % name)
+        if var is None or var.prop.global_property_types != PropertyType.PT_int32:
+            print(sys.stderr, "global_seq(char *name='%s'): sequence name is missing or not an int32 variable" % name)
             return None
 
         addr = var.prop.prop_addr
         addr[0] += 1
-        output_debug("updating global sequence '%s' to value '%d'" % (seq, addr[0]))
+        print(f"updating global sequence '{seq}' to value '{addr[0]}'")
         return global_get_var(seq, buffer, size)
     else:
-        output_error("global_seq(..., char *name='%s'): sequence spec '%s' is invalid" % (name, opt))
+        print(sys.stderr, "global_seq(..., char *name='%s'): sequence spec '%s' is invalid" % (name, opt))
         return None
 
 
@@ -1064,7 +1120,7 @@ def parameter_expansion(buffer, size, spec):
         name, offset, length = match.groups()
         temp = global_get_var(name, "", 1024)
         if temp:
-            buffer = temp[offset:offset+length]
+            buffer = temp[offset:offset + length]
             buffer = buffer[:size]
             return (name, value, pattern, op, string, yes, no, offset, length, number)
         else:
@@ -1120,7 +1176,7 @@ def parameter_expansion(buffer, size, spec):
     if match:
         name = match.group(1)
         var = global_find(name)
-        if var and var.prop.ptype == PROPERTYTYPE.PT_int32:
+        if var and var.prop.global_property_types == PropertyType.PT_int32:
             addr = var.prop.prop_addr
             buffer = str(addr[0] + 1)
             return (name, value, pattern, op, string, yes, no, offset, length, number)
@@ -1130,7 +1186,7 @@ def parameter_expansion(buffer, size, spec):
     if match:
         name = match.group(1)
         var = global_find(name)
-        if var and var.prop.ptype == PROPERTYTYPE.PT_int32:
+        if var and var.prop.global_property_types == PropertyType.PT_int32:
             addr = var.prop.prop_addr
             buffer = str(addr[0] - 1)
             return (name, value, pattern, op, string, yes, no, offset, length, number)
@@ -1140,7 +1196,7 @@ def parameter_expansion(buffer, size, spec):
     if match:
         name, op, number, yes, no = match.groups()
         var = global_find(name)
-        if var and var.prop.ptype == PROPERTYTYPE.PT_int32:
+        if var and var.prop.global_property_types == PropertyType.PT_int32:
             addr = var.prop.prop_addr
             if op == "==":
                 buffer = yes if addr[0] == int(number) else no
@@ -1172,7 +1228,7 @@ def parameter_expansion(buffer, size, spec):
     if match:
         name, op, number = match.groups()
         var = global_find(name)
-        if var and var.prop.ptype == PROPERTYTYPE.PT_int32:
+        if var and var.prop.global_property_types == PropertyType.PT_int32:
             addr = var.prop.prop_addr
             buffer = str(addr[0])
             if op == "+=":
@@ -1228,7 +1284,8 @@ def parameter_expansion(buffer, size, spec):
         addr = None
         if var is None:
             addr = [int(number)]
-            var = global_create(name, PROPERTYTYPE.PT_int32, addr, PROPERTYTYPE.PT_ACCESS, PROPERTYACCESS.PA_PUBLIC, None)
+            var = global_create(name, PropertyType.PT_int32, addr, PropertyType.PT_ACCESS, PropertyAccess.PA_PUBLIC,
+                                None)
         else:
             addr = var.prop.prop_addr
             addr[0] = int(number)
@@ -1274,13 +1331,13 @@ def global_get_var(name, buffer, size):
 
     # Check for buffer, name, and size validity
     if buffer is None:
-        output_error("global_getvar: buffer not supplied")
+        print(sys.stderr, "global_getvar: buffer not supplied")
         return None
     if name is None:
-        output_error("global_getvar: variable name not supplied")
+        print(sys.stderr, "global_getvar: variable name not supplied")
         return None
     if size < 1:
-        output_error("global_getvar: invalid buffer size")
+        print(sys.stderr, "global_getvar: invalid buffer size")
         return None  # User error
 
     # Special variables
@@ -1304,11 +1361,11 @@ def global_get_var(name, buffer, size):
         else:
             return None
 
-    len_ = Class.property_to_string(var.prop, var.prop.addr, temp, len(temp))
-    if len_ < size:
-        # If we have enough space, copy to the supplied buffer
-        buffer[:len_] = temp[:len_]
-        return buffer  # Wrote buffer, return pointer for printf functions
+    # len_ = DynamicClass.property_to_string(var.prop, var.prop.addr, temp, len(temp))
+    # if len_ < size:
+    #     # If we have enough space, copy to the supplied buffer
+    #     buffer[:len_] = temp[:len_]
+    #     return buffer  # Wrote buffer, return pointer for printf functions
 
     return None  # None if insufficient buffer space
 
@@ -1339,8 +1396,8 @@ def global_dump():
     while var is not None:
         var = global_get_next(var)
         buffer = [0] * 1024
-        if Class.property_to_string(var.prop, var.prop.addr, buffer, len(buffer)):
-            print(f"{var.prop.name}={buffer};")
+        # if DynamicClass.property_to_string(var.prop, var.prop.addr, buffer, len(buffer)):
+        #     print(f"{var.prop.name}={buffer};")
     global_suppress_repeat_messages = old
 
 
@@ -1352,7 +1409,7 @@ def global_remote_read(local, var):
     :param var: Global variable from which to get data.
     :return: Local memory with data copied from the global variable.
     """
-    size = property_size(var.prop)
+    size = len(var.prop)
     addr = var.prop.addr
     global global_multirun_mode
     # Single host
@@ -1381,7 +1438,7 @@ def global_remote_write(local, var):
     :param local: Local memory for data.
     :param var: Global variable to which data is written.
     """
-    size = property_size(var.prop)
+    size = len(var.prop)
     addr = var.prop.addr
 
     # Single host
@@ -1401,132 +1458,256 @@ def global_remote_write(local, var):
         pass  # Placeholder for multihost implementation
 
 
-# Property global_map
+# PropertyMap global_map
 global_map = [
-    {"name": "version.major", "type": PROPERTYTYPE.PT_int32, "addr": global_version_major, "access": PROPERTYACCESS.PA_REFERENCE, "description": "major version"},
-    {"name": "version.minor", "type": PROPERTYTYPE.PT_int32, "addr": global_version_minor, "access": PROPERTYACCESS.PA_REFERENCE, "description": "minor version"},
-    {"name": "version.patch", "type": PROPERTYTYPE.PT_int32, "addr": global_version_patch, "access": PROPERTYACCESS.PA_REFERENCE, "description": "patch number"},
-    {"name": "version.build", "type": PROPERTYTYPE.PT_int32, "addr": global_version_build, "access": PROPERTYACCESS.PA_REFERENCE, "description": "build number"},
-    {"name": "version.branch", "type": PROPERTYTYPE.PT_char256, "addr": global_version_branch, "access": PROPERTYACCESS.PA_REFERENCE, "description": "branch name"},
-    {"name": "command_line", "type": PROPERTYTYPE.PT_char1024, "addr": global_command_line, "access": PROPERTYACCESS.PA_REFERENCE, "description": "command line"},
-    {"name": "environment", "type": PROPERTYTYPE.PT_char1024, "addr": global_environment, "access": PROPERTYACCESS.PA_PUBLIC, "description": "operating environment"},
-    {"name": "quiet", "type": PROPERTYTYPE.PT_bool, "addr": global_quiet_mode, "access": PROPERTYACCESS.PA_PUBLIC, "description": "quiet output status flag"},
-    {"name": "warn", "type": PROPERTYTYPE.PT_bool, "addr": global_warn_mode, "access": PROPERTYACCESS.PA_PUBLIC, "description": "warning output status flag"},
-    {"name": "debugger", "type": PROPERTYTYPE.PT_bool, "addr": global_debug_mode, "access": PROPERTYACCESS.PA_PUBLIC, "description": "debugger enable flag"},
-    {"name": "gdb", "type": PROPERTYTYPE.PT_bool, "addr": global_gdb, "access": PROPERTYACCESS.PA_PUBLIC, "description": "gdb enable flag"},
-    {"name": "debug", "type": PROPERTYTYPE.PT_bool, "addr": global_debug_output, "access": PROPERTYACCESS.PA_PUBLIC, "description": "debug output status flag"},
-    {"name": "test", "type": PROPERTYTYPE.PT_bool, "addr": global_debug_mode, "access": PROPERTYACCESS.PA_PUBLIC, "description": "test enable flag"},
-    {"name": "verbose", "type": PROPERTYTYPE.PT_bool, "addr": global_verbose_mode, "access": PROPERTYACCESS.PA_PUBLIC, "description": "verbose enable flag"},
-    {"name": "iteration_limit", "type": PROPERTYTYPE.PT_int32, "addr": global_iteration_limit, "access": PROPERTYACCESS.PA_PUBLIC, "description": "iteration limit"},
-    {"name": "federation_reiteration", "type": PROPERTYTYPE.PT_bool, "addr": global_federation_reiteration, "access": PROPERTYACCESS.PA_REFERENCE, "description": "global boolean to enforce a reiteration for all modules due to an external federation reiteration"},
-    {"name": "workdir", "type": PROPERTYTYPE.PT_char1024, "addr": global_workdir, "access": PROPERTYACCESS.PA_REFERENCE, "description": "working directory"},
-    {"name": "lock", "type": PROPERTYTYPE.PT_bool, "addr": global_lock_enabled, "access": PROPERTYACCESS.PA_PUBLIC, "description": "lock enabled flag"},
-    {"name": "dumpfile", "type": PROPERTYTYPE.PT_char1024, "addr": global_dumpfile, "access": PROPERTYACCESS.PA_PUBLIC, "description": "dump input_code_filename"},
-    {"name": "savefile", "type": PROPERTYTYPE.PT_char1024, "addr": global_savefile, "access": PROPERTYACCESS.PA_PUBLIC, "description": "save input_code_filename"},
-    {"name": "dumpall", "type": PROPERTYTYPE.PT_bool, "addr": global_dumpall, "access": PROPERTYACCESS.PA_PUBLIC, "description": "dumpall enable flag"},
-    {"name": "runchecks", "type": PROPERTYTYPE.PT_bool, "addr": global_runchecks, "access": PROPERTYACCESS.PA_PUBLIC, "description": "runchecks enable flag"},
-    {"name": "threadcount", "type": PROPERTYTYPE.PT_int32, "addr": global_thread_count, "access": PROPERTYACCESS.PA_PUBLIC, "description": "number of threads to use while using multicore"},
-    {"name": "profiler", "type": PROPERTYTYPE.PT_bool, "addr": global_profiler, "access": PROPERTYACCESS.PA_PUBLIC, "description": "profiler enable flag"},
-    {"name": "pauseatexit", "type": PROPERTYTYPE.PT_bool, "addr": global_pauseatexit, "access": PROPERTYACCESS.PA_PUBLIC, "description": "pause at exit flag"},
-    {"name": "testoutputfile", "type": PROPERTYTYPE.PT_char1024, "addr": global_testoutputfile, "access": PROPERTYACCESS.PA_PUBLIC, "description": "input_code_filename for test output"},
-    {"name": "xml_encoding", "type": PROPERTYTYPE.PT_int32, "addr": global_xml_encoding, "access": PROPERTYACCESS.PA_PUBLIC, "description": "XML data encoding"},
-    {"name": "clock", "type": PROPERTYTYPE.PT_timestamp, "addr": global_clock, "access": PROPERTYACCESS.PA_PUBLIC, "description": "global clock"},
-    {"name": "starttime", "type": PROPERTYTYPE.PT_timestamp, "addr": global_start_time, "access": PROPERTYACCESS.PA_PUBLIC, "description": "simulation start time"},
-    {"name": "stoptime", "type": PROPERTYTYPE.PT_timestamp, "addr": global_stop_time, "access": PROPERTYACCESS.PA_PUBLIC, "description": "simulation stop time"},
-    {"name": "double_format", "type": PROPERTYTYPE.PT_char32, "addr": global_double_format, "access": PROPERTYACCESS.PA_PUBLIC, "description": "format for writing double values"},
-    {"name": "complex_format", "type": PROPERTYTYPE.PT_char256, "addr": global_complex_format, "access": PROPERTYACCESS.PA_PUBLIC, "description": "format for writing complex values"},
-    {"name": "complex_output_format", "type": PROPERTYTYPE.PT_enumeration, "addr": global_complex_output_format, "access": PROPERTYACCESS.PA_PUBLIC, "description": "complex output representation", "enum_keys": cnf_keys},
-    {"name": "object_format", "type": PROPERTYTYPE.PT_char32, "addr": global_object_format, "access": PROPERTYACCESS.PA_PUBLIC, "description": "format for writing anonymous object names"},
-    {"name": "object_scan", "type": PROPERTYTYPE.PT_char32, "addr": global_object_scan, "access": PROPERTYACCESS.PA_PUBLIC, "description": "format for reading anonymous object names"},
-    {"name": "object_tree_balance", "type": PROPERTYTYPE.PT_bool, "addr": global_no_balance, "access": PROPERTYACCESS.PA_PUBLIC, "description": "object index tree balancing enable flag"},
-    {"name": "kmlfile", "type": PROPERTYTYPE.PT_char1024, "addr": global_kmlfile, "access": PROPERTYACCESS.PA_PUBLIC, "description": "KML output file name"},
-    {"name": "modelname", "type": PROPERTYTYPE.PT_char1024, "addr": global_modelname, "access": PROPERTYACCESS.PA_REFERENCE, "description": "model name"},
-    {"name": "execdir", "type": PROPERTYTYPE.PT_char1024, "addr": global_execdir, "access": PROPERTYACCESS.PA_REFERENCE, "description": "directory where executable binary was found"},
-    {"name": "strictnames", "type": PROPERTYTYPE.PT_bool, "addr": global_strictnames, "access": PROPERTYACCESS.PA_PUBLIC, "description": "strict global name enable flag"},
-    {"name": "website", "type": PROPERTYTYPE.PT_char1024, "addr": global_urlbase, "access": PROPERTYACCESS.PA_PUBLIC, "description": "url base string (deprecated)"}, # @todo deprecate use of 'website'
-    {"name": "urlbase", "type": PROPERTYTYPE.PT_char1024, "addr": global_urlbase, "access": PROPERTYACCESS.PA_PUBLIC, "description": "url base string"},
-    {"name": "randomseed", "type": PROPERTYTYPE.PT_int32, "addr": global_randomseed, "access": PROPERTYACCESS.PA_PUBLIC, "description": "random number generator seed value", "enum_keys": None, "enum_function": random_init},
-    {"name": "include", "type": PROPERTYTYPE.PT_char1024, "addr": global_include, "access": PROPERTYACCESS.PA_REFERENCE, "description": "include folder path"},
-    {"name": "trace", "type": PROPERTYTYPE.PT_char1024, "addr": global_trace, "access": PROPERTYACCESS.PA_PUBLIC, "description": "trace function list"},
-    {"name": "gdb_window", "type": PROPERTYTYPE.PT_bool, "addr": global_gdb_window, "access": PROPERTYACCESS.PA_PUBLIC, "description": "gdb window enable flag"},
-    {"name": "tmp", "type": PROPERTYTYPE.PT_char1024, "addr": global_tmp, "access": PROPERTYACCESS.PA_PUBLIC, "description": "temporary folder name"},
-    {"name": "force_compile", "type": PROPERTYTYPE.PT_int32, "addr": global_force_compile, "access": PROPERTYACCESS.PA_PUBLIC, "description": "force recompile enable flag"},
-    {"name": "nolocks", "type": PROPERTYTYPE.PT_bool, "addr": global_nolocks, "access": PROPERTYACCESS.PA_PUBLIC, "description": "locking disable flag"},
-    {"name": "skipsafe", "type": PROPERTYTYPE.PT_bool, "addr": global_skipsafe, "access": PROPERTYACCESS.PA_PUBLIC, "description": "skip sync safe enable flag"},
-    {"name": "dateformat", "type": PROPERTYTYPE.PT_enumeration, "addr": global_dateformat, "access": PROPERTYACCESS.PA_PUBLIC, "description": "date format string", "enum_keys": df_keys},
-    {"name": "init_sequence", "type": PROPERTYTYPE.PT_enumeration, "addr": global_init_sequence, "access": PROPERTYACCESS.PA_PUBLIC, "description": "initialization sequence control flag", "enum_keys": isc_keys},
-    {"name": "minimum_timestep", "type": PROPERTYTYPE.PT_int32, "addr": global_minimum_timestep, "access": PROPERTYACCESS.PA_PUBLIC, "description": "minimum timestep"},
-    {"name": "platform", "type": PROPERTYTYPE.PT_char8, "addr": global_platform, "access": PROPERTYACCESS.PA_REFERENCE, "description": "operating platform"},
-    {"name": "suppress_repeat_messages", "type": PROPERTYTYPE.PT_bool, "addr": global_suppress_repeat_messages, "access": PROPERTYACCESS.PA_PUBLIC, "description": "suppress repeated messages enable flag"},
-    {"name": "maximum_synctime", "type": PROPERTYTYPE.PT_int32, "addr": global_maximum_synctime, "access": PROPERTYACCESS.PA_PUBLIC, "description": "maximum sync time for deltamode"},
-    {"name": "run_realtime", "type": PROPERTYTYPE.PT_bool, "addr": global_run_realtime, "access": PROPERTYACCESS.PA_PUBLIC, "description": "realtime enable flag"},
-    {"name": "enter_realtime", "type": PROPERTYTYPE.PT_timestamp, "addr": global_enter_realtime, "access": PROPERTYACCESS.PA_PUBLIC, "description": "timestamp to transition to realtime mode"},
-    {"name": "realtime_metric", "type": PROPERTYTYPE.PT_double, "addr": global_realtime_metric, "access": PROPERTYACCESS.PA_REFERENCE, "description": "realtime performance metric (0=worst, 1=best)"},
-    {"name": "no_deprecate", "type": PROPERTYTYPE.PT_bool, "addr": global_suppress_deprecated_messages, "access": PROPERTYACCESS.PA_PUBLIC, "description": "suppress deprecated usage message enable flag"},
-    # Continue with the remaining entries...
+    {"name": "version.major", "global_property_types": PropertyType.PT_int32, "addr": global_version_major,
+     "access": PropertyAccess.PA_REFERENCE, "description": "major version"},
+    {"name": "version.minor", "global_property_types": PropertyType.PT_int32, "addr": global_version_minor,
+     "access": PropertyAccess.PA_REFERENCE, "description": "minor version"},
+    {"name": "version.patch", "global_property_types": PropertyType.PT_int32, "addr": global_version_patch,
+     "access": PropertyAccess.PA_REFERENCE, "description": "patch number"},
+    {"name": "version.build", "global_property_types": PropertyType.PT_int32, "addr": global_version_build,
+     "access": PropertyAccess.PA_REFERENCE, "description": "build number"},
+    {"name": "version.branch", "global_property_types": PropertyType.PT_char256, "addr": global_version_branch,
+     "access": PropertyAccess.PA_REFERENCE, "description": "branch name"},
+    {"name": "command_line", "global_property_types": PropertyType.PT_char1024, "addr": global_command_line,
+     "access": PropertyAccess.PA_REFERENCE, "description": "command line"},
+    {"name": "environment", "global_property_types": PropertyType.PT_char1024, "addr": global_environment,
+     "access": PropertyAccess.PA_PUBLIC, "description": "operating environment"},
+    {"name": "quiet", "global_property_types": PropertyType.PT_bool, "addr": global_quiet_mode, "access": PropertyAccess.PA_PUBLIC,
+     "description": "quiet output status flag"},
+    {"name": "warn", "global_property_types": PropertyType.PT_bool, "addr": global_warn_mode, "access": PropertyAccess.PA_PUBLIC,
+     "description": "warning output status flag"},
+    {"name": "debugger", "global_property_types": PropertyType.PT_bool, "addr": global_debug_mode, "access": PropertyAccess.PA_PUBLIC,
+     "description": "debugger enable flag"},
+    {"name": "gdb", "global_property_types": PropertyType.PT_bool, "addr": global_gdb, "access": PropertyAccess.PA_PUBLIC,
+     "description": "gdb enable flag"},
+    {"name": "debug", "global_property_types": PropertyType.PT_bool, "addr": global_debug_output, "access": PropertyAccess.PA_PUBLIC,
+     "description": "debug output status flag"},
+    {"name": "test", "global_property_types": PropertyType.PT_bool, "addr": global_debug_mode, "access": PropertyAccess.PA_PUBLIC,
+     "description": "test enable flag"},
+    {"name": "verbose", "global_property_types": PropertyType.PT_bool, "addr": global_verbose_mode, "access": PropertyAccess.PA_PUBLIC,
+     "description": "verbose enable flag"},
+    {"name": "iteration_limit", "global_property_types": PropertyType.PT_int32, "addr": global_iteration_limit,
+     "access": PropertyAccess.PA_PUBLIC, "description": "iteration limit"},
+    {"name": "federation_reiteration", "global_property_types": PropertyType.PT_bool, "addr": global_federation_reiteration,
+     "access": PropertyAccess.PA_REFERENCE,
+     "description": "global boolean to enforce a reiteration for all modules due to an external federation reiteration"},
+    {"name": "workdir", "global_property_types": PropertyType.PT_char1024, "addr": global_workdir, "access": PropertyAccess.PA_REFERENCE,
+     "description": "working directory"},
+    {"name": "lock", "global_property_types": PropertyType.PT_bool, "addr": global_lock_enabled, "access": PropertyAccess.PA_PUBLIC,
+     "description": "lock enabled flag"},
+    {"name": "dumpfile", "global_property_types": PropertyType.PT_char1024, "addr": global_dumpfile, "access": PropertyAccess.PA_PUBLIC,
+     "description": "dump input_code_filename"},
+    {"name": "savefile", "global_property_types": PropertyType.PT_char1024, "addr": global_savefile, "access": PropertyAccess.PA_PUBLIC,
+     "description": "save input_code_filename"},
+    {"name": "dumpall", "global_property_types": PropertyType.PT_bool, "addr": global_dumpall, "access": PropertyAccess.PA_PUBLIC,
+     "description": "dumpall enable flag"},
+    {"name": "runchecks", "global_property_types": PropertyType.PT_bool, "addr": global_runchecks, "access": PropertyAccess.PA_PUBLIC,
+     "description": "runchecks enable flag"},
+    {"name": "threadcount", "global_property_types": PropertyType.PT_int32, "addr": global_thread_count,
+     "access": PropertyAccess.PA_PUBLIC, "description": "number of threads to use while using multicore"},
+    {"name": "profiler", "global_property_types": PropertyType.PT_bool, "addr": global_profiler, "access": PropertyAccess.PA_PUBLIC,
+     "description": "profiler enable flag"},
+    {"name": "pauseatexit", "global_property_types": PropertyType.PT_bool, "addr": global_pauseatexit,
+     "access": PropertyAccess.PA_PUBLIC, "description": "pause at exit flag"},
+    {"name": "testoutputfile", "global_property_types": PropertyType.PT_char1024, "addr": global_testoutputfile,
+     "access": PropertyAccess.PA_PUBLIC, "description": "input_code_filename for test output"},
+    {"name": "xml_encoding", "global_property_types": PropertyType.PT_int32, "addr": global_xml_encoding,
+     "access": PropertyAccess.PA_PUBLIC, "description": "XML data encoding"},
+    {"name": "clock", "global_property_types": PropertyType.PT_timestamp, "addr": global_clock, "access": PropertyAccess.PA_PUBLIC,
+     "description": "global clock"},
+    {"name": "starttime", "global_property_types": PropertyType.PT_timestamp, "addr": global_start_time,
+     "access": PropertyAccess.PA_PUBLIC, "description": "simulation start time"},
+    {"name": "stoptime", "global_property_types": PropertyType.PT_timestamp, "addr": global_stop_time,
+     "access": PropertyAccess.PA_PUBLIC, "description": "simulation stop time"},
+    {"name": "double_format", "global_property_types": PropertyType.PT_char32, "addr": global_double_format,
+     "access": PropertyAccess.PA_PUBLIC, "description": "format for writing double values"},
+    {"name": "complex_format", "global_property_types": PropertyType.PT_char256, "addr": global_complex_format,
+     "access": PropertyAccess.PA_PUBLIC, "description": "format for writing complex values"},
+    {"name": "complex_output_format", "global_property_types": PropertyType.PT_enumeration, "addr": global_complex_output_format,
+     "access": PropertyAccess.PA_PUBLIC, "description": "complex output representation", "enum_keys": cnf_keys},
+    {"name": "object_format", "global_property_types": PropertyType.PT_char32, "addr": global_object_format,
+     "access": PropertyAccess.PA_PUBLIC, "description": "format for writing anonymous object names"},
+    {"name": "object_scan", "global_property_types": PropertyType.PT_char32, "addr": global_object_scan,
+     "access": PropertyAccess.PA_PUBLIC, "description": "format for reading anonymous object names"},
+    {"name": "object_tree_balance", "global_property_types": PropertyType.PT_bool, "addr": global_no_balance,
+     "access": PropertyAccess.PA_PUBLIC, "description": "object index tree balancing enable flag"},
+    {"name": "kmlfile", "global_property_types": PropertyType.PT_char1024, "addr": global_kmlfile, "access": PropertyAccess.PA_PUBLIC,
+     "description": "KML output file name"},
+    {"name": "modelname", "global_property_types": PropertyType.PT_char1024, "addr": global_modelname,
+     "access": PropertyAccess.PA_REFERENCE, "description": "model name"},
+    {"name": "execdir", "global_property_types": PropertyType.PT_char1024, "addr": global_execdir, "access": PropertyAccess.PA_REFERENCE,
+     "description": "directory where executable binary was found"},
+    {"name": "strictnames", "global_property_types": PropertyType.PT_bool, "addr": global_strictnames,
+     "access": PropertyAccess.PA_PUBLIC, "description": "strict global name enable flag"},
+    {"name": "website", "global_property_types": PropertyType.PT_char1024, "addr": global_urlbase, "access": PropertyAccess.PA_PUBLIC,
+     "description": "url base string (deprecated)"},  # @todo deprecate use of 'website'
+    {"name": "urlbase", "global_property_types": PropertyType.PT_char1024, "addr": global_urlbase, "access": PropertyAccess.PA_PUBLIC,
+     "description": "url base string"},
+    {"name": "randomseed", "global_property_types": PropertyType.PT_int32, "addr": global_randomseed, "access": PropertyAccess.PA_PUBLIC,
+     "description": "random number generator seed value", "enum_keys": None, "enum_function": random_init},
+    {"name": "include", "global_property_types": PropertyType.PT_char1024, "addr": global_include, "access": PropertyAccess.PA_REFERENCE,
+     "description": "include folder path"},
+    {"name": "trace", "global_property_types": PropertyType.PT_char1024, "addr": global_trace, "access": PropertyAccess.PA_PUBLIC,
+     "description": "trace function list"},
+    {"name": "gdb_window", "global_property_types": PropertyType.PT_bool, "addr": global_gdb_window, "access": PropertyAccess.PA_PUBLIC,
+     "description": "gdb window enable flag"},
+    {"name": "tmp", "global_property_types": PropertyType.PT_char1024, "addr": global_tmp, "access": PropertyAccess.PA_PUBLIC,
+     "description": "temporary folder name"},
+    {"name": "force_compile", "global_property_types": PropertyType.PT_int32, "addr": global_force_compile,
+     "access": PropertyAccess.PA_PUBLIC, "description": "force recompile enable flag"},
+    {"name": "nolocks", "global_property_types": PropertyType.PT_bool, "addr": global_nolocks, "access": PropertyAccess.PA_PUBLIC,
+     "description": "locking disable flag"},
+    {"name": "skipsafe", "global_property_types": PropertyType.PT_bool, "addr": global_skipsafe, "access": PropertyAccess.PA_PUBLIC,
+     "description": "skip sync safe enable flag"},
+    {"name": "dateformat", "global_property_types": PropertyType.PT_enumeration, "addr": global_dateformat,
+     "access": PropertyAccess.PA_PUBLIC, "description": "date format string", "enum_keys": df_keys},
+    {"name": "init_sequence", "global_property_types": PropertyType.PT_enumeration, "addr": global_init_sequence,
+     "access": PropertyAccess.PA_PUBLIC, "description": "initialization sequence control flag", "enum_keys": isc_keys},
+    {"name": "minimum_timestep", "global_property_types": PropertyType.PT_int32, "addr": global_minimum_timestep,
+     "access": PropertyAccess.PA_PUBLIC, "description": "minimum timestep"},
+    {"name": "platform", "global_property_types": PropertyType.PT_char8, "addr": global_platform, "access": PropertyAccess.PA_REFERENCE,
+     "description": "operating platform"},
+    {"name": "suppress_repeat_messages", "global_property_types": PropertyType.PT_bool, "addr": global_suppress_repeat_messages,
+     "access": PropertyAccess.PA_PUBLIC, "description": "suppress repeated messages enable flag"},
+    {"name": "maximum_synctime", "global_property_types": PropertyType.PT_int32, "addr": global_maximum_synctime,
+     "access": PropertyAccess.PA_PUBLIC, "description": "maximum sync time for deltamode"},
+    {"name": "run_realtime", "global_property_types": PropertyType.PT_bool, "addr": global_run_realtime,
+     "access": PropertyAccess.PA_PUBLIC, "description": "realtime enable flag"},
+    {"name": "enter_realtime", "global_property_types": PropertyType.PT_timestamp, "addr": global_enter_realtime,
+     "access": PropertyAccess.PA_PUBLIC, "description": "timestamp to transition to realtime mode"},
+    {"name": "realtime_metric", "global_property_types": PropertyType.PT_double, "addr": global_realtime_metric,
+     "access": PropertyAccess.PA_REFERENCE, "description": "realtime performance metric (0=worst, 1=best)"},
+    {"name": "no_deprecate", "global_property_types": PropertyType.PT_bool, "addr": global_suppress_deprecated_messages,
+     "access": PropertyAccess.PA_PUBLIC, "description": "suppress deprecated usage message enable flag"},
 ]
 
-
 global_map += [
-    {"name": "sync_dumpfile", "type": PROPERTYTYPE.PT_char1024, "addr": global_sync_dumpfile, "access": PROPERTYACCESS.PA_PUBLIC, "description": "sync event dump file name"},
-    {"name": "streaming_io", "type": PROPERTYTYPE.PT_bool, "addr": global_streaming_io_enabled, "access": PROPERTYACCESS.PA_PROTECTED, "description": "streaming I/O enable flag"},
-    {"name": "compileonly", "type": PROPERTYTYPE.PT_bool, "addr": global_compileonly, "access": PROPERTYACCESS.PA_PROTECTED, "description": "compile only enable flag"},
-    {"name": "relax_naming_rules", "type": PROPERTYTYPE.PT_bool, "addr": global_relax_naming_rules, "access": PROPERTYACCESS.PA_PUBLIC, "description": "relax object naming rules enable flag"},
-    {"name": "browser", "type": PROPERTYTYPE.PT_char1024, "addr": global_browser, "access": PROPERTYACCESS.PA_PUBLIC, "description": "browser selection"},
-    {"name": "server_portnum", "type": PROPERTYTYPE.PT_int32, "addr": global_server_port_num, "access": PROPERTYACCESS.PA_PUBLIC, "description": "server port number (default is find first open starting at 6267)"},
-    {"name": "server_quit_on_close", "type": PROPERTYTYPE.PT_bool, "addr": global_server_quit_on_close, "access": PROPERTYACCESS.PA_PUBLIC, "description": "server quit on connection closed enable flag"},
-    {"name": "client_allowed", "type": PROPERTYTYPE.PT_char1024, "addr": global_client_allowed, "access": PROPERTYACCESS.PA_PUBLIC, "description": "clients from which to accept connections"},
-    {"name": "autoclean", "type": PROPERTYTYPE.PT_bool, "addr": global_autoclean, "access": PROPERTYACCESS.PA_PUBLIC, "description": "autoclean enable flag"},
-    {"name": "technology_readiness_level", "type": PROPERTYTYPE.PT_enumeration, "addr": technology_readiness_level, "access": PROPERTYACCESS.PA_PUBLIC, "description": "technology readiness level", "enum_keys": trl_keys},
-    {"name": "show_progress", "type": PROPERTYTYPE.PT_bool, "addr": global_show_progress, "access": PROPERTYACCESS.PA_PUBLIC, "description": "show progress enable flag"},
-    {"name": "checkpoint_type", "type": PROPERTYTYPE.PT_enumeration, "addr": global_checkpoint_type, "access": PROPERTYACCESS.PA_PUBLIC, "description": "checkpoint type usage flag", "enum_keys": cpt_keys},
-    {"name": "checkpoint_file", "type": PROPERTYTYPE.PT_char1024, "addr": global_checkpoint_file, "access": PROPERTYACCESS.PA_PUBLIC, "description": "checkpoint file base name"},
-    {"name": "checkpoint_seqnum", "type": PROPERTYTYPE.PT_int32, "addr": global_checkpoint_seqnum, "access": PROPERTYACCESS.PA_PUBLIC, "description": "checkpoint sequence number"},
-    {"name": "checkpoint_interval", "type": PROPERTYTYPE.PT_int32, "addr": global_checkpoint_interval, "access": PROPERTYACCESS.PA_PUBLIC, "description": "checkpoint interval"},
-    {"name": "checkpoint_keepall", "type": PROPERTYTYPE.PT_bool, "addr": global_checkpoint_keepall, "access": PROPERTYACCESS.PA_PUBLIC, "description": "checkpoint file keep enable flag"},
-    {"name": "check_version", "type": PROPERTYTYPE.PT_bool, "addr": global_check_version, "access": PROPERTYACCESS.PA_PUBLIC, "description": "check version enable flag"},
-    {"name": "random_number_generator", "type": PROPERTYTYPE.PT_enumeration, "addr": global_randomnumbergenerator, "access": PROPERTYACCESS.PA_PUBLIC, "description": "random number generator version control flag", "enum_keys": rng_keys},
-    {"name": "mainloop_state", "type": PROPERTYTYPE.PT_enumeration, "addr": global_mainloopstate, "access": PROPERTYACCESS.PA_PUBLIC, "description": "main sync loop state flag", "enum_keys": mls_keys},
-    {"name": "pauseat", "type": PROPERTYTYPE.PT_timestamp, "addr": global_mainlooppauseat, "access": PROPERTYACCESS.PA_PUBLIC, "description": "pause at time"},
-    {"name": "infourl", "type": PROPERTYTYPE.PT_char1024, "addr": global_infourl, "access": PROPERTYACCESS.PA_PUBLIC, "description": "URL to use for obtaining online help"},
-    {"name": "hostname", "type": PROPERTYTYPE.PT_char1024, "addr": global_hostname, "access": PROPERTYACCESS.PA_PUBLIC, "description": "unused"},
-    {"name": "hostaddr", "type": PROPERTYTYPE.PT_char32, "addr": global_hostaddr, "access": PROPERTYACCESS.PA_PUBLIC, "description": "unused"},
-    {"name": "autostart_gui", "type": PROPERTYTYPE.PT_bool, "addr": global_autostartgui, "access": PROPERTYACCESS.PA_PUBLIC, "description": "automatic GUI start enable flag"},
-    {"name": "master", "type": PROPERTYTYPE.PT_char1024, "addr": global_master, "access": PROPERTYACCESS.PA_PUBLIC, "description": "master server hostname"},
-    {"name": "master_port", "type": PROPERTYTYPE.PT_int64, "addr": global_master_port, "access": PROPERTYACCESS.PA_PUBLIC, "description": "master server port number"},
-    {"name": "multirun_mode", "type": PROPERTYTYPE.PT_enumeration, "addr": global_multirun_mode, "access": PROPERTYACCESS.PA_PUBLIC, "description": "multirun enable flag", "enum_keys": mrm_keys},
-    {"name": "multirun_conn", "type": PROPERTYTYPE.PT_enumeration, "addr": global_multirun_connection, "access": PROPERTYACCESS.PA_PUBLIC, "description": "unused", "enum_keys": mrc_keys},
-    {"name": "signal_timeout", "type": PROPERTYTYPE.PT_int32, "addr": global_signal_timeout, "access": PROPERTYACCESS.PA_PUBLIC, "description": "unused"},
-    {"name": "slave_port", "type": PROPERTYTYPE.PT_int16, "addr": global_slave_port, "access": PROPERTYACCESS.PA_PUBLIC, "description": "unused"},
-    {"name": "slave_id", "type": PROPERTYTYPE.PT_int64, "addr": global_slave_id, "access": PROPERTYACCESS.PA_PUBLIC, "description": "unused"},
-    {"name": "return_code", "type": PROPERTYTYPE.PT_int32, "addr": global_return_code, "access": PROPERTYACCESS.PA_REFERENCE, "description": "unused"},
-    {"name": "exit_code", "type": PROPERTYTYPE.PT_int16, "addr": global_exit_code, "access": PROPERTYACCESS.PA_REFERENCE, "description": "The exit code for GridLAB-D"},
-    {"name": "module_compiler_flags", "type": PROPERTYTYPE.PT_set, "addr": global_module_compiler_flags, "access": PROPERTYACCESS.PA_PUBLIC, "description": "module compiler flags", "enum_keys": mcf_keys},
-    {"name": "init_max_defer", "type": PROPERTYTYPE.PT_int32, "addr": global_init_max_defer, "access": PROPERTYACCESS.PA_REFERENCE, "description": "deferred initialization limit"},
-    {"name": "mt_analysis", "type": PROPERTYTYPE.PT_bool, "addr": global_mt_analysis, "access": PROPERTYACCESS.PA_PUBLIC, "description": "perform multithread profile optimization analysis"},
-    {"name": "inline_block_size", "type": PROPERTYTYPE.PT_int32, "addr": global_inline_block_size, "access": PROPERTYACCESS.PA_PUBLIC, "description": "inline code block size"},
-    {"name": "validate", "type": PROPERTYTYPE.PT_set, "addr": global_validate_options, "access": PROPERTYACCESS.PA_PUBLIC, "description": "validation test options", "enum_keys": vo_keys},
-    {"name": "sanitize", "type": PROPERTYTYPE.PT_set, "addr": global_sanitize_options, "access": PROPERTYACCESS.PA_PUBLIC, "description": "sanitize process options", "enum_keys": so_keys},
-    {"name": "sanitize_prefix", "type": PROPERTYTYPE.PT_char8, "addr": global_sanitize_prefix, "access": PROPERTYACCESS.PA_PUBLIC, "description": "sanitized name prefix"},
-    {"name": "sanitize_index", "type": PROPERTYTYPE.PT_char1024, "addr": global_sanitize_index, "access": PROPERTYACCESS.PA_PUBLIC, "description": "sanitization index file spec"},
-    {"name": "sanitize_offset", "type": PROPERTYTYPE.PT_char32, "addr": global_sanitize_offset, "access": PROPERTYACCESS.PA_PUBLIC, "description": "sanitization lat/lon offset"},
-    {"name": "simulation_mode", "type": PROPERTYTYPE.PT_enumeration, "addr": global_simulation_mode, "access": PROPERTYACCESS.PA_PUBLIC, "description": "current time simulation type", "enum_keys": sm_keys},
-    {"name": "deltamode_timestep", "type": PROPERTYTYPE.PT_double, "addr": global_deltamode_timestep_pub, "access": PROPERTYACCESS.PA_PUBLIC, "description": "uniform step size for deltamode simulations", "enum_keys": None, "enum_function": None, "enum_unit": "ns"},
-    {"name": "deltamode_maximumtime", "type": PROPERTYTYPE.PT_double, "addr": global_deltamode_maximumtime_pub, "access": PROPERTYACCESS.PA_PUBLIC, "description": "maximum time (ns) deltamode can run", "enum_keys": None, "enum_function": None, "enum_unit": "ns"},
-    {"name": "deltaclock", "type": PROPERTYTYPE.PT_int64, "addr": global_deltaclock, "access": PROPERTYACCESS.PA_PUBLIC, "description": "cumulative delta runtime with respect to the global clock"},
-    {"name": "delta_current_clock", "type": PROPERTYTYPE.PT_double, "addr": global_delta_curr_clock, "access": PROPERTYACCESS.PA_PUBLIC, "description": "Absolute delta time (global clock offset)"},
-    {"name": "deltamode_updateorder", "type": PROPERTYTYPE.PT_char1024, "addr": global_deltamode_updateorder, "access": PROPERTYACCESS.PA_REFERENCE, "description": "order in which modules are updated in deltamode"},
-    {"name": "deltamode_iteration_limit", "type": PROPERTYTYPE.PT_int32, "addr": global_deltamode_iteration_limit, "access": PROPERTYACCESS.PA_PUBLIC, "description": "iteration limit for each delta timestep (object and interupdate)"},
-    {"name": "deltamode_forced_extra_timesteps", "type": PROPERTYTYPE.PT_int32, "addr": global_deltamode_forced_extra_timesteps, "access": PROPERTYACCESS.PA_PUBLIC, "description": "forced extra deltamode timesteps before returning to event-driven mode"},
-    {"name": "deltamode_forced_always", "type": PROPERTYTYPE.PT_bool, "addr": global_deltamode_forced_always, "access": PROPERTYACCESS.PA_PUBLIC, "description": "forced deltamode for debugging -- prevents event-driven mode"},
-    {"name": "deltamode_preferred_module_order", "type": PROPERTYTYPE.PT_bool, "addr": global_deltamode_force_preferred_order, "access": PROPERTYACCESS.PA_PUBLIC, "description": "sets execution order for deltamode, as opposed to GLM order"},
-    {"name": "run_powerworld", "type": PROPERTYTYPE.PT_bool, "addr": global_run_power_world, "access": PROPERTYACCESS.PA_PUBLIC, "description": "boolean that says your system is set up correctly to run with PowerWorld"},
-    {"name": "bigranks", "type": PROPERTYTYPE.PT_bool, "addr": global_bigranks, "access": PROPERTYACCESS.PA_PUBLIC, "description": "enable fast/blind set_rank operations"},
-    {"name": "exename", "type": PROPERTYTYPE.PT_char1024, "addr": global_execname, "access": PROPERTYACCESS.PA_REFERENCE, "description": "argv[0] value"},
-    {"name": "wget_options", "type": PROPERTYTYPE.PT_char1024, "addr": global_wget_options, "access": PROPERTYACCESS.PA_PUBLIC, "description": "wget options"},
-    {"name": "svnroot", "type": PROPERTYTYPE.PT_char1024, "addr": global_svn_root, "access": PROPERTYACCESS.PA_PUBLIC, "description": "svnroot"},
-    {"name": "allow_reinclude", "type": PROPERTYTYPE.PT_bool, "addr": global_reinclude, "access": PROPERTYACCESS.PA_PUBLIC, "description": "allow the same include file to be included multiple times"},
-    # Add new global variables here
+    {"name": "sync_dumpfile", "global_property_types": PropertyType.PT_char1024, "addr": global_sync_dumpfile,
+     "access": PropertyAccess.PA_PUBLIC, "description": "sync event dump file name"},
+    {"name": "streaming_io", "global_property_types": PropertyType.PT_bool, "addr": global_streaming_io_enabled,
+     "access": PropertyAccess.PA_PROTECTED, "description": "streaming I/O enable flag"},
+    {"name": "compileonly", "global_property_types": PropertyType.PT_bool, "addr": global_compileonly,
+     "access": PropertyAccess.PA_PROTECTED, "description": "compile only enable flag"},
+    {"name": "relax_naming_rules", "global_property_types": PropertyType.PT_bool, "addr": global_relax_naming_rules,
+     "access": PropertyAccess.PA_PUBLIC, "description": "relax object naming rules enable flag"},
+    {"name": "browser", "global_property_types": PropertyType.PT_char1024, "addr": global_browser, "access": PropertyAccess.PA_PUBLIC,
+     "description": "browser selection"},
+    {"name": "server_portnum", "global_property_types": PropertyType.PT_int32, "addr": global_server_port_num,
+     "access": PropertyAccess.PA_PUBLIC,
+     "description": "server port number (default is find first open starting at 6267)"},
+    {"name": "server_quit_on_close", "global_property_types": PropertyType.PT_bool, "addr": global_server_quit_on_close,
+     "access": PropertyAccess.PA_PUBLIC, "description": "server quit on connection closed enable flag"},
+    {"name": "client_allowed", "global_property_types": PropertyType.PT_char1024, "addr": global_client_allowed,
+     "access": PropertyAccess.PA_PUBLIC, "description": "clients from which to accept connections"},
+    {"name": "autoclean", "global_property_types": PropertyType.PT_bool, "addr": global_autoclean, "access": PropertyAccess.PA_PUBLIC,
+     "description": "autoclean enable flag"},
+    {"name": "technology_readiness_level", "global_property_types": PropertyType.PT_enumeration, "addr": technology_readiness_level,
+     "access": PropertyAccess.PA_PUBLIC, "description": "technology readiness level", "enum_keys": trl_keys},
+    {"name": "show_progress", "global_property_types": PropertyType.PT_bool, "addr": global_show_progress,
+     "access": PropertyAccess.PA_PUBLIC, "description": "show progress enable flag"},
+    {"name": "checkpoint_type", "global_property_types": PropertyType.PT_enumeration, "addr": global_checkpoint_type,
+     "access": PropertyAccess.PA_PUBLIC, "description": "checkpoint global_property_types usage flag", "enum_keys": cpt_keys},
+    {"name": "checkpoint_file", "global_property_types": PropertyType.PT_char1024, "addr": global_checkpoint_file,
+     "access": PropertyAccess.PA_PUBLIC, "description": "checkpoint file base name"},
+    {"name": "checkpoint_seqnum", "global_property_types": PropertyType.PT_int32, "addr": global_checkpoint_seqnum,
+     "access": PropertyAccess.PA_PUBLIC, "description": "checkpoint sequence number"},
+    {"name": "checkpoint_interval", "global_property_types": PropertyType.PT_int32, "addr": global_checkpoint_interval,
+     "access": PropertyAccess.PA_PUBLIC, "description": "checkpoint interval"},
+    {"name": "checkpoint_keepall", "global_property_types": PropertyType.PT_bool, "addr": global_checkpoint_keepall,
+     "access": PropertyAccess.PA_PUBLIC, "description": "checkpoint file keep enable flag"},
+    {"name": "check_version", "global_property_types": PropertyType.PT_bool, "addr": global_check_version,
+     "access": PropertyAccess.PA_PUBLIC, "description": "check version enable flag"},
+    {"name": "random_number_generator", "global_property_types": PropertyType.PT_enumeration, "addr": global_randomnumbergenerator,
+     "access": PropertyAccess.PA_PUBLIC, "description": "random number generator version control flag",
+     "enum_keys": rng_keys},
+    {"name": "mainloop_state", "global_property_types": PropertyType.PT_enumeration, "addr": global_mainloopstate,
+     "access": PropertyAccess.PA_PUBLIC, "description": "main sync loop state flag", "enum_keys": mls_keys},
+    {"name": "pauseat", "global_property_types": PropertyType.PT_timestamp, "addr": global_mainlooppauseat,
+     "access": PropertyAccess.PA_PUBLIC, "description": "pause at time"},
+    {"name": "infourl", "global_property_types": PropertyType.PT_char1024, "addr": global_infourl, "access": PropertyAccess.PA_PUBLIC,
+     "description": "URL to use for obtaining online help"},
+    {"name": "hostname", "global_property_types": PropertyType.PT_char1024, "addr": global_hostname, "access": PropertyAccess.PA_PUBLIC,
+     "description": "unused"},
+    {"name": "hostaddr", "global_property_types": PropertyType.PT_char32, "addr": global_hostaddr, "access": PropertyAccess.PA_PUBLIC,
+     "description": "unused"},
+    {"name": "autostart_gui", "global_property_types": PropertyType.PT_bool, "addr": global_autostartgui,
+     "access": PropertyAccess.PA_PUBLIC, "description": "automatic GUI start enable flag"},
+    {"name": "master", "global_property_types": PropertyType.PT_char1024, "addr": global_master, "access": PropertyAccess.PA_PUBLIC,
+     "description": "master server hostname"},
+    {"name": "master_port", "global_property_types": PropertyType.PT_int64, "addr": global_master_port,
+     "access": PropertyAccess.PA_PUBLIC, "description": "master server port number"},
+    {"name": "multirun_mode", "global_property_types": PropertyType.PT_enumeration, "addr": global_multirun_mode,
+     "access": PropertyAccess.PA_PUBLIC, "description": "multirun enable flag", "enum_keys": mrm_keys},
+    {"name": "multirun_conn", "global_property_types": PropertyType.PT_enumeration, "addr": global_multirun_connection,
+     "access": PropertyAccess.PA_PUBLIC, "description": "unused", "enum_keys": mrc_keys},
+    {"name": "signal_timeout", "global_property_types": PropertyType.PT_int32, "addr": global_signal_timeout,
+     "access": PropertyAccess.PA_PUBLIC, "description": "unused"},
+    {"name": "slave_port", "global_property_types": PropertyType.PT_int16, "addr": global_slave_port, "access": PropertyAccess.PA_PUBLIC,
+     "description": "unused"},
+    {"name": "slave_id", "global_property_types": PropertyType.PT_int64, "addr": global_slave_id, "access": PropertyAccess.PA_PUBLIC,
+     "description": "unused"},
+    {"name": "return_code", "global_property_types": PropertyType.PT_int32, "addr": global_return_code,
+     "access": PropertyAccess.PA_REFERENCE, "description": "unused"},
+    {"name": "exit_code", "global_property_types": PropertyType.PT_int16, "addr": global_exit_code,
+     "access": PropertyAccess.PA_REFERENCE, "description": "The exit code for GridLAB-D"},
+    {"name": "module_compiler_flags", "global_property_types": PropertyType.PT_set, "addr": global_module_compiler_flags,
+     "access": PropertyAccess.PA_PUBLIC, "description": "module compiler flags", "enum_keys": mcf_keys},
+    {"name": "init_max_defer", "global_property_types": PropertyType.PT_int32, "addr": global_init_max_defer,
+     "access": PropertyAccess.PA_REFERENCE, "description": "deferred initialization limit"},
+    {"name": "mt_analysis", "global_property_types": PropertyType.PT_bool, "addr": global_mt_analysis,
+     "access": PropertyAccess.PA_PUBLIC, "description": "perform multithread profile optimization analysis"},
+    {"name": "inline_block_size", "global_property_types": PropertyType.PT_int32, "addr": global_inline_block_size,
+     "access": PropertyAccess.PA_PUBLIC, "description": "inline code block size"},
+    {"name": "validate", "global_property_types": PropertyType.PT_set, "addr": global_validate_options,
+     "access": PropertyAccess.PA_PUBLIC, "description": "validation test options", "enum_keys": vo_keys},
+    {"name": "sanitize", "global_property_types": PropertyType.PT_set, "addr": global_sanitize_options,
+     "access": PropertyAccess.PA_PUBLIC, "description": "sanitize process options", "enum_keys": so_keys},
+    {"name": "sanitize_prefix", "global_property_types": PropertyType.PT_char8, "addr": global_sanitize_prefix,
+     "access": PropertyAccess.PA_PUBLIC, "description": "sanitized name prefix"},
+    {"name": "sanitize_index", "global_property_types": PropertyType.PT_char1024, "addr": global_sanitize_index,
+     "access": PropertyAccess.PA_PUBLIC, "description": "sanitization index file spec"},
+    {"name": "sanitize_offset", "global_property_types": PropertyType.PT_char32, "addr": global_sanitize_offset,
+     "access": PropertyAccess.PA_PUBLIC, "description": "sanitization lat/lon offset"},
+    {"name": "simulation_mode", "global_property_types": PropertyType.PT_enumeration, "addr": global_simulation_mode,
+     "access": PropertyAccess.PA_PUBLIC, "description": "current time simulation global_property_types", "enum_keys": sm_keys},
+    {"name": "deltamode_timestep", "global_property_types": PropertyType.PT_double, "addr": global_deltamode_timestep_pub,
+     "access": PropertyAccess.PA_PUBLIC, "description": "uniform step size for deltamode simulations",
+     "enum_keys": None, "enum_function": None, "enum_unit": "ns"},
+    {"name": "deltamode_maximumtime", "global_property_types": PropertyType.PT_double, "addr": global_deltamode_maximumtime_pub,
+     "access": PropertyAccess.PA_PUBLIC, "description": "maximum time (ns) deltamode can run", "enum_keys": None,
+     "enum_function": None, "enum_unit": "ns"},
+    {"name": "deltaclock", "global_property_types": PropertyType.PT_int64, "addr": global_deltaclock, "access": PropertyAccess.PA_PUBLIC,
+     "description": "cumulative delta runtime with respect to the global clock"},
+    {"name": "delta_current_clock", "global_property_types": PropertyType.PT_double, "addr": global_delta_curr_clock,
+     "access": PropertyAccess.PA_PUBLIC, "description": "Absolute delta time (global clock offset)"},
+    {"name": "deltamode_updateorder", "global_property_types": PropertyType.PT_char1024, "addr": global_deltamode_updateorder,
+     "access": PropertyAccess.PA_REFERENCE, "description": "order in which modules are updated in deltamode"},
+    {"name": "deltamode_iteration_limit", "global_property_types": PropertyType.PT_int32, "addr": global_deltamode_iteration_limit,
+     "access": PropertyAccess.PA_PUBLIC,
+     "description": "iteration limit for each delta timestep (object and interupdate)"},
+    {"name": "deltamode_forced_extra_timesteps", "global_property_types": PropertyType.PT_int32,
+     "addr": global_deltamode_forced_extra_timesteps, "access": PropertyAccess.PA_PUBLIC,
+     "description": "forced extra deltamode timesteps before returning to event-driven mode"},
+    {"name": "deltamode_forced_always", "global_property_types": PropertyType.PT_bool, "addr": global_deltamode_forced_always,
+     "access": PropertyAccess.PA_PUBLIC, "description": "forced deltamode for debugging -- prevents event-driven mode"},
+    {"name": "deltamode_preferred_module_order", "global_property_types": PropertyType.PT_bool,
+     "addr": global_deltamode_force_preferred_order, "access": PropertyAccess.PA_PUBLIC,
+     "description": "sets execution order for deltamode, as opposed to GLM order"},
+    {"name": "run_powerworld", "global_property_types": PropertyType.PT_bool, "addr": global_run_power_world,
+     "access": PropertyAccess.PA_PUBLIC,
+     "description": "boolean that says your system is set up correctly to run with PowerWorld"},
+    {"name": "bigranks", "global_property_types": PropertyType.PT_bool, "addr": global_bigranks, "access": PropertyAccess.PA_PUBLIC,
+     "description": "enable fast/blind set_rank operations"},
+    {"name": "exename", "global_property_types": PropertyType.PT_char1024, "addr": global_execname,
+     "access": PropertyAccess.PA_REFERENCE, "description": "argv[0] value"},
+    {"name": "wget_options", "global_property_types": PropertyType.PT_char1024, "addr": global_wget_options,
+     "access": PropertyAccess.PA_PUBLIC, "description": "wget options"},
+    {"name": "svnroot", "global_property_types": PropertyType.PT_char1024, "addr": global_svn_root, "access": PropertyAccess.PA_PUBLIC,
+     "description": "svnroot"},
+    {"name": "allow_reinclude", "global_property_types": PropertyType.PT_bool, "addr": global_reinclude,
+     "access": PropertyAccess.PA_PUBLIC, "description": "allow the same include file to be included multiple times"},
 ]
 
 global_randomnumbergenerator = RANDOMNUMBERGENERATOR.RNG2

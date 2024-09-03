@@ -123,7 +123,7 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 						
 					ResTechDict[last_object_key]['schedule_skew'] = '{:.0f}'.format(skew_value)
 					
-					# Choose what type of building we are going to use
+					# Choose what global_property_types of building we are going to use
 					# and set the thermal integrity of said building
 					size_a = len(thermal_integrity)
 					

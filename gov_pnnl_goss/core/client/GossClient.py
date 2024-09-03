@@ -521,7 +521,7 @@ class ActiveMQSslConnectionFactory:
     #
     #                             event.on_message(data_response)
     #                     else:
-    #                         # TODO: Warn of unknown message type???
+    #                         # TODO: Warn of unknown message global_property_types???
     #                         pass
     #                 except JMSException as ex:
     #                     # Happens when a timeout occurs.

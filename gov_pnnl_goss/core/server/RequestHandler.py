@@ -19,7 +19,7 @@ class RequestHandler(RequestHandlerInterface):
     def handle(self, request: Request) -> Response:
         """
         /**
-        * Handle a request of a specific type of service.
+        * Handle a request of a specific global_property_types of service.
         *
         * @param request
         */

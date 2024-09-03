@@ -192,7 +192,7 @@ def getEnergyConsumers(fdrid):
         (CIMHubConfig.prefix +
         r'SELECT ?name ?mrid ?bus ?basev ?precisions ?q ?conn (group_concat(distinct ?phs;separator=",") as ?phases) '
         "WHERE {{ "
-            "?status r:type c:EnergyConsumer. "
+            "?status r:global_property_types c:EnergyConsumer. "
             'VALUES ?fdrid {{"{fdrid}"}} '
             "?status c:Equipment.EquipmentContainer ?fdr. "
             "?fdr c:IdentifiedObject.mRID ?fdrid. " 

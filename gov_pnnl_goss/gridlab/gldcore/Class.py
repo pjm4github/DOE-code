@@ -1,40 +1,12 @@
-# Pass configuration
-from base64 import encode
-from errno import ENOENT, E2BIG, EINVAL, ENOMEM
+# Python Equivalent of the C Class and PropertyMap Management System
+import json
+import warnings
 from enum import Enum
-from typing import Union, List, Any
-
-from gov_pnnl_goss.gridlab.gldcore.Convert import unit_find
-#  PROPERTYACCESS.PA_PUBLIC, PROPERTYACCESS.PA_PROTECTED, PROPERTYACCESS.PA_PRIVATE, PROPERTYACCESS.PA_REFERENCE, PROPERTYACCESS.PA_HIDDEN,
-from gov_pnnl_goss.gridlab.gldcore.Globals import \
-    global_suppress_deprecated_messages, global_suppress_repeat_messages, PROPERTYACCESS
-from gov_pnnl_goss.gridlab.gldcore.GridLabD import gl_error, gl_warning
-# PROPERTYFLAGS.PF_CHARSET, PROPERTYFLAGS.PF_DEPRECATED, PROPERTYFLAGS.PF_EXTENDED, PROPERTYFLAGS.PF_DEPRECATED_NONOTICE,
-from gov_pnnl_goss.gridlab.gldcore.Property import \
-    FUNCTIONADDR, PROPERTY, PROPERTYTYPE, PROPERTYFLAGS, DELEGATEDTYPE
-from gridlab.gldcore.Module import Module
-
-global_ms_per_second = 1000  # Assuming this value
-
-
-class PASSCONFIG(Enum):
-    PC_NOSYNC = 0x00               # < used when the class requires no synchronization */
-    PC_PRETOPDOWN = 0x01           # < used when the class requires synchronization on the first top-down pass */
-    PC_BOTTOMUP = 0x02             # < used when the class requires synchronization on the bottom-up pass */
-    PC_POSTTOPDOWN = 0x04          # < used when the class requires synchronization on the second top-down pass */
-    PC_FORCE_NAME = 0x20           # < used to indicate the class must define names for all its objects */
-    PC_PARENT_OVERRIDE_OMIT = 0x40 # < used to ignore parent's use of PC_UNSAFE_OVERRIDE_OMIT */
-    PC_UNSAFE_OVERRIDE_OMIT = 0x80 # < used to flag that omitting overrides is unsafe */
-    PC_ABSTRACTONLY = 0x100        # < used to flag that the class should never be instantiated itself, only inherited classes should */
-    PC_AUTOLOCK = 0x200            # < used to flag that sync operations should not be automatically write locked */
-    PC_OBSERVER = 0x400            # < used to flag whether commit process needs to be delayed with respect to ordinary "in-the-loop" objects */
-
-
-# Notification message types
-class NOTIFYMODULE(Enum):
-    NM_PREUPDATE = 0
-    NM_POSTUPDATE = 1
-    NM_RESET = 2
+from typing import Union, Set, Callable, List
+import xml.etree.ElementTree as ET
+# from gov_pnnl_goss.gridlab.gldcore.Globals import TECHNOLOGYREADINESSLEVEL
+# from gov_pnnl_goss.gridlab.gldcore.Module import Module
+from gov_pnnl_goss.gridlab.gldcore.PropertyHeader import PropertyMap, PropertyType, ExtendedProperty
 
 
 class TECHNOLOGYREADINESSLEVEL(Enum):
@@ -50,921 +22,526 @@ class TECHNOLOGYREADINESSLEVEL(Enum):
     TRL_PROVEN = 9
 
 
-class PROPERTYNAME:
-    pass
 
 
-class FUNCTION:
-    def __init__(self):
-        self.oclass = None
-        self.name = None
-        self.addr = None
-        self.next = None
+class PASSCONFIG(Enum):
+    PC_NOSYNC = 0x00               # used when the class requires no synchronization
+    PC_PRETOPDOWN = 0x01           # used when the class requires synchronization on the first top-down pass
+    PC_BOTTOMUP = 0x02             # used when the class requires synchronization on the bottom-up pass
+    PC_POSTTOPDOWN = 0x04          # used when the class requires synchronization on the second top-down pass
+    PC_FORCE_NAME = 0x20           # used to indicate the class must define names for all its objects
+    PC_PARENT_OVERRIDE_OMIT = 0x40 # used to ignore parent's use of PC_UNSAFE_OVERRIDE_OMIT
+    PC_UNSAFE_OVERRIDE_OMIT = 0x80 # used to flag that omitting overrides is unsafe
+    PC_ABSTRACTONLY = 0x100        # used to flag that the class should never be instantiated itself, only inherited classes should
+    PC_AUTOLOCK = 0x200            # used to flag that sync operations should not be automatically write locked
+    PC_OBSERVER = 0x400            # used to flag whether commit process needs to be delayed with respect to ordinary "in-the-loop" objects
 
+
+class DELEGATEDTYPE():
+    """
+    Type delegation specification
+    Delegated types allow module to keep all global_property_types operations private
+    this includes convert operations and allocation/deallocation
+    """
+    def __init__(self, delegated_type, owner_class, from_string, to_string):
+        self.delegated_type:str = delegated_type
+        self.owner_class: DynamicClass = owner_class
+        self.from_string: callable = from_string
+        self.to_string: callable = to_string
+
+# Notification message types
+class NOTIFYMODULE(Enum):
+    NM_PREUPDATE = 0  # notify module before property change
+    NM_POSTUPDATE = 1  # notify module after property change
+    NM_RESET = 2  # notify module of system reset event
+
+
+# The function class is now just a function definition in Python
 # class FUNCTION:
-#     def __init__(self) -> None:
-#         self.oclass: Class
-#         self.name: FUNCTIONNAME
-#         self.addr: FUNCTIONADDR
-#         self.next: FUNCTION
+#     def __init__(self, owner_class=None, name=None, addr=None):
+#         self.owner_class = owner_class
+#         self.name = name
+#         self.addr = addr  # This is the actual function callable
+#         # self.next = next   # Not needed because Python can perform introspection
 
 
 class LOADDATA:
     def __init__(self):
-        self.name = None
-        self.call = None
-        self.next = None
+        self.name: str = ""
+        self.call: [Callable, None] = None
+        #  self.next: LOADDATA  # Not needed because Python can perform introspection
 
 
-class KEYWORD:
-    def __init__(self):
-        self.name = None
-        self.value = None
-        self.next = None
 
 class LOADMETHOD:
     def __init__(self) -> None:
         self.name: str = ""
-        self.call: Any = None
-        self.next: LOADMETHOD
+        self.call: [Callable, None] = None
+        #  self.next: LOADMETHOD  # Not needed because Python can perform introspection
 
 
 # Set operations
 SET_MASK = 0xffff
 
 
-def SET_ADD(set_value, value):
-    return set_value | value
+class DynamicClass:
 
-def SET_DEL(set_value, value):
-    return (value ^ SET_MASK) & set_value
-
-def SET_CLEAR(set_value):
-    return 0
-
-def SET_HAS(set_value, value):
-    return set_value & value
-
-
-class CLASSMAGIC(Enum):
     CLASSVALID = 0xc44d822e
 
-
-class Class:
-    def __init__(self, module, name, size, passconfig):
-        self.commit: FUNCTIONADDR = None
-        self.create: FUNCTIONADDR = None
-        self.finalize: FUNCTIONADDR = None
-        self.first_class = []
-        self.fmap: List[FUNCTION] = None
-        self.has_runtime: bool = None
-        self.heartbeat: FUNCTIONADDR = None
-        self.id: int = None
-        self.init: FUNCTIONADDR = None
-        self.isa: FUNCTIONADDR = None
-        self.loadmethods: List[LOADMETHOD] = None
-        self.magic: CLASSMAGIC = CLASSMAGIC.CLASSVALID
-        self.module: Module = module
-        self.name: str = name
-        self.next: Class = None
-        self.notify: FUNCTIONADDR = None
-        self.parent: Class = None
-        self.passconfig: PASSCONFIG = passconfig
-        self.plc: FUNCTIONADDR = None
-        self.pmap: List[PROPERTY] = None
-        self.precommit: FUNCTIONADDR = None
+    def __init__(self, module, class_name: str, base_class, passconfig=PASSCONFIG.PC_ABSTRACTONLY):
+        self._properties = {}
+        self.base_class = base_class
+        self.check = None
+        self.commit: Callable  # A function that is called when the commit phase of the simulation is performed.
+        # self.count = 0  # Not needed in python
+        # self.create: Callable = None  # Built into Python  (See GridLabD)
+        # self.finalize: Callable = None  # Built into Python  (See GridLabD)
+        self.first_class = False # Set to True to becom the first class in the linked list
+        # self.fmap: List[FUNCTION] = None # A class method (see below)
+        self.has_runtime: bool = False  # flag indicating that a runtime dll, so, or dylib is in use
+        self.heartbeat: Callable
+        self.id: int = 0
+        self.init: Callable  # A function that is called when the class is initialized by the simulation (See GridLabD)
+        self.isa: Callable  # A function that is called by the simulation (See GridLabD)
+        self.last_class = None  # Not needed in python
+        self.loadmethods: List[LOADMETHOD] = []  # A list of load methods for loading the module into the simulation
+        self.magic: int = DynamicClass.CLASSVALID
+        self.module = module  # : Module  # The module that this simulation class item represents.
+        self.name: str = class_name
+        # self.next: Class   # List management is built-in to the list object.
+        self.next_class = None  # Not needed in python
+        self.notify: Callable  # A function that is called when the notify method is triggered by the simulation (See GridLabD)
+        self.parent: [DynamicClass, None] = None  # A pointer to the parent class of the simulation object
+        self.owner_class: [DynamicClass, None] = None
+        self.passconfig: Set[PASSCONFIG] = set() if passconfig is None else passconfig
+        self.plc: Callable   # The programmable logic controller function that is used in the simulation  (See GridLabD)
+        # self.pmap: List[PROPERTY] = None # A class method (see below)
+        self.precommit: Callable  # A function that called before the commit phase of the simulation  (See GridLabD)
         self.profiler: dict[str, Union[int, bool]] = {
             'numobjs': 0,
             'count': 0,
             'clocks': 0
         }
-        self.recalc: FUNCTIONADDR = None
-        self.runtime: str = None
-        self.size: int = size
-        self.sync: FUNCTIONADDR = None
-        self.threadsafe: bool = None
-        self.trl: TECHNOLOGYREADINESSLEVEL = None
-        self.update: FUNCTIONADDR = None
         self.property_type = []
-        self.last_class = None
-        self.count = 0
-        self.next_class = None
-        self.check = None
+        self.recalc: Callable  # A function that is triggered when a recalc is to be performed by teh simulation
+        self.registry: dict
+        self.runtime: str = ""  # name of file containing runtime dll, so, or dylib
+        # self.size: int = 0  # Not needed in Python
+        self.sync: Callable # The function that is called by teh sync phase of the simulation (See GridLabD)
+        self.threadsafe: bool = False  # Whether the simulation module can be run in its own thread
+        self.trl: Enum = TECHNOLOGYREADINESSLEVEL.TRL_UNKNOWN
+        self.update: Callable  # The update function that is called during the update phase of the simulation
 
-    def unit_find(self):
-        pass
-
-    def buffer_write(self, buffer, len, format, *args):
-        count = 0
-        if buffer is None:
-            return 0
-        if len < 1:
-            return 0
-        if self.check == 0:
-            return 0
-        temp = ""
-        for a in args:
-            temp = str(a).encode(format)
-        count = len(args)
-        if count < len:
-            buffer = temp
-            return count, buffer
-        else:
-            check = 0
-            return 0, None
-
-
-    def get_first_property(self, oclass):
-        if oclass is None:
-            raise Exception("get_first_property(Class *oclass=None): oclass is None")
-        return oclass.pmap
-
-    def get_next_property(self, prop):
-        if prop.next and prop.oclass == prop.next.oclass:
-            return prop.next
-        else:
-            return None
-
-    def prop_in_class(self, oclass, prop):
-        if oclass == prop.oclass:
-            return prop
-        elif oclass.parent is not None:
-            return self.prop_in_class(self, oclass.parent, prop)
-        else:
-            return None
-
-    def find_property_rec(self, oclass, name, pclass):
-        prop = oclass.pmap
-        while prop and prop.oclass == oclass:
-            if prop.name == name.encode('utf-8'):
-                return prop
-            prop = prop.next
-
-        if oclass.parent == pclass:
-            gl_error(
-                f"find_property_rec(Class *oclass='{oclass.name}', "
-                f"PROPERTYNAME name='{name}', Class *pclass='{pclass.name}') causes an infinite class inheritance loop"
-            )
-            """
-            TROUBLESHOOT
-            A class has somehow specified itself as a parent class, either directly or indirectly.
-            This means there is a problem with the module that publishes the class.
-            """
-            return None
-        elif oclass.parent:
-            return self.find_property_rec(oclass.parent, name, pclass)
-        else:
-            return None
-
-    def find_property(self, oclass, name):
-        if not oclass:
-            return None
-
-        prop = oclass.get(name, None)
-
-        if prop:
-            return prop
-
-        for prop in oclass.pmap:
-            if prop.oclass == oclass:
-                if prop.name == name.encode('utf-8'):
-                    if prop.flags & PROPERTYFLAGS.PF_DEPRECATED and not (
-                            prop.flags & PROPERTYFLAGS.PF_DEPRECATED_NONOTICE) and not global_suppress_deprecated_messages:
-                        gl_warning(
-                            f"find_property(Class *oclass='{oclass.name}', PROPERTYNAME name='{name}': property is deprecated")
-                        """
-                        TROUBLESHOOT
-                        You have done a search on a property that has been flagged as deprecated and will most likely not be supported soon.
-                        Correct the usage of this property to get rid of this message.
-                        """
-                        if global_suppress_repeat_messages:
-                            prop.flags |= ~PROPERTYFLAGS.PF_DEPRECATED_NONOTICE
-                    return prop
-
-        if oclass.parent == oclass:
-            gl_error(
-                f"find_property(oclass='{oclass.name}', name='{name}') causes an infinite class inheritance loop")
-            """
-            TROUBLESHOOT
-            A class has somehow specified itself as a parent class, either directly or indirectly.
-            This means there is a problem with the module that publishes the class.
-            """
-            return None
-        elif oclass.parent:
-            return self.find_property_rec(oclass.parent, name, oclass)
-        else:
-            return None
-
-    def add_property(self, oclass, prop):
-        last = oclass.pmap
-        while last is not None and last.next is not None:
-            last = last.next
-        if last is None:
-            oclass.pmap = prop
-        else:
-            last.next = prop
-
-    def add_extended_property(self, oclass, name, ptype, unit):
-        prop = PROPERTY()
-        pUnit = None
-
-        try:
-            if unit:
-                pUnit = self.unit_find(unit)
-        except Exception as msg:
-            # will get picked up later
-            pass
-
-        if prop is None:
-            raise Exception(
-                f"add_extended_property(oclass='{oclass.name}', name='{name}', ...): memory allocation failed")
-            # TROUBLESHOOT: The system has run out of memory. Try making the model smaller and trying again.
-
-        if ptype <= PROPERTYTYPE.PT_FIRST or ptype >= PROPERTYTYPE.PT_LAST:
-            raise Exception(
-                f"add_extended_property(oclass='{oclass.name}', name='{name}', ...): property type is invalid")
-            # TROUBLESHOOT: The function was called with a property type that is not recognized. This is a bug that should be reported.
-
-        if unit is not None and pUnit is None:
-            raise Exception(
-                f"add_extended_property(oclass='{oclass.name}', name='{name}', ...): unit '{unit}' is not found")
-            # TROUBLESHOOT: The function was called with a unit that is not defined in the units file. Try using a defined unit or adding the desired unit to the units file and try again.
-
-        prop.access = PROPERTYACCESS.PA_PUBLIC
-        prop.addr = int(oclass.size)
-        prop.size = 0
-        prop.delegation = None
-        prop.flags = PROPERTYFLAGS.PF_EXTENDED
-        prop.keywords = None
-        prop.description = None
-        prop.unit = pUnit
-        prop.name = name
-        prop.next = None
-        prop.oclass = oclass
-        prop.ptype = ptype
-        prop.width = self.property_type[ptype].size
-
-        oclass.size += self.property_type[ptype].size
-
-        self.add_property(oclass, prop)
-        return prop
-
-    def get_last_class(self,):
-        return self.last_class
-
-    def get_count(self,):
-        return self.count
-
-
-    def get_property_typename(self, type):
-        if type <= PROPERTYTYPE.PT_FIRST or type >= PROPERTYTYPE.PT_LAST:
-            return "//UNDEF//"
-        else:
-            return self.property_type[type].name
-
-    def get_property_typexsdname(self, type):
-        if type <= PROPERTYTYPE.PT_FIRST or type >= PROPERTYTYPE.PT_LAST:
-            return "//UNDEF//"
-        else:
-            return self.property_type[type].xsdname
-
-    def get_propertytype_from_typename(self, name):
-        for i, prop_type in enumerate(self.property_type):
-            if prop_type.name == name:
-                return PROPERTYTYPE(i)
-        return PROPERTYTYPE.PT_void
-
-    def string_to_propertytype(self, type, addr, value):
-        if type > PROPERTYTYPE.PT_void and type < PROPERTYTYPE.PT_last:
-            return self.property_type[type.value].string_to_data(value, addr, None)
-        else:
-            return 0
-
-    def string_to_property(self, prop, addr, value):
-        if prop.ptype > PROPERTYTYPE.PT_void and prop.ptype < PROPERTYTYPE.PT_last:
-            return self.property_type[prop.ptype.value].string_to_data(value, addr, prop)
-        else:
-            return 0
-
-    def property_to_string(self, prop, addr, value, size):
-        if prop.ptype == PROPERTYTYPE.PT_delegated:
-            print("unable to convert from delegated property value")
-            # TROUBLESHOOT: Property delegation is not yet fully implemented, so you should never get this error.
-            return 0
-        elif prop.ptype > PROPERTYTYPE.PT_void and prop.ptype < PROPERTYTYPE.PT_last:
-            rv = self.property_type[prop.ptype.value].data_to_string(value, size, addr, prop)
-            if rv > 0 and prop.unit != 0:
-                value += f" {prop.unit.name}"
-                rv += len(prop.unit.name) + 1
-            return rv
-        else:
-            return 0
-
-    def register(self, module, name, size, passconfig):
-        oclass = self.get_from_classname(name)
-
-        if oclass is not None:
-            if oclass.module.name == module.name:
-                print(
-                    f"module {module.name} cannot register class {name}, it is already registered by module {oclass.module.name}")
-                # TROUBLESHOOT: This error is caused by an attempt to define a new class which is already defined in the module or namespace given. This is generally caused by a bug in a module or an incorrectly defined class.
-                return None
-            else:
-                print(
-                    f"module {module.name} is registering a 2nd class {name}, previous one in module {oclass.module.name}")
-
-        oclass = Class(module, name, size, passconfig)
-        if oclass is None:
-            errno = ENOMEM
-            return 0
-
-        oclass.magic = CLASSMAGIC.CLASSVALID
-        oclass.id = self.count
-        oclass.module = module
-        oclass.name = name
-        oclass.size = size
-        oclass.passconfig = passconfig
-        oclass.profiler = {
-            'numobjs': 0,
-            'count': 0,
-            'clocks': 0
-        }
-
-        if self.first_class is None:
-            first_class = oclass
-        else:
-            self.last_class.next = oclass
-
-        last_class = oclass
-        print(f"class {name} registered ok")
-        return oclass
-
-    def get_first_class(self,):
-        return self.first_class
-
-    def get_next_classes(self,):
+    def __next__(self):
         return self.next_class
 
-    def get_from_classname_in_module(self, name, mod):
-        if name is None or mod is None:
-            return None
+    def add_property(self, pn: [str, 'PropertyMap'], property_type=None, default_value=None):
+        property_name = pn
+        if isinstance(pn, ExtendedProperty):
+            property_name = pn.name
+            property_type = pn.property_type
+            default_value = pn.value
+            units = pn.units
+            flags = pn.flags
+            keywords = pn.keywords
+            description = pn.description
+            setattr(self, property_name, default_value)
+            self._properties[property_name] = {"global_property_types": self._convert_python_type_to_gradappsd_type(property_type),
+                                               "default": default_value,
+                                               "units": units,
+                                               "flags": flags,
+                                               "keywords": keywords,
+                                               "description": description}
+        elif isinstance(pn, PropertyMap):
+            property_name = pn.name
+            property_type = pn.property_type
+            default_value = pn.value
+            setattr(self, property_name, default_value)
+            self._properties[property_name] = {"global_property_types": self._convert_python_type_to_gradappsd_type(property_type),
+                                               "default": default_value}
+        else:
+            if type(property_name) != type(str):
+                try:
+                    property_name = property_name.name
+                except AttributeError:
+                    property_name = "broken_property_name"
+            setattr(self, property_name, default_value)
+            self._properties[property_name] = {"global_property_types": self._convert_python_type_to_gradappsd_type(property_type), "default": default_value}
 
-        for oclass in self.first_class:
-            if oclass.module == mod and oclass.name == name:
-                return oclass
+    def _convert_python_type_to_gradappsd_type(self, variable):
+        """
+        Converts a Python global_property_types to a GridAPPSD global_property_types object defined by PropertyType values
+        :param variable: the python object that will be inspected
+        :return: PropertyType enum value that is equivalent to this global_property_types
+        """
 
-        return None
+        known_types = ["int16",
+                       "int32",
+                       "int64",
+                       "double",
+                       "float",
+                       "char8",
+                       "char32",
+                       "char256",
+                       "char1024",
+                       "complex",
+                       "object",
+                       "bool",
+                       "timestamp",
+                       "loadshape",
+                       "enduse"]
 
-    def get_runtimecount(self,):
-        count = 0
-        for oclass in self.first_class:
-            if oclass.has_runtime:
-                count += 1
-        return count
-
-    def get_first_runtime(self,):
-        for oclass in self.first_class:
-            if oclass.has_runtime:
-                return oclass
-        return None
-
-    def get_next_runtime(self, oclass):
-        oclass = oclass.next
-        while oclass is not None:
-            if oclass.has_runtime:
-                return oclass
-            oclass = oclass.next
-        return None
-
-    def get_extended_count(self, oclass):
-        count = 0
-        prop = oclass.pmap
-        while prop is not None:
-            if prop.flags & PROPERTYFLAGS.PF_EXTENDED:
-                count += 1
-            prop = prop.next
-        return count
-
-    def get_from_classname(self, name):
-        oclass = None
-        mod = None
-        temp = name
-        ptr = temp.find('.')
-        if ptr != -1:
-            temp, ptr = temp.split('.', 1)
-            mod = self.module_find(temp)
-            if mod is None:
-                print(f"could not search for '{name}', module not loaded")
-                return None
-            for oclass in self.first_class:
-                if oclass.module == mod and oclass.name == ptr:
-                    return oclass
-            return None
-        for oclass in self.first_class:
-            if oclass.name == name:
-                return oclass
-        return None
-
-    def define_map(self, oclass, *args):
-        va_list = list(args)
-        count = 0
-        prop = None
-        va_start = 0
-        errno = 0
-
-        while va_start < len(va_list):
-            prop_buffer = va_list[va_start]
-            va_start += 1
-            proptype = PROPERTYTYPE(prop_buffer)
-
-            if proptype > PROPERTYTYPE.PT_last:
-                if proptype == PROPERTYTYPE.PT_INHERIT:
-                    if oclass.parent is not None:
-                        errno = EINVAL
-                        gl_error(
-                            f"define_map(oclass='{oclass.name}',...): PT_INHERIT unexpected; class already inherits properties from class {oclass.parent.name}")
-
+        if str(type(variable)) == "<class 'global_property_types'>":
+            type_string = str(variable)
+        else:
+            type_string = str(type(variable))
+        match type_string:
+            case "<class 'int'>":
+                return PropertyType.PT_int64
+            case "<class 'float'>":
+                return PropertyType.PT_double
+            case "<class 'str'>":
+                return PropertyType.PT_string
+            case "<class 'list'>":
+                if len(variable) > 0:
+                    if str(type(variable[0])) == "<class 'complex'>":
+                        return PropertyType.PT_complex_array
+                    elif callable(variable[0]):
+                        return PropertyType.PT_object_array
                     else:
-                        classname = va_list[va_start]
-                        va_start += 1
-                        no_override = ~(~oclass.parent.passconfig | oclass.passconfig)
-                        if (
-                                oclass.parent.passconfig & PASSCONFIG.PC_UNSAFE_OVERRIDE_OMIT
-                                and not (oclass.passconfig & PASSCONFIG.PC_PARENT_OVERRIDE_OMIT)
-                                and no_override & PASSCONFIG.PC_PRETOPDOWN
-                        ):
-                            gl_warning(
-                                f"define_map(oclass='{oclass.name}',...): class '{oclass.name}' suppresses parent class '{oclass.parent.name}' PRETOPDOWN sync behavior by omitting override"
-                            )
-                        if (
-                                oclass.parent.passconfig & PASSCONFIG.PC_UNSAFE_OVERRIDE_OMIT
-                                and not (oclass.passconfig & PASSCONFIG.PC_PARENT_OVERRIDE_OMIT)
-                                and no_override & PASSCONFIG.PC_BOTTOMUP
-                        ):
-                            gl_warning(
-                                f"define_map(oclass='{oclass.name}',...): class '{oclass.name}' suppresses parent class '{oclass.parent.name}' BOTTOMUP sync behavior by omitting override"
-                            )
-                        if (
-                                oclass.parent.passconfig & PASSCONFIG.PC_UNSAFE_OVERRIDE_OMIT
-                                and not (oclass.passconfig & PASSCONFIG.PC_PARENT_OVERRIDE_OMIT)
-                                and no_override & PASSCONFIG.PC_POSTTOPDOWN
-                        ):
-                            gl_warning(
-                                f"define_map(oclass='{oclass.name}',...): class '{oclass.name}' suppresses parent class '{oclass.parent.name}' POSTTOPDOWN sync behavior by omitting override"
-                            )
-                        if (
-                                oclass.parent.passconfig & PASSCONFIG.PC_UNSAFE_OVERRIDE_OMIT
-                                and not (oclass.passconfig & PASSCONFIG.PC_PARENT_OVERRIDE_OMIT)
-                                and no_override & PASSCONFIG.PC_UNSAFE_OVERRIDE_OMIT
-                        ):
-                            gl_warning(
-                                f"define_map(oclass='{oclass.name}',...): class '{oclass.name}' does not assert UNSAFE_OVERRIDE_OMIT when parent class '{oclass.parent.name}' does"
-                            )
-                        count += 1
-                elif proptype == PROPERTYTYPE.PT_KEYWORD and prop.ptype == PROPERTYTYPE.PT_enumeration:
-                    keyword = va_list[va_start]
-                    va_start += 1
-                    keyvalue = va_list[va_start]
-                    va_start += 1
-                    if not self.define_enumeration_member(oclass, prop.name, keyword, keyvalue):
-                        errno = EINVAL
-                        gl_error(
-                            f"define_map(oclass='{oclass.name}',...): property keyword '{keyword}' could not be defined as value {keyvalue}"
-                        )
-
-                elif proptype == PROPERTYTYPE.PT_KEYWORD and prop.ptype == PROPERTYTYPE.PT_set:
-                    keyword = va_list[va_start]
-                    va_start += 1
-                    keyvalue = va_list[va_start]
-                    va_start += 1
-                    if not self.define_set_member(oclass, prop.name, keyword, keyvalue):
-                        errno = EINVAL
-                        gl_error(
-                            f"define_map(oclass='{oclass.name}',...): property keyword '{keyword}' could not be defined as value {keyvalue}"
-                        )
-
-                elif proptype == PROPERTYTYPE.PT_ACCESS:
-                    prop_buffer = va_list[va_start]
-                    va_start += 1
-                    pa = PROPERTYACCESS(prop_buffer)
-                    if pa == PROPERTYACCESS.PA_PUBLIC or pa == PROPERTYACCESS.PA_PROTECTED or pa == PROPERTYACCESS.PA_PRIVATE or pa == PROPERTYACCESS.PA_REFERENCE or pa == PROPERTYACCESS.PA_HIDDEN:
-                        prop.access = pa
-                    else:
-                        errno = EINVAL
-                        gl_error(
-                            f"define_map(oclass='{oclass.name}',...): unrecognized property access code (value={pa} is not valid)"
-                        )
-
-                elif proptype == PROPERTYTYPE.PT_SIZE:
-                    prop.size = va_list[va_start]
-                    va_start += 1
-                    if prop.size < 1:
-                        errno = EINVAL
-                        gl_error(f"define_map(oclass='{oclass.name}',...): property size must be greater than 0")
-
-                elif proptype == PROPERTYTYPE.PT_EXTEND:
-                    oclass.size += self.property_type[prop.ptype].size
-                elif proptype == PROPERTYTYPE.PT_EXTENDBY:
-                    oclass.size += va_list[va_start]
-                    va_start += 1
-                elif proptype == PROPERTYTYPE.PT_FLAGS:
-                    prop.flags |= va_list[va_start]
-                    va_start += 1
-                elif proptype == PROPERTYTYPE.PT_DEPRECATED:
-                    prop.flags |= PROPERTYFLAGS.PF_DEPRECATED
-                elif proptype == PROPERTYTYPE.PT_UNITS:
-                    unitspec = va_list[va_start]
-                    va_start += 1
-                    try:
-                        prop.unit = unit_find(unitspec)
-                        if prop.unit is None:
-                            gl_error(f"unable to define unit '{unitspec}'")
-                    except Exception as msg:
-                        gl_error(
-                            f"define_map(oclass='{oclass.name}',...): property {prop.name} unit '{unitspec}' is not recognized: {msg}"
-                        )
-
-                elif proptype == PROPERTYTYPE.PT_DESCRIPTION:
-                    prop.description = va_list[va_start]
-                    va_start += 1
-                elif proptype == PROPERTYTYPE.PT_HAS_NOTIFY or proptype == PROPERTYTYPE.PT_HAS_NOTIFY_OVERRIDE:
-                    notify_fname = f"notify_{prop.oclass.name}_{prop.name}"
-                    prop.notify = FUNCTIONADDR()
-                    if prop.notify == 0:
-                        errno = EINVAL
-                        gl_error(f"Unable to find function '{notify_fname}' in {prop.oclass.module.name} module")
-
-                    if proptype == PROPERTYTYPE.PT_HAS_NOTIFY_OVERRIDE:
-                        prop.notify_override = True
-                    else:
-                        prop.notify_override = False
+                        return PropertyType.PT_double_array
                 else:
-                    tcode = str(proptype)
-                    ptypestr = self.get_property_typename(proptype)
-                    if ptypestr == "//UNDEF//":
-                        ptypestr = tcode
-                    errno = EINVAL
-                    gl_error(
-                        f"define_map(oclass='{oclass.name}',...): unrecognized extended property (PROPERTYTYPE={ptypestr if ptypestr else tcode})")
+                    return PropertyType.PT_double_array
+            case  "<class 'complex'>":
+                return PropertyType.PT_complex
+            case "<class 'numpy.ndarray'>":
+                return PropertyType.PT_double_array
+            case "<class 'NoneType'>":
+                return PropertyType.PT_void
+            case "<class 'bytes'>":
+                return PropertyType.PT_char1024
+            case "<class 'builtin_function_or_method'>":
+                return PropertyType.PT_function
+            case "<class 'bool'>":
+                return PropertyType.PT_bool
+            case "<class 'global_property_types'>":
+                if callable(variable):
+                    return PropertyType.PT_object
+                    # Classes and methods are special types that are specific to GridAppsD
+                    # PropertyType.PT_class
+                    # PropertyType.PT_method
+            case "<class 'function'>":
+                if callable(variable):
+                    return PropertyType.PT_function
+            case "<class 'module'>":
+                return PropertyType.PT_object
+            case "<class 'tuple'>":
+                return PropertyType.PT_any
+            case "<class 'set'>":
+                return PropertyType.PT_set
+            case "<class 'enum.EnumType'>":
+                return PropertyType.PT_enum
+            case _:  # default statement
+                return PropertyType.PT_any
 
-            elif proptype == PROPERTYTYPE.PT_enduse:
-                name = va_list[va_start]
-                va_start += 1
-                addr = va_list[va_start]
-                va_start += 1
-                if self.enduse_publish(oclass, addr, name) <= 0:
-                    gl_error(
-                        f"define_map(oclass='{oclass.name}',...): substructure of property '{prop.name}' substructure could not be published"
-                    )
-                    errno = E2BIG
+    def to_dict(self):
+        return {
+            "name": self.name,
+            "_properties": self._properties
+        }
 
-            else:
-                delegation = va_list[va_start] if proptype == PROPERTYTYPE.PT_delegated else None
-                name = va_list[va_start]
-                va_start += 1
-                addr = va_list[va_start]
-                va_start += 1
-                if prop != None and len(name) >= len(prop.name):
-                    gl_error(f"define_map(oclass='{oclass.name}',...): property name '{name}' is too big")
-                    errno = E2BIG
+    def class_add_loadmethod(self, function_name, call):
+        if not callable(call):
+            raise ValueError(f"Function name: {function_name}, is not true function and is not callable.")
+        method = LOADMETHOD()
+        method.call = call
+        method.name = function_name
+        self.loadmethods.append(method)
 
-                if name == "parent":
-                    gl_error(
-                        f"define_map(oclass='{oclass.name}',...): property name '{name}' conflicts with built-in property")
 
-                elif name == "rank":
-                    gl_error(
-                        f"define_map(oclass='{oclass.name}',...): property name '{name}' conflicts with built-in property")
-
-                elif name == "clock":
-                    gl_error(
-                        f"define_map(oclass='{oclass.name}',...): property name '{name}' conflicts with built-in property")
-
-                elif name == "valid_to":
-                    gl_error(
-                        f"define_map(oclass='{oclass.name}',...): property name '{name}' conflicts with built-in property")
-
-                elif name == "latitude":
-                    gl_error(
-                        f"define_map(oclass='{oclass.name}',...): property name '{name}' conflicts with built-in property")
-
-                elif name == "longitude":
-                    gl_error(
-                        f"define_map(oclass='{oclass.name}',...): property name '{name}' conflicts with built-in property")
-
-                elif name == "in_svc":
-                    gl_error(
-                        f"define_map(oclass='{oclass.name}',...): property name '{name}' conflicts with built-in property")
-
-                elif name == "out_svc":
-                    gl_error(
-                        f"define_map(oclass='{oclass.name}',...): property name '{name}' conflicts with built-in property")
-
-                elif name == "name":
-                    gl_error(
-                        f"define_map(oclass='{oclass.name}',...): property name '{name}' conflicts with built-in property")
-
-                elif name == "flags":
-                    gl_error(
-                        f"define_map(oclass='{oclass.name}',...): property name '{name}' conflicts with built-in property")
-
-                prop = PROPERTY(proptype, oclass, name, addr, delegation)
-                if prop == None:
-                    pass
-                if proptype == PROPERTYTYPE.PT_method:
-                    prop.addr = 0
-                    prop.method = None
-                self.add_property(oclass, prop)
-                count += 1
-                if prop.ptype > PROPERTYTYPE.PT_last:
-                    prop = None
-        return count
-
-    def define_enumeration_member(self, oclass, property_name, member, value):
-        prop = self.find_property(oclass, property_name)
-        key = KEYWORD()
-        if prop == None or key == None:
-            return 0
-        key.next = prop.keywords
-        key.name = member
-        key.value = value
-        prop.keywords = key
-        return 1
-
-    def define_set_member(self, oclass, property_name, member, value):
-        prop = self.find_property(oclass, property_name)
-        key = KEYWORD()
-        if not prop or not key:
-            return 0
-        if not prop.keywords:
-            prop.flags |= PROPERTYFLAGS.PF_CHARSET  # Enable single character keywords until a long keyword is defined
-        key.next = prop.keywords
-        key.name = member.encode('utf-8')
-        key.value = value
-        prop.keywords = key
-        return 1
-
-    def define_function(self, oclass, functionname, call):
-        if self.get_function(oclass.name, functionname) is not None:
-            gl_error(
-                f"define_function(Class *class={{name='{oclass.name}',...}}, FUNCTIONNAME functionname='{functionname}', ...) the function name has already been defined")
-            errno = 1
-            return None
-
-        func = FUNCTION()
-        if not func:
-            errno = ENOMEM
-            return None
-        func.addr = call
-        func.name = functionname.encode('utf-8')
-        func.next = None
-        func.oclass = oclass
-        if not oclass.fmap:
-            oclass.fmap = func
-        elif not oclass.fmap.next:
-            oclass.fmap.next = func
+    def get_loadmethod(self, name):
+        method = [m for m in self.loadmethods if m.name == name]
+        if method:
+            return method[0]
         else:
-            tempfunc = oclass.fmap
-            while tempfunc.next:
-                tempfunc = tempfunc.next
-            tempfunc.next = func
+            return None
 
-        return func
+    @classmethod
+    def pmap(cls):
+        """
+        :return: A list of properties of this class global_property_types
+        """
+        instance_attrs = [attr for attr in cls.__dict__ if not callable(getattr(cls, attr))]
+        # class_properties = [prop for prop, value in cls.__dict__.items() if isinstance(value, property)]
+        return instance_attrs
 
-    def get_function(self, classname, functionname):
-        oclass = self.get_from_classname(classname)
-        func = oclass.fmap
-        while func and func.oclass == oclass:
-            if func.name.decode('utf-8') == functionname:
-                return func.addr
-            func = func.next
-        self.errno = ENOENT
+    @classmethod
+    def fmap(cls):
+        """
+        :return: a list of callable methods (functions) of this class global_property_types
+        """
+        method_names = [attr for attr in dir(cls) if callable(getattr(cls, attr)) and not attr.startswith("__")]
+        return method_names
+
+    def class_define_function(self, function_name, call):  # adds a new method to the class = cls
+        methods = self.fmap()
+        if function_name in methods:
+            raise ValueError(f"Class '{self.__name__}' already has a function of name: {function_name}.")
+
+        if not callable(call):
+            raise ValueError(f"Function name: {function_name}, is not true function and is not callable.")
+        # The FUNCTION call is replaced with a Pythonic version here
+        # func= FUNCTION(owner_class=self, name=functionname, addr=call, next=None)
+
+        new_function = call
+        new_function._owner_class = self
+        new_function._name = function_name
+        new_function._addr = None
+        new_function._next = None
+        # We can get the name of the class global_property_types using: global_property_types(class_instance).__name__
+        setattr(self, function_name, new_function)
+
+        return new_function
+
+    def class_get_xsd(self):
+        xsd_element = ET.Element("xs:schema", attrib={"xmlns:xs": "http://www.w3.org/2001/XMLSchema"})
+        class_element = ET.SubElement(xsd_element, "xs:element", name=self.name)
+        complex_type = ET.SubElement(class_element, "xs:complexType")
+        all_element = ET.SubElement(complex_type, "xs:all")
+
+        for key in self._properties.keys():
+            name = key
+            prop = self._properties[key]  # {"global_property_types": str(global_property_types), "default": default_value}
+
+            element = ET.SubElement(all_element, "xs:element", name=name, type=f"xs:{prop['global_property_types']}")
+            # TODO Fix the keywords dictionary element
+            if prop['keywords']:
+                simple_type = ET.SubElement(element, "xs:simpleType")
+                restriction = ET.SubElement(simple_type, "xs:restriction", base="xs:string")
+                for keyword in prop['keywords']:
+                    ET.SubElement(restriction, "xs:enumeration", value=keyword)
+
+        # Convert to a string
+        return ET.tostring(xsd_element, encoding="unicode", method="xml")
+
+    @property
+    def class_get_first_class(self):
+        for k in self.registry.keys():
+            if self.registry[k].first_class:
+                return self.registry[k].name
         return None
 
-    def saveall(self, fp):
-        count = 0
-        fp.write("\n////////////////////////////////////////////////////////\n")
-        fp.write("// classes\n")
-        oclass = self.get_first_class()
-        while oclass:
-            prop = oclass.pmap
-            fp.write("class {} {{\n".format(oclass.name.decode('utf-8')))
-            if oclass.parent:
-                fp.write("#ifdef INCLUDE_PARENT_CLASS\n\tparent {};\n#endif\n".format(
-                    oclass.parent.name.decode('utf-8')))
-            func = oclass.fmap
-            while func and func.oclass == oclass:
-                fp.write("#ifdef INCLUDE_FUNCTIONS\n\tfunction {}();\n#endif\n".format(
-                    func.name.decode('utf-8')))
-                func = func.next
-            while prop and prop.oclass == oclass:
-                ptype = self.get_property_typename(prop.ptype)
-                if ptype:
-                    if b'.' not in prop.name:
-                        fp.write("\t{} {};\n".format(ptype, prop.name.decode('utf-8')))
-                    else:
-                        fp.write("#ifdef INCLUDE_DOTTED_PROPERTIES\t{} {};\n#endif\n".format(
-                            ptype, prop.name.decode('utf-8')))
-                prop = prop.next
-            fp.write("}\n")
-            oclass = oclass.next
-        return count
 
-    def saveall_xml(self, fp):
-        count = 0
-        fp.write("\t<classes>\n")
-        oclass = self.get_first_class()
-        while oclass:
-            prop = oclass.pmap
-            fp.write("\t\t<class name=\"{}\">\n".format(oclass.name))
-            if oclass.parent:
-                fp.write("\t\t<parent>{}</parent>\n".format(oclass.parent.name))
-            func = oclass.fmap
-            while func and func.oclass == oclass:
-                fp.write("\t\t<function>{}</function>\n".format(func.name.decode('utf-8')))
-                func = func.next
-            while prop and prop.oclass == oclass:
-                propname = self.get_property_typename(prop.ptype)
-                if propname:
-                    fp.write("\t\t\t<property type=\"{}\">{}</property>\n".format(
-                        propname, prop.name.decode('utf-8')))
-                prop = prop.next
-            fp.write("\t\t</class>\n")
-            oclass = oclass.next
-        fp.write("\t</classes>\n")
-        return count
+class ClassRegistry:
+    """
+    The class registry is used to hold all the class types.
+    This is basically a large dictionary with some built in methods for constructing and manipulating the
+    class registry.
+    """
+    _classes = {}
 
-    def profiles(self,):
-        total = 0
-        count = 0
-        i = 0
-        hits = 0
-        print("Model profiler results")
-        print("======================\n")
-        print("Class            Time (s) Time (%%) msec/self")
-        print("---------------- -------- -------- --------")
-        cl = self.first_class
-        while cl:
-            total += cl.profiler.clocks
-            count += 1
-            cl = cl.next
+    @classmethod
+    def register_class(cls, module, class_name, base_class=None):
+        if module is None:
+            # from gov_pnnl_goss.gridlab.gldcore.Module import Module
+            # module = Module()
+            module = "A Module"
+        if class_name in cls._classes:
+            raise ValueError(f"Class '{class_name}' is already registered.")
+        # cls._classes[class_name] = {
+        #     "name": class_name,
+        #     "base_class": base_class,
+        #     "properties": []
+        # }
 
-        if count == 0:
-            return
+        # module: Module, class_name: str, base_class, passconfig = PASSCONFIG.PC_ABSTRACTONLY
+        new_class = DynamicClass(module, class_name, base_class)
+        new_class.registry = cls._classes
+        cls._classes[class_name] = new_class
 
-        index = Class()
-        i = 0
-        cl = self.first_class
-        while cl:
-            index[i] = cl
-            i += 1
-            cl = cl.next
 
-        hits = -1
-        while hits != 0:
-            hits = 0
-            for i in range(count - 1):
-                if index[i].profiler.clocks < index[i + 1].profiler.clocks:
-                    index[i], index[i + 1] = index[i + 1], index[i]
-                    hits += 1
+    @classmethod
+    def add_property(cls, class_name, property_name, property_type, default_value=None):
+        if class_name not in cls._classes:
+            raise ValueError(f"Class '{class_name}' is not registered.")
+        # cls._classes[class_name]["properties"].append(PropertyMap(property_name, global_property_types, default_value))
+        # cls._classes[class_name].add(PropertyMap(property_name, global_property_types, default_value))
+        class_instance = cls._classes[class_name]
+        class_instance.add_property(PropertyMap(name=property_name, property_type=property_type, value= default_value))
 
-        for i in range(count):
-            cl = index[i]
-            if cl.profiler.clocks > 0:
-                ts = float(cl.profiler.clocks) / global_ms_per_second
-                tp = float(cl.profiler.clocks) / total * 100
-                mt = ts / cl.profiler.numobjs * 1000
-                print("{:<16.16s} {:7.3f} {:8.1f}% {:8.1f}".format(cl.name.decode('utf-8'), ts, tp, mt))
-            else:
-                break
+    @classmethod
+    def define_properties(cls, class_name, properties):
+        if class_name not in cls._classes:
+            raise ValueError(f"Class '{class_name}' is not registered.")
+        class_instance = cls._classes[class_name]
+        for property_name, property_details in properties.items():
+            class_instance.add_property(property_name, property_details['global_property_types'], property_details.get('default'))
 
-        index = None
-        print("================ ======== ======== =======")
-        print("{:<16.16s} {:7.3f} {:8.1f}% {:8.1f}".format("Total", float(total) / global_ms_per_second, 100.0,
-                                                                    1000 * float(
-                                                                        total) / global_ms_per_second / self.object_get_count()))
+    @classmethod
+    def add_extended_property(cls,
+                              class_name,
+                              property_name,
+                              property_type,
+                              units=None,
+                              default_value=None,
+                              keywords=None,
+                              description=None):
+        """
+        Adds extended properties to the class
 
-    def register_type(self, oclass, ptype, from_string, to_string):
-        dt = DELEGATEDTYPE()
-        if dt:
-            dt.oclass = oclass
-            dt.type = ptype.encode('utf-8')
-            dt.from_string = from_string
-            dt.to_string = to_string
-        else:
-            gl_error("unable to register delegated type (memory allocation failed)")
-            # TROUBLESHOOT
-            # Property delegation is not supported yet, so this should never happen.
-            # This is most likely caused by a lack of memory or an unstable system.
+        :param class_name:     the class to which the property is to be added
+        :param property_name:  the name of the property
+        :param property_type:  the global_property_types of the property
+        :param units:          the unit of the property (default is None)
+        :param default_value:  the default value if provided
+        :param keywords:       a list of the keyword arguments for the property (default is None)
+        :param description:    the description of the property (default is None)
+        :return: the property
+        """
+        if class_name not in cls._classes:
+            raise ValueError(f"Class '{class_name}' is not registered.")
+        cls._classes[class_name].add_property(
+            ExtendedProperty(property_name, property_type, units, default_value, keywords, description))
+
+    @classmethod
+    def find_property(cls, class_name, property_name)-> [None, 'PropertyMap']:
+        """
+        Find the named property in the class
+        :param class_name:
+        :param property_name:
+        :return: the PROPERTY, or None if the property is not found.
+        """
+        current_class = cls._classes.get(class_name, None)
+        while current_class:
+            try:
+                if getattr(current_class, property_name):
+                    prop = current_class._properties.get(property_name, None)
+                    if prop:
+                        return prop
+            except AttributeError:
+                pass
+            # Move to parent class if the property is not found
+            parent_class_name = current_class.base_class
+            current_class = cls._classes.get(parent_class_name, None)
+        return None
+
+    @classmethod
+    def get_properties(cls, class_name):
+        if class_name not in cls._classes:
+            raise ValueError(f"Class '{class_name}' is not registered.")
+        return iter(cls._classes[class_name]._properties)
+
+    @classmethod
+    def get_class_info(cls, class_name):
+        if class_name not in cls._classes:
+            raise ValueError(f"Class '{class_name}' is not registered.")
+        return cls._classes[class_name]
+
+    @classmethod
+    def get_count(cls):
+        """
+        :return: the number of classes registered
+        """
+        return len(cls._classes)
+
+    @classmethod
+    def save_all(cls, filename):
+        """
+        Save all class information to a stream in glm format
+        :param filename:
+        :return: the number of characters written to the stream
+        """
+        class_definitions = {class_name: class_instance.to_dict() for class_name, class_instance in cls._classes.items()}
+        with open(filename, 'w') as file:
+            json.dump(class_definitions, file, indent=4, default=str)
+
+    def register_type(self, type: str, from_string: callable, to_string: callable):
+        """
+        Register a global_property_types delegation for a property
+        :param type: the property global_property_types
+        :param from_string: the converter from string to data
+        :param to_string: the converter from data to string
+
+        Type delegation is used to transform data to string and string to data conversion
+        to routines implemented in a module, instead of in the core.   This allows custom
+        data global_property_types to be implemented, including enumerations, sets, and special objects.
+
+        :return: a pointer DelegatedType struct if successful, None if delegation failed
+        """
+        dt = DELEGATEDTYPE(type, self, from_string, to_string)
+        # output_error("unable to register delegated global_property_types (memory allocation failed)");
+        # 		/*	TROUBLESHOOT
+        # 			PropertyMap delegation is not supported yet so this should never happen.
+        # 			This is most likely caused by a lack of memory or an unstable system.
+        # 		 */
+        # 	return dt;
+        warnings.warn("Please reimplement register_type")
         return dt
 
-    def add_loadmethod(self, oclass, name, call):
-        method = LOADDATA()
-        method.name = name.encode('utf-8')
-        method.call = call
-        method.next = oclass.loadmethods
-        oclass.loadmethods = method
-        return 1
 
-    def get_loadmethod(self, oclass, name):
-        method = oclass.loadmethods
-        while method:
-            if method.name.decode('utf-8') == name:
-                return method
-            method = method.next
-        return None
+if __name__ == "__main__":
+    # Example Usage
+    # __init__
+    c = ClassRegistry()
+    # register_class
+    c.register_class(None, "MyClass")
+    # add_extended_property
+    c.add_extended_property("MyClass",
+                            "power_usage",
+                            float,
+                            "W")
 
-    def define_type(self, oclass, delegation, *args):
-        gl_error("delegated types not supported using define_type (use define_map instead)")
-        # TROUBLESHOOT
-        # Property delegation is not supported yet, so this should never happen.
-        # This is most likely caused by a lack of memory or an unstable system.
-        return 0
+    # add_property
+    c.add_property("MyClass", "my_property", int, 42)
+    c.add_property("MyClass", "int_value", int, 102)
+    c.add_property("MyClass", "another_property", str, "default value")
+    c.add_extended_property("MyClass",
+                            "short_name",
+                            str,
+                            "W",
+                            description="this will be the short name",
+                            keywords=['name', 'description'])
 
+    # find_property
+    test_property = "another_property"
+    prop = c.find_property("MyClass", test_property)
+    if prop:
+        print(f'"{test_property}" is found with this global_property_types {prop["global_property_types"]}')
+    else:
+        print(f'"{test_property}" not found')
+    test_property = "junk_property"
+    prop = c.find_property("MyClass", test_property)
+    if prop:
+        print(f'"{test_property}" is found with this global_property_types {prop["global_property_types"]}')
+    else:
+        print(f'"{test_property}" not found')
 
-    def get_xsd(self, oclass, buffer, len_):
-        n = 0
-        prop = None
-        i = 0
-        oc = oclass
-        # Assuming oflags is defined elsewhere
-        oflags = []
-        attribute = [
-            {"name": "id", "type": "integer", "keys": None},
-            {"name": "parent", "type": "string", "keys": None},
-            {"name": "rank", "type": "integer", "keys": None},
-            {"name": "clock", "type": "string", "keys": None},
-            {"name": "valid_to", "type": "string", "keys": None},
-            {"name": "latitude", "type": "string", "keys": None},
-            {"name": "longitude", "type": "string", "keys": None},
-            {"name": "in_svc", "type": "string", "keys": None},
-            {"name": "out_svc", "type": "string", "keys": None},
-            {"name": "flags", "type": "string", "keys": oflags},
-        ]
+    # get_class_info
+    my_class_info = c.get_class_info("MyClass")
+    print(f"my_class_info: {my_class_info}")
 
-        check = 1
+    # Iterating over properties
+    # get_properties
+    for prop in c.get_properties("MyClass"):
+        type_of = type(getattr(c._classes['MyClass'], prop)).__name__
+        value = getattr(c._classes['MyClass'], prop)
+        print(f"Property Name: {prop}, Type: {type_of}, Default: {value}")
 
-        n += self.buffer_write(buffer + n, len_ - n, f"<xs:element name=\"{oclass.name}\">\n")
-        n += self.buffer_write(buffer + n, len_ - n, "\t<xs:complexType>\n")
-        n += self.buffer_write(buffer + n, len_ - n, "\t\t<xs:all>\n")
+    # Example usage
+    try:
+        c.register_class(None, "MyClass")
+    except ValueError as e:
+        print(f'Expecting an error here: "Error: {e}"')
+    print("Registering NewClass")
+    c.register_class(None, "NewClass")
+    c.define_properties("NewClass", {
+        "age": {"global_property_types": int, "default": 30},
+        "name": {"global_property_types": str, "default": "John Doe"}
+    })
+    # get_count
+    print(f"Number of classes: {c.get_count()}")
 
-        for i in range(len_(attribute)):
-            n += self.buffer_write(buffer + n, len_ - n, f"\t\t\t<xs:element name=\"{attribute[i]['name']}\">\n")
-            n += self.buffer_write(buffer + n, len_ - n, "\t\t\t\t<xs:simpleType>\n")
-
-            if attribute[i]['keys'] is None:
-                n += self.buffer_write(buffer + n, len_ - n, f"\t\t\t\t\t<xs:restriction base=\"xs:{attribute[i]['type']}\"/>\n")
-            else:
-                keys = attribute[i]['keys']
-                n += self.buffer_write(buffer + n, len_ - n, "\t\t\t\t\t<xs:restriction base=\"xs:string\">\n")
-                n += self.buffer_write(buffer + n, len_ - n, "\t\t\t\t\t\t<xs:pattern value=\"")
-
-                for key in keys:
-                    n += self.buffer_write(buffer + n, len_ - n, f"{'' if key == keys[0] else '|'}{key['name']}")
-
-                n += self.buffer_write(buffer + n, len_ - n, "\"/>\n")
-                n += self.buffer_write(buffer + n, len_ - n, "\t\t\t\t\t</xs:restriction>\n")
-
-            n += self.buffer_write(buffer + n, len_ - n, "\t\t\t\t</xs:simpleType>\n")
-            n += self.buffer_write(buffer + n, len_ - n, "\t\t\t</xs:element>\n")
-
-        while oc is not None:
-            for prop in oc.pmap:
-                if prop.oclass == oc:
-                    proptype = self.get_property_typexsdname(prop.ptype)
-
-                    if prop.unit is not None:
-                        n += self.buffer_write(buffer + n, len_ - n,
-                                          f"\t\t\t\t<xs:element name=\"{prop.name}\" type=\"xs:string\"/>\n")
-                    else:
-                        n += self.buffer_write(buffer + n, len_ - n, f"\t\t\t<xs:element name=\"{prop.name}\">\n")
-                        n += self.buffer_write(buffer + n, len_ - n, "\t\t\t\t<xs:simpleType>\n")
-                        n += self.buffer_write(buffer + n, len_ - n,
-                                          f"\t\t\t\t\t<xs:restriction base=\"xs:{'string' if proptype is None else proptype}\">\n")
-
-                        if prop.keywords is not None:
-                            keywords = prop.keywords
-                            n += self.buffer_write(buffer + n, len_ - n, "\t\t\t\t\t<xs:pattern value=\"")
-
-                            for key in keywords:
-                                n += self.buffer_write(buffer + n, len_ - n, f"{'' if key == keywords[0] else '|'}{key['name']}")
-
-                            n += self.buffer_write(buffer + n, len_ - n, "\"/>\n")
-
-                        n += self.buffer_write(buffer + n, len_ - n, "\t\t\t\t\t</xs:restriction>\n")
-                        n += self.buffer_write(buffer + n, len_ - n, "\t\t\t\t</xs:simpleType>\n")
-                        n += self.buffer_write(buffer + n, len_ - n, "\t\t\t</xs:element>\n")
-
-            oc = oc.parent
-
-        n += self.buffer_write(buffer + n, len_ - n, "\t\t</xs:all>\n")
-        n += self.buffer_write(buffer + n, len_ - n, "\t</xs:complexType>\n")
-        n += self.buffer_write(buffer + n, len_ - n, "</xs:element>\n")
-        buffer[n] = 0
-
-        if check == 0:
-            print("get_xsd() overflowed.\n")
-            buffer[0] = 0
-            return 0
-
-        return n
+    # register_type
+    c.register_type("int", int, str)
+    # save_all
+    c.save_all("classes.json")

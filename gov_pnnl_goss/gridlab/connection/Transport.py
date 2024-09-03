@@ -104,7 +104,7 @@ class ConnectionTransport:
         elif e == ConnectionTransportEnum.CT_TCP:
             t = TCP()
         else:
-            gl_error("invalid transport type")
+            gl_error("invalid transport global_property_types")
             return None
 
         if not t.create():

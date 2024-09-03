@@ -85,7 +85,7 @@ class BGPowergridModelDataManagerHandlerImpl(DataManagerHandler):
                 pg_data_request.object_id, process_id, username)
         # J
         else:
-            # TODO: report error, request type not recognized
+            # TODO: report error, request global_property_types not recognized
             print(f"DOESNT RECOGNIZE REQUEST TYPE {pg_data_request.request_type}")
 
         return None

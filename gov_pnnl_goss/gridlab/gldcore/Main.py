@@ -2,15 +2,15 @@ import sys
 from pathlib import Path
 import os
 
-from gridlab.gldcore import Save
-from gridlab.gldcore.Class import Class
-from gridlab.gldcore.Cmdarg import cmdarg_load
+from gridlab.gldcore import Save, Legal
+from gridlab.gldcore.Class import DynamicClass
+from gridlab.gldcore.CmdArg import cmdarg_load
 from gridlab.gldcore.Kill import kill_starthandler, kill_stophandler
 from gridlab.gldcore.GldRandom import random_init
 from gridlab.gldcore.Globals import global_check_version, FAILED, XC_SUCCESS, XC_ENVERR, XC_USRERR, XC_PRCERR, \
     global_pidfile, global_environment, global_savefile, global_kmlfile, global_profiler, global_pauseatexit, XC_ARGERR, \
     XC_INIERR, global_workdir, global_dumpall, global_start_time, global_stop_time, global_thread_count
-from gridlab.gldcore.Instance import exec_clock
+from gridlab.gldcore.Instance import Exec
 from gridlab.gldcore.Kml import Kml
 from gridlab.gldcore.Legal import check_version
 from gridlab.gldcore.Local import locale_pop
@@ -18,8 +18,8 @@ from gridlab.gldcore.Module import Module
 from gridlab.gldcore.Output import output_verbose, output_fatal, output_error, output_message, output_init
 from gridlab.gldcore.Realtime import realtime_runtime, realtime_starttime
 from gridlab.gldcore.Schedule import Schedule
-from gridlab.gldcore.Threadpool import processor_count
-from gridlab.gldcore.Timestamp import timestamp_set_tz, TS_NEVER
+from gridlab.gldcore.ThreadPool import processor_count
+from gridlab.gldcore.TimeStamp import timestamp_set_tz, TS_NEVER
 
 import atexit
 import os
@@ -138,7 +138,7 @@ class Main:
         # set the default timezone
         timestamp_set_tz(None)
 
-        exec_clock() # initialize the wall clock
+        Exec.exec_clock() # initialize the wall clock
         realtime_starttime() # mark start
 
         # set the process info
@@ -227,10 +227,7 @@ class Main:
                 #
                 exit(XC_PRCERR)
 
-            if _WIN32:
-                getpid_ = _getpid
-            else:
-                getpid_ = os.getpid()
+            getpid_ = os.getpid()
 
             fp.write("%d\n".format(getpid_))
             output_verbose("process id %d written to %s".format(getpid_, global_pidfile))
@@ -240,14 +237,14 @@ class Main:
 
         # do legal stuff
         if LEGAL_NOTICE:
-            if global_pidfile == "" and legal_notice() == FAILED:
+            if global_pidfile == "" and Legal.legal_notice() == FAILED:
                 raise Exception(XC_USRERR)
 
         # start the processing environment
         output_verbose("load time: %d sec".format(realtime_runtime()))
         output_verbose("starting up %s environment".format(global_environment))
         if self.environment_start(argc, argv) == FAILED:
-            output_fatal("environment startup failed: %s".format(errno))
+            output_fatal("environment startup failed: %s".format("-1"))
             #	TROUBLESHOOT
             #    The requested environment could not be started.  This usually
             #    follows a more specific message regarding the startup problem.
@@ -279,7 +276,7 @@ class Main:
 
         # profile results
         if global_profiler:
-            Class.class_profiles()
+            DynamicClass.class_profiles()
             Module.module_profiles()
 
         if DUMP_SCHEDULES:

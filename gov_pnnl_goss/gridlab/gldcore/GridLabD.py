@@ -53,10 +53,12 @@ from inspect import isclass
 
 from time import time_ns as TIMESTAMP
 
-from gov_pnnl_goss.gridlab.gldcore.Class import PASSCONFIG
-from gov_pnnl_goss.gridlab.gldcore.Output import output_verbose, output_message, output_warning
-from gov_pnnl_goss.gridlab.gldcore.Property import PROPERTYTYPE, PROPERTYCOMPAREOP
-
+# from gov_pnnl_goss.gridlab.gldcore.Class import PASSCONFIG
+from gov_pnnl_goss.gridlab.gldcore.Output import output_verbose, output_message, output_warning#
+from gov_pnnl_goss.gridlab.gldcore.PropertyHeader import PropertyType, PropertyMap
+from gridlab.gldcore import Load
+# from gridlab.gldcore.Class import PASSCONFIG
+from gridlab.gldcore.Version import Version, version_build, version_branch
 
 # Module version info (must match core version info)
 MAJOR = 5
@@ -147,14 +149,14 @@ def PUBLISH_CLASSX(C, T, N, V):
     return None
 
 def PUBLISH_DELEGATED(C, T, N):
-    # /** The PUBLISH_DELEGATED macro is used to publish a variable that uses a delegated type.
+    # /** The PUBLISH_DELEGATED macro is used to publish a variable that uses a delegated global_property_types.
     # define PUBLISH_DELEGATED(C,T,N) {class C *_t=NULL;if (gl_publish_variable(C##_class,PT_delegated,T,#N,(char*)&(_t->N)-(char*)_t,NULL)<1) return NULL;}
     return None
 # /** The PUBLISH_ENUM(C,N,E) macro is used to define a keyword for an enumeration variable
-# //#define PUBLISH_ENUM(C,N,E) (*Callback()->define_enumeration_member)(C##_class,#N,#E,C::E)
+# //#define PUBLISH_ENUM(C,N,E) (*self->define_enumeration_member)(C##_class,#N,#E,C::E)
 #
 # /** The PUBLISH_SET(C,N,E) macro is used to define a keyword for a set variable
-# //#define PUBLISH_SET(C,N,E) (*Callback()->define_set_member)(C##_class,#N,#E,C::E)
+# //#define PUBLISH_SET(C,N,E) (*self->define_set_member)(C##_class,#N,#E,C::E)
 
 
 #
@@ -187,10 +189,10 @@ def PADDR(index):
 
 
 # Exception handling
-# GL_TRY => try #  "EXCEPTIONHANDLER *_handler = (*Callback()->exception.create_exception_handler)(); if _handler==None: (*Callback()->output_error)(%status(%d): module exception handler creation failed, __FILE__, __LINE__); else if setjmp(_handler.buf) == 0:"
-# GL_THROW => raise #  "(*Callback()->exception.throw_exception)"
-# GL_CATCH => except # "else: Msg = (*Callback()->exception.exception_msg)();"
-# GL_ENDCATCH => finally "(*Callback()->exception.delete_exception_handler)(_handler);"
+# GL_TRY => try #  "EXCEPTIONHANDLER *_handler = (*self->exception.create_exception_handler)(); if _handler==None: (*self->output_error)(%status(%d): module exception handler creation failed, __FILE__, __LINE__); else if setjmp(_handler.buf) == 0:"
+# GL_THROW => raise #  "(*self->exception.throw_exception)"
+# GL_CATCH => except # "else: Msg = (*self->exception.exception_msg)();"
+# GL_ENDCATCH => finally "(*self->exception.delete_exception_handler)(_handler);"
 
 
 class GLError(Exception):
@@ -223,8 +225,8 @@ def gl_testmsg(message):
     GLTest(message)
 
 # Provides access to a global module variable.
-def gl_get_module_var(variable_name):
-    return Callback().module.getvar(variable_name)
+def gl_get_module_var(self, variable_name):
+    return self.module.getvar(variable_name)
 
 
 # Provide file search function
@@ -234,39 +236,40 @@ def gl_findfile(filename):
     return f[0] if f else None
 
 # Declare a module dependency. This will automatically load the module if it is not already loaded.
-def gl_module_depends(name, major=0, minor=0, build=0):
-    return Callback().module.depends(name, major, minor, build)
+def gl_module_depends(self, name, major=0, minor=0, build=0):
+    return self.module.depends(name, major, minor, build)
 
 # # Allow an object class to be registered with the core.
-def gl_register_class(class_definition):
-    Callback().register_class(class_definition)
+def gl_register_class(self, class_definition):
+    self.register_class(class_definition)
 
 # Creates an object by allocating one from the core heap.
-def gl_create_object(class_name):
-    return Callback().create.single(class_name)
+def gl_create_object(self, class_name):
+    return self.create.single(class_name)
 
 # Creates an array of objects on the core heap.
-def gl_create_array(class_name, count):
-    return Callback().create.array(class_name, count)
+def gl_create_array(self, class_name, count):
+    return self.create.array(class_name, count)
 
-# Set the Callback() table for the module
+# Set the self table for the module
 def set_callback(callback_table):
     pass
-    # Callback() = callback_table
+    # self = callback_table
 
 # Get the first object class
-def gl_class_get_first():
-    return Callback().class_getfirst()
+def gl_class_get_first(self, ):
+    return self.class_getfirst()
 
 # Get an object class by name
 def gl_class_get_by_name(class_name):
-    return Callback().class_getname(class_name)
+    return class_name.class_getname(class_name)
 
-# Check if an object is of a specific type within a module
+# Check if an object is of a specific global_property_types within a module
 def object_isa(obj, obj_type, module_name=None):
-    rv = Callback().object_isa(obj, obj_type) != 0
-    mv = module_name is None or (obj.oclass.module == Callback().module_find(module_name))
-    return rv and mv
+    pass
+    # rv = obj.object_isa(obj, obj_type) != 0
+    # mv = module_name is None or (obj.owner_class.module == obj.module_find(module_name))
+    # return rv and mv
 
 # Declare an object property as publicly accessible
 def publish_variable(obj, variable_name):
@@ -279,16 +282,17 @@ def publish_loadmethod(load_method_name):
     pass
 
 # Publish an object function
-def publish_function(oclass, function_name, function_call):
+def publish_function(owner_class, function_name, function_call):
     # Implement based on your specific requirements
     pass
 
 # Get an object function
 def get_function(obj, function_name):
-    if obj:
-        return Callback().function.get(obj.oclass.name, function_name)
-    else:
-        return None
+    pass
+    # if obj:
+    #     return obj.function.get(obj.owner_class.name, function_name)
+    # else:
+    #     return None
 
 # Set the dependency of an object
 def set_dependent(obj, dependent_obj):
@@ -307,7 +311,7 @@ function_call_to_define = "function_call_to_define"
 object_to_set_dependency = "object_to_set_dependency"
 dependent_object = "dependent_object"
 
-# Check if an object is of a specific type within a module
+# Check if an object is of a specific global_property_types within a module
 is_object_of_type = object_isa(obj=object_to_test, obj_type=object_type_to_check, module_name=module_name_to_check)
 
 # Declare an object property as publicly accessible
@@ -317,7 +321,7 @@ publish_variable(obj=None, variable_name=variable_name_to_publish)
 publish_loadmethod(load_method_name=load_method_name_to_publish)
 
 # Publish an object function
-publish_function(oclass=class_to_define_function, function_name=function_name_to_define, function_call=function_call_to_define)
+publish_function(owner_class=class_to_define_function, function_name=function_name_to_define, function_call=function_call_to_define)
 
 # Get an object function
 function = get_function(obj=object_to_test, function_name=function_name_to_define)
@@ -335,7 +339,7 @@ def set_rank(obj, rank):
     # Implement based on your specific requirements
     pass
 
-# Get the first object of a certain type
+# Get the first object of a certain global_property_types
 def get_first(type):
     # Implement based on your specific requirements
     pass
@@ -347,7 +351,7 @@ def find_by_id(id):
     pass
 
 
-# Register a type/class
+# Register a global_property_types/class
 def register_type(type):
     # Implement based on your specific requirements
     pass
@@ -384,7 +388,7 @@ set_parent(obj=object_to_set_parent, parent=parent_object)
 set_rank(obj=None, rank=rank_to_set)
 
 
-# Get the first object of a certain type
+# Get the first object of a certain global_property_types
 first_object = get_first(type=object_type_to_get_first)
 
 
@@ -392,7 +396,7 @@ first_object = get_first(type=object_type_to_get_first)
 found_object = find_by_id(id=object_id_to_find)
 
 
-# Register a type/class
+# Register a global_property_types/class
 register_type(type=class_name_to_register)
 
 # Add an extended property to a class
@@ -565,7 +569,7 @@ def gl_name(my, buffer, size):
     if my is None or buffer is None:
         return None
     if my.name is None:
-        temp = f"{my.oclass.name}:{my.id}"
+        temp = f"{my.owner_class.name}:{my.id}"
     else:
         temp = my.name
     if size < len(temp):
@@ -625,7 +629,13 @@ def nextpow2(x):
 
 
 # Interpolation functions (Replace with your own implementations)
-def gl_lerp():
+def gl_lerp(value, min_value, min_index, max_value, max_index):
+    """
+    Linear interpolation between points
+    example:
+    latitude, self.MIN_LAT, self.MIN_LAT_INDEX, self.MAX_LAT, self.MAX_LAT_INDEX))
+    :return:
+    """
     pass
 
 
@@ -651,11 +661,11 @@ def gl_forecast_save():
 
 # Error handling macros (Replace with Python-style error handling)
 # def SYNC_CATCHALL(C):
-#     self = C.oclass
+#     self = C.owner_class
 #     gl_error(functions"sync_{C}(self={self.id};{self.name}): {ex}")
 #
 # def INIT_CATCHALL(C):
-#     self = C.oclass
+#     self = C.owner_class
 #     gl_error(functions"init_{C}(self={self.id};{self.name}): {ex}")
 #
 # def CREATE_CATCHALL(C):
@@ -675,42 +685,42 @@ def gl_forecast_save():
 
 
 # Transform access
-def gl_transform_getfirst():
-    return Callback().transform.getnext(None)
+def gl_transform_getfirst(obj):
+    return obj.transform.getnext(None)
 
 
-def gl_transform_getnext(xform):
-    return Callback().transform.getnext(xform)
+def gl_transform_getnext(obj, xform):
+    return obj.transform.getnext(xform)
 
 
-def gl_transform_add_linear(stype, source, target, scale, bias, obj, prop, sched):
-    return Callback().transform.add_linear(stype, source, target, scale, bias, obj, prop, sched)
+def gl_transform_add_linear(self, stype, source, target, scale, bias, obj, prop, sched):
+    return self.transform.add_linear(stype, source, target, scale, bias, obj, prop, sched)
 
 
-def gl_transform_add_external(target_obj, target_prop, function, source_obj, source_prop):
-    return Callback().transform.add_external(target_obj, target_prop, function, source_obj, source_prop)
+def gl_transform_add_external(self, target_obj, target_prop, function, source_obj, source_prop):
+    return self.transform.add_external(target_obj, target_prop, function, source_obj, source_prop)
 
 
-def gl_module_find_transform_function(function):
-    return Callback().module.find_transform_function(function)
+def gl_module_find_transform_function(obj, function):
+    return obj.module.find_transform_function(function)
 
 
 # Random variable access
-def gl_randomvar_getfirst():
-    return Callback().randomvar.getnext(None)
+def gl_randomvar_getfirst(obj):
+    return obj.randomvar.getnext(None)
 
 
-def gl_randomvar_getnext(var):
-    return Callback().randomvar.getnext(var)
+def gl_randomvar_getnext(self, var):
+    return self.randomvar.getnext(var)
 
 
-def gl_randomvar_getspec(str, size, var):
-    return Callback().randomvar.getspec(str, size, var)
+def gl_randomvar_getspec(self, _str, size, var):
+    return self.randomvar.getspec(_str, size, var)
 
 
 # Remote data access
 def gl_read(local, obj, prop):
-    return Callback().remote.readobj(local, obj, prop)
+    return obj.remote.readobj(local, obj, prop)
 
 
 def gl_write(local, obj, prop):
@@ -1054,7 +1064,7 @@ class GldClock:
         self.dt.year = y
         self.dt.month = m
         self.dt.day = d
-        return Callback().time.mkdatetime(self.dt)
+        return self.time.mkdatetime(self.dt)
 
     def set_time(self, H, M, S, u=0, t=None, force_dst=False):
         self.dt.hour = H
@@ -1065,7 +1075,7 @@ class GldClock:
             self.set_tz(t)
         if force_dst:
             self.dt.is_dst = True
-        return Callback().time.mkdatetime(self.dt)
+        return self.time.mkdatetime(self.dt)
 
     def set_datetime(self, y, m, d, H, M, S, u=0, t=None, force_dst=False):
         self.set_date(y, m, d)
@@ -1073,46 +1083,46 @@ class GldClock:
 
     def set_year(self, y):
         self.dt.year = y
-        return Callback().time.mkdatetime(self.dt)
+        return self.time.mkdatetime(self.dt)
 
     def set_month(self, m):
         self.dt.month = m
-        return Callback().time.mkdatetime(self.dt)
+        return self.time.mkdatetime(self.dt)
 
     def set_day(self, d):
         self.dt.day = d
-        return Callback().time.mkdatetime(self.dt)
+        return self.time.mkdatetime(self.dt)
 
     def set_hour(self, h):
         self.dt.hour = h
-        return Callback().time.mkdatetime(self.dt)
+        return self.time.mkdatetime(self.dt)
 
     def set_minute(self, m):
         self.dt.minute = m
-        return Callback().time.mkdatetime(self.dt)
+        return self.time.mkdatetime(self.dt)
 
     def set_second(self, s):
         self.dt.second = s
-        return Callback().time.mkdatetime(self.dt)
+        return self.time.mkdatetime(self.dt)
 
     def set_nanosecond(self, u):
         self.dt.nanosecond = u
-        return Callback().time.mkdatetime(self.dt)
+        return self.time.mkdatetime(self.dt)
 
     def set_tz(self, t):
         self.dt.tz = t
-        return Callback().time.mkdatetime(self.dt)
+        return self.time.mkdatetime(self.dt)
 
     def set_is_dst(self, i):
         self.dt.is_dst = i
-        return Callback().time.mkdatetime(self.dt)
+        return self.time.mkdatetime(self.dt)
 
     def from_string(self, s):
-        return Callback().time.local_datetime(Callback().time.convert_to_timestamp(s), self.dt)
+        return self.time.local_datetime(self.time.convert_to_timestamp(s), self.dt)
 
     def to_string(self, size=1024):
         buf = ""
-        return Callback().time.convert_from_timestamp(self.dt.timestamp, buf, size)
+        return self.time.convert_from_timestamp(self.dt.timestamp, buf, size)
 
     def to_days(self, ts=0):
         return (self.dt.timestamp - ts) / 86400.0 + self.dt.nanosecond * 1e-9
@@ -1153,11 +1163,11 @@ class TECHNOLOGYREADINESSLEVEL:
 
 
 # class GldClass:
-#     def __init__(self, oclass):
-#         self.oclass = oclass
+#     def __init__(self, owner_class):
+#         self.owner_class = owner_class
 #
 #     def get_name(self):
-#         return self.oclass.name
+#         return self.owner_class.name
 
 
 class GldClass:
@@ -1185,18 +1195,18 @@ class GldClass:
         return GldProperty(self.core.pmap.name) if self.core.pmap else None
 
     def get_next_property(self, p):
-        if p and p.core.next and p.core.next.oclass == self.core:
+        if p and p.core.next and p.core.next.owner_class == self.core:
             return GldProperty(p.core.next.name)
         return None
 
     def get_first_function(self):
-        return GldFunction(self.core.fmap.name, self.core.fmap.oclass, self.core.fmap.classaddr) if self.core.fmap else None
+        return GldFunction(self.core.fmap.name, self.core.fmap.owner_class, self.core.fmap.classaddr) if self.core.fmap else None
 
     def get_next_function(self, f):
-        if f and f.oclass == self.core:
+        if f and f.owner_class == self.core:
             next_func = f.core.next
             if next_func:
-                return GldFunction(next_func.name, next_func.oclass, next_func.classaddr)
+                return GldFunction(next_func.name, next_func.owner_class, next_func.classaddr)
         return None
 
     def get_trl(self):
@@ -1206,8 +1216,8 @@ class GldClass:
         self.core.trl = t
 
     @staticmethod
-    def create(m, n, s, f):
-        return Callback().register_class(m, n, s, f)
+    def create(self, m, n, s, f):
+        return self.register_class(m, n, s, f)
 
     def is_last(self):
         return self.core.next is None
@@ -1224,7 +1234,7 @@ class GldFunction:
         self.name = name
         self.oclass = oclass
         self.addr = addr
-        self.core = self  # FUNCTION(name, oclass, classaddr)
+        self.core = self  # FUNCTION(name, owner_class, classaddr)
 
     def get_name(self):
         return self.core.name
@@ -1239,7 +1249,7 @@ class GldFunction:
         return self.core.next is None
 
     def get_next(self):
-        return GldFunction(self.core.next.name, self.core.next.oclass, self.core.next.classaddr)
+        return GldFunction(self.core.next.name, self.core.next.owner_class, self.core.next.classaddr)
 
 
 class GldType:
@@ -1247,7 +1257,7 @@ class GldType:
         self._type = t
 
     def get_spec(self):
-        return Callback().properties.get_spec(self._type)
+        return self.properties.get_spec(self._type)
 
     def get_first(self):
         return type(self._type.value) # .PT_double
@@ -1275,10 +1285,10 @@ class GldUnit:
         self.prec = None
 
         if name:
-            unit = Callback().unit_find(name)
+            unit = self.unit_find(name)
             if unit:
                 self.name = name
-                # ctypes.memmove(ctypes.byref(self.core), ctypes.byref(unit), ctypes.sizeof(UNIT))
+                # ctypes.memmove(ctypes.by_ref(self.core), ctypes.by_ref(unit), ctypes.sizeof(UNIT))
         else:
             self.core.name = ""
 
@@ -1316,30 +1326,30 @@ class GldUnit:
         return self.core.name != ""
 
     def set_unit(self, name):
-        unit = Callback().unit_find(name)
+        unit = self.unit_find(name)
         if unit:
             self.core.name = name
-            # ctypes.memmove(ctypes.byref(self.core), ctypes.byref(unit), ctypes.sizeof(UNIT))
+            # ctypes.memmove(ctypes.by_ref(self.core), ctypes.by_ref(unit), ctypes.sizeof(UNIT))
             return True
         else:
             self.core.name = ""
             return False
 
     def convert(self, name, value):
-        unit = Callback().unit_find(name)
-        if unit and Callback().unit_convert_ex(ctypes.byref(self.core), unit, ctypes.byref(value)):
+        unit = self.unit_find(name)
+        if unit and self.unit_convert_ex(ctypes.byref(self.core), unit, ctypes.byref(value)):
             return True
         else:
             return False
 
     def convert_unit(self, unit, value):
-        if Callback().unit_convert_ex(ctypes.byref(self.core), unit, ctypes.byref(value)):
+        if self.unit_convert_ex(ctypes.byref(self.core), unit, ctypes.byref(value)):
             return True
         else:
             return False
 
     def convert_gld_unit(self, unit, value):
-        if Callback().unit_convert_ex(ctypes.byref(self.core), ctypes.byref(unit.core), ctypes.byref(value)):
+        if self.unit_convert_ex(ctypes.byref(self.core), ctypes.byref(unit.core), ctypes.byref(value)):
             return True
         else:
             return False
@@ -1375,7 +1385,7 @@ class GldKeyword:
         elif isinstance(name_or_value, int):
             return -1 if name_or_value < self.value else 1 if name_or_value > self.value else 0
         else:
-            raise ValueError("Unsupported comparison type")
+            raise ValueError("Unsupported comparison global_property_types")
 
     def __eq__(self, name_or_value):
         return self.compare(name_or_value) == 0
@@ -1640,8 +1650,8 @@ class GldObject:
         self.value = None
 
     @staticmethod
-    def find_object(n):
-        obj = Callback().get_object(n)
+    def find_object(self, n):
+        obj = self.get_object(n)
         return GldObject.get_object(obj)
 
     def get_id(self):
@@ -1651,7 +1661,7 @@ class GldObject:
         return self.previous.groupid.get_string()
 
     def get_oclass(self):
-        return GldClass(self.previous.oclass)
+        return GldClass(self.previous.owner_class)
 
     def get_parent(self):
         return self.previous.parent if self.previous.parent else None
@@ -1660,7 +1670,7 @@ class GldObject:
         return self.previous.rank
 
     def get_clock(self):
-        return self.previous.clock
+        return self.previous.exec_clock
 
     def get_valid_to(self):
         return self.previous.valid_to
@@ -1686,8 +1696,8 @@ class GldObject:
     def get_name(self):
         if self.previous.name:
             return self.previous.name
-        elif self.previous.oclass:
-            return f"{self.previous.oclass.name}:{self.previous.id}"
+        elif self.previous.owner_class:
+            return f"{self.previous.owner_class.name}:{self.previous.id}"
         else:
             return "Unknown"
 
@@ -1707,7 +1717,7 @@ class GldObject:
         return self.previous.flags & mask
 
     def set_clock(self, ts=0):
-        self.previous.clock = ts if ts else gl_globalclock
+        self.previous.exec_clock = ts if ts else gl_globalclock
 
     def set_heartbeat(self, dt):
         self.previous.heartbeat = dt
@@ -1758,10 +1768,10 @@ class GldObject:
         return other is not None and self.previous == other.previous
 
     def get_property(self, name, pstruct=None):
-        return Callback().properties.get_property(self.previous, name, pstruct)
+        return self.properties.get_property(self.previous, name, pstruct)
 
     def get_function(self, name):
-        return Callback().function.get(self.previous.oclass.name, name)
+        return self.function.get(self.previous.owner_class.name, name)
 
     def getp(self, prop, value):
         self.rlock()
@@ -1783,16 +1793,16 @@ class GldObject:
         self.previous.prop[0] = value
 
     def set_dependent(self, obj):
-        return Callback().object.set_dependent(self.previous, obj)
+        return self.object.set_dependent(self.previous, obj)
 
     def set_parent(self, obj):
-        return Callback().object.set_parent(self.previous, obj)
+        return self.object.set_parent(self.previous, obj)
 
     def set_rank(self, r):
-        return Callback().object.set_rank(self.previous, r)
+        return self.object.set_rank(self.previous, r)
 
     def isa(self, otype):
-        return Callback().object_isa(self.previous, otype)
+        return self.object_isa(self.previous, otype)
 
     def is_valid(self):
         return self.previous is not None and self.previous == self
@@ -1801,8 +1811,8 @@ class GldObject:
         return self.previous.next is None
 
     @staticmethod
-    def get_first():
-        o = Callback().object.get_first()
+    def get_first(self, ):
+        o = self.object.get_first()
         return GldObject.get_object(o)
 
     def get_next(self):
@@ -1834,8 +1844,8 @@ class GldObject:
         return GldObject(obj)
 
     @staticmethod
-    def get_object_by_name(n):
-        obj = Callback().get_object(n)
+    def get_object_by_name(self, n):
+        obj = self.get_object(n)
         return GldObject.get_object(obj)
 
 
@@ -1848,9 +1858,9 @@ class GldProperty:
         if obj is not None:
             self.obj = obj.previous
             if obj:
-                Callback().properties.get_property(obj.previous, name, self.pstruct)
+                self.properties.get_property(obj.previous, name, self.pstruct)
             else:
-                v = Callback().find(name)
+                v = self.find(name)
                 self.pstruct.prop = v.prop if v else None
 
     def is_valid(self):
@@ -1866,7 +1876,7 @@ class GldProperty:
         return self.pstruct
 
     def get_class(self):
-        return GldClass(self.pstruct.prop.oclass) if self.pstruct.prop else None
+        return GldClass(self.pstruct.prop.owner_class) if self.pstruct.prop else None
 
     def get_name(self):
         return self.pstruct.prop.name if self.pstruct.prop else None
@@ -1875,7 +1885,7 @@ class GldProperty:
         return f"{self.pstruct.prop.name}_{self.pstruct.part}" if self.pstruct.part else self.pstruct.prop.name
 
     def get_type(self):
-        return GldType(self.pstruct.prop.ptype) if self.pstruct.prop else None
+        return GldType(self.pstruct.prop.global_property_types) if self.pstruct.prop else None
 
     def get_size(self):
         return self.pstruct.prop.size if self.pstruct.prop else None
@@ -1905,7 +1915,7 @@ class GldProperty:
         return self.pstruct.prop.flags if self.pstruct.prop else None
 
     def to_string(self, buffer, size):
-        return Callback().convert.property_to_string(self.pstruct.prop, self.get_addr(), buffer, size) if self.pstruct.prop else -1
+        return self.convert.property_to_string(self.pstruct.prop, self.get_addr(), buffer, size) if self.pstruct.prop else -1
 
     def get_string(self, sz=1024):
         res = GldString
@@ -1917,13 +1927,13 @@ class GldProperty:
         return res
 
     def from_string(self, string):
-        return Callback().convert.string_to_property(self.pstruct.prop, self.get_addr(), string) if self.pstruct.prop else -1
+        return self.convert.string_to_property(self.pstruct.prop, self.get_addr(), string) if self.pstruct.prop else -1
 
     def get_partname(self):
         return self.pstruct.part
 
     def get_part(self, part=None):
-        return Callback().properties.get_part(self.obj, self.pstruct.prop, part if part else self.pstruct.part) if self.obj else None
+        return self.properties.get_part(self.obj, self.pstruct.prop, part if part else self.pstruct.part) if self.obj else None
 
     def set_object(self, o):
         self.obj = o
@@ -1932,7 +1942,7 @@ class GldProperty:
     #     self.self = o.previous
 
     # def set_property(self, dimensions):
-    #     Callback().properties.get_property(self.self, dimensions, self.pstruct)
+    #     self.properties.get_property(self.self, dimensions, self.pstruct)
 
     def set_property(self, p):
         self.pstruct.prop = p
@@ -1944,57 +1954,57 @@ class GldProperty:
         return bool(self.pstruct.part)
 
     def is_complex(self):
-        return self.pstruct.prop.ptype == PROPERTYTYPE.PT_complex if self.pstruct.prop else False
+        return self.pstruct.prop.global_property_types == PropertyType.PT_complex if self.pstruct.prop else False
 
     def is_double(self):
-        return self.pstruct.prop.ptype in [PROPERTYTYPE.PT_double, PROPERTYTYPE.PT_random, PROPERTYTYPE.PT_enduse, PROPERTYTYPE.PT_loadshape] if self.pstruct.prop else False
+        return self.pstruct.prop.global_property_types in [PropertyType.PT_double, PropertyType.PT_random, PropertyType.PT_enduse, PropertyType.PT_loadshape] if self.pstruct.prop else False
 
     def is_integer(self):
-        return self.pstruct.prop.ptype in [PROPERTYTYPE.PT_int16, PROPERTYTYPE.PT_int32, PROPERTYTYPE.PT_int64] if self.pstruct.prop else False
+        return self.pstruct.prop.global_property_types in [PropertyType.PT_int16, PropertyType.PT_int32, PropertyType.PT_int64] if self.pstruct.prop else False
 
     def is_enumeration(self):
-        return self.pstruct.prop.ptype == PROPERTYTYPE.PT_enumeration if self.pstruct.prop else False
+        return self.pstruct.prop.global_property_types == PropertyType.PT_enumeration if self.pstruct.prop else False
 
     def is_set(self):
-        return self.pstruct.prop.ptype == PROPERTYTYPE.PT_set if self.pstruct.prop else False
+        return self.pstruct.prop.global_property_types == PropertyType.PT_set if self.pstruct.prop else False
 
     def is_character(self):
-        return self.pstruct.prop.ptype in [PROPERTYTYPE.PT_char8, PROPERTYTYPE.PT_char32, PROPERTYTYPE.PT_char256, PROPERTYTYPE.PT_char1024] if self.pstruct.prop else False
+        return self.pstruct.prop.global_property_types in [PropertyType.PT_char8, PropertyType.PT_char32, PropertyType.PT_char256, PropertyType.PT_char1024] if self.pstruct.prop else False
 
     def is_random(self):
-        return self.pstruct.prop.ptype == PROPERTYTYPE.PT_random if self.pstruct.prop else False
+        return self.pstruct.prop.global_property_types == PropertyType.PT_random if self.pstruct.prop else False
 
     def is_enduse(self):
-        return self.pstruct.prop.ptype == PROPERTYTYPE.PT_enduse if self.pstruct.prop else False
+        return self.pstruct.prop.global_property_types == PropertyType.PT_enduse if self.pstruct.prop else False
 
     def is_loadshape(self):
-        return self.pstruct.prop.ptype == PROPERTYTYPE.PT_loadshape if self.pstruct.prop else False
+        return self.pstruct.prop.global_property_types == PropertyType.PT_loadshape if self.pstruct.prop else False
 
     def is_double_array(self):
-        return self.pstruct.prop.ptype == PROPERTYTYPE.PT_double_array if self.pstruct.prop else False
+        return self.pstruct.prop.global_property_types == PropertyType.PT_double_array if self.pstruct.prop else False
 
     def is_complex_array(self):
-        return self.pstruct.prop.ptype == PROPERTYTYPE.PT_complex_array if self.pstruct.prop else False
+        return self.pstruct.prop.global_property_types == PropertyType.PT_complex_array if self.pstruct.prop else False
 
     def is_objectref(self):
-        return self.pstruct.prop.ptype == PROPERTYTYPE.PT_object if self.pstruct.prop else False
+        return self.pstruct.prop.global_property_types == PropertyType.PT_object if self.pstruct.prop else False
 
     def is_bool(self):
-        return self.pstruct.prop.ptype == PROPERTYTYPE.PT_bool if self.pstruct.prop else False
+        return self.pstruct.prop.global_property_types == PropertyType.PT_bool if self.pstruct.prop else False
 
     def is_timestamp(self):
-        return self.pstruct.prop.ptype == PROPERTYTYPE.PT_timestamp if self.pstruct.prop else False
+        return self.pstruct.prop.global_property_types == PropertyType.PT_timestamp if self.pstruct.prop else False
 
     def get_bool(self):
         errno = 0
-        if self.pstruct.prop.ptype != PROPERTYTYPE.PT_bool:
+        if self.pstruct.prop.global_property_types != PropertyType.PT_bool:
             raise Exception("get_bool() called on a property that is not a bool")
         return bool(self.get_addr())
 
     def get_double(self, to=None):
         errno = 0
-        if self.pstruct.prop.ptype not in [PROPERTYTYPE.PT_double, PROPERTYTYPE.PT_random, PROPERTYTYPE.PT_enduse, PROPERTYTYPE.PT_loadshape]:
-            raise Exception("Invalid property type for get_double()")
+        if self.pstruct.prop.global_property_types not in [PropertyType.PT_double, PropertyType.PT_random, PropertyType.PT_enduse, PropertyType.PT_loadshape]:
+            raise Exception("Invalid property global_property_types for get_double()")
 
         rv = self.get_part() if self.has_part() else float(self.get_addr())
         if to:
@@ -2003,31 +2013,31 @@ class GldProperty:
             return rv
 
     def get_complex(self):
-        if self.pstruct.prop.ptype == PROPERTYTYPE.PT_complex:
+        if self.pstruct.prop.global_property_types == PropertyType.PT_complex:
             return complex(*self.get_addr())
         return complex(NaN, NaN)
 
     def get_integer(self):
-        if self.pstruct.prop.ptype == PROPERTYTYPE.PT_int16:
+        if self.pstruct.prop.global_property_types == PropertyType.PT_int16:
             return int(self.get_addr())
-        if self.pstruct.prop.ptype == PROPERTYTYPE.PT_int32:
+        if self.pstruct.prop.global_property_types == PropertyType.PT_int32:
             return int(self.get_addr())
-        if self.pstruct.prop.ptype == PROPERTYTYPE.PT_int64:
+        if self.pstruct.prop.global_property_types == PropertyType.PT_int64:
             return int(self.get_addr())
 
     def get_timestamp(self):
-        if self.pstruct.prop.ptype != PROPERTYTYPE.PT_timestamp:
+        if self.pstruct.prop.global_property_types != PropertyType.PT_timestamp:
             raise Exception("get_timestamp() called on a property that is not a timestamp")
         return TIMESTAMP(*self.get_addr())
 
     def get_enumeration(self):
-        if self.pstruct.prop.ptype != PROPERTYTYPE.PT_enumeration:
+        if self.pstruct.prop.global_property_types != PropertyType.PT_enumeration:
             raise Exception("get_enumeration() called on a property that is not an enumeration")
         raise NotImplemented
         # return enumeration(*self.get_addr())
 
     def get_set(self):
-        if self.pstruct.prop.ptype != PROPERTYTYPE.PT_set:
+        if self.pstruct.prop.global_property_types != PropertyType.PT_set:
             raise Exception("get_set() called on a property that is not a set")
         raise NotImplemented
         # return set(*self.get_addr())
@@ -2062,30 +2072,31 @@ class GldProperty:
             return self.get_first_keyword().find(name)
 
     def compare(self, op, a, b=None, p=None):
-        n = Callback().properties.get_compare_op(self.pstruct.prop.ptype, op)
+        n = self.properties.get_compare_op(self.pstruct.prop.global_property_types, op)
+        from gridlab.gldcore.Property import PROPERTYCOMPAREOP
         if n == PROPERTYCOMPAREOP.TCOP_ERR:
             raise Exception("Invalid property compare operation")
         return self.compare(int(n), a, b, p)
 
     def compare(self, op, a, b=None):
         v1, v2 = None, None
-        if self.pstruct.prop.ptype == PROPERTYTYPE.PT_complex:
+        if self.pstruct.prop.global_property_types == PropertyType.PT_complex:
             if isinstance(a, str) and isinstance(b, str):
                 v1 = complex(float(a), float(b))
             else:
                 v1 = a
                 v2 = b
-        elif self.pstruct.prop.ptype in [PROPERTYTYPE.PT_double, PROPERTYTYPE.PT_random, PROPERTYTYPE.PT_enduse, PROPERTYTYPE.PT_loadshape]:
+        elif self.pstruct.prop.global_property_types in [PropertyType.PT_double, PropertyType.PT_random, PropertyType.PT_enduse, PropertyType.PT_loadshape]:
             v1 = float(a)
             v2 = float(b) if b is not None else 0.0
-        return Callback().properties.compare_basic(self.pstruct.prop.ptype, op, self.get_addr(), v1, v2, None)
+        return self.properties.compare_basic(self.pstruct.prop.global_property_types, op, self.get_addr(), v1, v2, None)
 
     def compare(self, op, a, b, p):
         v1, v2 = float(a), float(b) if b else 0.0
-        return Callback().properties.compare_basic(self.pstruct.prop.ptype, op, self.get_addr(), v1, v2, p)
+        return self.properties.compare_basic(self.pstruct.prop.global_property_types, op, self.get_addr(), v1, v2, p)
 
     def compare(self, op, a, b=None):
-        return Callback().properties.compare_basic(self.pstruct.prop.ptype, op, self.get_addr(), a, b, None);
+        return self.properties.compare_basic(self.pstruct.prop.global_property_types, op, self.get_addr(), a, b, None);
 
     # Comparators
     def __eq__(self, a):
@@ -2116,7 +2127,7 @@ class GldProperty:
         return (
                 self.pstruct.prop is None
                 or self.pstruct.prop.next is None
-                or self.pstruct.prop.oclass != self.pstruct.prop.next.oclass
+                or self.pstruct.prop.owner_class != self.pstruct.prop.next.owner_class
         )
 
     def get_next(self):
@@ -2134,7 +2145,7 @@ class GldProperty:
 class GldGlobal:
     def __init__(self, v=None):
         if v is None:
-            self.var = Callback().find(None)
+            self.var = self.find(None)
         else:
             self.var = v
 
@@ -2190,15 +2201,15 @@ class GldGlobal:
         return p.from_string(bp)
 
     def get(self, n):
-        self.var = Callback().find.next(n)
+        self.var = self.find.next(n)
         return self.var is not None
 
     def create(self, n, t, p):
-        self.var = Callback().aggregate.create(n, t, p, None)
+        self.var = self.aggregate.create(n, t, p, None)
         return self.var is not None
 
     def get_first(self):
-        return Callback().find.next(None)
+        return self.find.next(None)
 
     def is_last(self):
         return self.var is not None and self.var.next is None
@@ -2212,7 +2223,7 @@ class GldAggregate:
         self.aggr = None
 
     def set_aggregate(self, spec, group):
-        self.aggr = Callback().aggregate.create(spec, group)
+        self.aggr = self.aggregate.create(spec, group)
         return self.aggr is not None
 
     def is_valid(self):
@@ -2221,7 +2232,7 @@ class GldAggregate:
     def get_value(self):
         if not self.aggr:
             raise Exception("null aggregate")
-        return Callback().aggregate.refresh(self.aggr)
+        return self.aggregate.refresh(self.aggr)
 
 
 class GldObjlist:
@@ -2233,15 +2244,15 @@ class GldObjlist:
 
     def set(self, group):
         if self.list:
-            Callback().objlist.destroy(self.list)
-        self.list = Callback().objlist.search(group)
+            self.objlist.destroy(self.list)
+        self.list = self.objlist.search(group)
         return self.list.size if self.list else -1
 
     def add(self, m, p, o, a, b=None):
-        return Callback().objlist.add(self.list, m, p, o, a, b)
+        return self.objlist.add(self.list, m, p, o, a, b)
 
     def del_(self, m, p, o, a, b=None):
-        return Callback().objlist.add(self.list, m, p, o, a, b)
+        return self.objlist.add(self.list, m, p, o, a, b)
 
     def is_valid(self):
         return self.list is not None
@@ -2253,7 +2264,7 @@ class GldObjlist:
         return self.list.objlist[n] if self.list else None
 
     def apply(self, arg, function):
-        return Callback().objlist.apply(self.list, arg, function) if self.list else -1
+        return self.objlist.apply(self.list, arg, function) if self.list else -1
 
     def exception(self, msg):
         buf = msg  # Replace vsprintf with Python string formatting
@@ -2268,11 +2279,11 @@ class GldWebdata:
         self.result = None
 
     def open(self, url, maxlen=4096):
-        self.result = Callback().http.read(url, int(maxlen))
+        self.result = self.http.read(url, int(maxlen))
         return self.is_valid()
 
     def close(self):
-        Callback().http.free(self.result)
+        self.http.free(self.result)
 
     def is_valid(self):
         return self.result is not None
@@ -2332,17 +2343,17 @@ class ExportedMethodsMixin:
     def sync(self, obj, t0, passconfig):
         try:
             t1 = TS_NEVER
-            if obj is not None:
-                if passconfig == PASSCONFIG.PC_PRETOPDOWN:
-                    t1 = self.presync(t0)
-                elif passconfig == PASSCONFIG.PC_BOTTOMUP:
-                    t1 = self.sync_method(t0)
-                elif passconfig == PASSCONFIG.PC_POSTTOPDOWN:
-                    t1 = self.postsync(t0)
-                else:
-                    raise Exception("invalid pass request")
-            if obj.oclass.passconfig & (PASSCONFIG.PC_PRETOPDOWN | PASSCONFIG.PC_BOTTOMUP | PASSCONFIG.PC_POSTTOPDOWN) & (~passconfig) <= passconfig:
-                obj.clock = t0
+            # if obj is not None:
+            #     if passconfig == PASSCONFIG.PC_PRETOPDOWN:
+            #         t1 = self.presync(t0)
+            #     elif passconfig == PASSCONFIG.PC_BOTTOMUP:
+            #         t1 = self.sync_method(t0)
+            #     elif passconfig == PASSCONFIG.PC_POSTTOPDOWN:
+            #         t1 = self.postsync(t0)
+            #     else:
+            #         raise Exception("invalid pass request")
+            # if obj.oclass.passconfig & (PASSCONFIG.PC_PRETOPDOWN | PASSCONFIG.PC_BOTTOMUP | PASSCONFIG.PC_POSTTOPDOWN) & (~passconfig) <= passconfig:
+            #     obj.clock = t0
             return t1
         except Exception as e:
             self.catch_all(e)
@@ -2702,7 +2713,7 @@ class Callback:
         output_warning(message)
 
     def object_isa(self, obj, obj_type, module_name=None):
-        # Check if an object is of a specific type within a module
+        # Check if an object is of a specific global_property_types within a module
         return object_isa(obj, obj_type, module_name=None)
 
     def local_clock(self,offsetclock, dt):
@@ -2731,15 +2742,15 @@ class Callback:
 # gl_register_class(class_definition)  # Register an object class with the core
 # object_instance = gl_create_object("ClassTypeName")  # Create an object instance
 # object_array = gl_create_array("ClassTypeName", 5)  # Create an array of objects
-# is_object_type = gl_object_isa(object_instance, "ObjectType", "ModuleToCheck")  # Check object type
+# is_object_type = gl_object_isa(object_instance, "ObjectType", "ModuleToCheck")  # Check object global_property_types
 # gl_fatal("This is a fatal error message")  # Produce a fatal error message
 # gl_debug("This is a debug message")  # Produce a debug message
 # gl_testmsg("This is a test message")  # Produce a test message
 #
 
 # Runtime module API functions
-def set_callback(fntable):
-    fntable.callback = Callback()
+def set_callback(self, fntable):
+    fntable.callback = self
     return fntable
 
 
@@ -2751,32 +2762,34 @@ class GlVersion:
     branch = ''
 
 # Access information about the version of the core
-gl_version_major = Callback().version.major
-gl_version_minor = Callback().version.minor
-gl_version_patch = Callback().version.patch
-gl_version_build = Callback().version.build
-gl_version_branch = Callback().version.branch
+gl_version_major = Version.REV_MAJOR
+gl_version_minor = Version.REV_MINOR
+gl_version_patch = Version.REV_PATCH
+gl_version_build = version_build()
+gl_version_branch = version_branch()
+
+local_clock = 0
 
 # Output functions
-gl_verbose = Callback().output_verbose
-gl_output = Callback().output_message
-gl_warning = Callback().output_warning
-gl_globalclock = Callback().global_clock
-gl_localtime = Callback().local_clock
-gl_object_isa = Callback().object_isa
+gl_verbose = output_verbose
+gl_output = output_message
+gl_warning = output_warning
+gl_globalclock = global_clock
+gl_localtime = local_clock
+gl_object_isa = object_isa
 
-# Object type test
-def gl_object_isa(obj, obj_type, module_name=None):
-    rv = Callback().object_isa(obj, obj_type) != 0
-    mv = module_name is None or (obj.oclass.module == Callback().module_find(module_name))
+# Object global_property_types test
+def gl_object_isa(self, obj, obj_type, module_name=None):
+    rv = self.object_isa(obj, obj_type) != 0
+    mv = module_name is None or (obj.owner_class.module == self.module_find(module_name))
     return rv and mv
 
 
 # Declare an object property as publicly accessible.
 # @see object_define_map()
 #
-gl_publish_variable = Callback().define_map
-gl_publish_loadmethod = Callback().loadmethod
+gl_publish_variable = None # PropertyMap.define_map
+gl_publish_loadmethod = None # Load.load_method
 
 
 class GClass:
@@ -2840,7 +2853,7 @@ class GClass:
         size of the class objects. Will not add a property if the class is in use.
 
         :param pname: Name of the property to add.
-        :param ptype: Name of the property type to add (see GridlabD.proptype).
+        :param ptype: Name of the property global_property_types to add (see GridlabD.proptype).
         :return: None if the class is in use, if the property already exists for this class, or if
         an error occurs. Returns the new GProperty on success.
         """
@@ -2851,10 +2864,10 @@ class GClass:
         offset = sum(prop.get_size() for prop in self.proptable.values())
         GridlabD.verbose(f"\toffset = {offset}")
         if pname in self.proptable:
-            GridlabD.error(f"Property \"{pname}\" already exists")
+            GridlabD.error(f"PropertyMap \"{pname}\" already exists")
             return None
         else:
-            GridlabD.verbose(f"Property {pname} is unique")
+            GridlabD.verbose(f"PropertyMap {pname} is unique")
         psize = GridlabD.publish_variable(self.modaddr, self.classaddr, pname, ptype, offset)
         if psize == 0:
             GridlabD.error(
@@ -2902,9 +2915,9 @@ class GClass:
 
     def get_sync_type(self):
         """
-        Get the synchronization type.
+        Get the synchronization global_property_types.
 
-        :return: The synchronization type.
+        :return: The synchronization global_property_types.
         """
         return self.synctype
 
@@ -3121,7 +3134,7 @@ class GProperty:
         Constructor for GProperty.
 
         :param name: Name of this property.
-        :param type: Name of the type of this property (see GridlabD.proptype).
+        :param type: Name of the global_property_types of this property (see GridlabD.proptype).
         :param size: Estimated size of this property, in bytes.
         :param offset: Estimated offset within the OBJECT data block in C for this property, in bytes.
         """
@@ -3141,9 +3154,9 @@ class GProperty:
 
     def get_type(self):
         """
-        Get the type of this property.
+        Get the global_property_types of this property.
 
-        :return: The type of this property.
+        :return: The global_property_types of this property.
         """
         return self.type
 
@@ -3177,13 +3190,13 @@ class GProperty:
         Public constructor wrapper.
 
         :param name: Name of the property to create.
-        :param type: Name of the type of property to create.
+        :param type: Name of the global_property_types of property to create.
         :param offset: Offset for this property, in bytes.
-        :return: The new GProperty object, None if the property type was invalid.
+        :return: The new GProperty object, None if the property global_property_types was invalid.
         """
         size = GridlabD.proptype.get(type)
         if size is None:
-            GridlabD.error(f"Unable to create property \"{name}\" of type \"{type}\"")
+            GridlabD.error(f"Unable to create property \"{name}\" of global_property_types \"{type}\"")
             return None
         return GProperty(name, type, size, offset)
 
@@ -3193,7 +3206,7 @@ class GProperty:
         Public constructor wrapper.
 
         :param name: Name of the property to create.
-        :param type: Name of the type of property to create.
+        :param type: Name of the global_property_types of property to create.
         :param offset: Offset for this property, in bytes.
         :param size: Size of this property, in bytes.
         :return: The new GProperty object.
@@ -3220,25 +3233,7 @@ class GridlabD:
         "loadshape": 256,
         "enduse": 256,
     }
-    TS_NEVER = ctypes.c_longlong(ctypes.c_ulonglong(-1).value >> 1).value
-    TS_INVALID = -1
-    TS_ZERO = 0
-    TS_MAX = ctypes.c_longlong(-1).value
-    MIN_YEAR = 1970
-    MAX_YEAR = 2969
 
-    PI = 3.1415926535897932384626433832795
-    E = 2.71828182845905
-    NM_PREUPDATE = 0
-    NM_POSTUPDATE = 1
-    NM_RESET = 2
-    OF_NONE = 0
-    OF_HASPLC = 1
-    OF_LOCKED = 2
-    OF_RECALC = 8
-    OF_FOREIGN = 16
-    OF_SKIPSAFE = 32
-    OF_RERANK = 16384
 
     # Inner classes
     class Complex:
@@ -3605,7 +3600,7 @@ class GridlabD:
 
     class Property:
         """
-        The inner Property class is used to cache published properties from classes in Java modules.
+        The inner PropertyMap class is used to cache published properties from classes in Java modules.
 
         An extensible class that mirrors the struct PROPERTY in the GridLAB-D core.  Used in GObject,
         but little is done with this class beyond struct-like behavior.  Primarily for internal use and
@@ -3614,7 +3609,7 @@ class GridlabD:
         """
         def __init__(self, name, type, size, offset, addr):
             self.name = name  # Name of this property*/
-            self.type = type  # Name of the type of this property (see GridlabD.proptype) */
+            self.type = type  # Name of the global_property_types of this property (see GridlabD.proptype) */
             self.size = size  # Estimated size of this property, in bytes. */
             self.offset = offset  # Estimated offset within the OBJECT data block in C for this property, in bytes */
             self.addr = addr  # Pointer to the */
@@ -3638,7 +3633,7 @@ class GridlabD:
         def build(cls, name, type, offset, addr):
             size = GridlabD.proptype.get(type)
             if size is None:
-                GridlabD.error(f"Unable to create property \"{name}\" of type \"{type}\"")
+                GridlabD.error(f"Unable to create property \"{name}\" of global_property_types \"{type}\"")
                 return None
             return cls(name, type, size, offset, addr)
 

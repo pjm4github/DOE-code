@@ -431,7 +431,7 @@ def ConfigurationFunc(config_file, classification=None):
            [1, 1, 1, 1, 0, 0, 0, 0, 0]] 
 
 	# Commercial Buildings
-	# - Designate what type of commercial building each classification represents.
+	# - Designate what global_property_types of commercial building each classification represents.
 	com_buildings = [[0, 0, 0, 0, 0, 0, 0, 0, 1],  # office buildings 
                      [0, 0, 0, 0, 0, 0, 0, 1, 0],  # big box 
                      [0, 0, 0, 0, 0, 0, 1, 0, 0]]  # strip mall
@@ -674,7 +674,7 @@ def ConfigurationFunc(config_file, classification=None):
                             [0.141, 79, 74]]
 	
 	# Heating
-	# - Percentage breakdown of heating system type by classification.
+	# - Percentage breakdown of heating system global_property_types by classification.
 	#perc_gas     = [0.52, 0.36, 0.52, 0.36, 0.16, 0.33, 0, 0, 0] 
 	
 	#perc_pump    = [0.37, 0.57, 0.37, 0.57, 0.34, 0.53, 0, 0, 0]
@@ -684,7 +684,7 @@ def ConfigurationFunc(config_file, classification=None):
 	# Cooling
 	# - Percentage AC
 	# - Breakdown AC unit types([central AC; window/wall units])
-	# - Oversizing factor of AC units by load classification and unit type (central/window wall)
+	# - Oversizing factor of AC units by load classification and unit global_property_types (central/window wall)
 	#perc_AC = [0.94, 1.00, 0.94, 1.00, 0.94, 0.93, 0, 0, 0] 
 	
 	# AC_type = [[0.90, 1.00, 0.90, 1.00, 0.88, 0.87, 0, 0, 0],
@@ -724,11 +724,11 @@ def ConfigurationFunc(config_file, classification=None):
 	sol_inv_properties = ['', #1    # inverter_type (TWO_PULSE|SIX_PULSE|TWELVE_PULSE|PWM|FOUR_QUADRANT)
 						  '', #2    # generator_status (ONLINE|OFFLINE)
 						  '', #3    # generator_mode (UNKNOWN|CONSTANT_V|CONSTANT_PQ|CONSTANT_PF|SUPPLY_DRIVEN), 
-									# -- default is CONSTANT_PF, and this property is irrelevent if inverter type is four quadrant:
+									# -- default is CONSTANT_PF, and this property is irrelevent if inverter global_property_types is four quadrant:
 						  '', #4    # V_In [V]
 						  '', #5    # I_In [A]
 						  '', #6    # four_quadrant_control_mode (NONE|CONSTANT_PQ|CONSTANT_PF)
-									# -- this property is necessary only if inverter type is four quadrant:
+									# -- this property is necessary only if inverter global_property_types is four quadrant:
 						  '', #7    # P_Out [VA]  -- used for constant PQ mode
 						  '', #8    # Q_Out [VAr] -- used for constant PQ mode
 						  '', #9    # power_factor [pu] (used for constant pf mode)
@@ -756,11 +756,11 @@ def ConfigurationFunc(config_file, classification=None):
 							 '', 						#5  # Tmodule [degF] -- used to calculate Voc and VA_Out  
 							 '', 						#6  # power_factor [pu] (used for constant pf mode)
 							 '', 						#7  # Rated_Insolation [W/sf] -- default is 92.902
-							 '', 						#8  # Pmax_temp_coeff -- used to calculate VA_Out, set by panel type selection if not set here:
-							 '', 						#9  # Voc_temp_coeff -- used to calculate Voc, set by panel type selection if not set here:
+							 '', 						#8  # Pmax_temp_coeff -- used to calculate VA_Out, set by panel global_property_types selection if not set here:
+							 '', 						#9  # Voc_temp_coeff -- used to calculate Voc, set by panel global_property_types selection if not set here:
 							 '', 						#10 # V_Max [V] -- default is 27.1 + 0j, used to calculate V_Out
 							 '', 						#11 # Voc_Max [V] -- default is 34 + 0j, used to calculate Voc and V_Out
-							 '', 						#12 # efficiency [unit] -- set by panel type selection if not set here:
+							 '', 						#12 # efficiency [unit] -- set by panel global_property_types selection if not set here:
 							 '', 						#13 # area [sf] -- default is 323 #TODO: should they be allowed to change this since it'status figured out according to load size?
 							 '', 						#14 # shading_factor -- default is 1 (no shading)
 							 '20',  					#15 # tilt_angle -- default is 45 degrees

@@ -1,9 +1,10 @@
 from enum import Enum
 import numpy as np
 
-from gov_pnnl_goss.gridlab.gldcore.Object import object_name, Object
+from gov_pnnl_goss.gridlab.gldcore.Object import Object
 from gov_pnnl_goss.gridlab.gldcore.Output import output_error, output_debug
 from gridlab.gldcore.Module import Module
+from gridlab.gldcore.PropertyHeader import PropertyType
 
 
 class LINEARTRANSFORMDATA:
@@ -49,9 +50,6 @@ class TRANSFORMFUNCTIONTYPE(Enum):
     XT_EXTERNAL = 0x01
     XT_FILTER = 0x04
 
-class PROPERTYTYPE(Enum):
-    # Define your property types here
-    pass
 
 class UNIT:
     # Define your UNIT structure here
@@ -128,7 +126,7 @@ class GlbVar:
 
     # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
     def gldvar_get_type(self, var, n):
-        return var[n].prop.ptype
+        return var[n].prop.global_property_types
 
     def gldvar_get_name(self, var, n):
         return var[n].prop.name
@@ -136,7 +134,7 @@ class GlbVar:
     # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
     def gldvar_get_string(self, var, n, buffer, size):
         if self.gldvar_isset(var, n):
-            pspec = PropertyType.property_get_spec(var[n].prop.ptype)
+            pspec = PropertyType.property_get_spec(var[n].prop.global_property_types)
             pspec.data_to_string(buffer, size, var[n].addr, var[n].prop)
             return buffer
         else:
@@ -155,8 +153,8 @@ GLDVAR = GlbVar
 # class Schedule:
 #     pass  # Placeholder for SCHEDULE structure
 #
-# class TransformFunction:
-#     pass  # Placeholder for TRANSFORMFUNCTION structure
+class TransformFunction:
+    pass  # Placeholder for TRANSFORMFUNCTION structure
 #
 # class TransferFunction:
 #     pass  # Placeholder for TRANSFERFUNCTION structure
@@ -190,7 +188,7 @@ class Transform:
         self.function_type = None  # Instance of TransformFunctionType
 
         # Attributes for linear transforms
-        self.source_addr = None  # Can be any type, depending on usage
+        self.source_addr = None  # Can be any global_property_types, depending on usage
         self.source_schedule = None  # Instance of Schedule
         self.target = None  # Initially None, can be set to reference an array of doubles
         self.scale = None  # double
@@ -242,9 +240,8 @@ class Transform:
         while xform is not None:
             obj = xform.target_obj
             prop = xform.target_prop
-            name = [0] * 1024
-            object_name(obj, name, len(name))
-            count += fp.write(f"#warning transform to {name.decode('utf-8')}.{prop.name} was not saved\n")
+            name= Object.object_name(obj)
+            count += fp.write(f"#warning transform to {name}.{prop.name} was not saved\n")
             xform = xform.next
         return count
 
@@ -323,43 +320,40 @@ def find_filter(name):
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
 def get_source_type(prop):
     source_type = 0
-    if prop.ptype == PROPERTYTYPE.PT_double:
+    if prop.global_property_types == PropertyType.PT_double:
         source_type = TRANSFORMSOURCE.XS_DOUBLE
-    elif prop.ptype == PROPERTYTYPE.PT_complex:
+    elif prop.global_property_types == PropertyType.PT_complex:
         source_type = TRANSFORMSOURCE.XS_COMPLEX
-    elif prop.ptype == PROPERTYTYPE.PT_loadshape:
+    elif prop.global_property_types == PropertyType.PT_loadshape:
         source_type = TRANSFORMSOURCE.XS_LOADSHAPE
-    elif prop.ptype == PROPERTYTYPE.PT_enduse:
+    elif prop.global_property_types == PropertyType.PT_enduse:
         source_type = TRANSFORMSOURCE.XS_ENDUSE
-    elif prop.ptype == PROPERTYTYPE.PT_random:
+    elif prop.global_property_types == PropertyType.PT_random:
         source_type = TRANSFORMSOURCE.XS_RANDOMVAR
     else:
-        output_error("tranform/get_source_type(PROPERTY *prop='%s'): unsupported source property type '%s'",
-                      prop.name, PropertyType.property_getspec(prop.ptype).name)
+        output_error("tranform/get_source_type(PROPERTY *prop='%s'): unsupported source property global_property_types '%s'",
+                     prop.name, PropertyType.property_getspec(prop.global_property_types).name)
     return source_type
 
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
 def transform_add_filter(target_obj, target_prop, filter_str, source_obj, source_prop):
     global global_start_time, global_debug_output
-    buffer1 = [1024]
-    buffer2 = [1024]
-    xform = None
-    tf = None
-    
+
+
     tf = find_filter(filter_str)
     if tf is None:
         output_error("transform_add_filter(source='{}:{}', filter='{}', target='{}:{}'): transfer function not defined".format(
-            object_name(target_obj, buffer1, len(buffer1)), target_prop.name, filter_str,
-            object_name(source_obj, buffer2, len(buffer2)), source_prop.name)
+            Object.object_name(target_obj), target_prop.name, filter_str,
+            Object.object_name(source_obj), source_prop.name)
         )
         return 0
 
     xform = TRANSFORM()
     if xform is None:
         output_error("transform_add_filter(source='{}:{}', filter='{}', target='{}:{}'): memory allocation failure".format(
-            object_name(target_obj, buffer1, len(buffer1)), target_prop.name, filter_str,
-            object_name(source_obj, buffer2, len(buffer2)), source_prop.name)
+            Object.object_name(target_obj), target_prop.name, filter_str,
+            Object.object_name(source_obj), source_prop.name)
         )
         return 0
 
@@ -380,7 +374,7 @@ def transform_add_filter(target_obj, target_prop, filter_str, source_obj, source
 
     if global_debug_output:
         output_debug("added filter '{}' from source '{}:{}' to target '{}:{}'".format(filter_str,
-            object_name(target_obj, buffer1, len(buffer1)), target_prop.name, object_name(source_obj, buffer2, len(buffer2)), source_prop.name)
+            Object.object_name(target_obj), target_prop.name, Object.object_name(source_obj), source_prop.name)
         )
     
     return 1
@@ -389,15 +383,13 @@ def transform_add_filter(target_obj, target_prop, filter_str, source_obj, source
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
 def transform_add_external(target_obj, target_prop, function, source_obj, source_prop):
     global schedule_xformlist
-    buffer1 = [1024]
-    buffer2 = [1024]
     xform = TRANSFORM()
     if xform is None:
         return 0
     xform.function = Module.module_get_transform_function(function)
     if xform.function is None:
         output_error("transform_add_external(source='%s:%s',function='%s',target='%s:%s'): function is not defined (probably a missing or invalid extern directive)" 
-            % (object_name(target_obj, buffer1, buffer1.size), target_prop.name, function, object_name(source_obj, buffer2, buffer2.size), source_prop.name))
+            % (Object.object_name(target_obj), target_prop.name, function, Object.object_name(source_obj), source_prop.name))
         return 0
     xform.function_type = TRANSFORMFUNCTIONTYPE.XT_EXTERNAL
     xform.source_type = get_source_type(source_prop)
@@ -411,14 +403,13 @@ def transform_add_external(target_obj, target_prop, function, source_obj, source
     GlbVar.gldvar_set(xform.prhs, 0, Transform.object_get_addr(source_obj, source_prop.name))
     xform.next = schedule_xformlist
     schedule_xformlist = xform
-    output_debug("added external transform %s:%s <- %s(%s:%s)" % (object_name(target_obj, buffer1, buffer1.size), target_prop.name, function, object_name(source_obj, buffer2, buffer2.size), source_prop.name))
+    output_debug("added external transform %s:%s <- %s(%s:%s)" % (Object.object_name(target_obj), target_prop.name, function, Object.object_name(source_obj), source_prop.name))
     return 1
 
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
 def transform_add_linear(stype, source, target, scale, bias, obj, prop, sched):
     global schedule_xformlist
-    buffer = [0] * 1024
     xform = TRANSFORM()
     if xform is None:
         return 0
@@ -436,40 +427,40 @@ def transform_add_linear(stype, source, target, scale, bias, obj, prop, sched):
     xform.function_type = TRANSFORMFUNCTIONTYPE.XT_LINEAR
     xform.next = schedule_xformlist
     schedule_xformlist = xform
-    output_debug("added linear transform %s:%s <- scale=%.3g, bias=%.3g" % (object_name(obj, buffer, 1024), prop.name, scale, bias))
+    output_debug("added linear transform %s:%s <- scale=%.3g, bias=%.3g" % (Object.object_name(obj), prop.name, scale, bias))
     return 1
 
 
 # Converted by an OPENAI API call using model: gpt-3.5-turbo-1106
 def cast_from_double(ptype, addr, value):
-    if ptype == PROPERTYTYPE.PT_void:
+    if ptype == PropertyType.PT_void:
         pass
-    elif ptype == PROPERTYTYPE.PT_double:
+    elif ptype == PropertyType.PT_double:
         addr[0] = value
-    elif ptype == PROPERTYTYPE.PT_complex:
+    elif ptype == PropertyType.PT_complex:
         addr.SetReal(value)
         addr.SetImag(0)
-    elif ptype == PROPERTYTYPE.PT_bool:
+    elif ptype == PropertyType.PT_bool:
         addr[0] = int(value != 0)
-    elif ptype == PROPERTYTYPE.PT_int16:
+    elif ptype == PropertyType.PT_int16:
         addr[0] = int(value)
-    elif ptype == PROPERTYTYPE.PT_int32:
+    elif ptype == PropertyType.PT_int32:
         addr[0] = int(value)
-    elif ptype == PROPERTYTYPE.PT_int64:
+    elif ptype == PropertyType.PT_int64:
         addr[0] = int(value)
-    elif ptype == PROPERTYTYPE.PT_enumeration:
+    elif ptype == PropertyType.PT_enumeration:
         addr[0] = int(value)
-    elif ptype == PROPERTYTYPE.PT_set:
+    elif ptype == PropertyType.PT_set:
         addr[0] = int(value)
-    elif ptype == PROPERTYTYPE.PT_object:
+    elif ptype == PropertyType.PT_object:
         pass
-    elif ptype == PROPERTYTYPE.PT_timestamp:
+    elif ptype == PropertyType.PT_timestamp:
         addr[0] = int(value)
-    elif ptype == PROPERTYTYPE.PT_float:
+    elif ptype == PropertyType.PT_float:
         addr[0] = float(value)
-    elif ptype == PROPERTYTYPE.PT_loadshape:
+    elif ptype == PropertyType.PT_loadshape:
         addr.load = value
-    elif ptype == PROPERTYTYPE.PT_enduse:
+    elif ptype == PropertyType.PT_enduse:
         addr.total.SetReal(value)
     else:
         pass

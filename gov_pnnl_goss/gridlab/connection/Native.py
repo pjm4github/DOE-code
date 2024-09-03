@@ -1,10 +1,14 @@
 import re
 from enum import Enum
 
-from gov_pnnl_goss.gridlab.connection.Connection import CONNECTIONMODETYPE
-from gov_pnnl_goss.gridlab.gldcore.GridLabD import gl_error, TS_ZERO, gl_verbose, PC_PRETOPDOWN, PC_BOTTOMUP, \
-    PC_POSTTOPDOWN, gl_warning
-from gov_pnnl_goss.gridlab.gldcore.Property import PROPERTYTYPE
+from gov_pnnl_goss.gridlab.connection.Connection import CONNECTIONMODETYPE, CONNECTIONTYPE, DATAEXCHANGEDIRECTION, \
+    ETO_QUOTES
+from gov_pnnl_goss.gridlab.gldcore.GridLabD import gl_error, TS_ZERO, gl_verbose, gl_warning, gl_publish_variable, \
+    gl_publish_loadmethod
+from gov_pnnl_goss.gridlab.gldcore.Class import PASSCONFIG, DynamicClass
+
+from gov_pnnl_goss.gridlab.gldcore.PropertyHeader import PropertyType
+from gov_pnnl_goss.gridlab.gldcore.Globals import TECHNOLOGYREADINESSLEVEL
 
 
 class FUNCTIONRELAY:
@@ -89,38 +93,38 @@ def add_function(spec, local_class):
 
 
 # #
-# def create_native_class(oclass, module):
-#     if oclass is None:
-#         oclass = gld_class.create(module, "native", sizeof(native),
+# def create_native_class(owner_class, module):
+#     if owner_class is None:
+#         owner_class = gld_class.create(module, "native", sizeof(native),
 #                                   PC_AUTOLOCK | PC_PRETOPDOWN | PC_BOTTOMUP |
 #                                   PC_POSTTOPDOWN | PC_OBSERVER)
-#         if oclass is None:
+#         if owner_class is None:
 #             raise Exception("connection/native::native(MODULE*): unable to register class connection:native")
 #         else:
-#             oclass.trl = TRL_UNKNOWN
+#             owner_class.trl = TRL_UNKNOWN
 #
 #         defaults = self
-#         if ( gl_publish_variable(oclass,
-#                 PROPERTYTYPE.PT_enumeration, "mode", get_mode_offset(),
-#                 PROPERTYTYPE.PT_DESCRIPTION, "connection mode",
-#                 PROPERTYTYPE.PT_KEYWORD, "SERVER", CONNECTIONMODETYPE.CM_SERVER,
-#                 PROPERTYTYPE.PT_KEYWORD, "CLIENT", CONNECTIONMODETYPE.CM_CLIENT,
-#                 PROPERTYTYPE.PT_KEYWORD, "NONE", CONNECTIONMODETYPE.CM_NONE,
-#                 PROPERTYTYPE.PT_enumeration, "transport", get_transport_offset(),
-#                 PROPERTYTYPE.PT_DESCRIPTION, "connection transport",
-#                 PROPERTYTYPE.PT_KEYWORD, "UDP", CONNECTIONTYPE.CM_UDP,
-#                 PROPERTYTYPE.PT_KEYWORD, "TCP", CONNECTIONTYPE.CM_TCP,
-#                 PROPERTYTYPE.PT_KEYWORD, "NONE", CONNECTIONTYPE.CM_NONE,
-#                 PROPERTYTYPE.PT_double, "timestep", get_timestep_offset(),
-#                 PROPERTYTYPE.PT_DESCRIPTION, "timestep between updates",
-#                 PROPERTYTYPE.PT_UNITS, "s",
+#         if ( gl_publish_variable(owner_class,
+#                 PropertyType.PT_enumeration, "mode", get_mode_offset(),
+#                 PropertyType.PT_DESCRIPTION, "connection mode",
+#                 PropertyType.PT_KEYWORD, "SERVER", CONNECTIONMODETYPE.CM_SERVER,
+#                 PropertyType.PT_KEYWORD, "CLIENT", CONNECTIONMODETYPE.CM_CLIENT,
+#                 PropertyType.PT_KEYWORD, "NONE", CONNECTIONMODETYPE.CM_NONE,
+#                 PropertyType.PT_enumeration, "transport", get_transport_offset(),
+#                 PropertyType.PT_DESCRIPTION, "connection transport",
+#                 PropertyType.PT_KEYWORD, "UDP", CONNECTIONTYPE.CM_UDP,
+#                 PropertyType.PT_KEYWORD, "TCP", CONNECTIONTYPE.CM_TCP,
+#                 PropertyType.PT_KEYWORD, "NONE", CONNECTIONTYPE.CM_NONE,
+#                 PropertyType.PT_double, "timestep", get_timestep_offset(),
+#                 PropertyType.PT_DESCRIPTION, "timestep between updates",
+#                 PropertyType.PT_UNITS, "s",
 #                 None) < 1 ):
 #             raise Exception("connection/native::native(MODULE*): unable to publish properties of connection:native")
 #
-#         if not gl_publish_loadmethod(oclass, "link",
+#         if not gl_publish_loadmethod(owner_class, "link",
 #                                      reinterpret_cast<int(*)(void *, char *)>(loadmethod_native_link)):
 #             raise Exception("connection/native::native(MODULE*): unable to publish link method of connection:native")
-#         if not gl_publish_loadmethod(oclass, "option",
+#         if not gl_publish_loadmethod(owner_class, "option",
 #                                      reinterpret_cast<int(*)(void *, char *)>(loadmethod_native_option)):
 #             raise Exception("connection/native::native(MODULE*): unable to publish option method of connection:native")
 #         mode = 0
@@ -203,6 +207,10 @@ def convert_from_hex(buf, len, hex, hexlen):
     return n
 
 
+def varmap():
+    pass
+
+
 class Native:
     def __init__(self, module):
         super().__init__(module)
@@ -214,32 +222,36 @@ class Native:
         self.oclass = None
 
         if self.oclass is None:
-            self.oclass = gld_class.create(module, "native", 0, PC_AUTOLOCK|PC_PRETOPDOWN|PC_BOTTOMUP|PC_POSTTOPDOWN|PC_OBSERVER)
+            self.oclass = DynamicClass.create(module, "native", 0,
+                                           PASSCONFIG.PC_AUTOLOCK | PASSCONFIG.PC_PRETOPDOWN |
+                                           PASSCONFIG.PC_BOTTOMUP | PASSCONFIG.PC_POSTTOPDOWN |
+                                           PASSCONFIG.PC_OBSERVER)
             if self.oclass is None:
                 raise "connection/native::__init__(MODULE*): unable to register class connection:native"
             else:
-                self.oclass.trl = TRL_UNKNOWN
+                self.oclass.trl = TECHNOLOGYREADINESSLEVEL.TRL_UNKNOWN
 
             self.defaults = self
-            if not gl_publish_variable(self.oclass, PROPERTYTYPE.PT_enumeration, "mode", self.get_mode_offset(),
-                    PROPERTYTYPE.PT_DESCRIPTION, "connection mode",
-                    PROPERTYTYPE.PT_KEYWORD, "SERVER", CONNECTIONMODETYPE.CM_SERVER,
-                    PROPERTYTYPE.PT_KEYWORD, "CLIENT", CONNECTIONMODETYPE.CM_CLIENT,
-                    PROPERTYTYPE.PT_KEYWORD, "NONE", CONNECTIONMODETYPE.CM_NONE,
-                PROPERTYTYPE.PT_enumeration, "transport", self.get_transport_offset(),
-                    PROPERTYTYPE.PT_DESCRIPTION, "connection transport",
-                    PROPERTYTYPE.PT_KEYWORD, "UDP", CONNECTIONTYPE.CM_UDP,
-                    PROPERTYTYPE.PT_KEYWORD, "TCP", CONNECTIONTYPE.CM_TCP,
-                    PROPERTYTYPE.PT_KEYWORD, "NONE", CONNECTIONTYPE.CM_NONE,
-                PROPERTYTYPE.PT_double, "timestep", self.get_timestep_offset(),
-                    PROPERTYTYPE.PT_DESCRIPTION, "timestep between updates",
-                    PROPERTYTYPE.PT_UNITS, "s",
-                None) < 1:
+            if not gl_publish_variable(self.oclass, PropertyType.PT_enumeration, "mode", self.get_mode_offset(),
+                                       PropertyType.PT_DESCRIPTION, "connection mode",
+                                       PropertyType.PT_KEYWORD, "SERVER", CONNECTIONMODETYPE.CM_SERVER,
+                                       PropertyType.PT_KEYWORD, "CLIENT", CONNECTIONMODETYPE.CM_CLIENT,
+                                       PropertyType.PT_KEYWORD, "NONE", CONNECTIONMODETYPE.CM_NONE,
+                                       PropertyType.PT_enumeration, "transport", self.get_transport_offset(),
+                                       PropertyType.PT_DESCRIPTION, "connection transport",
+                                       PropertyType.PT_KEYWORD, "UDP", CONNECTIONTYPE.CM_UDP,
+                                       PropertyType.PT_KEYWORD, "TCP", CONNECTIONTYPE.CM_TCP,
+                                       PropertyType.PT_KEYWORD, "NONE", CONNECTIONTYPE.CM_NONE,
+                                       PropertyType.PT_double, "timestep", self.get_timestep_offset(),
+                                       PropertyType.PT_DESCRIPTION, "timestep between updates",
+                                       PropertyType.PT_UNITS, "s",
+                                       None) < 1:
                 raise "connection/native::__init__(MODULE*): unable to publish properties of connection:native"
 
-            if not gl_publish_loadmethod(self.oclass, "link", getattr(int, "(void *, char *)>(loadmethod_native_link))") :
+            if not gl_publish_loadmethod(self.oclass, "link",
+                                         getattr(int, "(void *, char *)>(loadmethod_native_link))")):
                 gl_error("connection/native::__init__(MODULE*): unable to publish link method of connection:native")
-            if not gl_publish_loadmethod(self.oclass, "option", getattr(int, "(void *, char *)>(loadmethod_native_option))"):
+            if not gl_publish_loadmethod(self.oclass, "option", getattr(int, "(void *, char *)>(loadmethod_native_option))")):
                 gl_error("connection/native::__init__(MODULE*): unable to publish option method of connection:native")
             self.mode = 0
             self.transport = 0
@@ -307,7 +319,7 @@ class Native:
                     "native::add_function(const char *spec='%s'): outgoing call definition of '%s' overwrites existing function definition in class '%s'",
                     specs, local_name, local_class)
 
-            f_local = add_relay_function(self, local_class, "", remote_class, remote_name, None, DXD_WRITE)
+            f_local = add_relay_function(self, local_class, "", remote_class, remote_name, None, DATAEXCHANGEDIRECTION.DXD_WRITE)
             if f_local == None:
                 return 0
 
@@ -324,15 +336,15 @@ class Native:
         self.transport = 'CT_TCP'
         self.timestep = 1.0
 
-        for n in range(ALLOW, _NUMVMI):
+        for n in range(VARMAPINDEX.ALLOW, VARMAPINDEX.NUMVMI):
             self.map[n] = varmap()
 
         return 1
 
     def init(self, parent, xlate):
-        for n in range(ALLOW, _NUMVMI):
+        for n in range(VARMAPINDEX.ALLOW, VARMAPINDEX.NUMVMI):
             self.map[n].resolve()
-            if n >= _FIRST and n <= _LAST:
+            if n >= VARMAPINDEX.FIRST and n <= VARMAPINDEX.LAST:
                 self.map[n].linkcache(get_connection(), xlate)
                 return 1
 
@@ -359,7 +371,7 @@ class Native:
         pass
 
     def commit(self, t_0, t_1, xlate):
-        if self.get_connection().update(self.map[COMMIT], "commit", xlate) < 0:
+        if self.get_connection().update(self.map[VARMAPINDEX.COMMIT], "commit", xlate) < 0:
             gl_error("connection/native::commit(TIMESTAMP t0=%lld, TIMESTAMP t1=%lld, TRANSLATOR *xltr=%p): update failed", t_0, t_1, xlate)
             return TS_ZERO
         else:
@@ -458,16 +470,16 @@ class Native:
                 return self.get_connection().option(target, command)
 
     def get_firstmap(self):
-        return _FIRST
+        return VARMAPINDEX.FIRST
 
     def get_lastmap(self):
-        return _LAST
+        return VARMAPINDEX.LAST
 
     def get_varmap(self, n):
         return self.map[n].getfirst()
 
     def get_initmap(self):
-        return self.map[INIT]
+        return self.map[VARMAPINDEX.INIT]
 
     def outgoing_route_function(self, from_str, to_str, func_name, func_class, data, len):
         result = -1
@@ -563,7 +575,3 @@ class Native:
             return 0
         else:
             return t + self.timestep
-
-
-
-

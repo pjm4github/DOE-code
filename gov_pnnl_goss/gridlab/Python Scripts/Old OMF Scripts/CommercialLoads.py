@@ -29,7 +29,7 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 	#  else, create a residential strip mall
 
 	# If using Configuration.multiplicities and load classifications,
-	#  building type is chosen according to classification
+	#  building global_property_types is chosen according to classification
 	#  regardless of number of "houses"
 
 
@@ -182,7 +182,7 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 			# Recall Configuration.multiplicities with this load'status classification
 			# @todo figure out what to do with this!
 			config_data = Configuration.ConfigurationFunc(use_config_file,classID) 
-			# Determine how many houses and of what building type the classification designates
+			# Determine how many houses and of what building global_property_types the classification designates
 			com_buildings_classified = [config_data["com_buildings"][0][classID] * total_comm_houses,config_data["com_buildings"][1][classID] * total_comm_houses,config_data["com_buildings"][2][classID] * total_comm_houses] # cID-1 for index fixing
 
 			# Same for everyone - TODO: move to tech specs?
